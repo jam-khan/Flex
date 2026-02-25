@@ -288,6 +288,31 @@ partial def RExpr.subst (target : Var) (val : RExpr) : RExpr → RExpr
   | .not e        => .not (e.subst target val)
   | .app f args   => .app f (args.map fun a => a.subst target val)
 
+-- NOTE: ADD docs
+partial def Pred.substVar (target : Var) (replacement : Var) : Pred → Pred
+  | .tru          => .tru
+  | .fls          => .fls
+  | .rexpr r      => .rexpr (r.subst target (.var replacement))
+  | .kapp k args  => .kapp k (args.map fun a => if a == target then replacement else a)
+  | .conj p₁ p₂  => .conj (p₁.substVar target replacement) (p₂.substVar target replacement)
+  | .disj p₁ p₂  => .disj (p₁.substVar target replacement) (p₂.substVar target replacement)
+  | .exist x b p  => .exist x b (p.substVar target replacement)
+
+-- NOTE: Add docs
+partial def Pred.substKVar (κ : KVar) (sol : Pred) : Pred → Pred
+  | .tru          => .tru
+  | .fls          => .fls
+  | .rexpr r      => .rexpr r
+  | .kapp k args  =>
+    if k == κ then
+      -- substitute formal params with actual args in the solution
+      let pairs := κ.params.zip args
+      pairs.foldl (fun acc (param, arg) => acc.substVar param arg) sol
+    else .kapp k args
+  | .conj p₁ p₂  => .conj (p₁.substKVar κ sol) (p₂.substKVar κ sol)
+  | .disj p₁ p₂  => .disj (p₁.substKVar κ sol) (p₂.substKVar κ sol)
+  | .exist x b p  => .exist x b (p.substKVar κ sol)
+
 def RExpr.substMany (params : List Var) (args : List Var) (body : RExpr) : RExpr :=
   (params.zip args).foldl (fun acc (p, a) => acc.subst p (.var a)) body
 
@@ -337,24 +362,6 @@ def Constraint.scope (κ : KVar) : Constraint → Constraint
   It returns a predicate that is
   guaranteed to satisfy all clauses
   where κ appears as the head.
-
-  -- Predicates `p`
-inductive Pred where
-  -- `true`
-  | tru   : Pred
-  -- `false`
-  | fls   : Pred
-  -- refinement `r`
-  | rexpr : RExpr → Pred
-  -- `κ(y₁, ..., yₙ)`
-  | kapp  : KVar → List Var → Pred
-  -- `p₁ ∧ p₂`
-  | conj  : Pred → Pred → Pred
-  -- `p₁ ∨ p₂`
-  | disj  : Pred → Pred → Pred
-  -- `∃x:b. p`
-  | exist : Var → BaseTy → Pred → Pred
-deriving Repr, Inhabited
 -/
 def Constraint.sol1 (κ : KVar) : Constraint → Pred
   | .conj c₁ c₂           => .disj (c₁.sol1 κ) (c₂.sol1 κ)
@@ -369,3 +376,41 @@ def Constraint.sol1 (κ : KVar) : Constraint → Pred
       | e :: es => es.foldl Pred.conj e
     else .fls
   | _                     => .fls
+
+/-
+  `elim* : (σ × C) → C` from Fig. 11
+
+  Replaces all occurrences of κ in c:
+  - body (hypothesis): κ(args) → σ(κ) applied to args
+  - head (goal): κ(args) → true (eliminated)
+-/
+def Constraint.elimStar (κ : KVar) (sol : Pred) : Constraint → Constraint
+  | .conj c₁ c₂  => .conj (c₁.elimStar κ sol) (c₂.elimStar κ sol)
+  | .imp x b p c  => .imp x b (p.substKVar κ sol) (c.elimStar κ sol)
+  | .pred (.kapp k y) => if k == κ then .pred .tru else .pred (.kapp k y)
+  | .pred p       => .pred p
+
+/-
+  `elim1 : (K × C) → C` from Fig. 11
+
+  elim1(κ, c) = elimStar(κ, sol, c)
+  where sol = sol1(κ, c') and scope(κ, c) = ∀(xᵢ:pᵢ) ⇒ c'
+-/
+def Constraint.elim1 (κ : KVar) (c : Constraint) : Constraint :=
+  let scoped' := c.scope κ
+  -- extract c' from scope (strip outer ∀ binders where κ ∉ p)
+  let c' := stripScope κ scoped'
+  let sol := c'.sol1 κ
+  c.elimStar κ sol
+  where
+    stripScope (κ : KVar) : Constraint → Constraint
+      | .imp x b p c => if !p.kvars.contains κ then stripScope κ c else .imp x b p c
+      | c => c
+
+/-
+  `elim : (List K × C) → C` from Fig. 12
+
+  Iteratively eliminate each κ.
+-/
+def Constraint.elim (kvars : List KVar) (c : Constraint) : Constraint :=
+  kvars.foldl (fun acc κ => acc.elim1 κ) c
