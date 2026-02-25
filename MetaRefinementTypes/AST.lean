@@ -138,6 +138,10 @@ inductive Pred where
   | kapp  : KVar → List Var → Pred
   -- `p₁ ∧ p₂`
   | conj  : Pred → Pred → Pred
+  -- `p₁ ∨ p₂`
+  | disj  : Pred → Pred → Pred
+  -- `∃x:b. p`
+  | exist : Var → BaseTy → Pred → Pred
 deriving Repr, Inhabited
 
 -- Constraints c
@@ -199,11 +203,13 @@ def RType.erase : RType → UType
 
 -- Extract `kvars` from predicate `p`
 def Pred.kvars : Pred → List KVar
-  | .tru        => []
-  | .fls        => []
-  | .rexpr _    => []
-  | .kapp k _   => [k]
-  | .conj p₁ p₂ => p₁.kvars ++ p₂.kvars
+  | .tru          => []
+  | .fls          => []
+  | .rexpr _      => []
+  | .kapp k _     => [k]
+  | .conj p₁ p₂   => p₁.kvars ++ p₂.kvars
+  | .disj p₁ p₂   => p₁.kvars ++ p₂.kvars
+  | .exist _ _ p  => p.kvars
 
 -- Extract `kvars` from constraint `c`
 def Constraint.kvars : Constraint → List KVar
@@ -293,3 +299,73 @@ def primInt (n : Int) : RType :=
 def primAssert : RType :=
   .fn (String.toName "x") (.base nu .bool (.var nu))
            (.base nu .bool RExpr.tt)
+
+/-
+  `scope : (K × C) → C`
+
+  `scope` takes a `κ` variable and constraint `c`
+  then, it returns a sub-constraint c of the form
+  `∀(xᵢ:pᵢ) => c'` s.t.
+    1) κ does not occur in any pᵢ
+    2) all occurences of κ in c occur in c'
+
+  Based on `Fig. 9` of the paper `Local Refinement Typing`
+  and explained in `Section 5.1`.
+-/
+def Constraint.scope (κ : KVar) : Constraint → Constraint
+  | .conj c₁ c₂ =>
+    let inC₁ := c₁.kvars.contains κ
+    let inC₂ := c₂.kvars.contains κ
+    if inC₁ && !inC₂
+      then c₁.scope κ
+      else
+        if !inC₁ && inC₂
+        then c₂.scope κ
+        else .conj c₁ c₂
+  | .imp x b p c' =>
+    if !(p.kvars.contains κ)
+    then .imp x b p (c'.scope κ)
+    else .imp x b p c'
+  | c => c
+
+/-
+  `sol1 : (K × C) → P`
+
+  sol1(κ, c) is strongest solution
+  procedure in `Section 5.2`.
+
+  It returns a predicate that is
+  guaranteed to satisfy all clauses
+  where κ appears as the head.
+
+  -- Predicates `p`
+inductive Pred where
+  -- `true`
+  | tru   : Pred
+  -- `false`
+  | fls   : Pred
+  -- refinement `r`
+  | rexpr : RExpr → Pred
+  -- `κ(y₁, ..., yₙ)`
+  | kapp  : KVar → List Var → Pred
+  -- `p₁ ∧ p₂`
+  | conj  : Pred → Pred → Pred
+  -- `p₁ ∨ p₂`
+  | disj  : Pred → Pred → Pred
+  -- `∃x:b. p`
+  | exist : Var → BaseTy → Pred → Pred
+deriving Repr, Inhabited
+-/
+def Constraint.sol1 (κ : KVar) : Constraint → Pred
+  | .conj c₁ c₂           => .disj (c₁.sol1 κ) (c₂.sol1 κ)
+  | .imp x b p c          => .exist x b (.conj p (c.sol1 κ))
+  | .pred (.kapp k' args) =>
+    if κ == k' then
+      let eqs := (κ.params.zip args).map fun (pi, ai) =>
+        Pred.rexpr (RExpr.mkEq (.var pi) (.var ai))
+      match eqs with
+      | []      => .tru
+      | [e]     => e
+      | e :: es => es.foldl Pred.conj e
+    else .fls
+  | _                     => .fls
