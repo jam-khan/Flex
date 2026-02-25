@@ -305,7 +305,6 @@ partial def Pred.substKVar (κ : KVar) (sol : Pred) : Pred → Pred
   | .rexpr r      => .rexpr r
   | .kapp k args  =>
     if k == κ then
-      -- substitute formal params with actual args in the solution
       let pairs := κ.params.zip args
       pairs.foldl (fun acc (param, arg) => acc.substVar param arg) sol
     else .kapp k args
@@ -398,10 +397,10 @@ def Constraint.elimStar (κ : KVar) (sol : Pred) : Constraint → Constraint
 -/
 def Constraint.elim1 (κ : KVar) (c : Constraint) : Constraint :=
   let scoped' := c.scope κ
-  -- extract c' from scope (strip outer ∀ binders where κ ∉ p)
   let c' := stripScope κ scoped'
   let sol := c'.sol1 κ
-  c.elimStar κ sol
+  let c1 := c.elimStar κ sol
+  c1.elimStar κ sol
   where
     stripScope (κ : KVar) : Constraint → Constraint
       | .imp x b p c => if !p.kvars.contains κ then stripScope κ c else .imp x b p c
@@ -414,3 +413,28 @@ def Constraint.elim1 (κ : KVar) (c : Constraint) : Constraint :=
 -/
 def Constraint.elim (kvars : List KVar) (c : Constraint) : Constraint :=
   kvars.foldl (fun acc κ => acc.elim1 κ) c
+
+/-
+  **Hardcoded Example 1 constraint**
+-/
+def kappa : KVar := { name := `κ, params := [`z] }
+
+def ex1Constraint : Constraint :=
+  .imp `x .int
+    (.rexpr (.cmp .le (.int 0) (.var `x)))
+    (.conj
+      (.imp `ν .int
+        (.rexpr (.mkEq (.var `ν) (.arith .sub (.var `x) (.int 1))))
+        (.pred (.kapp kappa [`ν])))
+      (.imp `y .int
+        (.kapp kappa [`y])
+        (.imp `ν .int
+          (.rexpr (.mkEq (.var `ν) (.arith .add (.var `y) (.int 1))))
+          (.pred (.rexpr (.cmp .le (.int 0) (.var `ν)))))))
+
+def ex1Eliminated := ex1Constraint.elim1 kappa
+
+
+-- Below is apparently wrong, it doesn't eliminates single
+-- κ variable
+#eval ex1Eliminated.kvars
