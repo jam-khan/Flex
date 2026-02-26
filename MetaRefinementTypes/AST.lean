@@ -397,9 +397,9 @@ def Constraint.elimStar (κ : KVar) (sol : Pred) : Constraint → Constraint
 -/
 def Constraint.elim1 (κ : KVar) (c : Constraint) : Constraint :=
   let scoped' := c.scope κ
-  let c' := stripScope κ scoped'
-  let sol := c'.sol1 κ
-  let c1 := c.elimStar κ sol
+  let c'      := stripScope κ scoped'
+  let sol     := c'.sol1 κ
+  let c1      := c.elimStar κ sol
   c1.elimStar κ sol
   where
     stripScope (κ : KVar) : Constraint → Constraint
@@ -419,6 +419,13 @@ def Constraint.elim (kvars : List KVar) (c : Constraint) : Constraint :=
 -/
 def kappa : KVar := { name := `κ, params := [`z] }
 
+/-
+  ex1 constraint from Section 2.3, equations (1) and (2):
+
+    ∀x:int. (0 ≤ x) ⇒
+     (∀ν:int. (ν = x − 1) ⇒ κ(ν))                 -- (1)
+    ∧ (∀y:int. κ(y) ⇒ ∀ν:int. (ν = y + 1) ⇒ 0 ≤ ν) -- (2)
+-/
 def ex1Constraint : Constraint :=
   .imp `x .int
     (.rexpr (.cmp .le (.int 0) (.var `x)))
