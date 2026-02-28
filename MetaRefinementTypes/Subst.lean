@@ -38,17 +38,28 @@ partial def Pred.substKVar (κ : KVar) (sol : Pred) : Pred → Pred
 
 -- Simplifies the predicate, e.g. p ∧ false = false
 def Pred.simplify : Pred → Pred
-  | .conj _ .fls      => .fls
-  | .conj .fls _      => .fls
-  | .conj .tru p      => p.simplify
-  | .conj p .tru      => p.simplify
-  | .conj p₁ p₂       => .conj p₁.simplify p₂.simplify
-  | .disj p .fls      => p.simplify
-  | .disj .fls p      => p.simplify
-  | .exist _ _ .fls   => .fls
-  | .exist x b p      => .exist x b p.simplify
-  | p                 => p
+  | .conj p₁ p₂ =>
+    match p₁.simplify, p₂.simplify with
+    | .fls, _    => .fls
+    | _, .fls    => .fls
+    | .tru, s    => s
+    | s, .tru    => s
+    | s₁, s₂     => .conj s₁ s₂
+
+  | .disj p₁ p₂ =>
+    match p₁.simplify, p₂.simplify with
+    | .tru, _    => .tru
+    | _, .tru    => .tru
+    | .fls, s    => s
+    | s, .fls    => s
+    | s₁, s₂     => .disj s₁ s₂
+
+  | .exist x b p =>
+    match p.simplify with
+    | .fls => .fls
+    | s    => .exist x b s
+
+  | p => p
 
 def RExpr.substMany (params : List Var) (args : List Var) (body : RExpr) : RExpr :=
   (params.zip args).foldl (fun acc (p, a) => acc.subst p (.var a)) body
-

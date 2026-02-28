@@ -1,5 +1,6 @@
 import MetaRefinementTypes.Syntax
 import MetaRefinementTypes.Subst
+import MetaRefinementTypes.Macros
 
 /-
   **Subtyping Rules**
@@ -71,6 +72,17 @@ def Constraint.kvars : Constraint → List KVar
   | .pred p       => p.kvars
   | .conj c₁ c₂   => c₁.kvars ++ c₂.kvars
   | .imp _ _ p c  => p.kvars ++ c.kvars
+
+-- Basic example
+def kappa1 : KVar := { name := `κ₁, params := [`z] }
+def kappa2 : KVar := { name := `κ₂, params := [`z] }
+def constraintEx : Constraint :=
+  c{
+    ∀ x : int . true ⇒
+      [∀ y : int . true ⇒ kappa1(x) ∧ kappa2(y)]
+  }
+
+#eval constraintEx.kvars
 
 /-
   WARNING: Constraint.head and .body shall
@@ -169,6 +181,17 @@ def Constraint.scope (κ : KVar) : Constraint → Constraint
   It returns a predicate that is
   guaranteed to satisfy all clauses
   where κ appears as the head.
+
+  `Note`
+    Rule `sol1(κ, ∀ x : b. p ⇒ c') ≡ ∃ x : b. p ∧ sol1(κ, c)`
+
+    If we don't simplify,
+      then we can get a case where
+      `sol1` returns `∃ x : b. p ∧ false`
+      where logically `p ∧ false ≡ false`
+      so `p` might be left over with a `κ`
+
+
 -/
 def Constraint.sol1 (κ : KVar) : Constraint → Pred
   | .conj c₁ c₂           => .disj (c₁.sol1 κ) (c₂.sol1 κ)
@@ -192,7 +215,7 @@ def Constraint.sol1 (κ : KVar) : Constraint → Pred
   - head (goal): κ(args) → true (eliminated)
 -/
 def Constraint.elimStar (κ : KVar) (sol : Pred) : Constraint → Constraint
-  | .conj c₁ c₂  => .conj (c₁.elimStar κ sol) (c₂.elimStar κ sol)
+  | .conj c₁ c₂   => .conj (c₁.elimStar κ sol) (c₂.elimStar κ sol)
   | .imp x b p c  => .imp x b (p.substKVar κ sol) (c.elimStar κ sol)
   | .pred (.kapp k y) => if k == κ then .pred .tru else .pred (.kapp k y)
   | .pred p       => .pred p
@@ -205,8 +228,8 @@ def Constraint.elimStar (κ : KVar) (sol : Pred) : Constraint → Constraint
 -/
 def Constraint.elim1 (κ : KVar) (c : Constraint) : Constraint :=
   let scoped' := c.scope κ
-  let c' := stripScope κ scoped'
-  let sol := (c'.sol1 κ).simplify
+  let c'      := stripScope κ scoped'
+  let sol     := (c'.sol1 κ).simplify
   c.elimStar κ sol
   where
     stripScope (κ : KVar) : Constraint → Constraint

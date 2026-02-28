@@ -14,7 +14,6 @@ def RType.erase : RType → UType
   | .fn x t1 t2    => .fn x t1.erase t2.erase
   | .forallTy α t  => .forallTy α t.erase
 
-
 def nu : Var := String.toName "v"
 
 def primInt (n : Int) : RType :=

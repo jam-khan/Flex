@@ -18,7 +18,6 @@ import MetaRefinementTypes.Macros
   ```
 -/
 
-
 /-
   Step 1: Generate Templates
 
@@ -58,26 +57,8 @@ import MetaRefinementTypes.Macros
 -/
 
 
-/-
-  Step 2: Generate Constraints
--/
-
 def kappa : KVar := { name := `κ, params := [`z] }
 
-/-
-  ex1 constraint from Section 2.3, equations (1) and (2):
-
-    ∀x:int. (0 ≤ x) ⇒
-     (∀ν:int. (ν = x − 1) ⇒ κ(ν)) -- (1)
-    ∧ (∀y:int. κ                  (y) ⇒ ∀ν:int. (ν = y + 1) ⇒ 0 ≤ ν)  -- (2)
--/
-/-
-  ex1 constraint from Section 2.3, equations (1) and (2):
-
-    ∀x:int. (0 ≤ x) ⇒
-        (∀ν:int. (ν = x − 1) ⇒ κ(ν))                    -- (1)
-      ∧ (∀y:int. κ(y) ⇒ ∀ν:int. (ν = y + 1) ⇒ 0 ≤ ν)   -- (2)
--/
 def ex1Constraint : Constraint :=
   c{ ∀ x : int . 0 ≤ x ⇒
       [∀ ν : int . ν == x - 1 ⇒ kappa(ν)]
@@ -86,23 +67,18 @@ def ex1Constraint : Constraint :=
 
 def ex1Eliminated := ex1Constraint.elim1 kappa
 
--- Below is apparently wrong, it doesn't eliminates single
--- κ variable
+-- Below is apparently wrong, it only eliminates one κ variable
 #eval ex1Constraint.kvars
 #eval ex1Constraint.elim1 kappa
-#eval (ex1Constraint.elim1 kappa).kvars
+#eval (ex1Constraint.elim1 kappa)
 #eval ex1Eliminated.kvars
 
-
--- κ(z) ≡ ∃ν'. ν' = x - 1 ∧ z = ν'
--- Constraint (1) says: this solution is reachable
 theorem ex1_kappa_solution :
     ∀ x : Int, 0 ≤ x →
       ∀ ν : Int, ν = x - 1 →
         ∃ ν', ν' = x - 1 ∧ ν = ν' := by
   grind
 
--- Constraint (2) says: anything satisfying κ leads to valid output
 theorem ex1_kappa_soundness :
     ∀ x : Int, 0 ≤ x →
       ∀ y : Int, (∃ ν', ν' = x - 1 ∧ y = ν') →
