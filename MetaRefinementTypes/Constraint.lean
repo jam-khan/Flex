@@ -1,6 +1,60 @@
 import MetaRefinementTypes.Syntax
 import MetaRefinementTypes.Subst
 
+/-
+  **Subtyping Rules**
+  Required for constraint generation
+
+  `Base Subtyping -- Implication`
+
+  Γ, x: b ⊢ r₁ ⇒ r₂
+  --------------------------------
+  Γ ⊢ {x : b | r₁} <: {x : b | r₂}
+
+  Refinement of the subtype must
+  imply refinement of the supertype.
+
+  `Function Subtyping (Contravariant / Covariant)`
+
+  Γ ⊢ τ'₁ <: τ₁
+  Γ, x : τ₁ ⊢ τ₂ <: τ'₂
+  ------------------------------------
+  Γ ⊢ (x : τ₁ → τ₂) <: (x : τ'₁ → τ'₂)
+
+  Input is contravariant, and output is
+  covariant. The `binder x` is shared.
+
+  `Application constraint`
+
+  Γ ⊢ f : (x : τ₁ → τ₂)
+  Γ ⊢ e : τ' Γ ⊢ τ' <: τ₁
+  ------------------------
+  Γ ⊢ f e : τ₂[x ↦ e]
+
+  Each argument type must be a subtype
+  of the function f's input type.
+
+  `Let-Binding constraint`
+  Γ ⊢ e₁ : τ₁
+  Γ, x : τ₁ ⊢ e₂ : τ₂
+  Γ, x : τ₁ ⊢ τ₂ <: τ
+  -------------------------
+  Γ ⊢ let x = e₁ in e₂ : τ
+
+  The body type of let-binding must be
+  a subtype of the the whole body type τ
+  of the let-expression.
+
+  `Function Definition Constraint`
+
+  Γ, x : τ₁ ⊢ τ'₂ <: τ₂
+  Γ, x : τ₁ ⊢ e : τ'₂
+  --------------------------
+  Γ ⊢ λx. e : (x : τ₁ → τ₂)
+
+  The inferred body mmust be a subtype
+  of the declared output type.
+-/
 
 -- Extract `kvars` from predicate `p`
 def Pred.kvars : Pred → List KVar

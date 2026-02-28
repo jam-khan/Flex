@@ -2,8 +2,39 @@ import MetaRefinementTypes.Constraint
 import MetaRefinementTypes.Elab
 
 /-
-  **Hardcoded Example 1 constraint**
+  **Example 1**
+
+  ```
+  ex1 :: Nat → Nat
+  ex1 x =
+    let y =
+      let t = x
+      in
+        dec t
+    in
+      inc y
+  ```
 -/
+
+
+/-
+  Step 1: Generate Templates
+
+  x     :: {v : Int | v ≥ 0}
+  t     :: {v : Int | v = x}
+  dec t :: {v : Int | v = t - 1}
+  y     :: {v : Int | κ(v)}
+  inc y :: {v : Int | v = y + 1}
+
+  κ is a refinement variable that is generated fresh
+-/
+
+
+/-
+  Step 2: Generate Constraints
+
+-/
+
 def kappa : KVar := { name := `κ, params := [`z] }
 
 /-
@@ -11,7 +42,7 @@ def kappa : KVar := { name := `κ, params := [`z] }
 
     ∀x:int. (0 ≤ x) ⇒
      (∀ν:int. (ν = x − 1) ⇒ κ(ν))                   -- (1)
-    ∧ (∀y:int. κ(y) ⇒ ∀ν:int. (ν = y + 1) ⇒ 0 ≤ ν)  -- (2)
+    ∧ (∀y:int. κ                                           (y) ⇒ ∀ν:int. (ν = y + 1) ⇒ 0 ≤ ν)  -- (2)
 -/
 def ex1Constraint : Constraint :=
   .imp `x .int
