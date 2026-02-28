@@ -1,5 +1,7 @@
 import MetaRefinementTypes.Constraint
 import MetaRefinementTypes.Elab
+import MetaRefinementTypes.Syntax
+import MetaRefinementTypes.Macros
 
 /-
   **Example 1**
@@ -20,19 +22,44 @@ import MetaRefinementTypes.Elab
 /-
   Step 1: Generate Templates
 
-  x     :: {v : Int | v ≥ 0}
-  t     :: {v : Int | v = x}
-  dec t :: {v : Int | v = t - 1}
-  y     :: {v : Int | κ(v)}
-  inc y :: {v : Int | v = y + 1}
+    x     :: {v : Int | v ≥ 0}
+    t     :: {v : Int | v = x}
+    dec t :: {v : Int | v = t - 1}
+    y     :: {v : Int | κ(v)}
+    inc y :: {v : Int | v = y + 1}
 
-  κ is a refinement variable that is generated fresh
+    κ is a refinement variable that is generated fresh
+
+  Step 2: Generate Constraints
+
+    Below is the generated constraint for ex1:
+
+    ∀x:int. 0 ≤ x ⇒
+                    ∀v. v = x - 1 ⇒ κ(v)    (1)
+      ∧ ∀y. κ(y)  ⇒ ∀v. v = y + 1 ⇒ 0 ≤ v   (2)
+
+    Note: shared binders are explicit in NNF constraint.
+    So, binder `x` in the source program is also
+    shared by implication (1) and (2).
+
+  Step 3: Solution
+
+    Based on literature, if we have
+    implication of the form: Pᵢ => κ(v)
+    then we can assign κ to the disjunction
+    κ(x) ≡ ∨ᵢ Pᵢ
+
+  In example 1,
+    `κ(z) = ∃x. 0 ≤ x ∨ (∃v. v = x - 1 ∧ v = z)`
+
+  simplifying to
+    `κ(z) = 0 ≤ z + 1`
+
 -/
 
 
 /-
   Step 2: Generate Constraints
-
 -/
 
 def kappa : KVar := { name := `κ, params := [`z] }
@@ -41,43 +68,43 @@ def kappa : KVar := { name := `κ, params := [`z] }
   ex1 constraint from Section 2.3, equations (1) and (2):
 
     ∀x:int. (0 ≤ x) ⇒
-     (∀ν:int. (ν = x − 1) ⇒ κ(ν))                   -- (1)
-    ∧ (∀y:int. κ                                           (y) ⇒ ∀ν:int. (ν = y + 1) ⇒ 0 ≤ ν)  -- (2)
+     (∀ν:int. (ν = x − 1) ⇒ κ(ν)) -- (1)
+    ∧ (∀y:int. κ                  (y) ⇒ ∀ν:int. (ν = y + 1) ⇒ 0 ≤ ν)  -- (2)
+-/
+/-
+  ex1 constraint from Section 2.3, equations (1) and (2):
+
+    ∀x:int. (0 ≤ x) ⇒
+        (∀ν:int. (ν = x − 1) ⇒ κ(ν))                    -- (1)
+      ∧ (∀y:int. κ(y) ⇒ ∀ν:int. (ν = y + 1) ⇒ 0 ≤ ν)   -- (2)
 -/
 def ex1Constraint : Constraint :=
-  .imp `x .int
-    (.rexpr (.cmp .le (.int 0) (.var `x)))
-    (.conj
-      (.imp `ν .int
-        (.rexpr (.mkEq (.var `ν) (.arith .sub (.var `x) (.int 1))))
-        (.pred (.kapp kappa [`ν])))
-      (.imp `y .int
-        (.kapp kappa [`y])
-        (.imp `ν .int
-          (.rexpr (.mkEq (.var `ν) (.arith .add (.var `y) (.int 1))))
-          (.pred (.rexpr (.cmp .le (.int 0) (.var `ν)))))))
+  c{ ∀ x : int . 0 ≤ x ⇒
+      [∀ ν : int . ν == x - 1 ⇒ kappa(ν)]
+    ∧ [∀ y : int . kappa(y) ⇒
+        ∀ ν : int . ν == y + 1 ⇒ 0 ≤ ν] }
 
 def ex1Eliminated := ex1Constraint.elim1 kappa
 
 -- Below is apparently wrong, it doesn't eliminates single
 -- κ variable
+#eval ex1Constraint.kvars
+#eval ex1Constraint.elim1 kappa
+#eval (ex1Constraint.elim1 kappa).kvars
 #eval ex1Eliminated.kvars
 
 
-/-
-  Below shows the result of the elim + elaboration to
-  an actual lean term. Ofc, below is written in terms
-  of Lean.Syntax which is the surface level syntax, but
-  elaboration will (most likely) target Lean.Expr which
-  is the Lean Core.
-
-  Basically,
-  Constraint ~> elim1 + elaboration ~> ex1_vc_unsimplified
--/
-
-theorem ex1_vc_unsimplified :
+-- κ(z) ≡ ∃ν'. ν' = x - 1 ∧ z = ν'
+-- Constraint (1) says: this solution is reachable
+theorem ex1_kappa_solution :
     ∀ x : Int, 0 ≤ x →
-      ∀ y : Int, (∃ x', 0 ≤ x' ∧ ∃ ν', ν' = x' - 1 ∧ y = ν') →
+      ∀ ν : Int, ν = x - 1 →
+        ∃ ν', ν' = x - 1 ∧ ν = ν' := by
+  grind
+
+-- Constraint (2) says: anything satisfying κ leads to valid output
+theorem ex1_kappa_soundness :
+    ∀ x : Int, 0 ≤ x →
+      ∀ y : Int, (∃ ν', ν' = x - 1 ∧ y = ν') →
         ∀ ν : Int, ν = y + 1 → 0 ≤ ν := by
-  -- Good news! Grind solves it
   grind

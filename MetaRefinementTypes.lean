@@ -2,3 +2,4 @@ import MetaRefinementTypes.Syntax
 import MetaRefinementTypes.Subst
 import MetaRefinementTypes.Constraint
 import MetaRefinementTypes.Elab
+import MetaRefinementTypes.Macros
