@@ -56,7 +56,6 @@ import MetaRefinementTypes.Macros
 
 -/
 
-
 def kappa : KVar := { name := `κ, params := [`z] }
 
 def ex1Constraint : Constraint :=
@@ -67,10 +66,8 @@ def ex1Constraint : Constraint :=
 
 def ex1Eliminated := ex1Constraint.elim1 kappa
 
--- Below is apparently wrong, it only eliminates one κ variable
 #eval ex1Constraint.kvars
 #eval ex1Constraint.elim1 kappa
-#eval (ex1Constraint.elim1 kappa)
 #eval ex1Eliminated.kvars
 
 theorem ex1_kappa_solution :

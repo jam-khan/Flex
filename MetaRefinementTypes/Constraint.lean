@@ -191,21 +191,25 @@ def Constraint.scope (κ : KVar) : Constraint → Constraint
       where logically `p ∧ false ≡ false`
       so `p` might be left over with a `κ`
 
-
+  Hence. simplification is called.
+  In the paper, this is implicit.
 -/
-def Constraint.sol1 (κ : KVar) : Constraint → Pred
-  | .conj c₁ c₂           => .disj (c₁.sol1 κ) (c₂.sol1 κ)
-  | .imp x b p c          => .exist x b (.conj p (c.sol1 κ))
-  | .pred (.kapp k' args) =>
-    if κ == k' then
-      let eqs := (κ.params.zip args).map fun (pi, ai) =>
-        Pred.rexpr (RExpr.mkEq (.var pi) (.var ai))
-      match eqs with
-      | []      => .tru
-      | [e]     => e
-      | e :: es => es.foldl Pred.conj e
-    else .fls
-  | _                     => .fls
+def Constraint.sol1 (κ : KVar) (c : Constraint) : Pred :=
+  (sol1Aux c).simplify
+  where
+    sol1Aux : Constraint → Pred
+      | .conj c₁ c₂           => .disj (sol1Aux c₁) (sol1Aux c₂)
+      | .imp x b p c          => .exist x b (.conj p (sol1Aux c))
+      | .pred (.kapp k' args) =>
+        if κ == k' then
+          let eqs := (κ.params.zip args).map fun (pi, ai) =>
+            Pred.rexpr (RExpr.mkEq (.var pi) (.var ai))
+          match eqs with
+          | []      => .tru
+          | [e]     => e
+          | e :: es => es.foldl Pred.conj e
+        else .fls
+      | _                     => .fls
 
 /-
   `elim* : (σ × C) → C` from Fig. 11
@@ -229,7 +233,7 @@ def Constraint.elimStar (κ : KVar) (sol : Pred) : Constraint → Constraint
 def Constraint.elim1 (κ : KVar) (c : Constraint) : Constraint :=
   let scoped' := c.scope κ
   let c'      := stripScope κ scoped'
-  let sol     := (c'.sol1 κ).simplify
+  let sol     := c'.sol1 κ
   c.elimStar κ sol
   where
     stripScope (κ : KVar) : Constraint → Constraint
