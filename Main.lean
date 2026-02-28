@@ -1,4 +1,4 @@
 import MetaRefinementTypes
 
 def main : IO Unit :=
-  IO.println s!"Hello, {hello}!"
+  IO.println s!"Verified Predicate Abstraction and Meta-Programming"

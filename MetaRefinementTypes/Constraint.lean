@@ -1,0 +1,168 @@
+import MetaRefinementTypes.Syntax
+import MetaRefinementTypes.Subst
+
+
+-- Extract `kvars` from predicate `p`
+def Pred.kvars : Pred → List KVar
+  | .tru          => []
+  | .fls          => []
+  | .rexpr _      => []
+  | .kapp k _     => [k]
+  | .conj p₁ p₂   => p₁.kvars ++ p₂.kvars
+  | .disj p₁ p₂   => p₁.kvars ++ p₂.kvars
+  | .exist _ _ p  => p.kvars
+
+-- Extract `kvars` from constraint `c`
+def Constraint.kvars : Constraint → List KVar
+  | .pred p       => p.kvars
+  | .conj c₁ c₂   => c₁.kvars ++ c₂.kvars
+  | .imp _ _ p c  => p.kvars ++ c.kvars
+
+/-
+  WARNING: Constraint.head and .body shall
+  only be called on Flattened Horn Constraints
+-/
+-- the innermost predicate (the goal)
+def Constraint.head : Constraint → Pred
+  | .pred p      => p
+  | .imp _ _ _ c => c.head
+  -- shouldn't happen on flat constraints
+  | .conj _ _    => .tru
+
+-- all hypothesis predicates
+def Constraint.body : Constraint → List Pred
+  | .pred _       => []
+  | .imp _ _ p c  => p :: c.body
+  | .conj _ _     => []
+
+def FlatConstraint.head (fc: FlatConstraint) : Pred := fc.val.head
+def FlatConstraint.body (fc: FlatConstraint) : List Pred := fc.val.body
+def FlatConstraint.kvars (fc: FlatConstraint) : List KVar :=
+  fc.val.kvars
+
+/-
+  `flat : Constraint → list FlatConstraint`
+
+  It performs flattening on Horn Clauses
+  based on `flat` in `Fig. 12.`
+
+  Note: Order is left to right, c₁ => ⋯ => cₙ => p
+-/
+def Constraint.flat : Constraint → List FlatConstraint
+  | .pred .tru    => []
+  | .pred p       => [⟨.pred p⟩]
+  | .conj c₁ c₂   => c₁.flat ++ c₂.flat
+  | .imp x b p c  => c.flat.map (fun ⟨c'⟩ => ⟨.imp x b p c'⟩)
+
+/-
+  Dependencies `deps(c)` over constraints
+
+  Deals with two cases:
+  deps(c) ≅ {(κ, κ') | κ ∈ body(c), k' ∈ head(c)} -- flat constraint `c`
+  deps(c) ≅ ⋃ deps(c'), where c' ∈ flat(c) -- NNF constraint `c`
+-/
+def FlatConstraint.deps (fc : FlatConstraint) : List (KVar × KVar) :=
+  let bodyKs := (fc.body.map Pred.kvars).flatten
+  let headKs := fc.head.kvars
+  (bodyKs.map (fun kb => headKs.map (fun kh => (kb, kh)))).flatten
+
+def Constraint.deps (c : Constraint) : List (KVar × KVar) :=
+  (c.flat.map (fun c' => c'.deps)).flatten
+
+-- Dependencies in `deps(σ)`
+def Assignment.deps (σ : Assignment) : List (KVar × KVar) :=
+  σ.flatMap fun (k', (_, body)) =>
+    body.kvars.map fun k => (k, k')
+
+-- `deps(K̂, c) = deps(c) \ (K × K̂ U K̂ × K)`, exclude pairs involving K̂
+def Constraint.depsExcluding (c : Constraint) (khat : List KVar) : List (KVar × KVar) :=
+  c.deps.filter fun (k1, k2) => !khat.contains k1 && !khat.contains k2
+
+/-
+  `scope : (K × C) → C`
+
+  `scope` takes a `κ` variable and constraint `c`
+  then, it returns a sub-constraint c of the form
+  `∀(xᵢ:pᵢ) => c'` s.t.
+    1) κ does not occur in any pᵢ
+    2) all occurences of κ in c occur in c'
+
+  Based on `Fig. 9` of the paper `Local Refinement Typing`
+  and explained in `Section 5.1`.
+-/
+def Constraint.scope (κ : KVar) : Constraint → Constraint
+  | .conj c₁ c₂ =>
+    let inC₁ := c₁.kvars.contains κ
+    let inC₂ := c₂.kvars.contains κ
+    if inC₁ && !inC₂
+      then c₁.scope κ
+      else
+        if !inC₁ && inC₂
+        then c₂.scope κ
+        else .conj c₁ c₂
+  | .imp x b p c' =>
+    if !(p.kvars.contains κ)
+    then .imp x b p (c'.scope κ)
+    else .imp x b p c'
+  | c => c
+
+/-
+  `sol1 : (K × C) → P`
+
+  sol1(κ, c) is strongest solution
+  procedure in `Section 5.2`.
+
+  It returns a predicate that is
+  guaranteed to satisfy all clauses
+  where κ appears as the head.
+-/
+def Constraint.sol1 (κ : KVar) : Constraint → Pred
+  | .conj c₁ c₂           => .disj (c₁.sol1 κ) (c₂.sol1 κ)
+  | .imp x b p c          => .exist x b (.conj p (c.sol1 κ))
+  | .pred (.kapp k' args) =>
+    if κ == k' then
+      let eqs := (κ.params.zip args).map fun (pi, ai) =>
+        Pred.rexpr (RExpr.mkEq (.var pi) (.var ai))
+      match eqs with
+      | []      => .tru
+      | [e]     => e
+      | e :: es => es.foldl Pred.conj e
+    else .fls
+  | _                     => .fls
+
+/-
+  `elim* : (σ × C) → C` from Fig. 11
+
+  Replaces all occurrences of κ in c:
+  - body (hypothesis): κ(args) → σ(κ) applied to args
+  - head (goal): κ(args) → true (eliminated)
+-/
+def Constraint.elimStar (κ : KVar) (sol : Pred) : Constraint → Constraint
+  | .conj c₁ c₂  => .conj (c₁.elimStar κ sol) (c₂.elimStar κ sol)
+  | .imp x b p c  => .imp x b (p.substKVar κ sol) (c.elimStar κ sol)
+  | .pred (.kapp k y) => if k == κ then .pred .tru else .pred (.kapp k y)
+  | .pred p       => .pred p
+
+/-
+  `elim1 : (K × C) → C` from Fig. 11
+
+  elim1(κ, c) = elimStar(κ, sol, c)
+  where sol = sol1(κ, c') and scope(κ, c) = ∀(xᵢ:pᵢ) ⇒ c'
+-/
+def Constraint.elim1 (κ : KVar) (c : Constraint) : Constraint :=
+  let scoped' := c.scope κ
+  let c' := stripScope κ scoped'
+  let sol := (c'.sol1 κ).simplify
+  c.elimStar κ sol
+  where
+    stripScope (κ : KVar) : Constraint → Constraint
+      | .imp x b p c => if !p.kvars.contains κ then stripScope κ c else .imp x b p c
+      | c => c
+
+/-
+  `elim : (List K × C) → C` from Fig. 12
+
+  Iteratively eliminate each κ.
+-/
+def Constraint.elim (kvars : List KVar) (c : Constraint) : Constraint :=
+  kvars.foldl (fun acc κ => acc.elim1 κ) c
