@@ -64,6 +64,8 @@ def ex3Constraint : Constraint :=
 def ex3Eliminated := ex3Constraint.elim [kappa_a, kappa_b, kappa_c]
 
 #eval ex3Constraint.kvars
+#eval ex3Constraint.scope kappa_a
+#eval ex3Eliminated
 #eval ex3Eliminated.kvars
 
 -- κa justified by (12): Nat input flows into κa
@@ -95,4 +97,3 @@ theorem ex3_kappa_soundness :
             ∃ ν'', ν'' = b + 1 ∧ ν = ν'') →
       0 ≤ ν := by
   grind
-
