@@ -10,7 +10,7 @@ partial def RExpr.subst (target : Var) (val : RExpr) : RExpr → RExpr
   | .not e        => .not (RExpr.subst target val e)
   | .app f args   => .app f (args.map fun a => RExpr.subst target val a)
 
-def Pred.substVar (target : Var) (replacement : Var) : Pred → Pred
+partial def Pred.substVar (target : Var) (replacement : Var) : Pred → Pred
   | .tru          => .tru
   | .fls          => .fls
   | .rexpr r      => .rexpr (RExpr.subst target (.var replacement) r)
@@ -18,8 +18,13 @@ def Pred.substVar (target : Var) (replacement : Var) : Pred → Pred
   | .conj p₁ p₂  => .conj (Pred.substVar target replacement p₁) (Pred.substVar target replacement p₂)
   | .disj p₁ p₂  => .disj (Pred.substVar target replacement p₁) (Pred.substVar target replacement p₂)
   | .exist x b p  =>
-      if x == target then .exist x b p
-      else .exist x b (Pred.substVar target replacement p)
+        if x == target then .exist x b p                -- shadowed, stop
+        else if x == replacement then
+          -- Alpha-rename to avoid capture
+          let x' := x ++ `_α
+          let p' := Pred.substVar x x' p
+          .exist x' b (Pred.substVar target replacement p')
+        else .exist x b (Pred.substVar target replacement p)
 
 def Pred.applyKVarSol (κ : KVar) (sol : Pred) (args : List Var) : Pred :=
   let pairs := κ.params.zip args

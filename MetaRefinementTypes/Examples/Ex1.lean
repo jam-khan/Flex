@@ -58,6 +58,8 @@ def ex1Eliminated := ex1Constraint.elim1 kappa
 -- Discharge VC automatically
 #check_vc ex1Eliminated
 
+#eval IO.println (toString ex1Eliminated)
+
 -- Solve: compute strongest scoped solution
 #eval do
   let sc := ex1Constraint.scope kappa
@@ -66,10 +68,6 @@ def ex1Eliminated := ex1Constraint.elim1 kappa
   -- κ(z) = ∃ ν : Int. (ν == x - 1 ∧ z == ν)
   IO.println s!"κ(z) = {toString sol}"
 
--- Eliminate κ and print result
-
-
-#eval IO.println (toString ex1Eliminated)
 /-
   ∀ x : Int.
     0 <= x
