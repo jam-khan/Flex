@@ -3,58 +3,47 @@ import MetaRefinementTypes.Elab
 import MetaRefinementTypes.Syntax
 import MetaRefinementTypes.Macros
 
-/-
-  **Example 1**
+/-!
+  # Example 1 — Local Refinement Typing
 
   ```
   ex1 :: Nat → Nat
   ex1 x =
     let y =
       let t = x
-      in
-        dec t
-    in
-      inc y
+      in dec t
+    in inc y
   ```
--/
 
-/-
-  Step 1: Generate Templates
+  ## Step 1: Generate Templates
 
     x     :: {v : Int | v ≥ 0}
     t     :: {v : Int | v = x}
     dec t :: {v : Int | v = t - 1}
-    y     :: {v : Int | κ(v)}
+    y     :: {v : Int | κ(v)}       ← fresh refinement variable
     inc y :: {v : Int | v = y + 1}
 
-    κ is a refinement variable that is generated fresh
+  ## Step 2: Generate Constraints (NNF Horn Clause)
 
-  Step 2: Generate Constraints
+    ∀ x : Int. 0 ≤ x ⇒
+      (∀ ν : Int. ν = x - 1 ⇒ κ(ν))            — (1) definition
+    ∧ (∀ y : Int. κ(y) ⇒ ∀ ν : Int. ν = y + 1 ⇒ 0 ≤ ν) — (2) use
 
-    Below is the generated constraint for ex1:
+  ## Step 3: Solve & Eliminate κ
 
-    ∀x:int. 0 ≤ x ⇒
-                    ∀v. v = x - 1 ⇒ κ(v)    (1)
-      ∧ ∀y. κ(y)  ⇒ ∀v. v = y + 1 ⇒ 0 ≤ v   (2)
+    The scoped strongest solution (Section 5.2):
+      κ(z) = ∃ ν : Int. (ν = x - 1 ∧ z = ν)
 
-    Note: shared binders are explicit in NNF constraint.
-    So, binder `x` in the source program is also
-    shared by implication (1) and (2).
+    After elimination (Section 5.3):
+    - Head occurrence κ(ν) in (1) → ⊤
+    - Body occurrence κ(y) in (2) → ∃ ν. (ν = x - 1 ∧ y = ν)
 
-  Step 3: Solution
-
-    Based on literature, if we have
-    implication of the form: Pᵢ => κ(v)
-    then we can assign κ to the disjunction
-    κ(x) ≡ ∨ᵢ Pᵢ
-
-  In example 1,
-    `κ(z) = ∃x. 0 ≤ x ∨ (∃v. v = x - 1 ∧ v = z)`
-
-  simplifying to
-    `κ(z) = 0 ≤ z + 1`
-
+  ## Step 4: Discharge VC with grind
 -/
+
+-- ────────────────────────────────────────────
+-- Definition
+-- ────────────────────────────────────────────
 
 def kappa : KVar := { name := `κ, params := [`z] }
 
@@ -63,13 +52,40 @@ def ex1Constraint : Constraint :=
       [∀ ν : int . ν == x - 1 ⇒ kappa(ν)]
     ∧ [∀ y : int . kappa(y) ⇒
         ∀ ν : int . ν == y + 1 ⇒ 0 ≤ ν] }
+#solve_constraint ex1Constraint
 
 def ex1Eliminated := ex1Constraint.elim1 kappa
+-- Discharge VC automatically
+#check_vc ex1Eliminated
 
-#eval ex1Constraint.kvars
-#eval ex1Constraint.elim1 kappa
-#eval ex1Eliminated.kvars
+-- Solve: compute strongest scoped solution
+#eval do
+  let sc := ex1Constraint.scope kappa
+  let c' := stripScope kappa sc
+  let sol := c'.sol1 kappa
+  -- κ(z) = ∃ ν : Int. (ν == x - 1 ∧ z == ν)
+  IO.println s!"κ(z) = {toString sol}"
 
+-- Eliminate κ and print result
+
+
+#eval IO.println (toString ex1Eliminated)
+/-
+  ∀ x : Int.
+    0 <= x
+    ⇒ ∀ ν : Int.
+      ν == x - 1
+      ⇒ ⊤
+    ∧ ∀ y : Int.
+      ∃ ν : Int. (ν == x - 1 ∧ y == ν)
+      ⇒ ∀ ν : Int.
+        ν == y + 1
+        ⇒ 0 <= ν
+-/
+
+
+
+-- Manual proofs (for reference / sanity check)
 theorem ex1_kappa_solution :
     ∀ x : Int, 0 ≤ x →
       ∀ ν : Int, ν = x - 1 →

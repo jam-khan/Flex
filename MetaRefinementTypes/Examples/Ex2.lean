@@ -77,6 +77,8 @@ def ex2Eliminated := ex2Constraint.elim [kappa_x, kappa_y]
 #eval ex2Constraint.kvars
 #eval ex2Eliminated.kvars
 
+#check_vc ex2Eliminated
+
 /-
   κx justified by constraint (4):
   given 0 ≤ x, n = x - 1, p = x + 1, ν = n,

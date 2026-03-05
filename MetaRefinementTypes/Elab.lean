@@ -1,5 +1,6 @@
 import Lean
 import MetaRefinementTypes.Syntax
+import MetaRefinementTypes.Constraint
 
 import Std.Data.DHashMap
 
@@ -76,9 +77,9 @@ partial def RExpr.toExpr (env : VarMap) : RExpr → MetaM Expr
     else
       -- negSucc (n - 1) = -[(n - 1) + 1] = [n]
       return mkApp (mkConst ``Int.negSucc) (mkNatLit (n.natAbs - 1))
-  | .bool true  =>
+  | .bool Bool.true  =>
       return mkConst ``Bool.true
-  | .bool false =>
+  | .bool Bool.false =>
       return mkConst ``Bool.false
   | .arith op l r => do
       let le ← l.toExpr env
@@ -213,7 +214,7 @@ def checkVCWithGrindOmega (c : Constraint) : TermElabM Bool := do
       evalTactic (← `(tactic| first | grind | omega))
     return goals.isEmpty
   catch _ =>
-    return false
+    return Bool.false
 
 -- Simple string representation of a constraint's elaborated form
 def ppConstraintExpr (c : Constraint) : MetaM Format := do
@@ -241,6 +242,36 @@ elab "#check_vc " t:term : command => do
     let fmt ← ppExpr prop
     logInfo m!"VC: {fmt}"
     let ok ← checkVCWithGrindOmega c
+    if ok then
+      logInfo m!"✅ VC discharged successfully"
+    else
+      logWarning m!"❌ VC could not be discharged by omega or grind"
+
+elab "#solve_constraint " t:term : command => do
+  Lean.Elab.Command.liftTermElabM do
+    let cExpr ← Lean.Elab.Term.elabTerm t (some (mkConst ``Constraint))
+    let cExpr ← instantiateMVars cExpr
+    let c ← unsafe evalConstraint cExpr
+
+    let kvars : List KVar := c.kvars.eraseDups
+    if kvars.isEmpty then
+      logInfo m!"No κ-variables found, constraint is already a VC."
+    else
+      logInfo m!"κ-variables: {kvars.map toString}"
+
+    let mut eliminated := c
+    for κ in kvars do
+      let sol := eliminated.sol1 κ
+      logInfo m!"  {κ.name}({κ.params.map toString}) = {toString sol}"
+      eliminated := eliminated.elim1 κ
+
+    logInfo m!"Eliminated constraint:\n{toString eliminated}"
+
+    let prop ← constraintToExpr eliminated
+    let fmt ← ppExpr prop
+    logInfo m!"VC: {fmt}"
+
+    let ok ← checkVCWithGrindOmega eliminated
     if ok then
       logInfo m!"✅ VC discharged successfully"
     else

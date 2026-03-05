@@ -66,6 +66,7 @@ def ex3Eliminated := ex3Constraint.elim [kappa_a, kappa_b, kappa_c]
 #eval ex3Constraint.kvars
 #eval ex3Constraint.scope kappa_a
 #eval ex3Eliminated
+#check_vc ex3Eliminated
 #eval ex3Eliminated.kvars
 
 -- κa justified by (12): Nat input flows into κa

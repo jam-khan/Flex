@@ -172,6 +172,32 @@ def Constraint.scope (κ : KVar) : Constraint → Constraint
     else .imp x b p c'
   | c => c
 
+
+-- Simplifies the predicate, e.g. p ∧ false = false
+def Pred.simplify : Pred → Pred
+  | .conj p₁ p₂ =>
+    match p₁.simplify, p₂.simplify with
+    | .fls, _    => .fls
+    | _, .fls    => .fls
+    | .tru, s    => s
+    | s, .tru    => s
+    | s₁, s₂     => .conj s₁ s₂
+
+  | .disj p₁ p₂ =>
+    match p₁.simplify, p₂.simplify with
+    | .tru, _    => .tru
+    | _, .tru    => .tru
+    | .fls, s    => s
+    | s, .fls    => s
+    | s₁, s₂     => .disj s₁ s₂
+
+  | .exist x b p =>
+    match p.simplify with
+    | .fls => .fls
+    | s    => .exist x b s
+
+  | p => p
+
 /-
   `sol1 : (K × C) → P`
 
@@ -211,6 +237,20 @@ def Constraint.sol1 (κ : KVar) (c : Constraint) : Pred :=
         else .fls
       | _                     => .fls
 
+def substKVarInPred (κ : KVar) (sol : Pred) (p : Pred) : Pred :=
+  go p
+where
+  go : Pred → Pred
+    | .tru          => .tru
+    | .fls          => .fls
+    | .rexpr r      => .rexpr r
+    | .kapp k args  =>
+      if k == κ then Pred.applyKVarSol κ sol args
+      else .kapp k args
+    | .conj p₁ p₂  => .conj (go p₁) (go p₂)
+    | .disj p₁ p₂  => .disj (go p₁) (go p₂)
+    | .exist x b p  => .exist x b (go p)
+
 /-
   `elim* : (σ × C) → C` from Fig. 11
 
@@ -220,7 +260,7 @@ def Constraint.sol1 (κ : KVar) (c : Constraint) : Pred :=
 -/
 def Constraint.elimStar (κ : KVar) (sol : Pred) : Constraint → Constraint
   | .conj c₁ c₂   => .conj (c₁.elimStar κ sol) (c₂.elimStar κ sol)
-  | .imp x b p c  => .imp x b (p.substKVar κ sol) (c.elimStar κ sol)
+  | .imp x b p c  => .imp x b (substKVarInPred κ sol p) (c.elimStar κ sol)
   | .pred (.kapp k y) => if k == κ then .pred .tru else .pred (.kapp k y)
   | .pred p       => .pred p
 
@@ -230,15 +270,15 @@ def Constraint.elimStar (κ : KVar) (sol : Pred) : Constraint → Constraint
   elim1(κ, c) = elimStar(κ, sol, c)
   where sol = sol1(κ, c') and scope(κ, c) = ∀(xᵢ:pᵢ) ⇒ c'
 -/
+def stripScope (κ : KVar) : Constraint → Constraint
+  | .imp x b p c => if !p.kvars.contains κ then stripScope κ c else .imp x b p c
+  | c => c
+
 def Constraint.elim1 (κ : KVar) (c : Constraint) : Constraint :=
   let scoped' := c.scope κ
   let c'      := stripScope κ scoped'
   let sol     := c'.sol1 κ
   c.elimStar κ sol
-  where
-    stripScope (κ : KVar) : Constraint → Constraint
-      | .imp x b p c => if !p.kvars.contains κ then stripScope κ c else .imp x b p c
-      | c => c
 
 /-
   `elim : (List K × C) → C` from Fig. 12
