@@ -44,20 +44,19 @@ open Lean Meta Elab Term Tactic
 -/
 abbrev VarMap := Std.HashMap Name Expr
 
--- Look up a variable, throw error if not found
+-- Look up a variable in an `env`, throw error if not found
 def lookupVar (env : VarMap) (n : Name) : MetaM Expr := do
   match env.get? n with
   | some e => return e
   | none   => throwError s!"Elab: unbound variable `{n}`"
 
--- `BaseTy` ⤳ `Expr`
+/-
+  Simple type elaboration from
+  `BaseTy` AST to `Lean.Expr`
+-/
 def BaseTy.toExpr : BaseTy → Expr
   | .int  => mkConst ``Int
   | .bool => mkConst ``Bool
-
--- ============================================================
--- RExpr → MetaM Expr
--- ============================================================
 
 /--
   Elaborate a refinement expression to a Lean `Expr`.
@@ -67,10 +66,20 @@ def BaseTy.toExpr : BaseTy → Expr
   - Arithmetic becomes `HAdd.hAdd`, `HSub.hSub`, etc.
   - Comparisons become `LE.le`, `Eq`, etc. (these are `Prop`-valued)
   - Boolean connectives become `And`, `Or`, `Not`
+
+  Note: Partial as termination proof required.
 -/
 partial def RExpr.toExpr (env : VarMap) : RExpr → MetaM Expr
   | .var n =>
       lookupVar env n
+  /-
+    `integer` literal elaboration is a bit subtle.
+
+    Lean's `Int` has two constructors `ofNat` and `negSucc`.
+    So, `n: Int` needs to be elaborated to
+      - (n ≥ 0)   ~> ofNat n
+      - ¬(n ≥ 0)  ~> negSucc (n - 1) ≃ - ((n - 1) + 1)
+  -/
   | .int n =>
     if n ≥ 0 then
       return mkApp (mkConst ``Int.ofNat) (mkNatLit n.toNat)
@@ -94,7 +103,9 @@ partial def RExpr.toExpr (env : VarMap) : RExpr → MetaM Expr
       let re ← r.toExpr env
       match op with
       | .eq => mkAppM ``Eq #[le, re]
-      | .ne => do let eq ← mkAppM ``Eq #[le, re]; mkAppM ``Not #[eq]
+      | .ne => do
+          let eq ← mkAppM ``Eq #[le, re]
+          mkAppM ``Not #[eq]
       | .lt => mkAppM ``LT.lt #[le, re]
       | .le => mkAppM ``LE.le #[le, re]
       | .gt => mkAppM ``GT.gt #[le, re]
@@ -111,20 +122,20 @@ partial def RExpr.toExpr (env : VarMap) : RExpr → MetaM Expr
       mkAppM ``Not #[ee]
   | .app f args => do
       -- Note: Current examples don't use uninterpreted functions
-      let fExpr ← lookupVar env f
-      let argExprs ← args.mapM (RExpr.toExpr env)
+      let fExpr     ← lookupVar env f
+      let argExprs  ← args.mapM (RExpr.toExpr env)
       return mkAppN fExpr argExprs.toArray
 
 /--
   Elaborate a predicate to a Lean `Expr` (of type `Prop`).
 
-  - `true` → `True`
-  - `false` → `False`
-  - `rexpr r` → elaborate `r` (already Prop-valued for cmp/bop)
-  - `conj p₁ p₂` → `And p₁ p₂`
-  - `disj p₁ p₂` → `Or p₁ p₂`
+  - `true`        → `True`
+  - `false`       → `False`
+  - `rexpr r`     → elaborate `r` (already Prop-valued for cmp/bop)
+  - `conj p₁ p₂`  → `And p₁ p₂`
+  - `disj p₁ p₂`  → `Or p₁ p₂`
   - `exist x b p` → `∃ x : b, p`
-  - `kapp` → error (should be eliminated before elaboration)
+  - `kapp`        → error (should be eliminated before elaboration)
 -/
 def Pred.toExpr (env : VarMap) : Pred → MetaM Expr
   | .tru => return mkConst ``True
@@ -166,8 +177,8 @@ def Pred.toExpr (env : VarMap) : Pred → MetaM Expr
 /--
   Elaborate a κ-free constraint to a Lean `Expr` (of type `Prop`).
 
-  - `pred p` → elaborate `p`
-  - `conj c₁ c₂` → `c₁ ∧ c₂`
+  - `pred p`      → elaborate `p`
+  - `conj c₁ c₂`  → `c₁ ∧ c₂`
   - `imp x b p c` → `∀ x : b, p → c`
 
   The `imp` case is the key one: it introduces a universally
@@ -181,7 +192,7 @@ def Constraint.toExpr (env : VarMap) : Constraint → MetaM Expr
       let e₁ ← c₁.toExpr env
       let e₂ ← c₂.toExpr env
       mkAppM ``And #[e₁, e₂]
-  -- similar to `.exist` case in `Pred.toExpr`
+    -- similar to `.exist` case in `Pred.toExpr`
   | .imp x b p c => do
     -- Build: ∀ x : Int, p(x) → c(x)
     let bTy := b.toExpr
@@ -192,9 +203,6 @@ def Constraint.toExpr (env : VarMap) : Constraint → MetaM Expr
       let imp ← mkArrow hyp body
       mkForallFVars #[fvar] imp
 
--- Elaborate a constraint to a Prop. Starts with empty variable env.
-def constraintToExpr (c : Constraint) : MetaM Expr :=
-  c.toExpr {}
 
 /--
   Try to discharge a κ-free constraint using `grind`.
@@ -203,7 +211,7 @@ def constraintToExpr (c : Constraint) : MetaM Expr :=
   Useful for testing the pipeline end-to-end.
 -/
 def checkVCWithGrindOmega (c : Constraint) : TermElabM Bool := do
-  let prop ← constraintToExpr c
+  let prop ← c.toExpr {}
   let propTy ← inferType prop
   unless (← isDefEq propTy (mkSort .zero)) do
     throwError s!"checkVC: elaborated expression is not a Prop"
@@ -218,41 +226,51 @@ def checkVCWithGrindOmega (c : Constraint) : TermElabM Bool := do
 
 -- Simple string representation of a constraint's elaborated form
 def ppConstraintExpr (c : Constraint) : MetaM Format := do
-  let e ← constraintToExpr c
+  let e ← c.toExpr {}
   ppExpr e
 
 /--
-  `#check_vc c` elaborates constraint `c` to a Prop and
-  tries to discharge it with omega/grind.
+  `#solve_constraint c` solves for all κ-variables in constraint `c`,
+  eliminates them, and tries to discharge the resulting VC with omega/grind.
+
+  Pipeline:
+  - Infer κ-variables via `c.kvars`
+  - Solve each κ via `sol1` and eliminate via `elim1`
+  - Elaborate the κ-free constraint to a Prop
+  - Discharge with `omega` or `grind`
 
   Usage:
-  ```
-  #check_vc ex1Eliminated
-  ```
+```
+  #solve_constraint exConstraint
+```
+
+  Output:
+```
+  κ-variables: [κ2, κk]
+    κ2([k]) = 0 ≤ ν ∧ k ≤ ν
+    κk([k]) = ⊤
+  Eliminated constraint: ...
+  VC: ∀ k : Int, k < 0 → 0 ≤ 0 ∧ k ≤ 0
+  ✅ VC discharged successfully
+```
 -/
-unsafe def evalConstraint (e : Expr) : MetaM Constraint :=
-  Lean.Meta.evalExpr Constraint (mkConst ``Constraint) e
-
-elab "#check_vc " t:term : command => do
-  Lean.Elab.Command.liftTermElabM do
-    let cExpr ← Lean.Elab.Term.elabTerm t (some (mkConst ``Constraint))
-    let cExpr ← instantiateMVars cExpr
-    let c ← unsafe evalConstraint cExpr
-    let prop ← constraintToExpr c
-    let fmt ← ppExpr prop
-    logInfo m!"VC: {fmt}"
-    let ok ← checkVCWithGrindOmega c
-    if ok then
-      logInfo m!"✅ VC discharged successfully"
-    else
-      logWarning m!"❌ VC could not be discharged by omega or grind"
-
 elab "#solve_constraint " t:term : command => do
   Lean.Elab.Command.liftTermElabM do
-    let cExpr ← Lean.Elab.Term.elabTerm t (some (mkConst ``Constraint))
-    let cExpr ← instantiateMVars cExpr
-    let c ← unsafe evalConstraint cExpr
 
+    let elabExprC ← Lean.Elab.Term.elabTerm t (some (mkConst ``Constraint))
+    let elabExprC ← instantiateMVars elabExprC
+
+    let ty ← inferType elabExprC
+    unless (← isDefEq ty (mkConst ``Constraint)) do
+      throwError s!"Expected Constraint, got: {← ppExpr ty}"
+
+    -- reflect with contained unsafe block
+    let c ← try
+      unsafe Lean.Meta.evalExpr Constraint (mkConst ``Constraint) elabExprC
+    catch _ =>
+      throwError s!"Reflection failed"
+
+    -- everything below here is normal safe Lean
     let kvars : List KVar := c.kvars.eraseDups
     if kvars.isEmpty then
       logInfo m!"No κ-variables found, constraint is already a VC."
@@ -267,12 +285,12 @@ elab "#solve_constraint " t:term : command => do
 
     logInfo m!"Eliminated constraint:\n{toString eliminated}"
 
-    let prop ← constraintToExpr eliminated
-    let fmt ← ppExpr prop
+    let prop  ← eliminated.toExpr {}
+    let fmt   ← ppExpr prop
     logInfo m!"VC: {fmt}"
 
     let ok ← checkVCWithGrindOmega eliminated
     if ok then
-      logInfo m!"✅ VC discharged successfully"
+      logInfo m!"VC discharged successfully ✅"
     else
-      logWarning m!"❌ VC could not be discharged by omega or grind"
+      logWarning m!"VC could not be discharged by omega or grind"
