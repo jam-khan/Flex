@@ -55,8 +55,6 @@ def ex1Constraint : Constraint :=
 #solve_constraint ex1Constraint
 
 def ex1Eliminated := ex1Constraint.elim1 kappa
--- Discharge VC automatically
-#check_vc ex1Eliminated
 
 #eval IO.println (toString ex1Eliminated)
 
