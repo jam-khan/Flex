@@ -293,6 +293,7 @@ private def ppConstraint (indent : Nat := 0) : Constraint → String
 
 instance : ToString Constraint where toString c := ppConstraint 0 c
 
+
 section Examples
 
 def exRType : RType :=

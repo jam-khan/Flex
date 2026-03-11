@@ -287,3 +287,19 @@ def Constraint.elim1 (κ : KVar) (c : Constraint) : Constraint :=
 -/
 def Constraint.elim (kvars : List KVar) (c : Constraint) : Constraint :=
   kvars.foldl (fun acc κ => acc.elim1 κ) c
+
+/-
+  Cycle detection - `partitionKVars`
+  and Eliminating Cyclic KVars
+-/
+
+/-- Check if κ appears in both head and body of any flat clause -/
+def KVar.isCyclic (κ : KVar) (c : Constraint) : Bool :=
+  c.deps.any fun (κ1, κ2) => κ1 == κ && κ2 == κ
+
+/-- Split kvars into (acyclic, cyclic) -/
+def Constraint.partitionKVars (c : Constraint) : List KVar × List KVar :=
+  let allKs   := c.kvars.eraseDups
+  let cuts    := allKs.filter (fun κ => κ.isCyclic c)
+  let acyclic := allKs.filter (fun κ => !κ.isCyclic c)
+  (acyclic, cuts)
