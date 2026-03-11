@@ -303,3 +303,51 @@ def Constraint.partitionKVars (c : Constraint) : List KVar × List KVar :=
   let cuts    := allKs.filter (fun κ => κ.isCyclic c)
   let acyclic := allKs.filter (fun κ => !κ.isCyclic c)
   (acyclic, cuts)
+
+section CyclicTests
+
+def kappa_test : KVar := { name := `κ, params := [`z] }
+
+def ex1Test : Constraint :=
+  c{ ∀ x : int . 0 ≤ x ⇒
+      [∀ v : int . v == x - 1 ⇒ kappa_test(v)]
+    ∧ [∀ y : int . kappa_test(y) ⇒
+        ∀ v : int . v == y + 1 ⇒ 0 ≤ v] }
+
+#eval kappa_test.isCyclic ex1Test
+-- expected: false
+
+#eval ex1Test.deps
+-- expected: []
+
+#eval ex1Test.partitionKVars
+-- expected: ([κ], [])
+
+def ka : KVar := { name := `κa, params := [`z] }
+def kb : KVar := { name := `κb, params := [`z] }
+def kc : KVar := { name := `κc, params := [`z] }
+def kd : KVar := { name := `κd, params := [`z] }
+
+def mixedTest : Constraint :=
+  c{  -- acyclic chain: κa → κb → κc (same as ex3)
+      [∀ a : int . ka(a) ⇒ ∀ ν : int . ν == a - 1 ⇒ kb(ν)]
+    ∧ [∀ b : int . kb(b) ⇒ ∀ ν : int . ν == b + 1 ⇒ kc(ν)]
+    ∧ [∀ ν : int . 0 ≤ ν ⇒ ka(ν)]
+    ∧ [∀ ν : int . kc(ν) ⇒ 0 ≤ ν]
+      -- cyclic: κd depends on itself (recursive accumulator)
+    ∧ [∀ x : int . 0 ≤ x ⇒
+        ∀ ν : int . x == 0 ∧ ν == 0 ⇒ kd(ν)]
+    ∧ [∀ x : int . 0 ≤ x ⇒
+        ∀ r : int . kd(r) ⇒
+          ∀ ν : int . ν == x + r ⇒ kd(ν)]
+    ∧ [∀ y : int . kd(y) ⇒ 0 ≤ y] }
+
+#eval ka.isCyclic mixedTest    -- expect: false
+#eval kb.isCyclic mixedTest    -- expect: false
+#eval kc.isCyclic mixedTest    -- expect: false
+#eval kd.isCyclic mixedTest    -- expect: true
+
+#eval mixedTest.partitionKVars
+-- expect: ([κa, κb, κc], [κd])
+
+end CyclicTests
