@@ -294,3 +294,55 @@ elab "#solve_constraint " t:term : command => do
       logInfo m!"VC discharged successfully ✅"
     else
       logWarning m!"VC could not be discharged by omega or grind"
+
+
+/--
+  Check if a flat constraint is valid under assignment A,
+  used for predicate abstraction
+-/
+def checkFlatUnderAssignment
+    (fc : FlatConstraint)
+    (assignment : Std.HashMap KVar Pred)
+    : TermElabM Bool := do
+  let mut c := fc.val
+  for (κ, sol) in assignment.toList do
+    c := c.elimStar κ sol
+  checkVCWithGrindOmega c
+
+section Test
+
+-- Using mixed test from `Constraint.lean`
+#eval do
+  let flats := mixedAfterAcyclic.flat
+  IO.println s!"Number of flat constraints: {flats.length}"
+  for (i, fc) in flats.toArray.mapIdx (·, ·) |>.toList do
+    IO.println s!"\n--- Flat constraint {i} ---"
+    IO.println (toString fc.val)
+    IO.println s!"  head kvars: {fc.head.kvars.map toString}"
+    IO.println s!"  body kvars: {(fc.body.map Pred.kvars).flatten.map toString}"
+
+elab "#test_manual_assignment" : command => do
+  Lean.Elab.Command.liftTermElabM do
+    let flats := mixedAfterAcyclic.flat
+
+    -- Build assignment: κd ↦ (0 ≤ z)
+    let sol : Pred := .rexpr (.cmp .le (.int 0) (.var `z))
+    let mut assignment : Std.HashMap KVar Pred := {}
+    assignment := assignment.insert kd sol
+    -- Check only the κd-related flat constraints
+    let kdFlats := flats.filter fun fc =>
+      fc.kvars.any (· == kd)
+
+    logInfo m!"κd-related flat constraints: {kdFlats.length}"
+
+    for fc in kdFlats do
+      logInfo m!"Checking: {toString fc.val}"
+      let ok ← checkFlatUnderAssignment fc assignment
+      if ok then
+        logInfo m!"  ✅ valid"
+      else
+        logWarning m!"❌ invalid"
+
+#test_manual_assignment
+
+end Test

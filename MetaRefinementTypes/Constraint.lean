@@ -350,4 +350,20 @@ def mixedTest : Constraint :=
 #eval mixedTest.partitionKVars
 -- expect: ([κa, κb, κc], [κd])
 
+-- Eliminate only the acyclic variables
+def mixedAfterAcyclic :=
+  let (acyclic, _cuts) := mixedTest.partitionKVars
+  mixedTest.elim acyclic
+
+#eval mixedAfterAcyclic.kvars.eraseDups
+
+-- Check: κa, κb, κc gone?
+#eval mixedAfterAcyclic.kvars.any (· == ka)  -- expect: false
+#eval mixedAfterAcyclic.kvars.any (· == kb)  -- expect: false
+#eval mixedAfterAcyclic.kvars.any (· == kc)  -- expect: false
+#eval mixedAfterAcyclic.kvars.any (· == kd)  -- expect: true
+
+-- Print the residual constraint to see what's left
+#eval IO.println (toString mixedAfterAcyclic)
+
 end CyclicTests
