@@ -1,8 +1,8 @@
 import Lean
-import MetaRefinementTypes.Syntax
-import MetaRefinementTypes.Constraint
-import MetaRefinementTypes.Qualifier
-import MetaRefinementTypes.Elab
+import LeanFixpoint.Syntax
+import LeanFixpoint.Constraint
+import LeanFixpoint.Qualifier
+import LeanFixpoint.Elab
 
 open Lean Meta Elab Term Tactic
 

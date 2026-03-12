@@ -1,5 +1,5 @@
 import Lean
-import MetaRefinementTypes.Syntax
+import LeanFixpoint.Syntax
 
 open Lean
 

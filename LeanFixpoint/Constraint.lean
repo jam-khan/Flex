@@ -1,6 +1,6 @@
-import MetaRefinementTypes.Syntax
-import MetaRefinementTypes.Subst
-import MetaRefinementTypes.Macros
+import LeanFixpoint.Syntax
+import LeanFixpoint.Subst
+import LeanFixpoint.Macros
 
 /-
   **Subtyping Rules**

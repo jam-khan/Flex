@@ -1,10 +1,10 @@
 import Lean
-import MetaRefinementTypes.Constraint
-import MetaRefinementTypes.Elab
-import MetaRefinementTypes.Solve
-import MetaRefinementTypes.Qualifier
-import MetaRefinementTypes.Syntax
-import MetaRefinementTypes.Macros
+import LeanFixpoint.Constraint
+import LeanFixpoint.Elab
+import LeanFixpoint.Solve
+import LeanFixpoint.Qualifier
+import LeanFixpoint.Syntax
+import LeanFixpoint.Macros
 
 /-!
   # Example: Factorial — acyclic setup + cyclic recursion + output property

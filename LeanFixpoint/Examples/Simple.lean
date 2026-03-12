@@ -1,7 +1,7 @@
-import MetaRefinementTypes.Constraint
-import MetaRefinementTypes.Elab
-import MetaRefinementTypes.Syntax
-import MetaRefinementTypes.Macros
+import LeanFixpoint.Constraint
+import LeanFixpoint.Elab
+import LeanFixpoint.Syntax
+import LeanFixpoint.Macros
 
 -- ∀ x : Int, 0 ≤ x → ∀ ν : Int, ν = x - 1 → 0 ≤ ν + 1
 def simpleVC1 : Constraint :=

@@ -1,7 +1,7 @@
-import MetaRefinementTypes.Constraint
-import MetaRefinementTypes.Elab
-import MetaRefinementTypes.Syntax
-import MetaRefinementTypes.Macros
+import LeanFixpoint.Constraint
+import LeanFixpoint.Elab
+import LeanFixpoint.Syntax
+import LeanFixpoint.Macros
 
 /-!
   # Example 1 — Local Refinement Typing

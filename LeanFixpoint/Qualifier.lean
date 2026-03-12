@@ -1,7 +1,7 @@
 -- Qualifier.lean
-import MetaRefinementTypes.Syntax
-import MetaRefinementTypes.Subst
-import MetaRefinementTypes.Macros
+import LeanFixpoint.Syntax
+import LeanFixpoint.Subst
+import LeanFixpoint.Macros
 
 structure Qualifier where
   /-- Predicate template with placeholder variable `v` -/

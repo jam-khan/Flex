@@ -1,6 +1,6 @@
 import Lean
-import MetaRefinementTypes.Syntax
-import MetaRefinementTypes.Constraint
+import LeanFixpoint.Syntax
+import LeanFixpoint.Constraint
 
 import Std.Data.DHashMap
 

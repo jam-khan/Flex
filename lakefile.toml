@@ -3,7 +3,7 @@ version = "0.1.0"
 defaultTargets = ["meta-refinement-types"]
 
 [[lean_lib]]
-name = "MetaRefinementTypes"
+name = "LeanFixpoint"
 
 [[lean_exe]]
 name = "meta-refinement-types"
