@@ -6,7 +6,6 @@ import MetaRefinementTypes.Qualifier
 import MetaRefinementTypes.Syntax
 import MetaRefinementTypes.Macros
 
-open Lean Meta Elab Term Tactic
 
 /-!
   # Example: Mixed Acyclic + Cyclic Constraints
@@ -62,32 +61,4 @@ def exMixed : Constraint :=
           ∀ ν : int . ν == k + r ⇒ ksum(ν)]
     ∧ [∀ y : int . ksum(y) ⇒ 0 ≤ y] }
 
--- Verify structure
-#eval do
-  let (acy, cyc) := exMixed.partitionKVars
-  IO.println s!"Acyclic: {acy.map toString}"
-  IO.println s!"Cyclic:  {cyc.map toString}"
-  -- expect: Acyclic: [κy], Cyclic: [κsum]
-
-def exAfterFusion :=
-  let (acy, _) := exMixed.partitionKVars
-  exMixed.elim acy
-
-#eval do
-  IO.println "After Fusion (κy eliminated):"
-  IO.println (toString exAfterFusion)
-  IO.println s!"Remaining kvars: {exAfterFusion.kvars.eraseDups.map toString}"
-  -- expect: only κsum remains
-
--- ── Phase 2: Predicate abstraction for κsum ──
-elab "#test_sat_mixed" : command => do
-  Lean.Elab.Command.liftTermElabM do
-    let Q : List Qualifier := [
-      { pred := r{ 0 ≤ v } },
-      { pred := r{ v ≤ 0 } }
-    ]
-    let ok ← sat exMixed Q
-    if ok then logInfo m!"✅ sat returned true"
-    else logWarning m!"❌ sat returned false"
-
-#test_sat_mixed
+#solve_constraint_full exMixed with [{ pred := r{ 0 ≤ v } }, { pred := r{ v ≤ 0 } }]

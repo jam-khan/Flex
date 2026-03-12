@@ -82,6 +82,76 @@ def sat (c : Constraint) (Q : List Qualifier) : TermElabM Bool := do
       result := result.elimStar κ (conjoinQualifiers qs)
     checkVCWithGrindOmega result
 
+
+/--
+  `#solve_constraint_full c` — Fusion + predicate abstraction.
+
+  1. Partition κ-vars into acyclic/cyclic
+  2. Eliminate acyclic via Fusion
+  3. If cyclic remain, run predicate abstraction with given qualifiers
+  4. Elaborate and discharge with grind/omega
+-/
+elab "#solve_constraint_full " t:term " with " qt:term : command => do
+  Lean.Elab.Command.liftTermElabM do
+    -- Reflect constraint
+    let cExpr ← Lean.Elab.Term.elabTerm t (some (mkConst ``Constraint))
+    let cExpr ← instantiateMVars cExpr
+    let c ← try
+      unsafe Lean.Meta.evalExpr Constraint (mkConst ``Constraint) cExpr
+    catch _ => throwError "Failed to reflect Constraint"
+
+    -- Reflect qualifier list
+    let qExpr ← Lean.Elab.Term.elabTerm qt
+      (some (mkApp (mkConst ``List [.zero]) (mkConst ``Qualifier)))
+    let qExpr ← instantiateMVars qExpr
+    let Q ← try
+      unsafe Lean.Meta.evalExpr (List Qualifier)
+        (mkApp (mkConst ``List [.zero]) (mkConst ``Qualifier)) qExpr
+    catch _ => throwError "Failed to reflect qualifier list"
+
+    -- Phase 1: partition
+    let (acyclic, cuts) := c.partitionKVars
+    logInfo m!"Acyclic: {acyclic.map toString}"
+    logInfo m!"Cyclic:  {cuts.map toString}"
+
+    -- Phase 2: Fusion
+    let mut eliminated := c
+    for κ in acyclic do
+      let sol := eliminated.sol1 κ
+      logInfo m!"  sol1({κ.name}) = {toString sol}"
+      eliminated := eliminated.elim1 κ
+
+    -- Phase 3: predicate abstraction (if cyclic vars remain)
+    if cuts.isEmpty then
+      logInfo m!"No cyclic variables."
+    else
+      let flatCs := eliminated.flat
+      -- Initialize
+      let init := cuts.map fun κ =>
+        let qs := Q.map fun q => q.instantiate κ.params.head!
+        (κ, qs)
+      for (κ, qs) in init do
+        logInfo m!"  Init A({κ.name}) = {qs.map toString}"
+
+      -- Solve fixpoint
+      let assignment ← solveFixpoint flatCs init
+      for (κ, qs) in assignment do
+        logInfo m!"  Final A({κ.name}) = {qs.map toString}"
+
+      -- Substitute
+      for (κ, qs) in assignment do
+        let sol := conjoinQualifiers qs
+        eliminated := eliminated.elimStar κ sol
+
+    -- Phase 4: elaborate and check
+    logInfo m!"Final constraint:\n{toString eliminated}"
+    let prop ← eliminated.toExpr {}
+    let fmt ← ppExpr prop
+    logInfo m!"VC: {fmt}"
+    let ok ← checkVCWithGrindOmega eliminated
+    if ok then logInfo m!"✅ VC discharged"
+    else logWarning m!"❌ VC could not be discharged"
+
 section Test
 /-- Simple test command -/
 elab "#test_sat" : command => do

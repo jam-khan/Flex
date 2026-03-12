@@ -297,8 +297,13 @@ elab "#solve_constraint " t:term : command => do
 
 
 /--
-  Check if a flat constraint is valid under assignment A,
-  used for predicate abstraction
+  `checkFlatUnderAssignment` takes a FlatConstraint, and
+  an assignment, which is a mapping from `kvars` to `predicates`.
+  Then, it iteratively eliminates each `kvar` using `elimStar`
+  in the constraint.
+
+  After iteratively eliminating all `kvar`,
+  it checks if result is valid under assignment
 -/
 def checkFlatUnderAssignment
     (fc : FlatConstraint)
