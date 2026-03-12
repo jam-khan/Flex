@@ -52,29 +52,23 @@ def ky   : KVar := { name := `κy,   params := [`z] }
 def ksum : KVar := { name := `κsum, params := [`z] }
 
 def exMixed : Constraint :=
-  c{  -- (1) dec x flows into κy
-      [∀ x : int . 0 ≤ x ⇒
+  c{  [∀ x : int . 0 ≤ x ⇒
         ∀ ν : int . ν == x - 1 ⇒ ky(ν)]
-      -- (2) y passed to sum
     ∧ [∀ y : int . ky(y) ⇒ ksum(y)]
-      -- (3) sum base case
     ∧ [∀ k : int . 0 ≤ k ⇒
         ∀ ν : int . k == 0 ∧ ν == 0 ⇒ ksum(ν)]
-      -- (4) sum recursive case
     ∧ [∀ k : int . 0 ≤ k ⇒
         ∀ r : int . ksum(r) ⇒
           ∀ ν : int . ν == k + r ⇒ ksum(ν)]
-      -- (5) output is Nat
     ∧ [∀ y : int . ksum(y) ⇒ 0 ≤ y] }
 
--- ── Verify structure ──
+-- Verify structure
 #eval do
   let (acy, cyc) := exMixed.partitionKVars
   IO.println s!"Acyclic: {acy.map toString}"
   IO.println s!"Cyclic:  {cyc.map toString}"
   -- expect: Acyclic: [κy], Cyclic: [κsum]
 
--- ── Phase 1: Fusion eliminates κy ──
 def exAfterFusion :=
   let (acy, _) := exMixed.partitionKVars
   exMixed.elim acy
