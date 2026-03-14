@@ -10,16 +10,12 @@ import LeanFixpoint.Macros
 def kappa_sum : KVar := { name := `κsum, params := [`z] }
 
 def sumConstraint : Constraint :=
-  c{  -- base case: x = 0 ∧ ν = 0 ⇒ κ(ν)
-      -- encode the two hypotheses as nested ∀ binders
-      [∀ x : int . 0 ≤ x ⇒
+  c{  [∀ x : int . 0 ≤ x ⇒
         ∀ ν : int . x == 0 ⇒
           ∀ ν2 : int . ν2 == 0 ⇒ kappa_sum(ν2)]
-      -- recursive case: κ(r) in body AND κ(ν) in head
     ∧ [∀ x : int . 0 ≤ x ⇒
         ∀ r : int . kappa_sum(r) ⇒
           ∀ ν : int . ν == x + r ⇒ kappa_sum(ν)]
-      -- output: κ(y) ⇒ 0 ≤ y
     ∧ [∀ y : int . kappa_sum(y) ⇒ 0 ≤ y] }
 
 #eval do
