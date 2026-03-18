@@ -6,6 +6,16 @@ import LeanFixpoint.Qualifier
 import LeanFixpoint.Syntax
 import LeanFixpoint.Macros
 
+def kappa : KVar := { name := `κ, params := [`z] }
+
+def ex1Constraint' : Constraint :=
+  c{ ∀ x : int . 0 ≤ x ⇒
+      [∀ ν : int . ν == x - 1 ⇒ kappa(ν)]
+    ∧ [∀ y : int . kappa(y) ⇒
+        ∀ ν : int . ν == y + 1 ⇒ 0 ≤ ν] }
+
+#solve_constraint ex1Constraint'
+
 def ex1Constraint : Prop :=
   ∃ κ : Int → Prop,
     ∀ x : Int, 0 ≤ x →
@@ -17,6 +27,21 @@ theorem ex1Proof : ex1Constraint := by
   unfold ex1Constraint
   exists fun z => ∃ x : Int, 0 ≤ x ∧ ∃ ν : Int, ν = x - 1 ∧ z = ν
   grind
+
+def kappa_x : KVar := { name := `κx, params := [`z] }
+def kappa_y : KVar := { name := `κy, params := [`z] }
+
+def ex2Constraint' : Constraint :=
+  c{ ∀ x : int . 0 ≤ x ⇒
+      ∀ n : int . n == x - 1 ⇒
+        ∀ p : int . p == x + 1 ⇒
+            [∀ ν : int . ν == n ⇒ kappa_x(ν)]
+          ∧ [∀ ν : int . ν == p ⇒ kappa_y(ν)]
+          ∧ [∀ ν : int . kappa_x(ν) ⇒ kappa_y(ν)]
+          ∧ [∀ y : int . kappa_y(y) ⇒
+              ∀ ν : int . ν == y + 1 ⇒ 0 ≤ ν] }
+
+#solve_constraint ex2Constraint'
 
 def ex2Constraint : Prop :=
   ∃ κx : Int → Prop, ∃ κy : Int → Prop,
@@ -46,6 +71,7 @@ theorem ex2Proof : ex2Constraint := by
   · intro y ⟨x', hx', n', hn', p', hp', hy⟩ ν hν
     rcases hy with ⟨ν', hν'p, hyν⟩ | ⟨ν', ⟨α, hαn, hνα⟩, hyν⟩ <;> omega
 
+
 def ex3Constraint : Prop :=
   ∃ κa : Int → Prop, ∃ κb : Int → Prop, ∃ κc : Int → Prop,
     (∀ a : Int, κa a → ∀ ν : Int, ν = a - 1 → κb ν)
@@ -59,16 +85,12 @@ theorem ex3Proof : ex3Constraint := by
   exists fun z => ∃ a : Int, (∃ ν : Int, 0 ≤ ν ∧ a = ν) ∧ ∃ ν : Int, ν = a - 1 ∧ z = ν
   exists fun z => ∃ b : Int, (∃ a : Int, (∃ ν : Int, 0 ≤ ν ∧ a = ν) ∧ ∃ ν : Int, ν = a - 1 ∧ b = ν) ∧ ∃ ν : Int, ν = b + 1 ∧ z = ν
   refine ⟨?_, ?_, ?_, ?_⟩
-  -- Clause 1: ∀ a, κa a → ∀ ν, ν = a - 1 → κb ν
   · intro a ⟨ν', hν', ha⟩ ν hν
     exact ⟨a, ⟨ν', hν', ha⟩, ν, hν, rfl⟩
-  -- Clause 2: ∀ b, κb b → ∀ ν, ν = b + 1 → κc ν
   · intro b ⟨a, ha, ν', hν', hb⟩ ν hν
     exact ⟨b, ⟨a, ha, ν', hν', hb⟩, ν, hν, rfl⟩
-  -- Clause 3: ∀ ν, 0 ≤ ν → κa ν
   · intro ν hν
     exact ⟨ν, hν, rfl⟩
-  -- Clause 4: ∀ ν, κc ν → 0 ≤ ν
   · intro ν ⟨b, ⟨a, ⟨ν', hν', ha⟩, ν'', hν'', hb⟩, ν''', hν''', hzν⟩
     omega
 
