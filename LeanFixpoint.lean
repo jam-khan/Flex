@@ -4,3 +4,4 @@ import LeanFixpoint.Constraint
 import LeanFixpoint.Elab
 import LeanFixpoint.Macros
 import LeanFixpoint.Qualifier
+import LeanFixpoint.Tactics
