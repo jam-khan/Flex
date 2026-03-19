@@ -325,3 +325,10 @@ def ex1Constraint : Prop :=
 theorem ex1Proof : ex1Constraint := by
   unfold ex1Constraint
   solve_fixpoint
+
+theorem ex2Proof : ex2Constraint := by
+  unfold ex2Constraint
+  -- too slow for some reason
+  -- solve_fixpoint
+  -- managed to remove 1 kappa
+  sorry
