@@ -229,6 +229,31 @@ def ppConstraintExpr (c : Constraint) : MetaM Format := do
   let e ← c.toExpr {}
   ppExpr e
 
+def solveAndCheckConstraint (c : Constraint) : TermElabM Unit := do
+    let kvars : List KVar := c.kvars.eraseDups
+    if kvars.isEmpty then
+      logInfo m!"No κ-variables found, constraint is already a VC."
+    else
+      logInfo m!"κ-variables: {kvars.map toString}"
+
+    let mut eliminated := c
+    for κ in kvars do
+      let sol := eliminated.sol1 κ
+      logInfo m!"  {κ.name}({κ.params.map toString}) = {toString sol}"
+      eliminated := eliminated.elim1 κ
+
+    logInfo m!"Eliminated constraint:\n{toString eliminated}"
+
+    let prop ← eliminated.toExpr {}
+    let fmt ← ppExpr prop
+    logInfo m!"VC: {fmt}"
+
+    let ok ← checkVCWithGrindOmega eliminated
+    if ok then
+      logInfo m!"✅ VC discharged successfully"
+    else
+      logWarning m!"❌ VC could not be discharged by omega or grind"
+
 /--
   `#solve_constraint c` solves for all κ-variables in constraint `c`,
   eliminates them, and tries to discharge the resulting VC with omega/grind.
@@ -256,45 +281,13 @@ def ppConstraintExpr (c : Constraint) : MetaM Format := do
 -/
 elab "#solve_constraint " t:term : command => do
   Lean.Elab.Command.liftTermElabM do
-
     let elabExprC ← Lean.Elab.Term.elabTerm t (some (mkConst ``Constraint))
     let elabExprC ← instantiateMVars elabExprC
-
-    let ty ← inferType elabExprC
-    unless (← isDefEq ty (mkConst ``Constraint)) do
-      throwError s!"Expected Constraint, got: {← ppExpr ty}"
-
-    -- reflect with contained unsafe block
     let c ← try
       unsafe Lean.Meta.evalExpr Constraint (mkConst ``Constraint) elabExprC
     catch _ =>
       throwError s!"Reflection failed"
-
-    -- everything below here is normal safe Lean
-    let kvars : List KVar := c.kvars.eraseDups
-    if kvars.isEmpty then
-      logInfo m!"No κ-variables found, constraint is already a VC."
-    else
-      logInfo m!"κ-variables: {kvars.map toString}"
-
-    let mut eliminated := c
-    for κ in kvars do
-      let sol := eliminated.sol1 κ
-      logInfo m!"  {κ.name}({κ.params.map toString}) = {toString sol}"
-      eliminated := eliminated.elim1 κ
-
-    logInfo m!"Eliminated constraint:\n{toString eliminated}"
-
-    let prop  ← eliminated.toExpr {}
-    let fmt   ← ppExpr prop
-    logInfo m!"VC: {fmt}"
-
-    let ok ← checkVCWithGrindOmega eliminated
-    if ok then
-      logInfo m!"VC discharged successfully ✅"
-    else
-      logWarning m!"VC could not be discharged by omega or grind"
-
+    solveAndCheckConstraint c
 
 /--
   `checkFlatUnderAssignment` takes a FlatConstraint, and
