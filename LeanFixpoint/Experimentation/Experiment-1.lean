@@ -16,7 +16,7 @@ import LeanFixpoint.Tactics
   5. Get example working end-to-end
 -/
 
-open Lean Elab Meta Command
+open Lean Elab Meta Command Tactic
 
 -- Maps fvar ids to names (for κx, κy, x, n, etc.)
 abbrev FVarMap := Std.HashMap FVarId Name
@@ -264,20 +264,64 @@ def ex2Constraint : Prop :=
         ∧ (∀ y : Int, κy y →
             ∀ ν : Int, ν = y + 1 → 0 ≤ ν)
 
--- Now, we shall add translation from PropAST to Constraint
--- it will look as follows:
-
-def kappa_x : KVar := { name := `κx, params := [`z] }
-def kappa_y : KVar := { name := `κy, params := [`z] }
-
-def ex2ConstraintConstraint : Constraint :=
-  c{ ∀ x : int . 0 ≤ x ⇒
-      ∀ n : int . n == x - 1 ⇒
-        ∀ p : int . p == x + 1 ⇒
-            [∀ ν : int . ν == n ⇒ kappa_x(ν)]
-          ∧ [∀ ν : int . ν == p ⇒ kappa_y(ν)]
-          ∧ [∀ ν : int . kappa_x(ν) ⇒ kappa_y(ν)]
-          ∧ [∀ y : int . kappa_y(y) ⇒
-              ∀ ν : int . ν == y + 1 ⇒ 0 ≤ ν] }
-
 #translate_and_solve ex2Constraint
+
+def ex3Constraint : Prop :=
+  ∃ κa : Int → Prop, ∃ κb : Int → Prop, ∃ κc : Int → Prop,
+    (∀ a : Int, κa a → ∀ ν : Int, ν = a - 1 → κb ν)
+  ∧ (∀ b : Int, κb b → ∀ ν : Int, ν = b + 1 → κc ν)
+  ∧ (∀ ν : Int, 0 ≤ ν → κa ν)
+  ∧ (∀ ν : Int, κc ν → 0 ≤ ν)
+
+#translate_and_solve ex3Constraint
+
+/--
+  Convert a solved `Pred` into a `fun (z : Int) => ...` witness expression.
+-/
+def solToWitnessExpr (sol : Pred) (paramName : Name := `z) : MetaM Expr := do
+  withLocalDeclD paramName (mkConst ``Int) fun zFvar => do
+    let env : VarMap := ({} : VarMap).insert paramName zFvar
+    let body ← sol.toExpr env
+    mkLambdaFVars #[zFvar] body
+
+elab "solve_fixpoint" : tactic => withMainContext do
+  let goal ← getMainGoal
+  let goalType ← goal.getType
+  let reduced ← reduce goalType
+
+  -- Translate Prop → PropAST → Constraint
+  let fvarsRef ← IO.mkRef ({} : FVarMap)
+  let kvarsRef ← IO.mkRef ({} : KVarSet)
+  let propAST ← toPropASTWithTracking fvarsRef kvarsRef reduced
+  let fvarMap ← fvarsRef.get
+  let kvarSet ← kvarsRef.get
+  let constraint ← toConstraint fvarMap kvarSet propAST
+
+  -- Solve all κ-variables
+  let kvars := constraint.kvars.eraseDups
+  let mut solutions : List (Name × Pred) := []
+  let mut curr := constraint
+  for κ in kvars do
+    let sol := curr.sol1 κ
+    solutions := solutions ++ [(κ.name, sol)]
+    curr := curr.elim1 κ
+
+  for (_κName, sol) in solutions do
+    let witness ← solToWitnessExpr sol
+    let witnessSyn ← PrettyPrinter.delab witness
+    evalTactic (← `(tactic| refine ⟨$witnessSyn, ?_⟩))
+
+  -- Discharge the remaining VC
+  evalTactic (← `(tactic| first | grind | omega))
+
+
+def ex1Constraint : Prop :=
+  ∃ κ : Int → Prop,
+    ∀ x : Int, 0 ≤ x →
+      (∀ ν : Int, ν = x - 1 → κ ν)
+    ∧ (∀ y : Int, κ y →
+        ∀ ν : Int, ν = y + 1 → 0 ≤ ν)
+
+theorem ex1Proof : ex1Constraint := by
+  unfold ex1Constraint
+  solve_fixpoint
