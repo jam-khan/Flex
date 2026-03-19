@@ -8,12 +8,14 @@ import LeanFixpoint.Macros
 import LeanFixpoint.Tactics
 
 /-
+Current Plan for experiment:
+
   1. Write a Prop for Example 2.
   2. Reduce to Exp and investigate
   3. Get an elaborator from Prop (Restricted Exp)
   to Constraint
   4. Connect it to remaining `#solve_constraint`
-  5. Get example working end-to-end
+  5. Get example working end-to-end for example 1
 -/
 
 open Lean Elab Meta Command Tactic
