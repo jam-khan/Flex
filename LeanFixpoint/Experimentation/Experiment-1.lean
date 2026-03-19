@@ -255,19 +255,6 @@ elab "#translate_and_solve" t:term : command => do
     -- Phase 3: Solve
     solveAndCheckConstraint constraint
 
-def ex2Constraint : Prop :=
-  ∃ κx : Int → Prop, ∃ κy : Int → Prop,
-    ∀ x : Int, 0 ≤ x →
-      ∀ n : Int, n = x - 1 →
-        ∀ p : Int, p = x + 1 →
-          (∀ ν : Int, ν = n → κx ν)
-        ∧ (∀ ν : Int, ν = p → κy ν)
-        ∧ (∀ ν : Int, κx ν → κy ν)
-        ∧ (∀ y : Int, κy y →
-            ∀ ν : Int, ν = y + 1 → 0 ≤ ν)
-
-#translate_and_solve ex2Constraint
-
 def ex3Constraint : Prop :=
   ∃ κa : Int → Prop, ∃ κb : Int → Prop, ∃ κc : Int → Prop,
     (∀ a : Int, κa a → ∀ ν : Int, ν = a - 1 → κb ν)
@@ -328,9 +315,23 @@ theorem ex1Proof : ex1Constraint := by
   unfold ex1Constraint
   solve_fixpoint
 
+def ex2Constraint : Prop :=
+  ∃ κx : Int → Prop, ∃ κy : Int → Prop,
+    ∀ x : Int, 0 ≤ x →
+      ∀ n : Int, n = x - 1 →
+        ∀ p : Int, p = x + 1 →
+          (∀ ν : Int, ν = n → κx ν)
+        ∧ (∀ ν : Int, ν = p → κy ν)
+        ∧ (∀ ν : Int, κx ν → κy ν)
+        ∧ (∀ y : Int, κy y →
+            ∀ ν : Int, ν = y + 1 → 0 ≤ ν)
+
+
 theorem ex2Proof : ex2Constraint := by
   unfold ex2Constraint
   -- too slow for some reason
   -- solve_fixpoint
   -- managed to remove 1 kappa
   sorry
+
+#translate_and_solve ex2Constraint
