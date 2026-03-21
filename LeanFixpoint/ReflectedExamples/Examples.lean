@@ -72,7 +72,6 @@ theorem ex2Proof : ex2Constraint := by
   exists fun z => ∃ x : Int, 0 ≤ x ∧ ∃ n : Int, n = x - 1 ∧ ∃ ν : Int, ν = n ∧ z = ν
   exists fun z => ∃ x : Int, 0 ≤ x ∧ ∃ n : Int, n = x - 1 ∧ ∃ p : Int, p = x + 1 ∧
     ((∃ ν : Int, ν = p ∧ z = ν) ∨ (∃ ν : Int, (∃ α : Int, α = n ∧ ν = α) ∧ z = ν))
-
   intro x hx n hn p hp
   refine ⟨?_, ?_, ?_, ?_⟩
   · intro ν hν

@@ -255,15 +255,6 @@ elab "#translate_and_solve" t:term : command => do
     -- Phase 3: Solve
     solveAndCheckConstraint constraint
 
-def ex3Constraint : Prop :=
-  ∃ κa : Int → Prop, ∃ κb : Int → Prop, ∃ κc : Int → Prop,
-    (∀ a : Int, κa a → ∀ ν : Int, ν = a - 1 → κb ν)
-  ∧ (∀ b : Int, κb b → ∀ ν : Int, ν = b + 1 → κc ν)
-  ∧ (∀ ν : Int, 0 ≤ ν → κa ν)
-  ∧ (∀ ν : Int, κc ν → 0 ≤ ν)
-
-#translate_and_solve ex3Constraint
-
 /--
   Convert a solved `Pred` into a `fun (z : Int) => ...` witness expression.
 -/
@@ -311,8 +302,12 @@ def ex1Constraint : Prop :=
     ∧ (∀ y : Int, κ y →
         ∀ ν : Int, ν = y + 1 → 0 ≤ ν)
 
-theorem ex1Proof : ex1Constraint := by
-  unfold ex1Constraint
+theorem ex1Proof :
+  ∃ κ : Int → Prop,
+    ∀ x : Int, 0 ≤ x →
+      (∀ ν : Int, ν = x - 1 → κ ν)
+    ∧ (∀ y : Int, κ y →
+        ∀ ν : Int, ν = y + 1 → 0 ≤ ν) := by
   solve_fixpoint
 
 def ex2Constraint : Prop :=
@@ -329,9 +324,36 @@ def ex2Constraint : Prop :=
 
 theorem ex2Proof : ex2Constraint := by
   unfold ex2Constraint
-  -- too slow for some reason
-  -- solve_fixpoint
-  -- managed to remove 1 kappa
-  sorry
+  exists fun z => ∃ x : Int, 0 ≤ x ∧ ∃ n : Int, n = x - 1 ∧ ∃ ν : Int, ν = n ∧ z = ν
+  exists fun z => ∃ x : Int, 0 ≤ x ∧ ∃ n : Int, n = x - 1 ∧ ∃ p : Int, p = x + 1 ∧
+    ((∃ ν : Int, ν = p ∧ z = ν) ∨ (∃ ν : Int, (∃ α : Int, α = n ∧ ν = α) ∧ z = ν))
+  simp
+  intro x hx
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · assumption
+  · exists x
+    grind
+  · intro _ x' _ _
+    exists x'
+    grind
+  · intros _ _ _ _
+    grind
 
 #translate_and_solve ex2Constraint
+
+def ex3Constraint : Prop :=
+  ∃ κa : Int → Prop, ∃ κb : Int → Prop, ∃ κc : Int → Prop,
+    (∀ a : Int, κa a → ∀ ν : Int, ν = a - 1 → κb ν)
+  ∧ (∀ b : Int, κb b → ∀ ν : Int, ν = b + 1 → κc ν)
+  ∧ (∀ ν : Int, 0 ≤ ν → κa ν)
+  ∧ (∀ ν : Int, κc ν → 0 ≤ ν)
+
+theorem ex3Proof : ex3Constraint := by
+  unfold ex3Constraint
+  exists fun z => ∃ ν : Int, 0 ≤ ν ∧ z = ν
+  exists fun z => ∃ a : Int, (∃ ν : Int, 0 ≤ ν ∧ a = ν) ∧ ∃ ν : Int, ν = a - 1 ∧ z = ν
+  exists fun z => ∃ b : Int, (∃ a : Int, (∃ ν : Int, 0 ≤ ν ∧ a = ν) ∧ ∃ ν : Int, ν = a - 1 ∧ b = ν) ∧ ∃ ν : Int, ν = b + 1 ∧ z = ν
+  simp
+  grind
+
+#translate_and_solve ex3Constraint
