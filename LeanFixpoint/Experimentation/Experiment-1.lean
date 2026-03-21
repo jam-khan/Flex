@@ -291,8 +291,17 @@ elab "solve_fixpoint" : tactic => withMainContext do
     let witnessSyn ← PrettyPrinter.delab witness
     evalTactic (← `(tactic| refine ⟨$witnessSyn, ?_⟩))
 
-  -- Discharge the remaining VC
-  evalTactic (← `(tactic| first | grind | omega))
+  -- Try simp first to simplify, then try to fully discharge
+  try
+    evalTactic (← `(tactic| simp_all))
+  catch _ => pure ()
+
+  -- If goals remain, try grind or omega
+  let goals ← getGoals
+  if !goals.isEmpty then
+    try
+      evalTactic (← `(tactic| first | grind | omega))
+    catch _ => pure ()
 
 
 def ex1Constraint : Prop :=
@@ -308,6 +317,7 @@ theorem ex1Proof :
       (∀ ν : Int, ν = x - 1 → κ ν)
     ∧ (∀ y : Int, κ y →
         ∀ ν : Int, ν = y + 1 → 0 ≤ ν) := by
+  -- simp
   solve_fixpoint
 
 def ex2Constraint : Prop :=
@@ -324,6 +334,7 @@ def ex2Constraint : Prop :=
 
 theorem ex2Proof : ex2Constraint := by
   unfold ex2Constraint
+  -- simp
   exists fun z => ∃ x : Int, 0 ≤ x ∧ ∃ n : Int, n = x - 1 ∧ ∃ ν : Int, ν = n ∧ z = ν
   exists fun z => ∃ x : Int, 0 ≤ x ∧ ∃ n : Int, n = x - 1 ∧ ∃ p : Int, p = x + 1 ∧
     ((∃ ν : Int, ν = p ∧ z = ν) ∨ (∃ ν : Int, (∃ α : Int, α = n ∧ ν = α) ∧ z = ν))
@@ -336,8 +347,7 @@ theorem ex2Proof : ex2Constraint := by
   · intro _ x' _ _
     exists x'
     grind
-  · intros _ _ _ _
-    grind
+  · grind
 
 #translate_and_solve ex2Constraint
 
@@ -350,10 +360,6 @@ def ex3Constraint : Prop :=
 
 theorem ex3Proof : ex3Constraint := by
   unfold ex3Constraint
-  exists fun z => ∃ ν : Int, 0 ≤ ν ∧ z = ν
-  exists fun z => ∃ a : Int, (∃ ν : Int, 0 ≤ ν ∧ a = ν) ∧ ∃ ν : Int, ν = a - 1 ∧ z = ν
-  exists fun z => ∃ b : Int, (∃ a : Int, (∃ ν : Int, 0 ≤ ν ∧ a = ν) ∧ ∃ ν : Int, ν = a - 1 ∧ b = ν) ∧ ∃ ν : Int, ν = b + 1 ∧ z = ν
-  simp
-  grind
+  solve_fixpoint
 
 #translate_and_solve ex3Constraint
