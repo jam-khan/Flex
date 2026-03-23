@@ -1,4 +1,4 @@
-import LeanFixpoint.Syntax
+import LeanFixpoint.Core.Types
 
 partial def RExpr.subst (target : Var) (val : RExpr) : RExpr → RExpr
   | .var x        => if x == target then val else .var x

@@ -1,8 +1,11 @@
 import Lean
-import LeanFixpoint.Syntax
-import LeanFixpoint.Constraint
-import LeanFixpoint.Qualifier
-import LeanFixpoint.Elab
+import LeanFixpoint.Core.Types
+import LeanFixpoint.Core.Subst
+import LeanFixpoint.Core.Macros
+import LeanFixpoint.Core.Pretty
+import LeanFixpoint.Core.Fusion
+import LeanFixpoint.Solve.Qualifier
+import LeanFixpoint.Elab.ToExpr
 
 open Lean Meta Elab Term Tactic
 
@@ -37,17 +40,13 @@ def weakenOnce
       let headArgs := getHeadArgs fc.head κ
       let mut kept : List RExpr := []
       for q in qs do
-        -- Substitute all κ in body with current assignment
         let mut c := fc.val
         for (k, kqs) in a do
           c := c.elimStar k (conjoinQualifiers kqs)
-        -- Substitute head κ with this specific qualifier
         let qInst := instantiateQualWithArgs κ q headArgs
         c := c.elimStar κ (.rexpr qInst)
-        -- Check
         let ok ← checkVCWithGrindOmega c
         if ok then kept := kept ++ [q]
-      -- Update assignment for κ
       a := a.map fun (k, qs') => if k == κ then (k, kept) else (k, qs')
   return a
 
@@ -70,13 +69,10 @@ def sat (c : Constraint) (Q : List Qualifier) : TermElabM Bool := do
     checkVCWithGrindOmega c'
   else
     let flatCs := c'.flat
-    -- Initialize: each cyclic κ gets all qualifiers
     let init := cuts.map fun κ =>
       let qs := Q.map fun q => q.instantiate κ.params.head!
       (κ, qs)
-    -- Iterate
     let assignment ← solveFixpoint flatCs init
-    -- Substitute final solution
     let mut result := c'
     for (κ, qs) in assignment do
       result := result.elimStar κ (conjoinQualifiers qs)

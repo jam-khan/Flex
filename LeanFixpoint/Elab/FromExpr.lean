@@ -1,11 +1,11 @@
 import Lean
-import LeanFixpoint.Constraint
-import LeanFixpoint.Elab
-import LeanFixpoint.Solve
-import LeanFixpoint.Qualifier
-import LeanFixpoint.Syntax
-import LeanFixpoint.Macros
-import LeanFixpoint.Tactics
+
+import LeanFixpoint.Core.Types
+import LeanFixpoint.Core.Macros
+import LeanFixpoint.Core.Fusion
+import LeanFixpoint.Elab.ToExpr
+import LeanFixpoint.Solve.Solver
+import LeanFixpoint.Solve.Qualifier
 
 /-
 Current Plan for experiment:

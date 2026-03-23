@@ -1,5 +1,5 @@
 import Lean
-import LeanFixpoint.Syntax
+import LeanFixpoint.Core.Types
 
 open Lean
 

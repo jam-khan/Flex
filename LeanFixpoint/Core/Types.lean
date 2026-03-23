@@ -85,19 +85,6 @@ deriving BEq, Repr, Inhabited, DecidableEq
   - `Lean.Expr` is too abstract for direct manipulation
   - A custom AST keeps the prototype simple while still supporting
     elaboration to `Lean.Expr` (see `Elab.lean`)
-
-  ### Expression Forms
-
-  | Constructor | Example | Description |
-  |-------------|---------|-------------|
-  | `.var x` | `x` | Variable reference |
-  | `.int n` | `42`, `-1` | Integer literal |
-  | `.bool b` | `true`, `false` | Boolean literal |
-  | `.arith op l r` | `x + 1` | Arithmetic: `+`, `-`, `*`, `/` |
-  | `.cmp op l r` | `x ≤ y` | Comparison: `==`, `!=`, `<`, `≤`, `>`, `≥` |
-  | `.bop op l r` | `p ∧ q` | Boolean connective: `∧`, `∨`, `→` |
-  | `.not e` | `¬p` | Negation |
-  | `.app f args` | `f(x, y)` | Uninterpreted function application |
 -/
 
 -- + | - | * | /

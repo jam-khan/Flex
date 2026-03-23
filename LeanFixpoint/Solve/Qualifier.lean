@@ -1,7 +1,7 @@
--- Qualifier.lean
-import LeanFixpoint.Syntax
-import LeanFixpoint.Subst
-import LeanFixpoint.Macros
+import LeanFixpoint.Core.Types
+import LeanFixpoint.Core.Subst
+import LeanFixpoint.Core.Macros
+import LeanFixpoint.Core.Pretty
 
 structure Qualifier where
   /-- Predicate template with placeholder variable `v` -/

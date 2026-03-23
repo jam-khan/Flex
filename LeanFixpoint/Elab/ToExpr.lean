@@ -1,6 +1,6 @@
 import Lean
-import LeanFixpoint.Syntax
-import LeanFixpoint.Constraint
+import LeanFixpoint.Core.Types
+import LeanFixpoint.Core.Fusion
 
 import Std.Data.DHashMap
 
