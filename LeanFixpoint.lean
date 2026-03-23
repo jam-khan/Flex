@@ -5,3 +5,6 @@ import LeanFixpoint.Elab
 import LeanFixpoint.Macros
 import LeanFixpoint.Qualifier
 import LeanFixpoint.Tactics
+import LeanFixpoint.Reflect.PropAST
+import LeanFixpoint.Core.Types
+import LeanFixpoint.Core.Pretty
