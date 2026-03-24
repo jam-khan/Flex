@@ -4,44 +4,9 @@ import LeanFixpoint.Core.Fusion
 
 import Std.Data.DHashMap
 
-/-!
-  # Elab.lean — Elaboration from Constraint AST to Lean.Expr
-
-  After κ-variable elimination, constraints are κ-free.
-  We elaborate them into native Lean propositions (`Lean.Expr`)
-  so they can be discharged by `grind` or `omega`.
-
-  ## Pipeline
-
-  ```
-  Constraint
-  → elim
-  → Constraint (κ-free)
-  → constraintToExpr
-  → Expr (Prop)
-  ```
-
-  ## Architecture
-
-  The elaboration is stratified:
-
-  1. `RExpr.toExpr`      : RExpr      → ReaderT VarMap MetaM Expr
-  2. `Pred.toExpr`       : Pred       → ReaderT VarMap MetaM Expr
-  3. `Constraint.toExpr` : Constraint → ReaderT VarMap MetaM Expr
-  4. `checkVC`           : Constraint → MetaM Bool
-
-  `VarMap` tracks bound variables: maps `Name → Expr` (free variables
-  introduced by `∀` binders in constraints and `∃` binders in preds).
--/
-
 open Lean Meta Elab Term Tactic
 
-/-
-  Maps our AST variable names to Lean free variables (`Expr.fvar`)
-
-  See `Std.HashMap` at
-  `https://leanprover-community.github.io/mathlib4_docs/Std/Data/HashMap/Basic.html`
--/
+--Maps our AST variable names to Lean free variables (`Expr.fvar`)
 abbrev VarMap := Std.HashMap Name Expr
 
 -- Look up a variable in an `env`, throw error if not found
@@ -50,10 +15,7 @@ def lookupVar (env : VarMap) (n : Name) : MetaM Expr := do
   | some e => return e
   | none   => throwError s!"Elab: unbound variable `{n}`"
 
-/-
-  Simple type elaboration from
-  `BaseTy` AST to `Lean.Expr`
--/
+-- `BaseTy` AST to `Lean.Expr`
 def BaseTy.toExpr : BaseTy → Expr
   | .int  => mkConst ``Int
   | .bool => mkConst ``Bool
@@ -66,8 +28,6 @@ def BaseTy.toExpr : BaseTy → Expr
   - Arithmetic becomes `HAdd.hAdd`, `HSub.hSub`, etc.
   - Comparisons become `LE.le`, `Eq`, etc. (these are `Prop`-valued)
   - Boolean connectives become `And`, `Or`, `Not`
-
-  Note: Partial as termination proof required.
 -/
 partial def RExpr.toExpr (env : VarMap) : RExpr → MetaM Expr
   | .var n =>
@@ -129,12 +89,6 @@ partial def RExpr.toExpr (env : VarMap) : RExpr → MetaM Expr
 /--
   Elaborate a predicate to a Lean `Expr` (of type `Prop`).
 
-  - `true`        → `True`
-  - `false`       → `False`
-  - `rexpr r`     → elaborate `r` (already Prop-valued for cmp/bop)
-  - `conj p₁ p₂`  → `And p₁ p₂`
-  - `disj p₁ p₂`  → `Or p₁ p₂`
-  - `exist x b p` → `∃ x : b, p`
   - `kapp`        → error (should be eliminated before elaboration)
 -/
 def Pred.toExpr (env : VarMap) : Pred → MetaM Expr
@@ -205,142 +159,10 @@ def Constraint.toExpr (env : VarMap) : Constraint → MetaM Expr
 
 
 /--
-  Try to discharge a κ-free constraint using `grind`.
-
-  Returns `true` if `grind` closes the goal, `false` otherwise.
-  Useful for testing the pipeline end-to-end.
+  Convert a solved `Pred` into a `fun (z : Int) => ...` witness expression.
 -/
-def checkVCWithGrindOmega (c : Constraint) : TermElabM Bool := do
-  let prop ← c.toExpr {}
-  let propTy ← inferType prop
-  unless (← isDefEq propTy (mkSort .zero)) do
-    throwError s!"checkVC: elaborated expression is not a Prop"
-  let mvar ← mkFreshExprMVar (some prop) (kind := MetavarKind.syntheticOpaque)
-  let mvarId := mvar.mvarId!
-  try
-    let goals ← Tactic.run mvarId do
-      evalTactic (← `(tactic| first | grind | omega))
-    return goals.isEmpty
-  catch _ =>
-    return Bool.false
-
--- Simple string representation of a constraint's elaborated form
-def ppConstraintExpr (c : Constraint) : MetaM Format := do
-  let e ← c.toExpr {}
-  ppExpr e
-
-def solveAndCheckConstraint (c : Constraint) : TermElabM Unit := do
-    let kvars : List KVar := c.kvars.eraseDups
-    if kvars.isEmpty then
-      logInfo m!"No κ-variables found, constraint is already a VC."
-    else
-      logInfo m!"κ-variables: {kvars.map toString}"
-
-    let mut eliminated := c
-    for κ in kvars do
-      let sol := eliminated.sol1 κ
-      logInfo m!"  {κ.name}({κ.params.map toString}) = {toString sol}"
-      eliminated := eliminated.elim1 κ
-
-    logInfo m!"Eliminated constraint:\n{toString eliminated}"
-
-    let prop ← eliminated.toExpr {}
-    let fmt ← ppExpr prop
-    logInfo m!"VC: {fmt}"
-
-    let ok ← checkVCWithGrindOmega eliminated
-    if ok then
-      logInfo m!"✅ VC discharged successfully"
-    else
-      logWarning m!"❌ VC could not be discharged by omega or grind"
-
-/--
-  `#solve_constraint c` solves for all κ-variables in constraint `c`,
-  eliminates them, and tries to discharge the resulting VC with omega/grind.
-
-  Pipeline:
-  - Infer κ-variables via `c.kvars`
-  - Solve each κ via `sol1` and eliminate via `elim1`
-  - Elaborate the κ-free constraint to a Prop
-  - Discharge with `omega` or `grind`
-
-  Usage:
-```
-  #solve_constraint exConstraint
-```
-
-  Output:
-```
-  κ-variables: [κ2, κk]
-    κ2([k]) = 0 ≤ ν ∧ k ≤ ν
-    κk([k]) = ⊤
-  Eliminated constraint: ...
-  VC: ∀ k : Int, k < 0 → 0 ≤ 0 ∧ k ≤ 0
-  ✅ VC discharged successfully
-```
--/
-elab "#solve_constraint " t:term : command => do
-  Lean.Elab.Command.liftTermElabM do
-    let elabExprC ← Lean.Elab.Term.elabTerm t (some (mkConst ``Constraint))
-    let elabExprC ← instantiateMVars elabExprC
-    let c ← try
-      unsafe Lean.Meta.evalExpr Constraint (mkConst ``Constraint) elabExprC
-    catch _ =>
-      throwError s!"Reflection failed"
-    solveAndCheckConstraint c
-
-/--
-  `checkFlatUnderAssignment` takes a FlatConstraint, and
-  an assignment, which is a mapping from `kvars` to `predicates`.
-  Then, it iteratively eliminates each `kvar` using `elimStar`
-  in the constraint.
-
-  After iteratively eliminating all `kvar`,
-  it checks if result is valid under assignment
--/
-def checkFlatUnderAssignment
-    (fc : FlatConstraint)
-    (assignment : Std.HashMap KVar Pred)
-    : TermElabM Bool := do
-  let mut c := fc.val
-  for (κ, sol) in assignment.toList do
-    c := c.elimStar κ sol
-  checkVCWithGrindOmega c
-
-section Test
-
--- Using mixed test from `Constraint.lean`
-#eval do
-  let flats := mixedAfterAcyclic.flat
-  IO.println s!"Number of flat constraints: {flats.length}"
-  for (i, fc) in flats.toArray.mapIdx (·, ·) |>.toList do
-    IO.println s!"\n--- Flat constraint {i} ---"
-    IO.println (toString fc.val)
-    IO.println s!"  head kvars: {fc.head.kvars.map toString}"
-    IO.println s!"  body kvars: {(fc.body.map Pred.kvars).flatten.map toString}"
-
-elab "#test_manual_assignment" : command => do
-  Lean.Elab.Command.liftTermElabM do
-    let flats := mixedAfterAcyclic.flat
-
-    -- Build assignment: κd ↦ (0 ≤ z)
-    let sol : Pred := .rexpr (.cmp .le (.int 0) (.var `z))
-    let mut assignment : Std.HashMap KVar Pred := {}
-    assignment := assignment.insert kd sol
-    -- Check only the κd-related flat constraints
-    let kdFlats := flats.filter fun fc =>
-      fc.kvars.any (· == kd)
-
-    logInfo m!"κd-related flat constraints: {kdFlats.length}"
-
-    for fc in kdFlats do
-      logInfo m!"Checking: {toString fc.val}"
-      let ok ← checkFlatUnderAssignment fc assignment
-      if ok then
-        logInfo m!"  ✅ valid"
-      else
-        logWarning m!"❌ invalid"
-
-#test_manual_assignment
-
-end Test
+def solToWitnessExpr (sol : Pred) (paramName : Name := `z) : MetaM Expr := do
+  withLocalDeclD paramName (mkConst ``Int) fun zFvar => do
+    let env : VarMap := ({} : VarMap).insert paramName zFvar
+    let body ← sol.toExpr env
+    mkLambdaFVars #[zFvar] body

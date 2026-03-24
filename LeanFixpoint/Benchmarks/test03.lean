@@ -2,14 +2,7 @@
   Liquid Haskell example
   `https://github.com/ucsd-progsys/liquid-fixpoint/blob/develop/tests/horn/pos/test03.smt2`
 -/
-
-import Lean
-import LeanFixpoint.Constraint
-import LeanFixpoint.Elab
-import LeanFixpoint.Solve
-import LeanFixpoint.Qualifier
-import LeanFixpoint.Syntax
-import LeanFixpoint.Macros
+import LeanFixpoint.Tactic.Command
 
 def k0 : KVar := { name := `κ0, params := [`v] }
 def lhTest1 : Constraint :=

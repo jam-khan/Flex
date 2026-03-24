@@ -1,11 +1,5 @@
-import Lean
-import LeanFixpoint.Constraint
-import LeanFixpoint.Elab
-import LeanFixpoint.Solve
-import LeanFixpoint.Qualifier
-import LeanFixpoint.Syntax
-import LeanFixpoint.Macros
-import LeanFixpoint.Tactics
+import LeanFixpoint.Tactic.Command
+
 
 def kappa : KVar := { name := `κ, params := [`z] }
 

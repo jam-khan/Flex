@@ -1,7 +1,8 @@
-import LeanFixpoint.Constraint
-import LeanFixpoint.Elab
-import LeanFixpoint.Syntax
--- import LeanFixpoint.Macros
+import Lean
+
+import LeanFixpoint.Tactic.SolveFixpoint
+import LeanFixpoint.Tactic.Command
+
 import Lean
 open Lean Meta Elab Term Tactic
 

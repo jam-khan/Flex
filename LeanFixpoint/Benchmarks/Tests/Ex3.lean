@@ -1,7 +1,5 @@
-import LeanFixpoint.Constraint
-import LeanFixpoint.Elab
-import LeanFixpoint.Syntax
-import LeanFixpoint.Macros
+import LeanFixpoint.Tactic.Command
+
 
 /-!
   # Example 3 — Higher-Order Composition (Local Refinement Typing, §2)

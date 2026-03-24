@@ -1,7 +1,5 @@
-import LeanFixpoint.Constraint
-import LeanFixpoint.Elab
-import LeanFixpoint.Syntax
-import LeanFixpoint.Macros
+import LeanFixpoint.Tactic.Command
+
 
 /-!
   # Example: Cyclic κ-variable (should fail elimination)

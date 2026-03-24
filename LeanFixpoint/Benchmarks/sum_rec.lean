@@ -2,14 +2,7 @@
   Liquid Haskell example
   `https://github.com/ucsd-progsys/liquid-fixpoint/blob/develop/tests/horn/pos/sum-rec.smt2`
 -/
-
-import Lean
-import LeanFixpoint.Constraint
-import LeanFixpoint.Elab
-import LeanFixpoint.Solve
-import LeanFixpoint.Qualifier
-import LeanFixpoint.Syntax
-import LeanFixpoint.Macros
+import LeanFixpoint.Tactic.Command
 
 def k1 : KVar := { name := `κ1, params := [`v, `n] }
 

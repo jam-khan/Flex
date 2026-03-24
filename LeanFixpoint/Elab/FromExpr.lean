@@ -7,38 +7,12 @@ import LeanFixpoint.Elab.ToExpr
 import LeanFixpoint.Solve.Solver
 import LeanFixpoint.Solve.Qualifier
 
-/-
-Current Plan for experiment:
-
-  1. Write a Prop for Example 2.
-  2. Reduce to Exp and investigate
-  3. Get an elaborator from Prop (Restricted Exp)
-  to Constraint
-  4. Connect it to remaining `#solve_constraint`
-  5. Get example working end-to-end for example 1
--/
-
 open Lean Elab Meta Command Tactic
 
 -- Maps fvar ids to names (for κx, κy, x, n, etc.)
 abbrev FVarMap := Std.HashMap FVarId Name
-
 -- Tracking set of `kappa` variables from `Prop` existentials
 abbrev KVarSet := Std.HashSet FVarId
-
-
-elab "#inspect_prop" t:term : command => do
-  liftTermElabM do
-    let expr ← Term.elabTerm t (some (mkSort levelZero))
-
-    let reduced ← reduce expr
-    logInfo m!"Reduced Expr:\n{reduced}"
-    dbg_trace "Reduced raw: {toString reduced}"   -- raw, no pretty print
-
-    let expr ← instantiateMVars expr
-    let whnfExpr ← whnf expr
-    logInfo m!"WHNF:\n{whnfExpr}"
-    dbg_trace "WHNF raw: {toString whnfExpr}"     -- raw, no pretty print
 
 inductive PropAST
   | tt   : PropAST
@@ -186,180 +160,37 @@ partial def toConstraint (fvars : FVarMap) (kvars : KVarSet)
   match ast with
   | .and l r =>
     return .conj (← toConstraint fvars kvars l) (← toConstraint fvars kvars r)
-
-  -- ∃ κ : Int → Prop, body
-  -- Existentials bind κ-variables; we
-  -- keep track of κ-variables when an existential
-  -- is encountered, and continue recursing
-  -- inside the body.
-  | .exists_ name _ty body =>
+  | .exists_ _ _ty body =>
     toConstraint fvars kvars body
-
-  -- ∀ x : Int, (guard → body) → Constraint.imp x .int guard body
-  -- standard horn clause form: ∀ x : b. p ⇒ c
-  -- You computed guardPred but used .tru — use guardPred!
   | .forall_ name _ty (.imp guard body) =>
-    let guardPred ← toPred fvars kvars guard
-    let bodyC ← toConstraint fvars kvars body
-    return .imp name .int guardPred bodyC
-
-  -- Add the missing no-guard forall case
+      let guardPred ← toPred fvars kvars guard
+      let bodyC ← toConstraint fvars kvars body
+      return .imp name .int guardPred bodyC
   | .forall_ name _ty body =>
     let bodyC ← toConstraint fvars kvars body
     return .imp name .int .tru bodyC
-
-  -- leaf: just a predicate
   | other =>
     return .pred (← toPred fvars kvars other)
 
-where toPred (fvars : FVarMap) (kvars : KVarSet)
+  where toPred (fvars : FVarMap) (kvars : KVarSet)
     (ast : PropAST) : MetaM Pred := do
-  match ast with
-  | .tt => return .tru
-  | .ff => return .fls
-  | .eq lhs rhs =>
-    return .rexpr (.cmp .eq (← exprToRExpr fvars lhs) (← exprToRExpr fvars rhs))
-  | .le lhs rhs =>
-    return .rexpr (.cmp .le (← exprToRExpr fvars lhs) (← exprToRExpr fvars rhs))
-  -- κ applied to argument: e.g. κx(v)
-  -- fn is the fvar for κ, arg is the fvar for the argument
-  | .app fn arg =>
-    let κName   := (Std.HashMap.get? fvars fn.fvarId!).getD `unknown
-    let argName := (Std.HashMap.get? fvars arg.fvarId!).getD `unknown
-    let kvar : KVar := { name := κName, params := [`z] }  -- canonical param
-    return .kapp kvar [argName]
-  | .and l r  =>
-    return .conj (← toPred fvars kvars l) (← toPred fvars kvars r)
-  | .nonNeg arg =>
-    return .rexpr (.cmp .le (.int 0) (← exprToRExpr fvars arg))
-  | .neg _p   =>
-    throwError "toPred: negation not yet supported"
-  | _ => throwError "toPred: unhandled: {repr ast}"
-
-elab "#translate_and_solve" t:term : command => do
-  liftTermElabM do
-    let expr ← Term.elabTerm t (some (mkSort levelZero))
-    let reduced ← reduce expr
-
-    -- Phase 1: Expr → PropAST
-    let fvarsRef ← IO.mkRef ({} : FVarMap)
-    let kvarsRef ← IO.mkRef ({} : KVarSet)
-    let propAST ← toPropASTWithTracking fvarsRef kvarsRef reduced
-    let fvarMap ← fvarsRef.get
-    let kvarSet ← kvarsRef.get
-
-    -- Phase 2: PropAST → Constraint
-    let constraint ← toConstraint fvarMap kvarSet propAST
-    logInfo m!"Translated Constraint:\n{toString constraint}"
-
-    -- Phase 3: Solve
-    solveAndCheckConstraint constraint
-
-/--
-  Convert a solved `Pred` into a `fun (z : Int) => ...` witness expression.
--/
-def solToWitnessExpr (sol : Pred) (paramName : Name := `z) : MetaM Expr := do
-  withLocalDeclD paramName (mkConst ``Int) fun zFvar => do
-    let env : VarMap := ({} : VarMap).insert paramName zFvar
-    let body ← sol.toExpr env
-    mkLambdaFVars #[zFvar] body
-
-elab "solve_fixpoint" : tactic => withMainContext do
-  let goal ← getMainGoal
-  let goalType ← goal.getType
-  let reduced ← reduce goalType
-
-  -- Translate Prop → PropAST → Constraint
-  let fvarsRef ← IO.mkRef ({} : FVarMap)
-  let kvarsRef ← IO.mkRef ({} : KVarSet)
-  let propAST ← toPropASTWithTracking fvarsRef kvarsRef reduced
-  let fvarMap ← fvarsRef.get
-  let kvarSet ← kvarsRef.get
-  let constraint ← toConstraint fvarMap kvarSet propAST
-
-  -- Solve all κ-variables
-  let kvars := constraint.kvars.eraseDups
-  let mut solutions : List (Name × Pred) := []
-  let mut curr := constraint
-  for κ in kvars do
-    let sol := curr.sol1 κ
-    solutions := solutions ++ [(κ.name, sol)]
-    curr := curr.elim1 κ
-
-  for (_κName, sol) in solutions do
-    let witness ← solToWitnessExpr sol
-    let witnessSyn ← PrettyPrinter.delab witness
-    evalTactic (← `(tactic| refine ⟨$witnessSyn, ?_⟩))
-
-  -- Try simp first to simplify, then try to fully discharge
-  try
-    evalTactic (← `(tactic| simp_all))
-  catch _ => pure ()
-
-  -- If goals remain, try grind or omega
-  let goals ← getGoals
-  if !goals.isEmpty then
-    try
-      evalTactic (← `(tactic| first | grind | omega))
-    catch _ => pure ()
-
-
-def ex1Constraint : Prop :=
-  ∃ κ : Int → Prop,
-    ∀ x : Int, 0 ≤ x →
-      (∀ ν : Int, ν = x - 1 → κ ν)
-    ∧ (∀ y : Int, κ y →
-        ∀ ν : Int, ν = y + 1 → 0 ≤ ν)
-
-theorem ex1Proof :
-  ∃ κ : Int → Prop,
-    ∀ x : Int, 0 ≤ x →
-      (∀ ν : Int, ν = x - 1 → κ ν)
-    ∧ (∀ y : Int, κ y →
-        ∀ ν : Int, ν = y + 1 → 0 ≤ ν) := by
-  -- simp
-  solve_fixpoint
-
-def ex2Constraint : Prop :=
-  ∃ κx : Int → Prop, ∃ κy : Int → Prop,
-    ∀ x : Int, 0 ≤ x →
-      ∀ n : Int, n = x - 1 →
-        ∀ p : Int, p = x + 1 →
-          (∀ ν : Int, ν = n → κx ν)
-        ∧ (∀ ν : Int, ν = p → κy ν)
-        ∧ (∀ ν : Int, κx ν → κy ν)
-        ∧ (∀ y : Int, κy y →
-            ∀ ν : Int, ν = y + 1 → 0 ≤ ν)
-
-
-theorem ex2Proof : ex2Constraint := by
-  unfold ex2Constraint
-  -- simp
-  exists fun z => ∃ x : Int, 0 ≤ x ∧ ∃ n : Int, n = x - 1 ∧ ∃ ν : Int, ν = n ∧ z = ν
-  exists fun z => ∃ x : Int, 0 ≤ x ∧ ∃ n : Int, n = x - 1 ∧ ∃ p : Int, p = x + 1 ∧
-    ((∃ ν : Int, ν = p ∧ z = ν) ∨ (∃ ν : Int, (∃ α : Int, α = n ∧ ν = α) ∧ z = ν))
-  simp
-  intro x hx
-  refine ⟨?_, ?_, ?_, ?_⟩
-  · assumption
-  · exists x
-    grind
-  · intro _ x' _ _
-    exists x'
-    grind
-  · grind
-
-#translate_and_solve ex2Constraint
-
-def ex3Constraint : Prop :=
-  ∃ κa : Int → Prop, ∃ κb : Int → Prop, ∃ κc : Int → Prop,
-    (∀ a : Int, κa a → ∀ ν : Int, ν = a - 1 → κb ν)
-  ∧ (∀ b : Int, κb b → ∀ ν : Int, ν = b + 1 → κc ν)
-  ∧ (∀ ν : Int, 0 ≤ ν → κa ν)
-  ∧ (∀ ν : Int, κc ν → 0 ≤ ν)
-
-theorem ex3Proof : ex3Constraint := by
-  unfold ex3Constraint
-  solve_fixpoint
-
-#translate_and_solve ex3Constraint
+    match ast with
+    | .tt => return .tru
+    | .ff => return .fls
+    | .eq lhs rhs =>
+        return .rexpr (.cmp .eq (← exprToRExpr fvars lhs) (← exprToRExpr fvars rhs))
+    | .le lhs rhs =>
+        return .rexpr (.cmp .le (← exprToRExpr fvars lhs) (← exprToRExpr fvars rhs))
+    | .app fn arg =>
+        let κName   := (Std.HashMap.get? fvars fn.fvarId!).getD `unknown
+        let argName := (Std.HashMap.get? fvars arg.fvarId!).getD `unknown
+        let kvar : KVar := { name := κName, params := [`z] }  -- canonical param
+        return .kapp kvar [argName]
+    | .and l r  =>
+        return .conj (← toPred fvars kvars l) (← toPred fvars kvars r)
+    | .nonNeg arg =>
+        return .rexpr (.cmp .le (.int 0) (← exprToRExpr fvars arg))
+    | .neg _p   =>
+        throwError "toPred: negation not yet supported"
+    | _ =>
+        throwError "toPred: unhandled: {repr ast}"

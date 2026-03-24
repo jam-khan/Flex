@@ -1,4 +1,5 @@
 import Lean
+
 import LeanFixpoint.Core.Types
 import LeanFixpoint.Core.Subst
 import LeanFixpoint.Core.Macros
@@ -6,6 +7,7 @@ import LeanFixpoint.Core.Pretty
 import LeanFixpoint.Core.Fusion
 import LeanFixpoint.Solve.Qualifier
 import LeanFixpoint.Elab.ToExpr
+import LeanFixpoint.Tactic.Grind
 
 open Lean Meta Elab Term Tactic
 

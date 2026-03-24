@@ -1,10 +1,5 @@
-import Lean
-import LeanFixpoint.Constraint
-import LeanFixpoint.Elab
-import LeanFixpoint.Solve
-import LeanFixpoint.Qualifier
-import LeanFixpoint.Syntax
-import LeanFixpoint.Macros
+import LeanFixpoint.Tactic.Command
+
 
 /-!
   # Example: Factorial — acyclic setup + cyclic recursion + output property

@@ -2,10 +2,7 @@
   Liquid Haskell test
   `https://github.com/ucsd-progsys/liquid-fixpoint/blob/develop/tests/horn/pos/abs02-re.smt2`
 -/
-import LeanFixpoint.Constraint
-import LeanFixpoint.Elab
-import LeanFixpoint.Syntax
-import LeanFixpoint.Macros
+import LeanFixpoint.Tactic.Command
 
 def lhGround : Constraint :=
   c{  [∀ x : int . true ⇒

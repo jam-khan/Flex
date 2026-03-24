@@ -1,10 +1,4 @@
-import LeanFixpoint.Constraint
-import LeanFixpoint.Elab
-import LeanFixpoint.Syntax
-import LeanFixpoint.Macros
-import LeanFixpoint.Solve
-
-/-!
+/-
   # LiquidHaskell Test: numeric-sort-01
 
   Same sum function but with `numeric Apple` type alias.
@@ -23,6 +17,7 @@ import LeanFixpoint.Solve
 
   Source: `https://github.com/ucsd-progsys/liquid-fixpoint/blob/develop/tests/horn/pos/numeric-sort-01.smt2`
 -/
+import LeanFixpoint.Tactic.Command
 
 def k1_ns01 : KVar := { name := `κ1, params := [`v] }
 

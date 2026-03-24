@@ -1,10 +1,4 @@
-import LeanFixpoint.Constraint
-import LeanFixpoint.Elab
-import LeanFixpoint.Syntax
-import LeanFixpoint.Macros
-import LeanFixpoint.Solve
-
-/-!
+/-
   LiquidHaskell Test: sum with type alias (Apple = Int)
 ```
   sum n = if n ≤ 0 then 0 else n + sum (n - 1)
@@ -14,6 +8,7 @@ import LeanFixpoint.Solve
 
   `https://github.com/ucsd-progsys/liquid-fixpoint/blob/develop/tests/horn/pos/numeric-sort-00.smt2`
 -/
+import LeanFixpoint.Tactic.Command
 
 def kApple : KVar := { name := `κ1, params := [`v] }
 
