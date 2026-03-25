@@ -1,4 +1,7 @@
+import Lean
 import LeanFixpoint.Core.Types
+
+open Lean
 
 partial def RExpr.subst (target : Var) (val : RExpr) : RExpr → RExpr
   | .var x        => if x == target then val else .var x
@@ -21,7 +24,7 @@ partial def Pred.substVar (target : Var) (replacement : Var) : Pred → Pred
         if x == target then .exist x b p                -- shadowed, stop
         else if x == replacement then
           -- Alpha-rename to avoid capture
-          let x' := x ++ `_α
+          let x' := Name.mkStr1 s!"{x}_α"
           let p' := Pred.substVar x x' p
           .exist x' b (Pred.substVar target replacement p')
         else .exist x b (Pred.substVar target replacement p)
