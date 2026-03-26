@@ -8,3 +8,7 @@ name = "LeanFixpoint"
 [[lean_exe]]
 name = "meta-refinement-types"
 root = "Main"
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
