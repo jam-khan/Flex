@@ -1,5 +1,6 @@
 import Lean
 
+import Aesop
 import LeanFixpoint.Core.Types
 import LeanFixpoint.Core.Macros
 import LeanFixpoint.Core.Fusion
@@ -9,6 +10,61 @@ import LeanFixpoint.Solve.Qualifier
 import LeanFixpoint.Elab.FromExpr
 
 open Lean Elab Meta Command Tactic
+
+private def attemptTactic (t : TacticM Unit) : TacticM Bool :=
+  tryCatch (do t; pure Bool.true) (fun _ => pure Bool.false)
+
+private def tryClosers : TacticM Bool := do
+  let b ← attemptTactic (evalTactic (← `(tactic| grind)))
+  match b with
+  | Bool.true => pure Bool.true
+  | Bool.false =>
+  let b ← attemptTactic (evalTactic (← `(tactic| aesop)))
+  match b with
+  | Bool.true => pure Bool.true
+  | Bool.false =>
+  let b ← attemptTactic (evalTactic (← `(tactic| omega)))
+  match b with
+  | Bool.true => pure Bool.true
+  | Bool.false =>
+  let b ← attemptTactic (evalTactic (← `(tactic| (constructor <;> grind))))
+  match b with
+  | Bool.true => pure Bool.true
+  | Bool.false =>
+  let b ← attemptTactic (evalTactic (← `(tactic| (simp_all; grind))))
+  match b with
+  | Bool.true => pure Bool.true
+  | Bool.false => pure Bool.false
+private partial def closeLoop : TacticM Unit := do
+  let goals ← getGoals
+  match goals with
+  | [] => pure ()
+  | g :: restGoals =>
+    let ty ← whnfR (← g.getType)
+    if ty.isForall then
+      evalTactic (← `(tactic| intro _))
+      closeLoop
+    else if ty.isAppOfArity ``And 2 then
+      evalTactic (← `(tactic| and_intros))
+      closeLoop
+    else
+      let closed ← tryClosers
+      if closed then
+        closeLoop
+      else
+        setGoals restGoals
+        closeLoop
+        let remaining ← getGoals
+        setGoals (g :: remaining)
+
+private def closeResidualGoals : TacticM Unit := do
+  let goals ← getGoals
+  if goals.isEmpty then pure ()
+  else
+    let _ ← attemptTactic (evalTactic (← `(tactic| simp_all)))
+    let goals ← getGoals
+    if goals.isEmpty then pure ()
+    else closeLoop
 
 elab "solve_fixpoint" : tactic => withMainContext do
   let goal ← getMainGoal
@@ -35,12 +91,4 @@ elab "solve_fixpoint" : tactic => withMainContext do
     let witnessSyn ← PrettyPrinter.delab witness
     evalTactic (← `(tactic| refine ⟨$witnessSyn, ?_⟩))
 
-  -- try
-  --   evalTactic (← `(tactic| simp_all))
-  -- catch _ => pure ()
-
-  -- let goals ← getGoals
-  -- if !goals.isEmpty then
-  --   try
-  --     evalTactic (← `(tactic| first | grind | omega))
-  --   catch _ => pure ()
+  closeResidualGoals
