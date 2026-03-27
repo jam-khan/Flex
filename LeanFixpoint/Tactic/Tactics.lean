@@ -75,8 +75,6 @@ elab "trivialk" : tactic => trivialkCore
 macro "zapt" : tactic => `(tactic| (trivialk; simp; zap))
 
 
-
-
 open Lean Elab Tactic Meta in
 private partial def splitAndsAllCore : TacticM Unit := do
   let ctx ← getLCtx
