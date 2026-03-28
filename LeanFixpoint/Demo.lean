@@ -7,25 +7,6 @@ import LeanFixpoint.Elab.ToExpr
 import LeanFixpoint.Tactic.SolveFixpoint
 import LeanFixpoint.Tactic.Command
 
--- open Lean Elab Tactic Meta Grind in
--- elab "grindx" : tactic => do
---   let params : Grind.Params := {
---     config    := default
---     norm      := default
---     normProcs := #[]
---   }
---   -- Process ALL current goals, not just the first
---   let goals ← getGoals
---   for mvarId in goals do
---     let result ← GrindM.run (params := params) do
---       let goal ← mkGoal mvarId
---       let goal ← goal.internalizeAll
---       goal.grind
---     match result with
---     | GrindResult.closed   => pure ()
---     | GrindResult.failed _ => throwError "grindx: failed to close goal {mvarId}"
---   pruneSolvedGoals
-
 -- Step 1: Get more and more complicated examples than just simple ones.
 def ex1 : Prop :=
   ∃ κ : Int → Prop,
@@ -246,4 +227,130 @@ def ex12 : Prop :=
 #translate_and_solve ex12
 
 theorem ex12Proof : ex12 := by
+  solve_fixpoint
+
+-- ex13: 3-κ chain with nested binders and cross-flow
+-- Given 0 ≤ x, let a = x-1, b = x+1:
+--   a → κ1, b → κ2, κ1 flows into κ2 (cross-flow)
+--   κ2 → (+1) → κ3, κ3 must be ≥ 0
+-- κ1(z) = 0 ≤ z+1, κ2(z) = 0 ≤ z+1 (disjunction of b and κ1), κ3(z) = 0 ≤ z
+def ex13 : Prop :=
+  ∃ κ1 : Int → Prop, ∃ κ2 : Int → Prop, ∃ κ3 : Int → Prop,
+    ∀ x : Int,
+      0 ≤ x →
+      ∀ a : Int,
+        a = x - 1 →
+        ∀ b : Int,
+          b = x + 1 →
+          (∀ ν : Int, ν = a → κ1 ν)
+        ∧ (∀ ν : Int, ν = b → κ2 ν)
+        ∧ (∀ v : Int, κ1 v → κ2 v)
+        ∧ (∀ y : Int, κ2 y →
+            ∀ ν : Int, ν = y + 1 → κ3 ν)
+        ∧ (∀ z : Int, κ3 z → 0 ≤ z)
+
+#translate_and_solve ex13
+
+theorem ex13Proof : ex13 := by
+  solve_fixpoint
+
+-- ex14: 4-κ chain with nested binders, cross-flow, and merge
+-- Given 0 ≤ x, let a = x-1, b = x+1, c = x:
+--   a → κ1, b → κ2, κ1 flows into κ2 (cross-flow)
+--   κ2 → (+1) → κ3, also c → κ3 directly (merge at κ3)
+--   κ3 → (+2) → κ4, κ4 must be ≥ 0
+-- κ1(z) = 0 ≤ z+1
+-- κ2(z) = 0 ≤ z+1 (disjunction: b gives 0≤z-1, κ1 gives 0≤z+1; weaker wins)
+-- κ3(z) = 0 ≤ z (merge: κ2 path gives 0≤z, c path gives 0≤z; both yield 0≤z)
+-- κ4(z) = 0 ≤ z (from w+2 where 0≤w, z≥2≥0)
+def ex14 : Prop :=
+  ∃ κ1 : Int → Prop, ∃ κ2 : Int → Prop,
+  ∃ κ3 : Int → Prop, ∃ κ4 : Int → Prop,
+    ∀ x : Int,
+      0 ≤ x →
+      ∀ a : Int,
+        a = x - 1 →
+        ∀ b : Int,
+          b = x + 1 →
+          ∀ c : Int,
+            c = x →
+            (∀ ν : Int, ν = a → κ1 ν)
+          ∧ (∀ ν : Int, ν = b → κ2 ν)
+          ∧ (∀ v : Int, κ1 v → κ2 v)
+          ∧ (∀ y : Int, κ2 y →
+              ∀ ν : Int, ν = y + 1 → κ3 ν)
+          ∧ (∀ ν : Int, ν = c → κ3 ν)
+          ∧ (∀ w : Int, κ3 w →
+              ∀ ν : Int, ν = w + 2 → κ4 ν)
+          ∧ (∀ z : Int, κ4 z → 0 ≤ z)
+
+#translate_and_solve ex14
+
+theorem ex14Proof : ex14 := by
+  solve_fixpoint
+
+-- ex_stress: 5-κ extreme test — chain + diamond + 3-way merge + cross-flow + nested binders
+--
+-- Topology (10 conjuncts):
+--   κ1: 2-way merge        (a=x-1) and (b=x+2) both feed κ1
+--   κ2: chain from κ1      κ1(v) → v-1 → κ2
+--   κ3: 3-way merge        κ2(w) via +1, κ1 cross-flow, direct x → κ3
+--   κ4: chain from κ3      κ3(u) → u+1 → κ4
+--   κ5: 2-way merge        κ4 identity + κ3 via +2 → κ5
+--   consumer: κ5(s) ⇒ 0 ≤ s
+--
+-- Dependency graph (DAG, no cycles):
+--   κ1 ──→ κ2 ──→ κ3 ──→ κ4 ──→ κ5 ──→ 0 ≤ s
+--   κ1 ─────────→ κ3 ─────────→ κ5
+--          (cross-flow)    (diamond)
+--              x ──→ κ3
+--             (direct)
+--
+-- Solutions (strongest refinements):
+--   κ1(z) ≡ 0 ≤ z + 1     weakest producer: a = x-1
+--   κ2(z) ≡ 0 ≤ z + 2     from κ1(v) with v = z+1: 0 ≤ (z+1)+1
+--   κ3(z) ≡ 0 ≤ z + 1     three paths all give z ≥ -1
+--     path κ2+1: w=z-1, 0≤w+2 → 0≤z+1 ✓
+--     path κ1:   v=z,   0≤v+1 → 0≤z+1 ✓
+--     path x:    z=x,   0≤x   → 0≤z   ✓ (strictly stronger, disjunction stays 0≤z+1)
+--   κ4(z) ≡ 0 ≤ z         from κ3(u) with z=u+1: 0≤u+1 → 0≤z
+--   κ5(z) ≡ 0 ≤ z         both paths give z ≥ 0
+--     path κ4:   t=z,   0≤t → 0≤z       ✓
+--     path κ3+2: u=z-2, 0≤u+1 → 0≤z-1 → z≥1≥0 ✓
+--
+-- Final: κ5(s) ⇒ 0 ≤ s  →  0 ≤ s ⇒ 0 ≤ s  ✓
+def ex_stress : Prop :=
+  ∃ κ1 : Int → Prop, ∃ κ2 : Int → Prop,
+  ∃ κ3 : Int → Prop, ∃ κ4 : Int → Prop,
+  ∃ κ5 : Int → Prop,
+    ∀ x : Int,
+      0 ≤ x →
+      ∀ a : Int,
+        a = x - 1 →
+        ∀ b : Int,
+          b = x + 2 →
+          -- κ1: 2-way merge
+          (∀ ν : Int, ν = a → κ1 ν)
+        ∧ (∀ ν : Int, ν = b → κ1 ν)
+          -- κ2: chain from κ1 via -1
+        ∧ (∀ v : Int, κ1 v →
+            ∀ ν : Int, ν = v - 1 → κ2 ν)
+          -- κ3: 3-way merge (κ2 chain, κ1 cross-flow, direct)
+        ∧ (∀ w : Int, κ2 w →
+            ∀ ν : Int, ν = w + 1 → κ3 ν)
+        ∧ (∀ v : Int, κ1 v → κ3 v)
+        ∧ (∀ ν : Int, ν = x → κ3 ν)
+          -- κ4: chain from κ3 via +1
+        ∧ (∀ u : Int, κ3 u →
+            ∀ ν : Int, ν = u + 1 → κ4 ν)
+          -- κ5: diamond merge (κ4 identity + κ3 via +2)
+        ∧ (∀ t : Int, κ4 t → κ5 t)
+        ∧ (∀ u : Int, κ3 u →
+            ∀ ν : Int, ν = u + 2 → κ5 ν)
+          -- consumer
+        ∧ (∀ s : Int, κ5 s → 0 ≤ s)
+
+#translate_and_solve ex_stress
+
+theorem ex_stressProof : ex_stress := by
   solve_fixpoint
