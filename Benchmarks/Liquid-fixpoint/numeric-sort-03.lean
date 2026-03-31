@@ -7,7 +7,7 @@
 
   Source: `https://github.com/ucsd-progsys/liquid-fixpoint/blob/develop/tests/horn/pos/numeric-sort-02.smt2`
 -/
-import LeanFixpoint.Tactic.Command
+import LeanFixpoint
 
 def k1_ns02 : KVar := { name := `κ1, params := [`v, `z] }
 

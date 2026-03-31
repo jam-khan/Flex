@@ -2,7 +2,7 @@
   Liquid Haskell test
   `https://github.com/ucsd-progsys/liquid-fixpoint/blob/develop/tests/horn/pos/abs02-re.smt2`
 -/
-import LeanFixpoint.Tactic.Command
+import LeanFixpoint
 
 def lhGround : Constraint :=
   c{  [∀ x : int . true ⇒
@@ -14,4 +14,4 @@ def lhGround : Constraint :=
         ∀ t1 : int . t1 ≥ 0 ⇒
           ∀ v : int . v ≥ 0 ⇒ v ≥ 0] }
 
--- #solve_constraint lhGround
+#solve_constraint lhGround

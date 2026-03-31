@@ -8,7 +8,7 @@
 
   `https://github.com/ucsd-progsys/liquid-fixpoint/blob/develop/tests/horn/pos/numeric-sort-00.smt2`
 -/
-import LeanFixpoint.Tactic.Command
+import LeanFixpoint
 
 def kApple : KVar := { name := `κ1, params := [`v] }
 

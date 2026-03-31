@@ -2,7 +2,7 @@
   Liquid Haskell Test
   `https://github.com/ucsd-progsys/liquid-fixpoint/blob/develop/tests/horn/pos/let-binding00.smt2`
 -/
-import LeanFixpoint.Tactic.Command
+import LeanFixpoint
 
 def lhNonlinear : Constraint :=
   c{ ∀ x : int . true ⇒

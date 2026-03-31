@@ -1,7 +1,6 @@
 import Lean
 
-import LeanFixpoint.Tactic.SolveFixpoint
-import LeanFixpoint.Tactic.Command
+import LeanFixpoint
 
 /-!
   # Example 1 — Local Refinement Typing

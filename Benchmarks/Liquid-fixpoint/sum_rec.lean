@@ -2,7 +2,7 @@
   Liquid Haskell example
   `https://github.com/ucsd-progsys/liquid-fixpoint/blob/develop/tests/horn/pos/sum-rec.smt2`
 -/
-import LeanFixpoint.Tactic.Command
+import LeanFixpoint
 
 def k1 : KVar := { name := `κ1, params := [`v, `n] }
 

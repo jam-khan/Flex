@@ -1,4 +1,4 @@
-import LeanFixpoint.Tactic.Command
+import LeanFixpoint
 
 
 

@@ -1,5 +1,5 @@
 import Lean
-import LeanFixpoint.Tactic.SolveFixpoint
+import LeanFixpoint
 
 noncomputable def fib_fib : Int -> Int := sorry
 

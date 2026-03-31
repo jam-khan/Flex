@@ -8,6 +8,9 @@ name = "LeanFixpoint"
 [[lean_lib]]
 name = "Demo"
 
+[[lean_lib]]
+name = "Benchmarks"
+
 [[lean_exe]]
 name = "lean-fixpoint"
 root = "Main"
