@@ -22,4 +22,4 @@ def lhNumericSort02 : Constraint :=
       ∧ [∀ y : int . true ⇒
           ∀ r : int . k1_ns02(r, zero) ⇒ zero ≤ r] }
 
-#solve_constraint_full lhNumericSort02 with [{ pred := r{ v ≥ 0 } }]
+-- #solve_constraint_full lhNumericSort02 with [{ pred := r{ v ≥ 0 } }]

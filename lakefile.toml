@@ -1,12 +1,15 @@
-name = "meta-refinement-types"
+name = "LeanFixpoint"
 version = "0.1.0"
-defaultTargets = ["meta-refinement-types"]
+defaultTargets = ["LeanFixpoint"]
 
 [[lean_lib]]
 name = "LeanFixpoint"
 
+[[lean_lib]]
+name = "Demo"
+
 [[lean_exe]]
-name = "meta-refinement-types"
+name = "lean-fixpoint"
 root = "Main"
 
 [[require]]

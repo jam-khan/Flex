@@ -65,4 +65,4 @@ elab "#test_manual_assignment" : command => do
       else
         logWarning m!"❌ invalid"
 
-#test_manual_assignment
+-- #test_manual_assignment

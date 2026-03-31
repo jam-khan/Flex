@@ -8,7 +8,7 @@ def lhNonlinear : Constraint :=
   c{ ∀ x : int . true ⇒
       x * 2 == x + x }
 
-#solve_constraint lhNonlinear
+-- #solve_constraint lhNonlinear
 
 -- Below fail
 

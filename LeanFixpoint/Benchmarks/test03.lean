@@ -12,4 +12,4 @@ def lhTest1 : Constraint :=
         ∀ v : int . v == y + 1 ⇒ k0(v)]
     ∧ [∀ z : int . k0(z) ⇒ z > 0] }
 
-#solve_constraint_full lhTest1 with [{ pred := r{ 0 < v } }]
+-- #solve_constraint_full lhTest1 with [{ pred := r{ 0 < v } }]

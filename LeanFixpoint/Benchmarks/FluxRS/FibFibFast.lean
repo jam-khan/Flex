@@ -1,3 +1,5 @@
+import Lean
+import LeanFixpoint.Tactic.SolveFixpoint
 
 noncomputable def fib_fib : Int -> Int := sorry
 
@@ -22,3 +24,8 @@ def FibFibFast := ∃ k0 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) 
     ) ∧
    ((n₀ ≤ 1) ->
     (1 = (fib_fib n₀)))
+
+theorem FibProof : FibFibFast := by
+  unfold FibFibFast
+  exists k0
+  sorry

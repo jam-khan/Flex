@@ -35,4 +35,4 @@ def lhNumericSort01 : Constraint :=
     ∧ [∀ y : int . true ⇒
         ∀ r : int . k1_ns01(r) ⇒ 0 ≤ r] }
 
-#solve_constraint_full lhNumericSort01 with [{ pred := r{ 0 ≤ v } }]
+-- #solve_constraint_full lhNumericSort01 with [{ pred := r{ 0 ≤ v } }]

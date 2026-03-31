@@ -42,4 +42,4 @@ def exFact : Constraint :=
     ∧ [∀ y : int . kfact(y) ⇒ 1 ≤ y] }
 
 -- Qualifiers needed: 1 ≤ v (positive) for κfact, 1 ≤ v for κarg
-#solve_constraint_full exFact with [{ pred := r{ 1 ≤ v } }, { pred := r{ 0 ≤ v } }]
+-- #solve_constraint_full exFact with [{ pred := r{ 1 ≤ v } }, { pred := r{ 0 ≤ v } }]

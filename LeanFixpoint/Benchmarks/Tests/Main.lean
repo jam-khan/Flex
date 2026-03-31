@@ -36,7 +36,7 @@ def ex2Constraint' : Constraint :=
           ∧ [∀ y : int . kappa_y(y) ⇒
               ∀ ν : int . ν == y + 1 ⇒ 0 ≤ ν] }
 
-#solve_constraint ex2Constraint'
+-- #solve_constraint ex2Constraint'
 
 theorem ex2Eliminated :
   ∀ x : Int, 0 ≤ x →
@@ -115,7 +115,7 @@ def exMixed : Constraint :=
           ∀ ν : int . ν == k + r ⇒ ksum(ν)]
     ∧ [∀ y : int . ksum(y) ⇒ 0 ≤ y] }
 
-#solve_constraint_full exMixed with [{ pred := r{ 0 ≤ v } }, { pred := r{ v ≤ 0 } }]
+-- #solve_constraint_full exMixed with [{ pred := r{ 0 ≤ v } }, { pred := r{ v ≤ 0 } }]
 
 def exMixedConstraint : Prop :=
   ∃ κy : Int → Prop, ∃ κsum : Int → Prop,

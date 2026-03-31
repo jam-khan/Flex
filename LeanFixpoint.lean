@@ -33,8 +33,3 @@ import LeanFixpoint.Tactic.Tactics
 -/
 import LeanFixpoint.Solve.Solver
 import LeanFixpoint.Solve.Qualifier
-
-/-
-  Demo for main/overview examples
--/
-import LeanFixpoint.Demo

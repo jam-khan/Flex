@@ -19,4 +19,4 @@ def lhSum : Constraint :=
     ∧ [∀ y : int . true ⇒
         ∀ r : int . k1(r, y) ⇒ 0 ≤ r] }
 
-#solve_constraint_full lhSum with [{ pred := r{ 0 < v } }]
+-- #solve_constraint_full lhSum with [{ pred := r{ 0 < v } }]

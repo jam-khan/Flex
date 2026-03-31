@@ -162,6 +162,6 @@ elab "#test_sat" : command => do
     if ok then logInfo m!"✅ sat returned true"
     else logWarning m!"❌ sat returned false"
 
-#test_sat
+-- #test_sat
 
 end Test

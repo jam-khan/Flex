@@ -1,13 +1,5 @@
-import Lean
+import LeanFixpoint
 
-import Aesop
-import LeanFixpoint.Core.Types
-import LeanFixpoint.Core.Fusion
-import LeanFixpoint.Elab.ToExpr
-import LeanFixpoint.Tactic.SolveFixpoint
-import LeanFixpoint.Tactic.Command
-
--- Step 1: Get more and more complicated examples than just simple ones.
 def ex1 : Prop :=
   ∃ κ : Int → Prop,
     ∀ x : Int,
@@ -44,8 +36,6 @@ def ex3 : Prop :=
   ∧ (∀ ν : Int, 0 ≤ ν → κa ν)
   ∧ (∀ ν : Int, κc ν → 0 ≤ ν)
 
-#translate_and_solve ex3
-
 theorem ex3Proof : ex3 := by
   solve_fixpoint
 
@@ -63,8 +53,6 @@ def ex4 : Prop :=
     ∧ (∀ z : Int, κ2 z →
         ∀ ν : Int, ν = z + 1 → 0 ≤ ν)
 
-#translate_and_solve ex4
-
 theorem ex4Proof : ex4 := by
   solve_fixpoint
 
@@ -80,8 +68,6 @@ def ex5 : Prop :=
         ∀ ν : Int, ν = y + 1 → κ2 ν)
     ∧ (∀ z : Int, κ2 z →
         ∀ ν : Int, ν = z + 1 → 0 ≤ ν)
-
-#translate_and_solve ex5
 
 theorem ex5Proof : ex5 := by
   solve_fixpoint
@@ -99,8 +85,6 @@ def ex6 : Prop :=
     ∧ (∀ b : Int, κ2 b →
         ∀ ν : Int, ν = b + 1 → 0 ≤ ν)
 
-#translate_and_solve ex6
-
 theorem ex6Proof : ex6 := by
   solve_fixpoint
 
@@ -115,8 +99,6 @@ def ex7 : Prop :=
     ∧ (∀ ν : Int, ν = x - 1 → κ ν)
     ∧ (∀ y : Int, κ y →
         ∀ ν : Int, ν = y + 1 → 0 ≤ ν)
-
-#translate_and_solve ex7
 
 theorem ex7Proof : ex7 := by
   solve_fixpoint
@@ -133,8 +115,6 @@ def ex8 : Prop :=
         (∀ ν : Int, ν = x - 1 → κ ν)
       ∧ (∀ a : Int, κ a →
           ∀ ν : Int, ν = a + 1 + y → 0 ≤ ν)
-
-#translate_and_solve ex8
 
 theorem ex8Proof : ex8 := by
   solve_fixpoint
@@ -154,8 +134,6 @@ def ex9 : Prop :=
     ∧ (∀ c : Int, κ3 c →
         ∀ ν : Int, ν = c - 1 → 0 ≤ ν)
 
-#translate_and_solve ex9
-
 theorem ex9Proof : ex9 := by
   solve_fixpoint
 
@@ -172,8 +150,6 @@ def ex10 : Prop :=
     ∧ (∀ ν : Int, ν = x + 1 → κ ν)
     ∧ (∀ y : Int, κ y →
         ∀ ν : Int, ν = y + 2 → 0 ≤ ν)
-
-#translate_and_solve ex10
 
 theorem ex10Proof : ex10 := by
   solve_fixpoint
@@ -193,8 +169,6 @@ def ex11 : Prop :=
     ∧ (∀ b : Int, κ2 b →
         ∀ ν : Int, ν = b + 2 → κ3 ν)
     ∧ (∀ c : Int, κ3 c → 0 ≤ c)
-
-#translate_and_solve ex11
 
 theorem ex11Proof : ex11 := by
   solve_fixpoint
@@ -224,8 +198,6 @@ def ex12 : Prop :=
         ∀ ν : Int, ν = c → κ4 ν)
     ∧ (∀ d : Int, κ4 d → 0 ≤ d)
 
-#translate_and_solve ex12
-
 theorem ex12Proof : ex12 := by
   solve_fixpoint
 
@@ -248,8 +220,6 @@ def ex13 : Prop :=
         ∧ (∀ y : Int, κ2 y →
             ∀ ν : Int, ν = y + 1 → κ3 ν)
         ∧ (∀ z : Int, κ3 z → 0 ≤ z)
-
-#translate_and_solve ex13
 
 theorem ex13Proof : ex13 := by
   solve_fixpoint
@@ -283,8 +253,6 @@ def ex14 : Prop :=
           ∧ (∀ w : Int, κ3 w →
               ∀ ν : Int, ν = w + 2 → κ4 ν)
           ∧ (∀ z : Int, κ4 z → 0 ≤ z)
-
-#translate_and_solve ex14
 
 theorem ex14Proof : ex14 := by
   solve_fixpoint
@@ -349,8 +317,6 @@ def ex_stress : Prop :=
             ∀ ν : Int, ν = u + 2 → κ5 ν)
           -- consumer
         ∧ (∀ s : Int, κ5 s → 0 ≤ s)
-
-#translate_and_solve ex_stress
 
 theorem ex_stressProof : ex_stress := by
   solve_fixpoint

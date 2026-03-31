@@ -28,10 +28,10 @@ theorem ex1Constraint_holds : ex1Constraint := by
     grind
 
 set_option pp.all true in
-#check (ex1Constraint)
+-- #check (ex1Constraint)
 
 -- Even better — see it as a term tree
-#print ex1Constraint
+-- #print ex1Constraint
 
 elab "#show_expr" t:term : command => do
   let e ← Lean.Elab.Command.liftTermElabM do
@@ -40,4 +40,4 @@ elab "#show_expr" t:term : command => do
     return e
   logInfo m!"Expr: {repr e}"
 
-#show_expr (∃ kappa : Int → Prop, ∀ x : Int, (0 ≤ x) → True)
+-- #show_expr (∃ kappa : Int → Prop, ∀ x : Int, (0 ≤ x) → True)

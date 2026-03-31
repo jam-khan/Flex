@@ -25,4 +25,4 @@ def lhAppleSum : Constraint :=
     ∧ [∀ y : int . true ⇒
         ∀ r : int . kApple(r) ⇒ 0 ≤ r] }
 
-#solve_constraint_full lhAppleSum with [{ pred := r{ 0 ≤ v } }]
+-- #solve_constraint_full lhAppleSum with [{ pred := r{ 0 ≤ v } }]

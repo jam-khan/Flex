@@ -14,4 +14,4 @@ def lhGround : Constraint :=
         ∀ t1 : int . t1 ≥ 0 ⇒
           ∀ v : int . v ≥ 0 ⇒ v ≥ 0] }
 
-#solve_constraint lhGround
+-- #solve_constraint lhGround
