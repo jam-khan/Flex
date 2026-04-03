@@ -182,10 +182,15 @@ partial def toConstraint (fvars : FVarMap) (kvars : KVarSet)
     | .le lhs rhs =>
         return .rexpr (.cmp .le (← exprToRExpr fvars lhs) (← exprToRExpr fvars rhs))
     | .app fn arg =>
-        let κName   := (Std.HashMap.get? fvars fn.fvarId!).getD `unknown
-        let argName := (Std.HashMap.get? fvars arg.fvarId!).getD `unknown
-        let kvar : KVar := { name := κName, params := [`z] }  -- canonical param
-        return .kapp kvar [argName]
+        let fnId := fn.fvarId!
+        -- We need to check whether it is a kvar or not
+        if kvars.contains fnId then
+          let κName   := (Std.HashMap.get? fvars fn.fvarId!).getD `unknown
+          let argName := (Std.HashMap.get? fvars arg.fvarId!).getD `unknown
+          let kvar : KVar := { name := κName, params := [`z] }  -- canonical param
+          return .kapp kvar [argName]
+        else
+          throwError "toPred: uninterpreted predicate (not a κ-variable) -"
     | .and l r  =>
         return .conj (← toPred fvars kvars l) (← toPred fvars kvars r)
     | .nonNeg arg =>

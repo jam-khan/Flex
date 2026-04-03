@@ -81,7 +81,10 @@ partial def RExpr.toExpr (env : VarMap) : RExpr → MetaM Expr
       let ee ← e.toExpr env
       mkAppM ``Not #[ee]
   | .app f args => do
-      -- Note: Current examples don't use uninterpreted functions
+      /-
+      Here, we can have cases where either we have an uninterpreted functions or k-var
+      We need to add the case for uninterpreted functions
+      -/
       let fExpr     ← lookupVar env f
       let argExprs  ← args.mapM (RExpr.toExpr env)
       return mkAppN fExpr argExprs.toArray
