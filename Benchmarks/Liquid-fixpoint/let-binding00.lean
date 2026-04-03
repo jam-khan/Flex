@@ -1,25 +1,21 @@
+import LeanFixpoint
 /-
   Liquid Haskell Test
   `https://github.com/ucsd-progsys/liquid-fixpoint/blob/develop/tests/horn/pos/let-binding00.smt2`
+
+  (constraint
+    (forall ((x Int) (true))
+        ((let ((y 2))
+            (= (* x y) (+ x x))))))
 -/
-import LeanFixpoint
 
 def lhNonlinear : Constraint :=
   c{ ∀ x : int . true ⇒
       x * 2 == x + x }
 
--- #solve_constraint lhNonlinear
+def lhNonlinearProp : Prop :=
+  ∀ x : Int, True → x * 2 = x + x
 
--- Below fail
-
--- def lhNonlinear2 : Constraint :=
---   c{ ∀ x : int . 0 ≤ x ⇒
---       ∀ y : int . 0 ≤ y ⇒
---         0 ≤ x * y }
-
--- def lhNonlinear3 : Constraint :=
---   c{ ∀ x : int . true ⇒
---       0 ≤ x * x }
-
--- #solve_constraint lhNonlinear2
--- #solve_constraint lhNonlinear3
+theorem lhNonlinearProof : lhNonlinearProp := by
+  -- unfold lhNonlinearProp
+  solve_fixpoint

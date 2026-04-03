@@ -67,6 +67,14 @@ private def closeResidualGoals : TacticM Unit := do
     else closeLoop
 
 elab "solve_fixpoint" : tactic => withMainContext do
+  -- unfolding at top level
+  let goal ← getMainGoal
+  let newGoal ← goal.withContext do
+    let target    ← goal.getType
+    let unfolded  ← unfoldDefinition target
+    goal.replaceTargetDefEq unfolded
+  replaceMainGoal [newGoal]
+  
   let goal ← getMainGoal
   let goalType ← goal.getType
   let reduced ← reduce goalType
