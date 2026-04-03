@@ -1,15 +1,36 @@
-/-
-  Liquid Haskell example
-  `https://github.com/ucsd-progsys/liquid-fixpoint/blob/develop/tests/horn/pos/test03.smt2`
--/
 import LeanFixpoint
+/-
+GOOD EXAMPLE FOR PREDICATE ABSTRACTION
 
-def k0 : KVar := { name := `κ0, params := [`v] }
-def lhTest1 : Constraint :=
-  c{  [∀ x : int . x > 0 ⇒
-        ∀ v : int . v == x ⇒ k0(v)]
-    ∧ [∀ y : int . k0(y) ⇒
-        ∀ v : int . v == y + 1 ⇒ k0(v)]
-    ∧ [∀ z : int . k0(z) ⇒ z > 0] }
+(qualif Bar ((v Int)) (>= v 0))
+(qualif Baz ((v Int) (a Int)) (>= v a))
+(var $k1 (Int Int))
+(constraint
+  (and
+    (and
+      (forall ((n Int) (true))
+        (forall ((cond bool) ((<=> cond (<= n 0))))
+          (and
+            (forall ((tmp bool) (cond))
+              (forall ((VV Int) ((= VV 0)))
+                ($k1 VV n)))
+            (forall ((tmp bool) ((not cond)))
+              (forall ((n1 Int) ((= n1 (- n 1))))
+                (forall ((t1 Int) ($k1 t1 n1))
+                  (forall ((v Int) ((= v (+ n t1))))
+                    ($k1 v n1))))))))
+      (forall ((y Int) (true))
+        (forall ((r Int) ($k1 r y))
+          (forall ((ok1 bool) ((<=> ok1 (<= 0 r))))
+            (forall ((v bool) (and ((<=> v (<= 0 r))) ((= v ok1))))
+              (v))))))))
+-/
 
--- #solve_constraint_full lhTest1 with [{ pred := r{ 0 < v } }]
+def sumRec3Prop : Prop :=
+  ∃ κ0 : Int → Prop,
+    ∀ x : Int, x > 0 →
+      (∀ y : Int, y > x + 100 → ∀ v : Int, v = x + y → κ0 v)
+      ∧ (∀ z : Int, κ0 z → ∀ v : Int, v = x + z → v > 100)
+
+theorem sumRec3Proof : sumRec3Prop := by
+  solve_fixpoint

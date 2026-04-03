@@ -1,13 +1,34 @@
-/-
-  # LiquidHaskell Test: numeric-sort-02 (two numeric sorts, cast)
-
-  Same sum but with two numeric type aliases (Apple, Banana).
-  `cast v Int` is identity since both are just Int.
-  κ1(v : Apple, z : Banana) — cross-sort κ.
-
-  Source: `https://github.com/ucsd-progsys/liquid-fixpoint/blob/develop/tests/horn/pos/numeric-sort-02.smt2`
--/
 import LeanFixpoint
+/-
+
+(numeric Apple)
+(numeric Banana)
+
+(qualif Bar ((v @(0)) (z @(1))) (>= (cast v Int) (cast z Int)))
+
+(var $k1 (Apple Banana))
+
+(constraint
+  (and
+    (forall ((zero Banana) ((= zero 0)))
+      (and
+        (forall ((n Apple) (true))
+          (forall ((cond bool) ((<=> cond (<= n zero))))
+            (and
+              (forall ((grd bool) (cond))
+                (forall ((VV Apple) ((= VV (cast zero Int))))
+                  ($k1 VV zero)))
+              (forall ((grd bool) ((not cond)))
+                (forall ((n1 Apple) ((= n1 (- n 1))))
+                  (forall ((t1 Apple) ($k1 t1 zero))
+                    (forall ((v Apple) ((= v (+ n t1))))
+                      ($k1 v zero))))))))
+        (forall ((y Apple) (true))
+          (forall ((r Apple) ($k1 r zero))
+            (forall ((ok1 bool) ((<=> ok1 (<= zero r))))
+              (forall ((v bool) (and ((<=> v (<= zero r))) ((= v ok1))))
+                (v)))))))))
+-/
 
 def k1_ns02 : KVar := { name := `κ1, params := [`v, `z] }
 

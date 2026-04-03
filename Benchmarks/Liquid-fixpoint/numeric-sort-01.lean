@@ -1,23 +1,32 @@
-/-
-  # LiquidHaskell Test: numeric-sort-01
-
-  Same sum function but with `numeric Apple` type alias.
-  `Apple` is just `Int` — `numeric` in liquid-fixpoint means
-  the sort supports arithmetic.
-```
-  sum n = if n ≤ 0 then 0 else n + sum (n - 1)
-```
-
-  The original encoding uses explicit boolean guard variables
-  (`cond`, `grd`, `ok1`) to model `if-then-else` with path
-  sensitivity. We preserve this structure faithfully.
-
-  Qualifier: `v ≥ 0`
-  κ1 is cyclic (recursive)
-
-  Source: `https://github.com/ucsd-progsys/liquid-fixpoint/blob/develop/tests/horn/pos/numeric-sort-01.smt2`
--/
 import LeanFixpoint
+/-
+
+(numeric Apple)
+
+(qualif Bar ((v @(0))) (>= v 0))
+
+(var $k1 (Apple))
+
+(constraint
+  (and
+    (and
+      (forall ((n Apple) (true))
+        (forall ((cond bool) ((<=> cond (<= n 0))))
+          (and
+            (forall ((grd bool) (cond))
+              (forall ((VV Apple) ((= VV 0)))
+                ($k1 VV)))
+            (forall ((grd bool) ((not cond)))
+              (forall ((n1 Apple) ((= n1 (- n 1))))
+                (forall ((t1 Apple) ($k1 t1))
+                  (forall ((v Apple) ((= v (+ n t1))))
+                    ($k1 v))))))))
+      (forall ((y Apple) (true))
+        (forall ((r Apple) ($k1 r))
+          (forall ((ok1 bool) ((<=> ok1 (<= 0 r))))
+            (forall ((v bool) (and ((<=> v (<= 0 r))) ((= v ok1))))
+              (v))))))))
+-/
 
 def k1_ns01 : KVar := { name := `κ1, params := [`v] }
 

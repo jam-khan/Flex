@@ -18,6 +18,10 @@ private def attemptTactic (t : TacticM Unit) : TacticM Bool :=
 initialize Lean.registerTraceClass `solveFixpoint
 
 private def tryClosers : TacticM Bool := do
+  let b ← attemptTactic (evalTactic (← `(tactic| native_decide)))
+  match b with
+  | Bool.true => logInfo m!"[solve_fixpoint] closed by: native_decide"; pure Bool.true
+  | Bool.false =>
   let b ← attemptTactic (evalTactic (← `(tactic| grind)))
   match b with
   | Bool.true => logInfo m!"[solve_fixpoint] closed by: grind"; pure Bool.true

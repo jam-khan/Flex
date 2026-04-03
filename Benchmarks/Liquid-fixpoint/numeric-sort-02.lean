@@ -1,20 +1,32 @@
-/-
-  # LiquidHaskell Test: numeric-sort-01 (two-param κ)
-
-  Same sum function but κ1 has two params: `(v, z)` where
-  `z` is always instantiated with `zero = 0`.
-
-  Qualifier: `v ≥ z` (relational)
-```
-  sum n = if n ≤ 0 then 0 else n + sum (n - 1)
-```
-
-  κ1(v, zero) means "v is the output, zero is 0"
-  The use site checks: κ1(r, 0) ⇒ 0 ≤ r
-
-  Source: `https://github.com/ucsd-progsys/liquid-fixpoint/blob/develop/tests/horn/pos/numeric-sort-01.smt2`
--/
 import LeanFixpoint
+/-
+(numeric Apple)
+
+(qualif Bar ((v @(0)) (z @(1))) (>= v z))
+
+(var $k1 (Apple Int))
+
+(constraint
+  (and
+    (forall ((zero Int) ((= zero 0)))
+      (and
+        (forall ((n Apple) (true))
+          (forall ((cond bool) ((<=> cond (<= n zero))))
+            (and
+              (forall ((grd bool) (cond))
+                (forall ((VV Apple) ((= VV zero)))
+                  ($k1 VV zero)))
+              (forall ((grd bool) ((not cond)))
+                (forall ((n1 Apple) ((= n1 (- n 1))))
+                  (forall ((t1 Apple) ($k1 t1 zero))
+                    (forall ((v Apple) ((= v (+ n t1))))
+                      ($k1 v zero))))))))
+        (forall ((y Apple) (true))
+          (forall ((r Apple) ($k1 r zero))
+            (forall ((ok1 bool) ((<=> ok1 (<= zero r))))
+              (forall ((v bool) (and ((<=> v (<= zero r))) ((= v ok1))))
+                (v)))))))))
+-/
 
 def k1_ns01 : KVar := { name := `κ1, params := [`v, `z] }
 
