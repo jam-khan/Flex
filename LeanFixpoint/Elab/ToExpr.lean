@@ -58,6 +58,7 @@ partial def RExpr.toExpr (env : VarMap) : RExpr → MetaM Expr
       | .sub => mkAppM ``HSub.hSub #[le, re]
       | .mul => mkAppM ``HMul.hMul #[le, re]
       | .div => mkAppM ``HDiv.hDiv #[le, re]
+      | .mod => mkAppM ``HMod.hMod #[le, re]
   | .cmp op l r => do
       let le ← l.toExpr env
       let re ← r.toExpr env

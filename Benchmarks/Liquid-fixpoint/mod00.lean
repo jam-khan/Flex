@@ -34,10 +34,5 @@ def mod00Prop : Prop :=
     ∧ (∀ a2 : Int, True → ∀ _ : Int, κ0 a2 → a2 % 2 = 0)
 
 theorem mod00Proof : mod00Prop := by
-  unfold mod00Prop
-  -- try grind
-  -- try omega
-  -- try aesop
-
-
   solve_fixpoint
+  

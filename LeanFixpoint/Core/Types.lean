@@ -89,7 +89,7 @@ deriving BEq, Repr, Inhabited, DecidableEq
 
 -- + | - | * | /
 inductive ArithOp where
-  | add | sub | mul | div
+  | add | sub | mul | div | mod
 deriving BEq, Repr, DecidableEq
 
 -- == | != | < | <= | > | >=

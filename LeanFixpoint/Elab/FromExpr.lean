@@ -142,6 +142,12 @@ partial def exprToRExpr (fvars : FVarMap) (e : Expr) : MetaM RExpr := do
     let r ← exprToRExpr fvars (e.getArg! 5)
     return .arith .div l r
 
+  -- HMod.hMov α β γ inst lhs rhs
+  else if e.isAppOfArity ``HMod.hMod 6 then
+    let l ← exprToRExpr fvars (e.getArg! 4)
+    let r ← exprToRExpr fvars (e.getArg! 5)
+    return .arith .mod l r
+
   -- OfNat.ofNat α n inst
   -- represents numeric literals like `0`, `1`, `2`
   -- 3 args: [0]=target type [1]=raw Nat literal [2]=instance

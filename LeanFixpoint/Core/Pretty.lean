@@ -11,7 +11,7 @@ open Lean
 -/
 
 instance : ToString ArithOp where
-  toString | .add => "+" | .sub => "-" | .mul => "*" | .div => "/"
+  toString | .add => "+" | .sub => "-" | .mul => "*" | .div => "/" | .mod => "%"
 
 instance : ToString CmpOp where
   toString | .eq => "==" | .ne => "!=" | .lt => "<"
@@ -27,7 +27,7 @@ private def parenIf (p : Bool) (s : String) : String :=
   if p then "(" ++ s ++ ")" else s
 
 private def arithPrec : ArithOp → Nat
-  | .mul | .div => 70 | .add | .sub => 60
+  | .mul | .div | .mod => 70 | .add | .sub => 60
 
 private def cmpPrec   : CmpOp → Nat  := fun _ => 50
 private def bopPrec   : BoolOp → Nat
