@@ -3,7 +3,7 @@ import LeanFixpoint.Core.Types
 
 open Lean
 
-private def elabBaseTy (id : TSyntax `ident) : MacroM (TSyntax `term) := do
+def elabBaseTy (id : TSyntax `ident) : MacroM (TSyntax `term) := do
   match id.getId with
   | `int  => `(BaseTy.int)
   | `bool => `(BaseTy.bool)

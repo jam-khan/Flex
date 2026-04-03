@@ -31,5 +31,5 @@ import LeanFixpoint.Tactic.Tactics
   includes the Qualifier AST and the
   Solve method.
 -/
-import LeanFixpoint.Solve.Solver
 import LeanFixpoint.Solve.Qualifier
+import LeanFixpoint.Solve.Solver

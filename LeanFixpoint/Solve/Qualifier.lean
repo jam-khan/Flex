@@ -1,64 +1,73 @@
+import Lean
 import LeanFixpoint.Core.Types
 import LeanFixpoint.Core.Subst
-import LeanFixpoint.Core.Macros
 import LeanFixpoint.Core.Pretty
+import LeanFixpoint.Core.Macros
+
+open Lean
+
+structure QualParam where
+  sym   : Var     -- name/symbol for the parameter
+  sort  : BaseTy  -- sort is just a base type, e.g., Int, Bool
+deriving Repr, BEq, Inhabited
 
 structure Qualifier where
-  /-- Predicate template with placeholder variable `v` -/
-  pred : RExpr
+  name    : Name            -- name for qualifier
+  params  : List QualParam  -- list of qualifier parameters
+  body    : RExpr           -- body is the refinement expression
 deriving Repr, BEq
 
-/-- Insantiate qualifier: replace `v` with the `k`'s param name -/
-def Qualifier.instantiate (q : Qualifier) (paramName : Var) : RExpr :=
-  RExpr.subst `v (.var paramName) q.pred
+
+/-- Insantiate qualifier: map each param to a concrete variable -/
+def Qualifier.instantiate (q : Qualifier) (args : List Var) : RExpr :=
+  -- Create list of pairs of parameter symbols and corresponding arguments
+  let pairs := q.params.map (fun p => p.sym) |>.zip args
+  -- walk through list and subst each in body from param sym to the argument
+  pairs.foldl (fun e (from', to) => RExpr.subst from' (.var to) e) q.body
+
+-- Qualifier param syntax, e.g. `v : int`
+declare_syntax_cat qualParam
+syntax ident ":" ident : qualParam
+
+-- Qualifier syntax: `Name(params) | body`
+declare_syntax_cat qual
+syntax ident "(" qualParam,* ")" "|" rexpr : qual
+
+-- Entry point
+syntax "q{" qual "}" : term
+
+macro_rules
+  | `(q{ $name:ident ( $[$ps],* ) | $body:rexpr }) => do
+      let params ← ps.mapM fun p => do
+        match p with
+        | `(qualParam| $sym:ident : $sort:ident) =>
+            let bty ← elabBaseTy sort
+            `({ sym := $(quote sym.getId), sort := $bty : QualParam })
+        | _ => Macro.throwError "invalid qualifier parameter"
+      `({ name := $(quote name.getId), params := [$params,*], body := r{$body} : Qualifier })
 
 section Examples
 
-def sumQualifiers : List Qualifier := [
-  { pred := r{ 0 ≤ v } },   -- non-negative
-  { pred := r{ v ≤ 0 } },   -- non-positive
-]
+-- (qualif Bar ((v Int)) (>= v 0))
+def qBar : Qualifier := q{ Bar(v : int) | 0 ≤ v }
 
--- Show raw AST of qualifiers
-#eval sumQualifiers.map (fun q => repr q.pred)
--- [RExpr.cmp (CmpOp.le) (RExpr.int 0) (RExpr.var `v),
---  RExpr.cmp (CmpOp.le) (RExpr.var `v) (RExpr.int 0)]
+-- (qualif Baz ((v Int) (a Int)) (>= v a))
+def qBaz : Qualifier := q{ Baz(v : int, a : int) | a ≤ v }
 
--- Show pretty-printed qualifiers
-#eval sumQualifiers.map (fun q => toString q.pred)
--- ["0 <= v", "v <= 0"]
+-- (qualif EqConj ((v Int) (a Int)) (and (>= v a) (<= v a)))
+def qEqConj : Qualifier := q{ EqConj(v : int, a : int) | a ≤ v ∧ v ≤ a }
 
--- Instantiate with κ's param name `z`
-#eval sumQualifiers.map (fun q => toString (q.instantiate `z))
--- ["0 <= z", "z <= 0"]
+-- (qualif Bounded ((v Int) (a Int) (b Int)) (and (>= v a) (<= v b)))
+def qBounded : Qualifier := q{ Bounded(v : int, a : int, b : int) | a ≤ v ∧ v ≤ b }
 
--- Instantiate with different param names
-#eval sumQualifiers.map (fun q => toString (q.instantiate `k))
--- ["0 <= k", "k <= 0"]
+-- (qualif Sum ((v Int) (a Int) (b Int)) (= v (+ a b)))
+def qSum : Qualifier := q{ Sum(v : int, a : int, b : int) | v == a + b }
 
-#eval sumQualifiers.map (fun q => toString (q.instantiate `ν))
--- ["0 <= ν", "ν <= 0"]
+-- (qualif Diff ((v Int) (a Int) (b Int)) (= v (- a b)))
+def qDiff : Qualifier := q{ Diff(v : int, a : int, b : int) | v == a - b }
 
--- More interesting qualifiers
-def arithQualifiers : List Qualifier := [
-  { pred := r{ 0 ≤ v } },       -- non-negative
-  { pred := r{ 0 ≤ v + 1 } },   -- almost non-negative
-  { pred := r{ v == 0 } },      -- zero
-]
-
-#eval arithQualifiers.map (fun q => toString q.pred)
--- ["0 <= v", "0 <= v + 1", "v == 0"]
-
-#eval arithQualifiers.map (fun q => toString (q.instantiate `z))
--- ["0 <= z", "0 <= z + 1", "z == 0"]
-
--- Show that instantiate only replaces `v`, not other variables
-def relationalQual : Qualifier := { pred := r{ x ≤ v } }
-
-#eval toString relationalQual.pred
--- "x <= v"
-
-#eval toString (relationalQual.instantiate `z)
--- "x <= z"    (only `v` replaced, `x` stays)
+#eval toString (qBar.instantiate [`z])         -- "0 <= z"
+#eval toString (qBaz.instantiate [`z, `n])     -- "n <= z"
+#eval toString (qBounded.instantiate [`x, `lo, `hi])  -- "lo <= x ∧ x <= hi"
 
 end Examples
