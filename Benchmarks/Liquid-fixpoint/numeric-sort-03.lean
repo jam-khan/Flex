@@ -30,17 +30,16 @@ import LeanFixpoint
                 (v)))))))))
 -/
 
-def k1_ns02 : KVar := { name := `κ1, params := [`v, `z] }
+-- cast erased: Apple, Banana both map to Int
+def qBar03 : Qualifier := q{ Bar(v : int, z : int) | v ≥ z }
 
-def lhNumericSort02 : Constraint :=
-  c{ ∀ zero : int . zero == 0 ⇒
-        [∀ n : int . n ≤ zero ⇒
-          ∀ VV : int . VV == zero ⇒ k1_ns02(VV, zero)]
-      ∧ [∀ n : int . 0 < n ⇒
-          ∀ n1 : int . n1 == n - 1 ⇒
-            ∀ t1 : int . k1_ns02(t1, zero) ⇒
-              ∀ v : int . v == n + t1 ⇒ k1_ns02(v, zero)]
-      ∧ [∀ y : int . true ⇒
-          ∀ r : int . k1_ns02(r, zero) ⇒ zero ≤ r] }
+def numericSort03Prop : Prop :=
+  ∃ κ1 : Int → Int → Prop,
+    ∀ zero : Int, zero = 0 →
+      (∀ n : Int, n ≤ zero → ∀ VV : Int, VV = zero → κ1 VV zero)
+      ∧ (∀ n : Int, 0 < n → ∀ n1 : Int, n1 = n - 1 →
+          ∀ t1 : Int, κ1 t1 zero → ∀ v : Int, v = n + t1 → κ1 v zero)
+      ∧ (∀ y : Int, ∀ r : Int, κ1 r zero → zero ≤ r)
 
--- #solve_constraint_full lhNumericSort02 with [{ pred := r{ v ≥ 0 } }]
+theorem numericSort03Proof : numericSort03Prop := by
+  sorry

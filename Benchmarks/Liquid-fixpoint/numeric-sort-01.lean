@@ -28,20 +28,17 @@ import LeanFixpoint
               (v))))))))
 -/
 
-def k1_ns01 : KVar := { name := `κ1, params := [`v] }
+def qBar01 : Qualifier := q{ Bar(v : int) | 0 ≤ v }
 
-def lhNumericSort01 : Constraint :=
-  c{  -- Branch encoding: ∀n. ∀cond. cond ⟺ (n ≤ 0)
-      -- Then branch: cond ⇒ VV = 0 ⇒ κ1(VV)
-      [∀ n : int . true ⇒
-        ∀ VV : int . n ≤ 0 ∧ VV == 0 ⇒ k1_ns01(VV)]
-      -- Else branch: ¬cond ⇒ n1 = n-1 ⇒ κ1(t1) ⇒ v = n+t1 ⇒ κ1(v)
-    ∧ [∀ n : int . true ⇒
-        ∀ n1 : int . 0 < n ∧ n1 == n - 1 ⇒
-          ∀ t1 : int . k1_ns01(t1) ⇒
-            ∀ v : int . v == n + t1 ⇒ k1_ns01(v)]
-      -- Use: κ1(r) ⇒ 0 ≤ r (asserted via boolean encoding)
-    ∧ [∀ y : int . true ⇒
-        ∀ r : int . k1_ns01(r) ⇒ 0 ≤ r] }
+def numericSort01Prop : Prop :=
+  ∃ κ1 : Int → Prop,
+    -- Base: n ≤ 0 ⇒ VV = 0 ⇒ κ1(VV)
+    (∀ n : Int, n ≤ 0 → ∀ VV : Int, VV = 0 → κ1 VV)
+    -- Rec: 0 < n ⇒ n1 = n-1 ⇒ κ1(t1) ⇒ v = n+t1 ⇒ κ1(v)
+    ∧ (∀ n : Int, 0 < n → ∀ n1 : Int, n1 = n - 1 →
+        ∀ t1 : Int, κ1 t1 → ∀ v : Int, v = n + t1 → κ1 v)
+    -- Use: κ1(r) ⇒ 0 ≤ r
+    ∧ (∀ y : Int, ∀ r : Int, κ1 r → 0 ≤ r)
 
--- #solve_constraint_full lhNumericSort01 with [{ pred := r{ 0 ≤ v } }]
+theorem numericSort01Proof : numericSort01Prop := by
+  sorry

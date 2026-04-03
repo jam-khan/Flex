@@ -49,25 +49,25 @@ macro_rules
 section Examples
 
 -- (qualif Bar ((v Int)) (>= v 0))
-def qBar : Qualifier := q{ Bar(v : int) | 0 ≤ v }
+private def ex1 : Qualifier := q{ Bar(v : int) | 0 ≤ v }
 
 -- (qualif Baz ((v Int) (a Int)) (>= v a))
-def qBaz : Qualifier := q{ Baz(v : int, a : int) | a ≤ v }
+private def ex2 : Qualifier := q{ Baz(v : int, a : int) | a ≤ v }
 
 -- (qualif EqConj ((v Int) (a Int)) (and (>= v a) (<= v a)))
-def qEqConj : Qualifier := q{ EqConj(v : int, a : int) | a ≤ v ∧ v ≤ a }
+private def ex3 : Qualifier := q{ EqConj(v : int, a : int) | a ≤ v ∧ v ≤ a }
 
 -- (qualif Bounded ((v Int) (a Int) (b Int)) (and (>= v a) (<= v b)))
-def qBounded : Qualifier := q{ Bounded(v : int, a : int, b : int) | a ≤ v ∧ v ≤ b }
+private def ex4 : Qualifier := q{ Bounded(v : int, a : int, b : int) | a ≤ v ∧ v ≤ b }
 
 -- (qualif Sum ((v Int) (a Int) (b Int)) (= v (+ a b)))
-def qSum : Qualifier := q{ Sum(v : int, a : int, b : int) | v == a + b }
+private def ex5 : Qualifier := q{ Sum(v : int, a : int, b : int) | v == a + b }
 
 -- (qualif Diff ((v Int) (a Int) (b Int)) (= v (- a b)))
-def qDiff : Qualifier := q{ Diff(v : int, a : int, b : int) | v == a - b }
+private def ex6 : Qualifier := q{ Diff(v : int, a : int, b : int) | v == a - b }
 
-#eval toString (qBar.instantiate [`z])         -- "0 <= z"
-#eval toString (qBaz.instantiate [`z, `n])     -- "n <= z"
-#eval toString (qBounded.instantiate [`x, `lo, `hi])  -- "lo <= x ∧ x <= hi"
+#eval toString (ex1.instantiate [`z])         -- "0 <= z"
+#eval toString (ex2.instantiate [`z, `n])     -- "n <= z"
+#eval toString (ex4.instantiate [`x, `lo, `hi])  -- "lo <= x ∧ x <= hi"
 
 end Examples

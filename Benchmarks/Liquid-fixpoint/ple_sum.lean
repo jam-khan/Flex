@@ -21,9 +21,4 @@ def pleSumProp : Prop :=
   ∀ x : Int, x = 5 → mySum x = 15
 
 theorem pleSumProof : pleSumProp := by
-  unfold pleSumProp
-  unfold mySum
-  -- sorry
-  intro x hx
-  subst hx
-  native_decide
+  solve_fixpoint

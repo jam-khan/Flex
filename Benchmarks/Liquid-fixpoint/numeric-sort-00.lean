@@ -27,19 +27,11 @@ import LeanFixpoint
               (v))))))))
 -/
 
-def kApple : KVar := { name := `κ1, params := [`v] }
+def numericSort00Prop : Prop :=
+  ∃ κ1 : Int → Prop,
+    (∀ n : Int, n ≤ 0 → ∀ VV : Int, VV = 0 → κ1 VV)
+    ∧ (∀ n : Int, 0 < n → ∀ n1 : Int, n1 = n - 1 →
+        ∀ t1 : Int, κ1 t1 → ∀ v : Int, v = n + t1 → κ1 v)
+    ∧ (∀ y : Int, ∀ r : Int, κ1 r → 0 ≤ r)
 
-def lhAppleSum : Constraint :=
-  c{  -- Base: n ≤ 0 ⇒ VV = 0 ⇒ κ1(VV)
-      [∀ n : int . n ≤ 0 ⇒
-        ∀ VV : int . VV == 0 ⇒ kApple(VV)]
-      -- Rec: ¬(n ≤ 0) ⇒ n1 = n-1 ⇒ κ1(t1) ⇒ v = n+t1 ⇒ κ1(v)
-    ∧ [∀ n : int . 0 < n ⇒
-        ∀ n1 : int . n1 == n - 1 ⇒
-          ∀ t1 : int . kApple(t1) ⇒
-            ∀ v : int . v == n + t1 ⇒ kApple(v)]
-      -- Use: κ1(r) ⇒ 0 ≤ r
-    ∧ [∀ y : int . true ⇒
-        ∀ r : int . kApple(r) ⇒ 0 ≤ r] }
-
--- #solve_constraint_full lhAppleSum with [{ pred := r{ 0 ≤ v } }]
+theorem numericSort00Proof : numericSort00Prop := by sorry

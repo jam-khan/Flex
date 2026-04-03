@@ -28,21 +28,18 @@ import LeanFixpoint
                 (v)))))))))
 -/
 
-def k1_ns01 : KVar := { name := `κ1, params := [`v, `z] }
+def qBar02 : Qualifier := q{ Bar(v : int, z : int) | v ≥ z }
 
-def lhNumericSort01 : Constraint :=
-  c{  -- zero = 0 is bound at the top
-      ∀ zero : int . zero == 0 ⇒
-        -- Base: n ≤ zero ⇒ VV = zero ⇒ κ1(VV, zero)
-        [∀ n : int . n ≤ zero ⇒
-          ∀ VV : int . VV == zero ⇒ k1_ns01(VV, zero)]
-        -- Rec: ¬(n ≤ zero) ⇒ n1 = n-1 ⇒ κ1(t1, zero) ⇒ v = n+t1 ⇒ κ1(v, zero)
-      ∧ [∀ n : int . 0 < n ⇒
-          ∀ n1 : int . n1 == n - 1 ⇒
-            ∀ t1 : int . k1_ns01(t1, zero) ⇒
-              ∀ v : int . v == n + t1 ⇒ k1_ns01(v, zero)]
-        -- Use: κ1(r, zero) ⇒ zero ≤ r
-      ∧ [∀ y : int . true ⇒
-          ∀ r : int . k1_ns01(r, zero) ⇒ zero ≤ r] }
+def numericSort02Prop : Prop :=
+  ∃ κ1 : Int → Int → Prop,
+    ∀ zero : Int, zero = 0 →
+      -- Base: n ≤ zero ⇒ VV = zero ⇒ κ1(VV, zero)
+      (∀ n : Int, n ≤ zero → ∀ VV : Int, VV = zero → κ1 VV zero)
+      -- Rec: 0 < n ⇒ n1 = n-1 ⇒ κ1(t1, zero) ⇒ v = n+t1 ⇒ κ1(v, zero)
+      ∧ (∀ n : Int, 0 < n → ∀ n1 : Int, n1 = n - 1 →
+          ∀ t1 : Int, κ1 t1 zero → ∀ v : Int, v = n + t1 → κ1 v zero)
+      -- Use: κ1(r, zero) ⇒ zero ≤ r
+      ∧ (∀ y : Int, ∀ r : Int, κ1 r zero → zero ≤ r)
 
--- #solve_constraint_full lhNumericSort01 with [{ pred := r{ v ≥ 0 } }]
+theorem numericSort02Proof : numericSort02Prop := by
+  sorry
