@@ -148,7 +148,7 @@ private def solveFixpointImpl (qs? : Option (TSyntax `term)) : TacticM Unit := w
       let fvarMap  ← fvarsRef.get
       let kvarSet  ← kvarsRef.get
       let constraint ← toConstraint fvarMap kvarSet propAST
-      let kvars := constraint.kvars.eraseDups
+      -- let kvars := constraint.kvars.eraseDups
 
       -- Phase 1: Partition into acyclic / cyclic
       let (acyclic, cyclic) := constraint.partitionKVars
@@ -169,12 +169,18 @@ private def solveFixpointImpl (qs? : Option (TSyntax `term)) : TacticM Unit := w
       -- Phase 3: Predicate abstraction - handle cyclic κ-vars
       if !cyclic.isEmpty then
         match quals? with
-        | some Q => predicateAbstraction curr Q
+        | some Q => do
+          let pa ← predicateAbstraction curr Q
+          for (κ, qs) in pa do
+            let sol   := conjoinQualifiers qs
+            solutions := solutions ++ [(κ.name, sol)]
+            curr      := curr.elimStar κ sol
         | none   => logWarning m!"[solve_fixpoint] Cyclic κ-vars present but no qualifiers provided"
 
       -- NOTE: One may need to be careful with order of instantiations
       -- Phase 4: Witness synthesis for acyclic solutions
       for (_κName, sol) in solutions do
+        logInfo m!"[solve_fixpoint] Elaborating witness for: {toString sol}"
         let witness    ← solToWitnessExpr sol
         let witnessSyn ← PrettyPrinter.delab witness
         evalTactic (← `(tactic| refine ⟨$witnessSyn, ?_⟩))
@@ -186,6 +192,7 @@ private def solveFixpointImpl (qs? : Option (TSyntax `term)) : TacticM Unit := w
 
   let _ := solverResult
   let _ := qs?
+
   closeResidualGoals
 
 -- declare syntax for solve_fixpoint
@@ -195,3 +202,8 @@ syntax "solve_fixpoint" "with" term : tactic
 elab_rules : tactic
   | `(tactic| solve_fixpoint)           => solveFixpointImpl none
   | `(tactic| solve_fixpoint with $qs)  => solveFixpointImpl (some qs)
+
+syntax "solve_residual" : tactic
+elab_rules : tactic
+  | `(tactic | solve_residual) => do
+    closeResidualGoals

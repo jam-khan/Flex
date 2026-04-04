@@ -15,6 +15,24 @@ def Q_pa : List Qualifier := [
   q{ LE1(v : int)  | v ≤ 1  }
 ]
 
+-- CYC0: simplest cyclic — single κ with self-loop, no acyclic κ-vars
+-- κ seeded from x (where 0 ≤ x), loop decrements by 1, check 0 ≤ result
+-- Expected solution: κ ↦ 0 ≤ z
+def cyc0 : Prop :=
+  ∃ κ : Int → Prop,
+    ∀ x : Int, 0 ≤ x →
+      (∀ ν : Int, ν = x → κ ν)                                  -- seed
+    ∧ (∀ i : Int, κ i ∧ 1 ≤ i → ∀ ν : Int, ν = i - 1 → κ ν)  -- loop (cyclic)
+    ∧ (∀ i : Int, κ i → 0 ≤ i)                                  -- check
+
+theorem cyc0_proof : cyc0 := by
+  -- unfold cyc0
+  -- exists (fun z => 0 ≤ z)
+  -- grind
+  solve_fixpoint with Q_pa
+
+
+
 -- PA1: 1 fusion κ + 1 PA κ
 def pa1 : Prop :=
   ∃ κseed : Int → Prop,
@@ -27,8 +45,7 @@ def pa1 : Prop :=
     ∧ (∀ i : Int, κinv i → 0 ≤ i)
 
 theorem pa1_proof : pa1 := by
-  try solve_fixpoint with Q_pa
-  sorry
+  solve_fixpoint with Q_pa
 
 -- PA2: 2 fusion κ merging into 1 PA κ
 -- The weaker source (κlo from x, gives 0 ≤ ν) dominates; GE2/GTZ eliminated.
@@ -46,15 +63,15 @@ def pa2 : Prop :=
     ∧ (∀ i : Int, κinv i → 0 ≤ i)
 
 theorem pa2_proof : pa2 := by
-  try solve_fixpoint with Q_pa
-  sorry
+  solve_fixpoint with Q_pa
+
 
 -- PA3: fusion pre-compute, PA loop (step-2), independent fusion output
 -- κout from x+3: 3 ≤ r post-check only closes via fusion's exact bound, not PA.
 def pa3 : Prop :=
   ∃ κpre : Int → Prop,
-  ∃ κinv : Int → Prop,
   ∃ κout : Int → Prop,
+  ∃ κinv : Int → Prop,
     ∀ x : Int, 0 ≤ x →
       (∀ ν : Int, ν = x + 1 → κpre ν)
     ∧ (∀ ν : Int, ν = x + 3 → κout ν)
@@ -65,8 +82,8 @@ def pa3 : Prop :=
     ∧ (∀ r : Int, κout r → 3 ≤ r)
 
 theorem pa3_proof : pa3 := by
-  try solve_fixpoint with Q_pa
-  sorry
+  solve_fixpoint with Q_pa
+
 
 -- PA4: 1 fusion κ, two independent PA loops
 -- κlp1 seeded from x directly; κlp2 seeded via the fusion κfused.
@@ -79,7 +96,7 @@ def pa4 : Prop :=
     ∧ (∀ ν : Int, ν = x     → κlp1 ν)
     ∧ (∀ i : Int, κlp1 i ∧ 1 ≤ i →
         ∀ ν : Int, ν = i - 1 → κlp1 ν)
-    ∧ (∀ i : Int, κlp1 i ∧ 0 ≤ i)
+    ∧ (∀ i : Int, κlp1 i → 0 ≤ i)
     ∧ (∀ v : Int, κfused v → κlp2 v)
     ∧ (∀ i : Int, κlp2 i ∧ 1 ≤ i →
         ∀ ν : Int, ν = i - 1 → κlp2 ν)
@@ -87,8 +104,7 @@ def pa4 : Prop :=
     ∧ (∀ r : Int, κfused r → 1 ≤ r)
 
 theorem pa4_proof : pa4 := by
-  try solve_fixpoint with Q_pa
-  sorry
+  solve_fixpoint with Q_pa
 
 -- PA5: two-step fusion chain → PA loop + independent fusion
 -- κa (x+1) → κb (κa+1): acyclic 2-step chain, both handled by fusion.
@@ -96,8 +112,8 @@ theorem pa4_proof : pa4 := by
 def pa5 : Prop :=
   ∃ κa   : Int → Prop,
   ∃ κb   : Int → Prop,
-  ∃ κinv : Int → Prop,
   ∃ κfin : Int → Prop,
+  ∃ κinv : Int → Prop,
     ∀ x : Int, 0 ≤ x →
       (∀ ν : Int, ν = x + 1 → κa ν)
     ∧ (∀ v : Int, κa v → ∀ ν : Int, ν = v + 1 → κb ν)
@@ -109,5 +125,4 @@ def pa5 : Prop :=
     ∧ (∀ r : Int, κfin r → 5 ≤ r)
 
 theorem pa5_proof : pa5 := by
-  try solve_fixpoint with Q_pa
-  sorry
+  solve_fixpoint with Q_pa

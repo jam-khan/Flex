@@ -320,3 +320,14 @@ def ex_stress : Prop :=
 
 theorem ex_stressProof : ex_stress := by
   solve_fixpoint
+
+private def qualBar : List Qualifier := [q{ Bar(z : int) | 0 ≤ z }]
+
+def exCyclic : Prop :=
+  ∃ κ : Int → Prop,
+    (∀ x : Int, 0 ≤ x → ∀ ν : Int, ν = x → κ ν)
+  ∧ (∀ x : Int, κ x → ∀ ν : Int, ν = x + 1 → κ ν)
+  ∧ (∀ x : Int, κ x → 0 ≤ x)
+
+theorem exCyclicProof : exCyclic := by
+  solve_fixpoint with qualBar

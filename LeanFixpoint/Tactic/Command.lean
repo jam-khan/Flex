@@ -41,7 +41,7 @@ elab "#translate_and_solve" t:term : command => do
     logInfo m!"Translated Constraint:\n{toString constraint}"
 
     -- Phase 3: Solve
-    solveAndCheckConstraint constraint
+    -- solveAndCheckConstraint constraint
 
 elab "#test_manual_assignment" : command => do
   Lean.Elab.Command.liftTermElabM do
@@ -57,12 +57,12 @@ elab "#test_manual_assignment" : command => do
 
     logInfo m!"κd-related flat constraints: {kdFlats.length}"
 
-    for fc in kdFlats do
-      logInfo m!"Checking: {toString fc.val}"
-      let ok ← checkFlatUnderAssignment fc assignment
-      if ok then
-        logInfo m!"  ✅ valid"
-      else
-        logWarning m!"❌ invalid"
+    -- for fc in kdFlats do
+    --   logInfo m!"Checking: {toString fc.val}"
+    --   let ok ← checkFlatUnderAssignment fc assignment
+    --   if ok then
+    --     logInfo m!"  ✅ valid"
+    --   else
+    --     logWarning m!"❌ invalid"
 
 -- #test_manual_assignment
