@@ -1,5 +1,6 @@
 import Lean
 
+import Aesop
 import LeanFixpoint.Core.Types
 import LeanFixpoint.Core.Subst
 import LeanFixpoint.Core.Macros
@@ -7,161 +8,138 @@ import LeanFixpoint.Core.Pretty
 import LeanFixpoint.Core.Fusion
 import LeanFixpoint.Solve.Qualifier
 import LeanFixpoint.Elab.ToExpr
-import LeanFixpoint.Tactic.Grind
+import LeanFixpoint.Tactic.Utils
 
 open Lean Meta Elab Term Tactic
 
--- /-- Build Pred (conjunction of qualifiers) from a list of RExpr -/
--- def conjoinQualifiers (qs : List RExpr) : Pred :=
---   match qs.map Pred.rexpr with
---   | []      => Pred.tru
---   | [p]     => p
---   | p :: ps => ps.foldl Pred.conj p
+-- Build Pred (conjunction of qualifiers) from a list of RExpr
+def conjoinQualifiers (qs : List RExpr) : Pred :=
+  match qs.map Pred.rexpr with
+  | []      => Pred.tru
+  | [p]     => p
+  | p :: ps => ps.foldl Pred.conj p
 
--- /-- Replace κ's formal params with actual args in a qualifier -/
--- def instantiateQualWithArgs (κ : KVar) (q : RExpr) (args : List Var) : RExpr :=
---   let pairs := κ.params.zip args
---   pairs.foldl (fun acc (param, arg) => RExpr.subst param (.var arg) acc) q
+-- Extract actual args from κ-application in head
+def getHeadArgs : Pred → KVar → List Var
+  | .kapp k args, κ => if k == κ then args else []
+  | .conj p₁ p₂, κ => getHeadArgs p₁ κ ++ getHeadArgs p₂ κ
+  | _, _ => []
 
--- /-- Extract actual args from κ-application in head -/
--- def getHeadArgs : Pred → KVar → List Var
---   | .kapp k args, κ => if k == κ then args else []
---   | .conj p₁ p₂, κ => getHeadArgs p₁ κ ++ getHeadArgs p₂ κ
---   | _, _ => []
+-- Replace κ's formal params with actual args in a qualifier -/
+def instantiateQualWithArgs (κ : KVar) (q : RExpr) (args : List Var) : RExpr :=
+  -- constructs a parameter × argument pair
+  -- where paramᵢ is to be replaced by argᵢ
+  let pairs := κ.params.zip args
+  pairs.foldl (fun acc (param, arg) => RExpr.subst param (.var arg) acc) q
 
--- /-- One weakening pass -/
--- def weakenOnce
---     (flatCs : List FlatConstraint)
---     (assignment : List (KVar × List RExpr))
---     : TermElabM (List (KVar × List RExpr)) := do
---   let mut a := assignment
---   for fc in flatCs do
---     for κ in fc.head.kvars do
---       let some qs := (a.find? fun (k, _) => k == κ).map (·.2)
---         | continue
---       let headArgs := getHeadArgs fc.head κ
---       let mut kept : List RExpr := []
---       for q in qs do
---         let mut c := fc.val
---         for (k, kqs) in a do
---           c := c.elimStar k (conjoinQualifiers kqs)
---         let qInst := instantiateQualWithArgs κ q headArgs
---         c := c.elimStar κ (.rexpr qInst)
---         let ok ← checkVCWithGrindOmega c
---         if ok then kept := kept ++ [q]
---       a := a.map fun (k, qs') => if k == κ then (k, kept) else (k, qs')
---   return a
+def checkConstraintVC (c : Constraint) : TermElabM Bool := do
+  let prop ← c.toExpr {}
+  let mvar ← mkFreshExprMVar (some prop) (kind := MetavarKind.syntheticOpaque)
+  let mvarId := mvar.mvarId!
+  try
+    let goals ← Tactic.run mvarId do
+      -- try the full closer chain from SolveFixpoint
+      let _ ← attemptTactic (evalTactic (← `(tactic | simp_all)))
+      let _ ← attemptTactic (evalTactic (← `(tactic | grind)))
+      let _ ← attemptTactic (evalTactic (← `(tactic | omega)))
+      let _ ← attemptTactic (evalTactic (← `(tactic | aesop)))
+    return goals.isEmpty
+  catch _ => return Bool.false
 
--- /-- Iterate until fixpoint -/
--- partial def solveFixpoint
---     (flatCs : List FlatConstraint)
---     (assignment : List (KVar × List RExpr))
---     : TermElabM (List (KVar × List RExpr)) := do
---   let a' ← weakenOnce flatCs assignment
---   let changed := a'.zip assignment |>.any fun ((_, qs'), (_, qs)) =>
---     qs'.length != qs.length
---   if !changed then return a'
---   solveFixpoint flatCs a'
+-- Single weakening pass
+-- Essentially takes constraints and qualifiers, tried to substitute a qualifier till satisfaction
+def weakenOnce
+    (flatCs : List FlatConstraint)
+    (assignment : List (KVar × List RExpr))
+    : TermElabM (List (KVar × List RExpr)) := do
+  let mut κq_pairs := assignment
+  for fc in flatCs do
+    for κ in fc.head.kvars do
+      -- take out the ones with κ in kappa qualifier pairs
+      let some qs := (κq_pairs.find? fun (κ', _) => κ' == κ).map (·.2)
+        | continue
+      -- get head arguments from κ application in head
+      let headArgs := getHeadArgs fc.head κ
+      -- qualifiers list
+      let mut kept : List RExpr := []
 
--- /-- Full sat: Fusion + predicate abstraction -/
--- def sat (c : Constraint) (Q : List Qualifier) : TermElabM Bool := do
---   let (acyclic, cuts) := c.partitionKVars
---   let c' := c.elim acyclic
---   if cuts.isEmpty then
---     checkVCWithGrindOmega c'
---   else
---     let flatCs := c'.flat
---     let init := cuts.map fun κ =>
---       let qs := Q.map fun q => q.instantiate κ.params.head!
---       (κ, qs)
---     let assignment ← solveFixpoint flatCs init
---     let mut result := c'
---     for (κ, qs) in assignment do
---       result := result.elimStar κ (conjoinQualifiers qs)
---     checkVCWithGrindOmega result
+      -- loop through qualifiers
+      for q in qs do
+        -- get constraint from the flattened constraint
+        let mut c := fc.val
+        -- walk through pair of kappa and corresponding qualifiers
+        for (k, kqs) in κq_pairs do
+          -- perform elimination using the qualifiers for k
+          c := c.elimStar k (conjoinQualifiers kqs)
+        -- instantiate qualifier q with headargs from κ in flattened constraint fc
+        let qInst := instantiateQualWithArgs κ q headArgs
+        -- now, elimstart with this instantiation
+        c := c.elimStar κ (.rexpr qInst)
+        -- check if constraint is satisfied
+        let ok ← checkConstraintVC c
+        -- if sat, then keep qualifier
+        if ok then kept := kept ++ [q]
+      κq_pairs := κq_pairs.map fun (k, qs') => if k == κ then (k, kept) else (k, qs')
+  return κq_pairs
 
+-- Iterate until fixpoint
+-- NOTE: CHECK this carefully again
+partial def solveFixpoint
+    (flatCs : List FlatConstraint)
+    (assignment : List (KVar × List RExpr))
+    : TermElabM (List (KVar × List RExpr)) := do
+  let a' ← weakenOnce flatCs assignment
+  let changed := a'.zip assignment |>.any fun ((_, qs'), (_, qs)) =>
+    qs'.length != qs.length
+  if !changed then return a'
+  solveFixpoint flatCs a'
 
--- /--
---   `#solve_constraint_full c` — Fusion + predicate abstraction.
+-- predicate abstraction
+def predicateAbstraction (c : Constraint) (Q : List Qualifier)
+  : TermElabM (List (KVar × List RExpr)) := do
 
---   1. Partition κ-vars into acyclic/cyclic
---   2. Eliminate acyclic via Fusion
---   3. If cyclic remain, run predicate abstraction with given qualifiers
---   4. Elaborate and discharge with grind/omega
--- -/
--- elab "#solve_constraint_full " t:term " with " qt:term : command => do
---   Lean.Elab.Command.liftTermElabM do
---     -- Reflect constraint
---     let cExpr ← Lean.Elab.Term.elabTerm t (some (mkConst ``Constraint))
---     let cExpr ← instantiateMVars cExpr
---     let c ← try
---       unsafe Lean.Meta.evalExpr Constraint (mkConst ``Constraint) cExpr
---     catch _ => throwError "Failed to reflect Constraint"
+  -- Log the constraint received
+  logInfo m!"[predicate-abstraction] Received constraint:\n{toString c}"
 
---     -- Reflect qualifier list
---     let qExpr ← Lean.Elab.Term.elabTerm qt
---       (some (mkApp (mkConst ``List [.zero]) (mkConst ``Qualifier)))
---     let qExpr ← instantiateMVars qExpr
---     let Q ← try
---       unsafe Lean.Meta.evalExpr (List Qualifier)
---         (mkApp (mkConst ``List [.zero]) (mkConst ``Qualifier)) qExpr
---     catch _ => throwError "Failed to reflect qualifier list"
+  -- Log qualifiers
+  let qStrs := Q.map fun q =>
+    let ps := String.intercalate ", " (q.params.map fun p => s!"{p.sym} : {toString p.sort}")
+    s!"{q.name}({ps} | {toString q.body})"
+  logInfo m!"[predicate-abstraction] Qualifiers ({Q.length}):\n{String.intercalate "\n" (qStrs.map (s!" · " ++ · ))}"
 
---     -- Phase 1: partition
---     let (acyclic, cuts) := c.partitionKVars
---     logInfo m!"Acyclic: {acyclic.map toString}"
---     logInfo m!"Cyclic:  {cuts.map toString}"
+  -- Partition κ-vars
+  let (acyclic, cyclic) := c.partitionKVars
 
---     -- Phase 2: Fusion
---     let mut eliminated := c
---     for κ in acyclic do
---       let sol := eliminated.sol1 κ
---       logInfo m!"  sol1({κ.name}) = {toString sol}"
---       eliminated := eliminated.elim1 κ
+  -- Log acyclic status
+  if acyclic.isEmpty then
+    logInfo m!"[oredicate-abstraction] No acyclic κ-vars remaining (fusion handled them all)"
+  else
+    logWarning m!"[predicate-abstraction] Acyclic κ-vars still present (fusion missed these): {acyclic.map (·.name)}"
 
---     -- Phase 3: predicate abstraction (if cyclic vars remain)
---     if cuts.isEmpty then
---       logInfo m!"No cyclic variables."
---     else
---       let flatCs := eliminated.flat
---       -- Initialize
---       let init := cuts.map fun κ =>
---         let qs := Q.map fun q => q.instantiate κ.params.head!
---         (κ, qs)
---       for (κ, qs) in init do
---         logInfo m!"  Init A({κ.name}) = {qs.map toString}"
+  -- Log cyclic κ-vars
+  if cyclic.isEmpty then
+    logInfo m!"[predicate-abstraction] No cyclic κ-vars -- nothing to solve"
+    return [] -- since no cyclic kvars to solve for predicate abstraction
 
---       -- Solve fixpoint
---       let assignment ← solveFixpoint flatCs init
---       for (κ, qs) in assignment do
---         logInfo m!"  Final A({κ.name}) = {qs.map toString}"
+  logInfo m!"[predicate-abstraction] Cyclic κ-vars to solve: {cyclic.map (·.name)}"
 
---       -- Substitute
---       for (κ, qs) in assignment do
---         let sol := conjoinQualifiers qs
---         eliminated := eliminated.elimStar κ sol
+  -- Flatten constraint
+  let flatCs := c.flat
 
---     -- Phase 4: elaborate and check
---     logInfo m!"Final constraint:\n{toString eliminated}"
---     let prop ← eliminated.toExpr {}
---     let fmt ← ppExpr prop
---     logInfo m!"VC: {fmt}"
---     let ok ← checkVCWithGrindOmega eliminated
---     if ok then logInfo m!"✅ VC discharged"
---     else logWarning m!"❌ VC could not be discharged"
+  -- Initialize: each cylic κ gets all qualifiers instantiates with its params
+  let init := cyclic.map fun κ =>
+    let qs := Q.map fun q => q.instantiate κ.params
+    (κ, qs)
 
--- section Test
--- /-- Simple test command -/
--- elab "#test_sat" : command => do
---   Lean.Elab.Command.liftTermElabM do
---     let Q : List Qualifier := [
---       { pred := r{ 0 ≤ v } },
---       { pred := r{ v ≤ 0 } }
---     ]
---     let ok ← sat mixedTest Q
---     if ok then logInfo m!"✅ sat returned true"
---     else logWarning m!"❌ sat returned false"
+  -- Display κ with instantiated qualifiers
+  for (κ, qs) in init do
+    logInfo m!"[predicate-abstraction] Init A({κ.name}) ↦ {qs.map toString}"
 
--- -- #test_sat
+  -- Solve fixpoint
+  let assignment ← solveFixpoint flatCs init
 
--- end Test
+  -- Final κ assignment/solutions after pedicate abstraction
+  for (κ, qs) in assignment do
+    logInfo m!"[predicate-abstraction] Final A({κ.name}) ↦ {qs.map toString}"
+
+  return assignment

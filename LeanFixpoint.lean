@@ -25,6 +25,7 @@ import LeanFixpoint.Tactic.Command
 import LeanFixpoint.Tactic.Grind
 import LeanFixpoint.Tactic.SolveFixpoint
 import LeanFixpoint.Tactic.Tactics
+import LeanFixpoint.Tactic.Utils
 
 /-
   Predicate Abstraction related code,

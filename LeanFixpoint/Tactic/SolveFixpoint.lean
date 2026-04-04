@@ -8,11 +8,9 @@ import LeanFixpoint.Elab.ToExpr
 import LeanFixpoint.Solve.Solver
 import LeanFixpoint.Solve.Qualifier
 import LeanFixpoint.Elab.FromExpr
+import LeanFixpoint.Tactic.Utils
 
 open Lean Elab Meta Command Tactic
-
-private def attemptTactic (t : TacticM Unit) : TacticM Bool :=
-  tryCatch (do t; pure Bool.true) (fun _ => pure Bool.false)
 
 -- Register a trace class (toggle with `set_option trace.solveFixpoint true`)
 initialize Lean.registerTraceClass `solveFixpoint
@@ -129,7 +127,6 @@ private def solveFixpointImpl (qs? : Option (TSyntax `term)) : TacticM Unit := w
 
   -- elaborate and log qualifiers
   let quals? ← elaborateQualifiers qs?
-  let _ := quals?
   let _ ← attemptTactic (evalTactic (← `(tactic| intros)))
 
   let goal ← getMainGoal
@@ -153,23 +150,30 @@ private def solveFixpointImpl (qs? : Option (TSyntax `term)) : TacticM Unit := w
       let constraint ← toConstraint fvarMap kvarSet propAST
       let kvars := constraint.kvars.eraseDups
 
-      -- Log found κ-variables
-      if kvars.isEmpty then
-        logInfo m!"[solve_fixpoint] No κ-variables found — falling back to closeResidualGoals"
-      else
-        logInfo m!"[solve_fixpoint] Found κ-variables: {kvars.map (·.name)}"
+      -- Phase 1: Partition into acyclic / cyclic
+      let (acyclic, cyclic) := constraint.partitionKVars
+      logInfo m!"[solve_fixpoint] Acyclic: {acyclic.map (·.name)}"
+      logInfo m!"[solve_fixpoint] Cyclic:  {cyclic.map (·.name)}"
 
+      -- Phase 2: Fusion - eliminate acyclic κ-vars
       let mut solutions : List (Name × Pred) := []
       let mut curr := constraint
-      for κ in kvars do
+      for κ in acyclic do
         let sol := curr.sol1 κ
         solutions := solutions ++ [(κ.name, sol)]
         curr := curr.elim1 κ
 
-      -- Log solutions
       for (κName, sol) in solutions do
         logInfo m!"[solve_fixpoint] Solution: {κName} := {toString sol}"
 
+      -- Phase 3: Predicate abstraction - handle cyclic κ-vars
+      if !cyclic.isEmpty then
+        match quals? with
+        | some Q => predicateAbstraction curr Q
+        | none   => logWarning m!"[solve_fixpoint] Cyclic κ-vars present but no qualifiers provided"
+
+      -- NOTE: One may need to be careful with order of instantiations
+      -- Phase 4: Witness synthesis for acyclic solutions
       for (_κName, sol) in solutions do
         let witness    ← solToWitnessExpr sol
         let witnessSyn ← PrettyPrinter.delab witness
