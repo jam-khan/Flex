@@ -42,7 +42,7 @@ import LeanFixpoint
                                 ($k1 a5 a6 a0 a1)))))))))))))))))
 -/
 
-def qLe : Qualifier := q{ Le(a0 : int, a1 : int) | a0 ≤ a1 }
+def Le : Qualifier := q{ Le(a0 : int, a1 : int) | a0 ≤ a1 }
 
 def scrape01Prop : Prop :=
   ∃ κ0 : Int → Int → Int → Prop,

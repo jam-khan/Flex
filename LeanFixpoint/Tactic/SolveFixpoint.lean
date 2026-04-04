@@ -84,7 +84,52 @@ private def closeResidualGoals : TacticM Unit := do
     if goals.isEmpty then pure ()
     else closeLoop
 
-elab "solve_fixpoint" : tactic => withMainContext do
+-- Format qualifiers for printing
+private def formatQualifier (q : Qualifier) : String :=
+  let ps := String.intercalate ", " (q.params.map fun p => s!"{p.sym} : {toString p.sort}")
+  s!"{q.name}({ps}) | {toString q.body}"
+
+private def elaborateQualifiers (qs? : Option (TSyntax `term)) : TacticM (Option (List Qualifier)) :=
+  -- logging the qualifiers first
+  match qs? with
+  -- no qualifiers passed
+  | none       => do
+    logInfo m!"[solve_fixpoint] Qualifiers: no argument passed"
+    return none
+  -- term passed for qualifiers
+  | some qsSyn =>
+      tryCatch
+        (do
+          -- elaborate the qualifier syntax into a term with expected type
+          -- of a list of qualifiers
+          let qsExpr ← elabTerm qsSyn
+            (some (mkApp (mkConst ``List [.zero]) (mkConst ``Qualifier)))
+          -- resolve `?m` meta-variables inside
+          let qsExpr  ← instantiateMVars qsExpr
+          -- finally, evaluate the expression and give an evaluated lean value
+          -- takes the type `List Qualifier` which is top-level `Lean` type
+          -- also, take `Expr` of the same type
+          -- and the expression to evaluate, here `qsExpr`
+          let quals   ← unsafe Lean.Meta.evalExpr (List Qualifier)
+                        (mkApp (mkConst ``List [.zero]) (mkConst ``Qualifier)) qsExpr
+
+          if quals.isEmpty then
+            logInfo m!"[solve_fixpoint] Qualifiers: empty list provided"
+          else
+            let lines := String.intercalate "\n" (quals.map fun q => s!" · {formatQualifier q}")
+            logInfo m!"[solve_fixpoint] Qualifiers ({quals.length}):\n{lines}"
+          return quals
+        )
+        (fun _ => do
+          logInfo m!"[solve_fixpoint] Qualifiers: argument could not be reflected as List Qualifier"
+          return none
+        )
+
+private def solveFixpointImpl (qs? : Option (TSyntax `term)) : TacticM Unit := withMainContext do
+
+  -- elaborate and log qualifiers
+  let quals? ← elaborateQualifiers qs?
+  let _ := quals?
   let _ ← attemptTactic (evalTactic (← `(tactic| intros)))
 
   let goal ← getMainGoal
@@ -135,5 +180,14 @@ elab "solve_fixpoint" : tactic => withMainContext do
       logInfo m!"[solve_fixpoint] → falling back to closeResidualGoals"
       )
 
-  let _ := solverResult  -- suppress unused warning
+  let _ := solverResult
+  let _ := qs?
   closeResidualGoals
+
+-- declare syntax for solve_fixpoint
+syntax "solve_fixpoint" : tactic
+syntax "solve_fixpoint" "with" term : tactic
+
+elab_rules : tactic
+  | `(tactic| solve_fixpoint)           => solveFixpointImpl none
+  | `(tactic| solve_fixpoint with $qs)  => solveFixpointImpl (some qs)
