@@ -28,17 +28,16 @@ import LeanFixpoint
               (v))))))))
 -/
 
-def qBar01 : Qualifier := q{ Bar(v : int) | 0 ≤ v }
+def qualifiers01 : List Qualifier := [
+  q{ Bar(v : int) | 0 ≤ v }
+]
 
 def numericSort01Prop : Prop :=
   ∃ κ1 : Int → Prop,
-    -- Base: n ≤ 0 ⇒ VV = 0 ⇒ κ1(VV)
     (∀ n : Int, n ≤ 0 → ∀ VV : Int, VV = 0 → κ1 VV)
-    -- Rec: 0 < n ⇒ n1 = n-1 ⇒ κ1(t1) ⇒ v = n+t1 ⇒ κ1(v)
     ∧ (∀ n : Int, 0 < n → ∀ n1 : Int, n1 = n - 1 →
         ∀ t1 : Int, κ1 t1 → ∀ v : Int, v = n + t1 → κ1 v)
-    -- Use: κ1(r) ⇒ 0 ≤ r
     ∧ (∀ y : Int, ∀ r : Int, κ1 r → 0 ≤ r)
 
 theorem numericSort01Proof : numericSort01Prop := by
-  sorry
+  solve_fixpoint with qualifiers01

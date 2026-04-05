@@ -26,6 +26,9 @@ import LeanFixpoint
             (forall ((v bool) (and ((<=> v (<= 0 r))) ((= v ok1))))
               (v))))))))
 -/
+def qualifiers00 : List Qualifier := [
+  q{ Bar(v : int) | 0 ≤ v }
+]
 
 def numericSort00Prop : Prop :=
   ∃ κ1 : Int → Prop,
@@ -34,4 +37,5 @@ def numericSort00Prop : Prop :=
         ∀ t1 : Int, κ1 t1 → ∀ v : Int, v = n + t1 → κ1 v)
     ∧ (∀ y : Int, ∀ r : Int, κ1 r → 0 ≤ r)
 
-theorem numericSort00Proof : numericSort00Prop := by sorry
+theorem numericSort00Proof : numericSort00Prop := by
+  solve_fixpoint with qualifiers00

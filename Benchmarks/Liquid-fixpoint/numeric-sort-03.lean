@@ -31,7 +31,10 @@ import LeanFixpoint
 -/
 
 -- cast erased: Apple, Banana both map to Int
-def qBar03 : Qualifier := q{ Bar(v : int, z : int) | v ≥ z }
+-- def qBar03 : Qualifier :=
+def qualifiers : List Qualifier := [
+  q{ Bar(v : int, z : int) | v ≥ z }
+]
 
 def numericSort03Prop : Prop :=
   ∃ κ1 : Int → Int → Prop,
@@ -42,4 +45,5 @@ def numericSort03Prop : Prop :=
       ∧ (∀ y : Int, ∀ r : Int, κ1 r zero → zero ≤ r)
 
 theorem numericSort03Proof : numericSort03Prop := by
+
   sorry

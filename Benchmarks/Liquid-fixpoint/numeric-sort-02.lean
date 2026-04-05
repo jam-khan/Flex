@@ -28,7 +28,9 @@ import LeanFixpoint
                 (v)))))))))
 -/
 
-def qBar02 : Qualifier := q{ Bar(v : int, z : int) | v ≥ z }
+def qualifiers02 : List Qualifier := [
+  q{ Bar(v : int, z : int) | v ≥ z }
+]
 
 def numericSort02Prop : Prop :=
   ∃ κ1 : Int → Int → Prop,
@@ -42,4 +44,6 @@ def numericSort02Prop : Prop :=
       ∧ (∀ y : Int, ∀ r : Int, κ1 r zero → zero ≤ r)
 
 theorem numericSort02Proof : numericSort02Prop := by
+  solve_fixpoint with qualifiers02
+  
   sorry
