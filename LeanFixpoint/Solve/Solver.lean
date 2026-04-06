@@ -25,6 +25,12 @@ def getHeadArgs : Pred → KVar → List Var
   | .conj p₁ p₂, κ => getHeadArgs p₁ κ ++ getHeadArgs p₂ κ
   | _, _ => []
 
+/-- All ordered k-tuples drawn from `xs` (with no repeats) -/
+partial def kPerms [BEq α] (k : Nat) (xs : List α) : List (List α) :=
+  if k == 0 then [[]]
+  else xs.flatMap fun x =>
+    (kPerms (k-1) (xs.erase x)).map (x :: ·)
+
 -- Replace κ's formal params with actual args in a qualifier -/
 def instantiateQualWithArgs (κ : KVar) (q : RExpr) (args : List Var) : RExpr :=
   -- constructs a parameter × argument pair
@@ -39,10 +45,10 @@ def checkConstraintVC (c : Constraint) : TermElabM Bool := do
   try
     let goals ← Tactic.run mvarId do
       -- try the full closer chain from SolveFixpoint
-      let _ ← attemptTactic (evalTactic (← `(tactic | simp_all)))
-      let _ ← attemptTactic (evalTactic (← `(tactic | grind)))
+      -- let _ ← attemptTactic (evalTactic (← `(tactic | simp_all)))
       let _ ← attemptTactic (evalTactic (← `(tactic | omega)))
-      let _ ← attemptTactic (evalTactic (← `(tactic | aesop)))
+      let _ ← attemptTactic (evalTactic (← `(tactic | grind)))
+      -- let _ ← attemptTactic (evalTactic (← `(tactic | aesop)))
     logInfo m!"[checkVC] result={goals.isEmpty} remaining={goals.length} prop={prop}"
     return goals.isEmpty
   catch e =>
@@ -146,7 +152,9 @@ def predicateAbstraction (c : Constraint) (Q : List Qualifier)
 
   -- Initialize: each cylic κ gets all qualifiers instantiates with its params
   let init := cyclic.map fun κ =>
-    let qs := Q.map fun q => q.instantiate κ.params
+    let qs := Q.flatMap fun q =>
+      let perms := kPerms q.params.length κ.params
+      perms.map fun perm => q.instantiate perm
     (κ, qs)
 
   -- Display κ with instantiated qualifiers

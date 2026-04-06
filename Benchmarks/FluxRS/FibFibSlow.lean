@@ -1,5 +1,8 @@
+import LeanFixpoint
 
-noncomputable def fib_fib : Int -> Int := sorry
+noncomputable def fib_fib : Int → Int := sorry
+@[simp] axiom fib_base (n : Int) : n ≤ 1 → fib_fib n = 1
+@[simp] axiom fib_rec (n : Int) : n > 1 → fib_fib n = fib_fib (n-1) + fib_fib (n-2)
 
 def FibFibSlow :=
  ∀ (n₀ : Int),
@@ -16,5 +19,4 @@ def FibFibSlow :=
     (1 = (fib_fib n₀)))
 
 def FibFibSlow_proof : FibFibSlow := by
-  unfold FibFibSlow
-  sorry
+  solve_fixpoint

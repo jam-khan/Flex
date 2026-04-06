@@ -163,10 +163,15 @@ def Constraint.toExpr (env : VarMap) : Constraint → MetaM Expr
 
 
 /--
-  Convert a solved `Pred` into a `fun (z : Int) => ...` witness expression.
+  Convert a solved `Pred` with a set of free params
+  into a closed function `fun (z₁ : Int, … , zₙ : Int) => ...` witness expression.
 -/
-def solToWitnessExpr (sol : Pred) (paramName : Name := `z) : MetaM Expr := do
-  withLocalDeclD paramName (mkConst ``Int) fun zFvar => do
-    let env : VarMap := ({} : VarMap).insert paramName zFvar
-    let body ← sol.toExpr env
-    mkLambdaFVars #[zFvar] body
+def solToWitnessExpr (sol : Pred) (params : List Name) : MetaM Expr := do
+  let rec go (env : VarMap) (fvars : Array Expr) : List Name → MetaM Expr
+    | [] => do
+      let body ← sol.toExpr env
+      mkLambdaFVars fvars body
+    | n :: rest =>
+      withLocalDeclD n (mkConst ``Int) fun fvar => do
+        go (env.insert n fvar) (fvars.push fvar) rest
+  go {} #[] params

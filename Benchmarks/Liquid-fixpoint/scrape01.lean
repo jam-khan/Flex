@@ -42,7 +42,11 @@ import LeanFixpoint
                                 ($k1 a5 a6 a0 a1)))))))))))))))))
 -/
 
-def Le : Qualifier := q{ Le(a0 : int, a1 : int) | a0 ≤ a1 }
+def qLe : Qualifier := q{ Le(a0 : int, a1 : int) | a0 ≤ a1 }
+def qDiff : Qualifier := q{ Diff(v : int, a : int, b : int) | v == a - b }
+
+def qualifiers : List Qualifier := [qLe, qDiff]
+
 
 def scrape01Prop : Prop :=
   ∃ κ0 : Int → Int → Int → Prop,
@@ -55,4 +59,5 @@ def scrape01Prop : Prop :=
           ∧ (a4 < a1 → ∀ a5 : Int, a5 = a3 + 1 → ∀ a6 : Int, a6 = a4 + 1 →
               κ0 a6 a0 a1 ∧ κ1 a5 a6 a0 a1))
 
-theorem scrape01Proof : scrape01Prop := by sorry
+theorem scrape01Proof : scrape01Prop := by
+  solve_fixpoint with qualifiers

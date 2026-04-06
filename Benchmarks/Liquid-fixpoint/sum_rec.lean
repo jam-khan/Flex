@@ -37,6 +37,8 @@ GOOD EXAMPLE FOR PREDICATE ABSTRACTION
 def qBarSR : Qualifier := q{ Bar(v : int) | 0 ≤ v }
 def qBazSR : Qualifier := q{ Baz(v : int, a : int) | v ≥ a }
 
+def qualifiers : List Qualifier := [qBarSR, qBazSR]
+
 def sumRecProp : Prop :=
   ∃ κ1 : Int → Int → Prop,
     -- Base: n ≤ 0 ⇒ VV = 0 ⇒ κ1(VV, n)
@@ -48,4 +50,5 @@ def sumRecProp : Prop :=
     ∧ (∀ y : Int, ∀ r : Int, κ1 r y → 0 ≤ r)
 
 theorem sumRecProof : sumRecProp := by
-  sorry
+  solve_fixpoint with qualifiers
+  

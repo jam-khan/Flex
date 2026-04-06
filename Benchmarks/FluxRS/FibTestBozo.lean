@@ -1,3 +1,4 @@
+import LeanFixpoint
 
 @[ext]
 structure FibBozo  where
@@ -13,5 +14,4 @@ def FibTestBozo :=
     (((FibBozo.x b₀) + 20) = (if (FibBozo.y b₀) then ((FibBozo.x b₀) + 10) else ((FibBozo.x b₀) + 20)))
 
 def FibTestBozo_proof : FibTestBozo := by
-  unfold FibTestBozo
-  grind
+  solve_fixpoint

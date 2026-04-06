@@ -26,7 +26,7 @@ inductive PropAST
   | nonNeg : Expr → PropAST
   | forall_ : Name → Expr → PropAST → PropAST
   | exists_ : Name → Expr → PropAST → PropAST
-  | app  : Expr → Expr → PropAST           -- κ ν  (predicate variable applied to arg)
+  | app  : Expr → Array Expr → PropAST  -- κ(ν₁, ..., νₙ)
   deriving Repr
 
 partial def toPropASTWithTracking
@@ -95,14 +95,11 @@ partial def toPropASTWithTracking
       let q ← toPropASTWithTracking fvarsRef kvarsRef (e.getArg! 1)
       return .and (.imp p q) (.imp q p)
 
-    -- κ ν  (predicate variable applied to arg)
+    -- κ(ν₁, ..., vₙ) (predicate variable applied to multiple args)
     else if e.getAppFn.isFVar then
       let fn := e.getAppFn
       let args := e.getAppArgs
-      if args.size == 1 then
-        return .app fn args[0]!
-      else
-        throwError "toPropAST: unsupported pred app arity {args.size}: {e}"
+      return .app fn args
     else
       throwError "toPropAST: unhandled: {e}"
 
@@ -175,6 +172,10 @@ partial def toConstraint (fvars : FVarMap) (kvars : KVarSet)
   | .forall_ name _ty body =>
     let bodyC ← toConstraint fvars kvars body
     return .imp name .int .tru bodyC
+  | .imp guard body =>
+      let guardPred ← toPred fvars kvars guard
+      let bodyC ← toConstraint fvars kvars body
+      return .imp `_anon .int guardPred bodyC
   | other =>
     return .pred (← toPred fvars kvars other)
 
@@ -187,14 +188,16 @@ partial def toConstraint (fvars : FVarMap) (kvars : KVarSet)
         return .rexpr (.cmp .eq (← exprToRExpr fvars lhs) (← exprToRExpr fvars rhs))
     | .le lhs rhs =>
         return .rexpr (.cmp .le (← exprToRExpr fvars lhs) (← exprToRExpr fvars rhs))
-    | .app fn arg =>
+    | .app fn args =>
         let fnId := fn.fvarId!
         -- We need to check whether it is a kvar or not
         if kvars.contains fnId then
           let κName   := (Std.HashMap.get? fvars fn.fvarId!).getD `unknown
-          let argName := (Std.HashMap.get? fvars arg.fvarId!).getD `unknown
-          let kvar : KVar := { name := κName, params := [`z] }  -- canonical param
-          return .kapp kvar [argName]
+          let argNames := args.toList.map fun arg =>
+              (Std.HashMap.get? fvars arg.fvarId!).getD `unknown
+          let canonParams := (List.range argNames.length).map fun i => Name.mkStr1 s!"z{i}"
+          let kvar : KVar := { name := κName, params := canonParams }
+          return .kapp kvar argNames
         else
           throwError "toPred: uninterpreted predicate (not a κ-variable) -"
     | .and l r  =>
