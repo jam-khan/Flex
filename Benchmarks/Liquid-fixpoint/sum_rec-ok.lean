@@ -25,3 +25,19 @@
             (forall ((v bool) (and ((<=> v (<= 0 r))) ((= v ok1))))
               (v))))))))
 -/
+
+import LeanFixpoint
+
+def qualifiersSumRecOk : List Qualifier := [
+  q{ Bar(v : int) | 0 ≤ v }
+]
+
+def sumRecOkProp : Prop :=
+  ∃ κ1 : Int → Prop,
+    (∀ n : Int, n ≤ 0 → ∀ VV : Int, VV = 0 → κ1 VV)
+    ∧ (∀ n : Int, 0 < n → ∀ n1 : Int, n1 = n - 1 →
+        ∀ t1 : Int, κ1 t1 → ∀ v : Int, v = n + t1 → κ1 v)
+    ∧ (∀ y : Int, ∀ r : Int, κ1 r → 0 ≤ r)
+
+theorem sumRecOkProof : sumRecOkProp := by
+  solve_fixpoint with qualifiersSumRecOk

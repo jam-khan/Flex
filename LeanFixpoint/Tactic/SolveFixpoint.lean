@@ -5,7 +5,7 @@ import LeanFixpoint.Core.Types
 import LeanFixpoint.Core.Macros
 import LeanFixpoint.Core.Fusion
 import LeanFixpoint.Elab.ToExpr
-import LeanFixpoint.Solve.Solver
+import LeanFixpoint.Solve.Fixpoint
 import LeanFixpoint.Solve.Qualifier
 import LeanFixpoint.Elab.FromExpr
 import LeanFixpoint.Tactic.Utils
@@ -77,7 +77,7 @@ private def closeResidualGoals : TacticM Unit := do
   let goals ← getGoals
   if goals.isEmpty then pure ()
   else
-    let _ ← attemptTactic (evalTactic (← `(tactic| simp_all)))
+    let _ ← attemptTactic (evalTactic (← `(tactic| simp only [])))
     let goals ← getGoals
     if goals.isEmpty then pure ()
     else closeLoop
@@ -142,6 +142,13 @@ private def solveFixpointImpl (qs? : Option (TSyntax `term)) : TacticM Unit := w
     (do
       let fvarsRef ← IO.mkRef ({} : FVarMap)
       let kvarsRef ← IO.mkRef ({} : KVarSet)
+
+      -- Below we add any local context variables in the fvars
+      let lctx ← getLCtx
+      for decl in lctx do
+        if !decl.isAuxDecl then
+          fvarsRef.modify fun m => m.insert decl.fvarId decl.userName
+
       let goalType ← goal.getType
       let reduced  ← reduce goalType
       let propAST  ← toPropASTWithTracking fvarsRef kvarsRef reduced
@@ -156,11 +163,12 @@ private def solveFixpointImpl (qs? : Option (TSyntax `term)) : TacticM Unit := w
       logInfo m!"[solve_fixpoint] Cyclic:  {cyclic.map (·.name)}"
 
       -- Phase 2: Fusion - eliminate acyclic κ-vars
-      let mut solutions : List (Name × Pred) := []
+      -- solutions need name of κ, solution pred and list of κ formal params
+      let mut solutions : List (Name × Pred × List Name) := []
       let mut curr := constraint
       for κ in acyclic do
         let sol := curr.sol1 κ
-        solutions := solutions ++ [(κ.name, sol)]
+        solutions := solutions ++ [(κ.name, sol, κ.params)]
         curr := curr.elim1 κ
 
       for (κName, sol) in solutions do
@@ -173,15 +181,20 @@ private def solveFixpointImpl (qs? : Option (TSyntax `term)) : TacticM Unit := w
           let pa ← predicateAbstraction curr Q
           for (κ, qs) in pa do
             let sol   := conjoinQualifiers qs
-            solutions := solutions ++ [(κ.name, sol)]
+            solutions := solutions ++ [(κ.name, sol, κ.params)]
             curr      := curr.elimStar κ sol
         | none   => logWarning m!"[solve_fixpoint] Cyclic κ-vars present but no qualifiers provided"
 
       -- NOTE: One may need to be careful with order of instantiations
       -- Phase 4: Witness synthesis for acyclic solutions
-      for (_κName, sol) in solutions do
+      for (_κName, sol, params) in solutions do
         logInfo m!"[solve_fixpoint] Elaborating witness for: {toString sol}"
-        let witness    ← solToWitnessExpr sol
+        let mut env₀ : VarMap := {}
+        let lctx ← getLCtx
+        for decl in lctx do
+          if !decl.isAuxDecl then
+            env₀ := env₀.insert decl.userName (mkFVar decl.fvarId)
+        let witness ← solToWitnessExpr sol params env₀
         let witnessSyn ← PrettyPrinter.delab witness
         evalTactic (← `(tactic| refine ⟨$witnessSyn, ?_⟩))
     )

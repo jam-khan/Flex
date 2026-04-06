@@ -44,20 +44,27 @@ NOTE: THIS REQUIRES
 def qLe : Qualifier := q{ Le(a0 : int, a1 : int) | a0 ≤ a1 }
 def qDiff : Qualifier := q{ Diff(v : int, a : int, b : int) | v == a - b }
 
+def qualifiers : List Qualifier := [qLe, qDiff]
+
+
 -- k0 has 3 params, k1 has 4 params
 def scrape00Prop : Prop :=
   ∃ κ0 : Int → Int → Int → Prop,
   ∃ κ1 : Int → Int → Int → Int → Prop,
-    ∀ a0 a1 : Int, a0 ≥ 0 → a0 ≤ a1 → a1 ≥ 0 →
-      -- Init: a2 = 0 ⇒ κ0(a0, a0, a1) ∧ κ1(a2, a0, a0, a1)
+    ∀ a0 : Int, ∀ a1 : Int,
+      ∀ _u1 : Int, a0 ≥ 0 →
+      ∀ _u2 : Int, a0 ≤ a1 →
+      ∀ _u3 : Int, a1 ≥ 0 →
       (∀ a2 : Int, a2 = 0 →
         κ0 a0 a0 a1 ∧ κ1 a2 a0 a0 a1)
-      -- Loop body: κ0(a4, a0, a1) ∧ κ1(a3, a4, a0, a1) assumed
-      ∧ (∀ a3 a4 : Int, κ0 a4 a0 a1 → κ1 a3 a4 a0 a1 →
-          -- Exit: ¬(a4 < a1) ⇒ a3 = a1 - a0
-          (a4 ≥ a1 → a3 = a1 - a0)
-          -- Step: a4 < a1 ⇒ κ0(a4+1) ∧ κ1(a3+1, a4+1)
-          ∧ (a4 < a1 → ∀ a5 : Int, a5 = a3 + 1 → ∀ a6 : Int, a6 = a4 + 1 →
+      ∧ (∀ a3 : Int, ∀ a4 : Int,
+          κ0 a4 a0 a1 → κ1 a3 a4 a0 a1 →
+          (∀ _u4 : Int, a4 ≥ a1 → a3 = a1 - a0)
+          ∧ (∀ _u5 : Int, a4 < a1 →
+              ∀ a5 : Int, a5 = a3 + 1 →
+              ∀ a6 : Int, a6 = a4 + 1 →
               κ0 a6 a0 a1 ∧ κ1 a5 a6 a0 a1))
 
-theorem scrape00Proof : scrape00Prop := by sorry
+
+theorem scrape00Proof : scrape00Prop := by
+  solve_fixpoint with qualifiers

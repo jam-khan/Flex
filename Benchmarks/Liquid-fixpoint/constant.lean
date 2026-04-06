@@ -20,12 +20,17 @@
           ((= z (f x))))))))
 -/
 
+-- need to let kappa have access to sufficient scope
+
 import LeanFixpoint
 
-def constantProp (f : Int → Int) : Prop :=
-  ∃ κ0 : Int → Prop,
-    ∀ x : Int, x > 0 →
-      (∀ v : Int, v = f x → κ0 v)
-      ∧ (∀ z : Int, κ0 z → z = f x)
+def constantProp : Prop :=
+  ∀ f : Int → Int,
+    ∃ κ0 : Int → Int → Prop,
+      ∀ x : Int, x > 0 →
+        (∀ v : Int, v = f x → κ0 v x)
+        ∧ (∀ z : Int, κ0 z x → z = f x)
 
-theorem constantProof (f : Int → Int) : constantProp f := by sorry
+
+theorem constantProof : constantProp := by
+  solve_fixpoint

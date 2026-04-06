@@ -45,5 +45,4 @@ def numericSort03Prop : Prop :=
       ∧ (∀ y : Int, ∀ r : Int, κ1 r zero → zero ≤ r)
 
 theorem numericSort03Proof : numericSort03Prop := by
-
-  sorry
+  solve_fixpoint with qualifiers

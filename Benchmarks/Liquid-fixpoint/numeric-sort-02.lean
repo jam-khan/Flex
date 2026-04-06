@@ -45,5 +45,3 @@ def numericSort02Prop : Prop :=
 
 theorem numericSort02Proof : numericSort02Prop := by
   solve_fixpoint with qualifiers02
-  
-  sorry
