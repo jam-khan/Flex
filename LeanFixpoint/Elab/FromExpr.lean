@@ -229,5 +229,11 @@ partial def toConstraint (fvars : FVarMap) (kvars : KVarSet)
           | .eq lhs rhs =>
               return .rexpr (.cmp .ne (← exprToRExpr fvars lhs) (← exprToRExpr fvars rhs))
           | _ => throwError "toPred: unsupported negation pattern: {repr p}"
+    | .imp (.eq lhs rhs) .ff =>
+        -- ¬(a = b) reduced to (a = b) → False
+        return .rexpr (.cmp .ne (← exprToRExpr fvars lhs) (← exprToRExpr fvars rhs))
+    | .imp (.le lhs rhs) .ff =>
+        -- ¬(a ≤ b) reduced to (a ≤ b) → False
+        return .rexpr (.cmp .lt (← exprToRExpr fvars rhs) (← exprToRExpr fvars lhs))
     | _ =>
         throwError "toPred: unhandled: {repr ast}"

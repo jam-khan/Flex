@@ -53,6 +53,9 @@ def weakenOnce
         let mut c := fc.val
         for (k, kqs) in κq_pairs do
           c := c.elimStar k (conjoinQualifiers kqs)
+        -- ADD THIS LINE:
+        logInfo m!"[weakenOnce] after elimStar:\n{toString c}"
+        -- Replace `true` head with q instantiated at head args.
         let qBody := RExpr.substMany κ.params headArgs q
         let qRepr := repr q
         let qBodyRepr := repr qBody
