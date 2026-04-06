@@ -1,3 +1,4 @@
+import LeanFixpoint
 /-
 (fixpoint "--scrape=head")
 
@@ -40,3 +41,18 @@
                                 ($k0 a6 a0 a1)
                                 ($k1 a5 a6 a0 a1)))))))))))))))))
 -/
+
+def Le : Qualifier := q{ Le(a0 : int, a1 : int) | a0 ≤ a1 }
+
+def scrape01Prop : Prop :=
+  ∃ κ0 : Int → Int → Int → Prop,
+  ∃ κ1 : Int → Int → Int → Int → Prop,
+    ∀ a0 a1 : Int, a0 ≥ 0 → a0 ≤ a1 → a1 ≥ 0 →
+      (∀ a2 : Int, a2 = 0 →
+        κ0 a0 a0 a1 ∧ κ1 a2 a0 a0 a1)
+      ∧ (∀ a3 a4 : Int, κ0 a4 a0 a1 → κ1 a3 a4 a0 a1 →
+          (a4 ≥ a1 → a3 = a1 - a0)
+          ∧ (a4 < a1 → ∀ a5 : Int, a5 = a3 + 1 → ∀ a6 : Int, a6 = a4 + 1 →
+              κ0 a6 a0 a1 ∧ κ1 a5 a6 a0 a1))
+
+theorem scrape01Proof : scrape01Prop := by sorry

@@ -1,3 +1,4 @@
+import LeanFixpoint
 /-
 GOOD EXAMPLE FOR PREDICATE ABSTRACTION
 
@@ -25,3 +26,26 @@ GOOD EXAMPLE FOR PREDICATE ABSTRACTION
               (v))))))))
 -/
 
+
+/-
+(qualif Bar ((v Int)) (>= v 0))
+(qualif Baz ((v Int) (a Int)) (>= v a))
+(var $k1 (Int Int))
+(constraint ...)
+-/
+
+def qBarSR : Qualifier := q{ Bar(v : int) | 0 ≤ v }
+def qBazSR : Qualifier := q{ Baz(v : int, a : int) | v ≥ a }
+
+def sumRecProp : Prop :=
+  ∃ κ1 : Int → Int → Prop,
+    -- Base: n ≤ 0 ⇒ VV = 0 ⇒ κ1(VV, n)
+    (∀ n : Int, n ≤ 0 → ∀ VV : Int, VV = 0 → κ1 VV n)
+    -- Rec: 0 < n ⇒ n1 = n-1 ⇒ κ1(t1, n1) ⇒ v = n+t1 ⇒ κ1(v, n1)
+    ∧ (∀ n : Int, 0 < n → ∀ n1 : Int, n1 = n - 1 →
+        ∀ t1 : Int, κ1 t1 n1 → ∀ v : Int, v = n + t1 → κ1 v n1)
+    -- Use: κ1(r, y) ⇒ 0 ≤ r
+    ∧ (∀ y : Int, ∀ r : Int, κ1 r y → 0 ≤ r)
+
+theorem sumRecProof : sumRecProp := by
+  sorry

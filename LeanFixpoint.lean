@@ -25,11 +25,12 @@ import LeanFixpoint.Tactic.Command
 import LeanFixpoint.Tactic.Grind
 import LeanFixpoint.Tactic.SolveFixpoint
 import LeanFixpoint.Tactic.Tactics
+import LeanFixpoint.Tactic.Utils
 
 /-
   Predicate Abstraction related code,
   includes the Qualifier AST and the
   Solve method.
 -/
-import LeanFixpoint.Solve.Solver
 import LeanFixpoint.Solve.Qualifier
+import LeanFixpoint.Solve.Solver

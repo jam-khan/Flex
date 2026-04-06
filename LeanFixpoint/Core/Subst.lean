@@ -45,4 +45,4 @@ def Pred.substKVar (κ : KVar) (sol : Pred) : Pred → Pred
   | .exist x b p  => .exist x b (Pred.substKVar κ sol p)
 
 def RExpr.substMany (params : List Var) (args : List Var) (body : RExpr) : RExpr :=
-  (params.zip args).foldl (fun acc (p, a) => acc.subst p (.var a)) body
+  (params.zip args).foldl (fun acc (p, a) => RExpr.subst p (.var a) acc) body
