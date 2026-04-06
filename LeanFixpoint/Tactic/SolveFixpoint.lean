@@ -5,7 +5,7 @@ import LeanFixpoint.Core.Types
 import LeanFixpoint.Core.Macros
 import LeanFixpoint.Core.Fusion
 import LeanFixpoint.Elab.ToExpr
-import LeanFixpoint.Solve.Solver
+import LeanFixpoint.Solve.Fixpoint
 import LeanFixpoint.Solve.Qualifier
 import LeanFixpoint.Elab.FromExpr
 import LeanFixpoint.Tactic.Utils
