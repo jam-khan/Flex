@@ -86,13 +86,14 @@ partial def RExpr.toExpr (env : VarMap) : RExpr → MetaM Expr
       Here, we can have cases where either we have an uninterpreted functions or k-var
       We need to add the case for uninterpreted functions
       -/
-      let fExpr     ← lookupVar env f
+      let fExpr ← match env.get? f with
+        | some e => pure e
+        | none   => try pure (Lean.mkConst f) catch _ => throwError s!"Elab: unbound variable `{f}`"
       let argExprs  ← args.mapM (RExpr.toExpr env)
       return mkAppN fExpr argExprs.toArray
 
 /--
   Elaborate a predicate to a Lean `Expr` (of type `Prop`).
-
   - `kapp`        → error (should be eliminated before elaboration)
 -/
 def Pred.toExpr (env : VarMap) : Pred → MetaM Expr
@@ -166,7 +167,7 @@ def Constraint.toExpr (env : VarMap) : Constraint → MetaM Expr
   Convert a solved `Pred` with a set of free params
   into a closed function `fun (z₁ : Int, … , zₙ : Int) => ...` witness expression.
 -/
-def solToWitnessExpr (sol : Pred) (params : List Name) : MetaM Expr := do
+def solToWitnessExpr (sol : Pred) (params : List Name) (env : VarMap := {}): MetaM Expr := do
   let rec go (env : VarMap) (fvars : Array Expr) : List Name → MetaM Expr
     | [] => do
       let body ← sol.toExpr env
@@ -174,4 +175,4 @@ def solToWitnessExpr (sol : Pred) (params : List Name) : MetaM Expr := do
     | n :: rest =>
       withLocalDeclD n (mkConst ``Int) fun fvar => do
         go (env.insert n fvar) (fvars.push fvar) rest
-  go {} #[] params
+  go env #[] params

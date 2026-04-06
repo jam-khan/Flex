@@ -39,7 +39,14 @@ def instantiateQualWithArgs (κ : KVar) (q : RExpr) (args : List Var) : RExpr :=
   pairs.foldl (fun acc (param, arg) => RExpr.subst param (.var arg) acc) q
 
 def checkConstraintVC (c : Constraint) : TermElabM Bool := do
-  let prop ← c.toExpr {}
+  -- Build env from local context so UFs are available
+  let mut env : VarMap := {}
+  let lctx ← getLCtx
+  for decl in lctx do
+    if !decl.isAuxDecl then
+      env := env.insert decl.userName (mkFVar decl.fvarId)
+  let prop ← c.toExpr env
+  -- let prop ← c.toExpr {}
   let mvar ← mkFreshExprMVar (some prop) (kind := MetavarKind.syntheticOpaque)
   let mvarId := mvar.mvarId!
   try

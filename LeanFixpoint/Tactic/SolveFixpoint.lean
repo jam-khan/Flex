@@ -142,6 +142,13 @@ private def solveFixpointImpl (qs? : Option (TSyntax `term)) : TacticM Unit := w
     (do
       let fvarsRef ← IO.mkRef ({} : FVarMap)
       let kvarsRef ← IO.mkRef ({} : KVarSet)
+
+      -- Below we add any local context variables in the fvars
+      let lctx ← getLCtx
+      for decl in lctx do
+        if !decl.isAuxDecl then
+          fvarsRef.modify fun m => m.insert decl.fvarId decl.userName
+
       let goalType ← goal.getType
       let reduced  ← reduce goalType
       let propAST  ← toPropASTWithTracking fvarsRef kvarsRef reduced
@@ -182,7 +189,12 @@ private def solveFixpointImpl (qs? : Option (TSyntax `term)) : TacticM Unit := w
       -- Phase 4: Witness synthesis for acyclic solutions
       for (_κName, sol, params) in solutions do
         logInfo m!"[solve_fixpoint] Elaborating witness for: {toString sol}"
-        let witness    ← solToWitnessExpr sol params
+        let mut env₀ : VarMap := {}
+        let lctx ← getLCtx
+        for decl in lctx do
+          if !decl.isAuxDecl then
+            env₀ := env₀.insert decl.userName (mkFVar decl.fvarId)
+        let witness ← solToWitnessExpr sol params env₀
         let witnessSyn ← PrettyPrinter.delab witness
         evalTactic (← `(tactic| refine ⟨$witnessSyn, ?_⟩))
     )

@@ -155,6 +155,20 @@ partial def exprToRExpr (fvars : FVarMap) (e : Expr) : MetaM RExpr := do
     else
       throwError "exprToRExpr: non-literal OfNat: {e}"
 
+  else if e.isApp && e.getAppFn.isFVar then
+    let fn := e.getAppFn
+    let fName := (Std.HashMap.get? fvars fn.fvarId!).getD `unknown
+    let args := e.getAppArgs
+    let argExprs ← args.toList.mapM (exprToRExpr fvars ·)
+    return .app fName argExprs
+
+  -- Constant application: fib_fib(arg1, ..., argN)
+  else if e.isApp && e.getAppFn.isConst then
+    let fnName := e.getAppFn.constName!
+    let args := e.getAppArgs
+    let argExprs ← args.toList.mapM (exprToRExpr fvars ·)
+    return .app fnName argExprs
+
   else
     throwError "exprToRExpr: unhandled: {e}"
 
@@ -199,12 +213,21 @@ partial def toConstraint (fvars : FVarMap) (kvars : KVarSet)
           let kvar : KVar := { name := κName, params := canonParams }
           return .kapp kvar argNames
         else
-          throwError "toPred: uninterpreted predicate (not a κ-variable) -"
+          -- Uninterpreted function (not in kvars)
+          let fName := (Std.HashMap.get? fvars fn.fvarId!).getD `unknown
+          let argExprs ← args.toList.mapM (exprToRExpr fvars .)
+          return .rexpr (.app fName argExprs)
+          -- throwError "toPred: uninterpreted predicate (not a κ-variable) -"
     | .and l r  =>
         return .conj (← toPred fvars kvars l) (← toPred fvars kvars r)
     | .nonNeg arg =>
         return .rexpr (.cmp .le (.int 0) (← exprToRExpr fvars arg))
-    | .neg _p   =>
-        throwError "toPred: negation not yet supported"
+    | .neg p   =>
+        match p with
+          | .le lhs rhs =>
+              return .rexpr (.cmp .lt (← exprToRExpr fvars rhs) (← exprToRExpr fvars lhs))
+          | .eq lhs rhs =>
+              return .rexpr (.cmp .ne (← exprToRExpr fvars lhs) (← exprToRExpr fvars rhs))
+          | _ => throwError "toPred: unsupported negation pattern: {repr p}"
     | _ =>
         throwError "toPred: unhandled: {repr ast}"
