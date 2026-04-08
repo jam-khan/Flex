@@ -126,3 +126,31 @@ def pa5 : Prop :=
 
 theorem pa5_proof : pa5 := by
   solve_fixpoint with Q_pa
+
+def Q_pa2 : List Qualifier := Q_pa ++ [
+  q{ Le(a : int, b : int) | a ≤ b }
+]
+
+-- PA6: Multi-parameter κ-vars (2 acyclic + 2 cyclic)
+-- Counter from 0 to n, accumulator tracks sum.
+-- κseed, κhi are acyclic; κcnt(i,n), κacc(a,n) are cyclic with 2 params.
+def pa6 : Prop :=
+  ∃ κseed : Int → Prop,
+  ∃ κhi   : Int → Prop,
+  ∃ κcnt  : Int → Int → Prop,
+  ∃ κacc  : Int → Int → Prop,
+    ∀ n : Int, 0 ≤ n →
+      (∀ ν : Int, ν = 0 → κseed ν)
+    ∧ (∀ ν : Int, ν = n → κhi ν)
+    ∧ (∀ v : Int, κseed v → ∀ b : Int, κhi b → κcnt v b)
+    ∧ (∀ v : Int, κseed v → ∀ b : Int, κhi b → κacc v b)
+    ∧ (∀ i m : Int, κcnt i m → i < m →
+        ∀ a : Int, κacc a m →
+          (∀ ν : Int, ν = i + 1 → κcnt ν m)
+        ∧ (∀ ν : Int, ν = a + i → κacc ν m))
+    ∧ (∀ i m : Int, κcnt i m → i ≥ m →
+        ∀ a : Int, κacc a m → 0 ≤ a)
+
+theorem pa6_proof : pa6 := by
+  solve_fixpoint with Q_pa2
+
