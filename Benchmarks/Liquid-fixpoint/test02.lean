@@ -19,9 +19,9 @@ import LeanFixpoint
 -/
 
 def sumRec3Prop : Prop :=
-  ∃ κ0 : Int → Prop,
+  ∃ κ0 : Int → Int → Prop,
     ∀ x : Int, x > 0 →
-      (∀ y : Int, y > x + 100 → ∀ v : Int, v = x + y → κ0 v)
-      ∧ (∀ z : Int, κ0 z → ∀ v : Int, v = x + z → v > 100)
+      (∀ y : Int, y > x + 100 → ∀ v : Int, v = x + y → κ0 v x)
+      ∧ (∀ z : Int, κ0 z x → ∀ v : Int, v = x + z → v > 100)
 
 theorem sumRec3Proof : sumRec3Prop := by solve_fixpoint

@@ -142,6 +142,10 @@ def Pred.simplify : Pred → Pred
     | .fls => .fls
     | s    => .exist x b s
 
+  -- x == x  →  true
+  | .rexpr (.cmp .eq (.var x) (.var y)) =>
+    if x == y then .tru else .rexpr (.cmp .eq (.var x) (.var y))
+
   | p => p
 
 /-
@@ -219,6 +223,15 @@ def Constraint.elimStar (κ : KVar) (sol : Pred) : Constraint → Constraint
 def stripScope (κ : KVar) : Constraint → Constraint
   | .imp x b p c => if !p.kvars.contains κ then stripScope κ c else .imp x b p c
   | c => c
+
+/-- Collect the forall-bound variable names that `stripScope` would remove.
+    These are the "scope variables" for κ — universally quantified variables
+    whose hypotheses don't mention κ. -/
+def collectScopeVars (κ : KVar) : Constraint → List Var
+  | .imp x _b p c =>
+    if !p.kvars.contains κ then x :: collectScopeVars κ c
+    else []
+  | _ => []
 
 def Constraint.elim1 (κ : KVar) (c : Constraint) : Constraint :=
   let scoped' := c.scope κ
