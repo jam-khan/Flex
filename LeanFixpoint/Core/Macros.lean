@@ -9,67 +9,11 @@ def elabBaseTy (id : TSyntax `ident) : MacroM (TSyntax `term) := do
   | `bool => `(BaseTy.bool)
   | n     => Macro.throwError s!"Unknown base type: {n}, expected `int` or `bool`"
 
-declare_syntax_cat rexpr
-
-syntax num      : rexpr
-syntax "-" num  : rexpr
-syntax "true"   : rexpr
-syntax "false"  : rexpr
-syntax ident    : rexpr
-
-syntax:50 rexpr:50 " + " rexpr:51 : rexpr
-syntax:50 rexpr:50 " - " rexpr:51 : rexpr
-syntax:60 rexpr:60 " * " rexpr:61 : rexpr
-syntax:60 rexpr:60 " / " rexpr:61 : rexpr
-
-syntax:40 rexpr:41 " == " rexpr:41 : rexpr
-syntax:40 rexpr:41 " != " rexpr:41 : rexpr
-syntax:40 rexpr:41 " < "  rexpr:41 : rexpr
-syntax:40 rexpr:41 " ≤ "  rexpr:41 : rexpr
-syntax:40 rexpr:41 " > "  rexpr:41 : rexpr
-syntax:40 rexpr:41 " ≥ "  rexpr:41 : rexpr
-
-syntax:30 rexpr:31 " ∧ " rexpr:30 : rexpr
-syntax:20 rexpr:21 " ∨ " rexpr:20 : rexpr
-syntax:10 rexpr:11 " → " rexpr:10 : rexpr
-syntax " ¬ " rexpr:70             : rexpr
-
-syntax "(" rexpr ")" : rexpr
-
--- entry point for refinement expressions
-syntax "r{" rexpr "}" : term
-
-macro_rules
-  | `(r{ $n:num })    => `(RExpr.int $n)
-  | `(r{ - $n:num })  => `(RExpr.int (- $n))
-  | `(r{ true })      => `(RExpr.bool Bool.true)
-  | `(r{ false })     => `(RExpr.bool Bool.false)
-  | `(r{ $x:ident })  => `(RExpr.var $(quote x.getId))
-  -- arithmetic
-  | `(r{ $l + $r })   => `(RExpr.arith .add r{$l} r{$r})
-  | `(r{ $l - $r })   => `(RExpr.arith .sub r{$l} r{$r})
-  | `(r{ $l * $r })   => `(RExpr.arith .mul r{$l} r{$r})
-  | `(r{ $l / $r })   => `(RExpr.arith .div r{$l} r{$r})
-  -- bool comparison
-  | `(r{ $l == $r })  => `(RExpr.cmp .eq r{$l} r{$r})
-  | `(r{ $l != $r })  => `(RExpr.cmp .ne r{$l} r{$r})
-  | `(r{ $l < $r })   => `(RExpr.cmp .lt r{$l} r{$r})
-  | `(r{ $l ≤ $r })   => `(RExpr.cmp .le r{$l} r{$r})
-  | `(r{ $l > $r })   => `(RExpr.cmp .gt r{$l} r{$r})
-  | `(r{ $l ≥ $r })   => `(RExpr.cmp .ge r{$l} r{$r})
-  -- boolean
-  | `(r{ $l ∧ $r })   => `(RExpr.bop .and r{$l} r{$r})
-  | `(r{ $l ∨ $r })   => `(RExpr.bop .or  r{$l} r{$r})
-  | `(r{ $l → $r })   => `(RExpr.bop .imp r{$l} r{$r})
-  | `(r{ ¬ $e })      => `(RExpr.not r{$e})
-  -- parens
-  | `(r{ ( $e ) })    => `(r{$e})
-
 declare_syntax_cat pred
 
 syntax "true"   : pred
 syntax "false"  : pred
-syntax rexpr    : pred
+syntax "(" term ")" : pred
 
 syntax ident "(" ident,* ")" : pred
 
@@ -88,7 +32,8 @@ macro_rules
   | `(p{ false })
       => `(Pred.fls)
   | `(p{ $k:ident ( $[$args:ident],* ) })
-      => do let argTerms ← args.mapM fun a => `($(quote a.getId))
+      => do let argTerms ← args.mapM fun a =>
+              `(Lean.mkFVar { name := $(quote a.getId) })
             `(Pred.kapp $k [$argTerms,*])
   | `(p{ $l ∧ $r })
       => `(Pred.conj p{$l} p{$r})
@@ -97,10 +42,8 @@ macro_rules
   | `(p{ ∃ $x:ident : $b:ident . $body })
       => do let bty ← elabBaseTy b
             `(Pred.exist $(quote x.getId) $bty p{$body})
-  | `(p{ $r:rexpr })
-      => `(Pred.rexpr r{$r})
-  -- | `(p{ ( $e:pred ) })      => `(p{$e})
-  -- | `(p{ ( $e:rexpr ) })     => `(Pred.rexpr r{$e})
+  | `(p{ ( $e:term ) })
+      => `(Pred.rexpr $e)
 
 declare_syntax_cat constr
 

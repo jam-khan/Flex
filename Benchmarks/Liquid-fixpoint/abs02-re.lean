@@ -19,17 +19,17 @@ import LeanFixpoint
               ((>= v 0)))))))))
 -/
 
-def lhGround : Constraint :=
-  c{  [∀ x : int . true ⇒
-        ∀ VV : int . VV == 10 ⇒ VV ≥ 0]
-    ∧ [∀ z : int . true ⇒
-        ∀ r : int . r ≥ 0 ⇒
-          ∀ v : int . v == r ∧ v ≥ 0 ⇒ v ≥ 0]
-    ∧ [∀ z : int . true ⇒
-        ∀ t1 : int . t1 ≥ 0 ⇒
-          ∀ v : int . v ≥ 0 ⇒ v ≥ 0] }
-
-#solve_constraint lhGround
+-- Old c{...} macro syntax — commented out, uses `==` which is no longer supported
+-- def lhGround : Constraint :=
+--   c{  [∀ x : int . true ⇒
+--         ∀ VV : int . VV == 10 ⇒ VV ≥ 0]
+--     ∧ [∀ z : int . true ⇒
+--         ∀ r : int . r ≥ 0 ⇒
+--           ∀ v : int . v == r ∧ v ≥ 0 ⇒ v ≥ 0]
+--     ∧ [∀ z : int . true ⇒
+--         ∀ t1 : int . t1 ≥ 0 ⇒
+--           ∀ v : int . v ≥ 0 ⇒ v ≥ 0] }
+-- #solve_constraint lhGround
 
 def lhGroundProp : Prop :=
   (∀ x : Int, True →

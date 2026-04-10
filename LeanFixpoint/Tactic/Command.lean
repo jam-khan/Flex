@@ -5,7 +5,6 @@ import LeanFixpoint.Core.Macros
 import LeanFixpoint.Core.Fusion
 import LeanFixpoint.Elab.ToExpr
 import LeanFixpoint.Solve.Solver
-import LeanFixpoint.Solve.Qualifier
 import LeanFixpoint.Elab.FromExpr
 
 
@@ -43,26 +42,13 @@ elab "#translate_and_solve" t:term : command => do
     -- Phase 3: Solve
     -- solveAndCheckConstraint constraint
 
-elab "#test_manual_assignment" : command => do
-  Lean.Elab.Command.liftTermElabM do
-    let flats := mixedAfterAcyclic.flat
-
-    -- Build assignment: κd ↦ (0 ≤ z)
-    let sol : Pred := .rexpr (.cmp .le (.int 0) (.var `z))
-    let mut assignment : Std.HashMap KVar Pred := {}
-    assignment := assignment.insert kd sol
-    -- Check only the κd-related flat constraints
-    let kdFlats := flats.filter fun fc =>
-      fc.kvars.any (· == kd)
-
-    logInfo m!"κd-related flat constraints: {kdFlats.length}"
-
-    -- for fc in kdFlats do
-    --   logInfo m!"Checking: {toString fc.val}"
-    --   let ok ← checkFlatUnderAssignment fc assignment
-    --   if ok then
-    --     logInfo m!"  ✅ valid"
-    --   else
-    --     logWarning m!"❌ invalid"
+-- elab "#test_manual_assignment" : command => do
+--   Lean.Elab.Command.liftTermElabM do
+--     let flats := mixedAfterAcyclic.flat
+--     -- Build assignment: κd ↦ (0 ≤ z)
+--     -- TODO: update sol construction after Qualifier migration
+--     let kdFlats := flats.filter fun fc =>
+--       fc.kvars.any (· == kd)
+--     logInfo m!"κd-related flat constraints: {kdFlats.length}"
 
 -- #test_manual_assignment

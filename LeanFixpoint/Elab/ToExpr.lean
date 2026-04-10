@@ -21,85 +21,24 @@ def BaseTy.toExpr : BaseTy → Expr
   | .bool => mkConst ``Bool
 
 /--
-  Elaborate a refinement expression to a Lean `Expr`.
-
-  - Variables are looked up in `env`
-  - Integer literals become `Int` values
-  - Arithmetic becomes `HAdd.hAdd`, `HSub.hSub`, etc.
-  - Comparisons become `LE.le`, `Eq`, etc. (these are `Prop`-valued)
-  - Boolean connectives become `And`, `Or`, `Not`
--/
-partial def RExpr.toExpr (env : VarMap) : RExpr → MetaM Expr
-  | .var n =>
-      lookupVar env n
-  /-
-    `integer` literal elaboration is a bit subtle.
-
-    Lean's `Int` has two constructors `ofNat` and `negSucc`.
-    So, `n: Int` needs to be elaborated to
-      - (n ≥ 0)   ~> ofNat n
-      - ¬(n ≥ 0)  ~> negSucc (n - 1) ≃ - ((n - 1) + 1)
-  -/
-  | .int n =>
-    if n ≥ 0 then
-      return mkApp (mkConst ``Int.ofNat) (mkNatLit n.toNat)
-    else
-      -- negSucc (n - 1) = -[(n - 1) + 1] = [n]
-      return mkApp (mkConst ``Int.negSucc) (mkNatLit (n.natAbs - 1))
-  | .bool Bool.true  =>
-      return mkConst ``Bool.true
-  | .bool Bool.false =>
-      return mkConst ``Bool.false
-  | .arith op l r => do
-      let le ← l.toExpr env
-      let re ← r.toExpr env
-      match op with
-      | .add => mkAppM ``HAdd.hAdd #[le, re]
-      | .sub => mkAppM ``HSub.hSub #[le, re]
-      | .mul => mkAppM ``HMul.hMul #[le, re]
-      | .div => mkAppM ``HDiv.hDiv #[le, re]
-      | .mod => mkAppM ``HMod.hMod #[le, re]
-  | .cmp op l r => do
-      let le ← l.toExpr env
-      let re ← r.toExpr env
-      match op with
-      | .eq => mkAppM ``Eq #[le, re]
-      | .ne => do
-          let eq ← mkAppM ``Eq #[le, re]
-          mkAppM ``Not #[eq]
-      | .lt => mkAppM ``LT.lt #[le, re]
-      | .le => mkAppM ``LE.le #[le, re]
-      | .gt => mkAppM ``GT.gt #[le, re]
-      | .ge => mkAppM ``GE.ge #[le, re]
-  | .bop op l r => do
-      let le ← l.toExpr env
-      let re ← r.toExpr env
-      match op with
-      | .and => mkAppM ``And #[le, re]
-      | .or  => mkAppM ``Or #[le, re]
-      | .imp => mkArrow le re
-  | .not e => do
-      let ee ← e.toExpr env
-      mkAppM ``Not #[ee]
-  | .app f args => do
-      /-
-      Here, we can have cases where either we have an uninterpreted functions or k-var
-      We need to add the case for uninterpreted functions
-      -/
-      let fExpr ← match env.get? f with
-        | some e => pure e
-        | none   => try pure (Lean.mkConst f) catch _ => throwError s!"Elab: unbound variable `{f}`"
-      let argExprs  ← args.mapM (RExpr.toExpr env)
-      return mkAppN fExpr argExprs.toArray
-
-/--
   Elaborate a predicate to a Lean `Expr` (of type `Prop`).
   - `kapp`        → error (should be eliminated before elaboration)
 -/
 def Pred.toExpr (env : VarMap) : Pred → MetaM Expr
   | .tru => return mkConst ``True
   | .fls => return mkConst ``False
-  | .rexpr r => r.toExpr env
+  | .rexpr e =>
+    -- Resolve any stable name-keyed fvars (FVarId.name == var name) via env
+    return e.replace fun sub =>
+      if sub.isFVar then
+        let n := sub.fvarId!.name
+        env.get? n
+      else none
+  | .eqVars pi ai => do
+    let lhs ← lookupVar env pi
+    let rhs ← lookupVar env ai
+    let lhsTy ← inferType lhs
+    mkAppOptM ``Eq #[lhsTy, lhs, rhs]
   | .conj p₁ p₂ => do
     let e₁ ← p₁.toExpr env
     let e₂ ← p₂.toExpr env
@@ -130,6 +69,10 @@ def Pred.toExpr (env : VarMap) : Pred → MetaM Expr
       let lam ← mkLambdaFVars #[fvar] body
       -- creates an exists with lam
       mkAppM ``Exists #[lam]
+  | .eqExpr v e => do
+    let lhs ← lookupVar env v
+    let rhs := e.replace fun sub => if sub.isFVar then env.get? sub.fvarId!.name else none
+    mkAppOptM ``Eq #[← inferType lhs, lhs, rhs]
   | .kapp k _ =>
     throwError s!"Elab: κ-variable `{k.name}` not eliminated! Cannot elaborate."
 

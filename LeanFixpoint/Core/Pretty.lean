@@ -6,19 +6,9 @@ open Lean
 /-!
   # Pretty.lean — ToString instances for AST types
 
-  Pretty-printing for `RExpr`, `Pred`, `Constraint`, `RType`, `UType`, `KVar`.
+  Pretty-printing for `Pred`, `Constraint`, `RType`, `UType`, `KVar`.
   Uses precedence-based parenthesization for expressions.
 -/
-
-instance : ToString ArithOp where
-  toString | .add => "+" | .sub => "-" | .mul => "*" | .div => "/" | .mod => "%"
-
-instance : ToString CmpOp where
-  toString | .eq => "==" | .ne => "!=" | .lt => "<"
-            | .le => "<=" | .gt => ">"  | .ge => ">="
-
-instance : ToString BoolOp where
-  toString | .and => "∧" | .or => "∨" | .imp => "⇒"
 
 instance : ToString BaseTy where
   toString | .int => "Int" | .bool => "Bool"
@@ -26,36 +16,6 @@ instance : ToString BaseTy where
 private def parenIf (p : Bool) (s : String) : String :=
   if p then "(" ++ s ++ ")" else s
 
-private def arithPrec : ArithOp → Nat
-  | .mul | .div | .mod => 70 | .add | .sub => 60
-
-private def cmpPrec   : CmpOp → Nat  := fun _ => 50
-private def bopPrec   : BoolOp → Nat
-  | .and => 40 | .or => 30 | .imp => 20
-
--- Precedence-aware printing for refinement expressions
-mutual
-  private def ppRExprPrec (prec : Nat) : RExpr → String
-    | .var v       => toString v
-    | .int i       => toString i
-    | .bool b      => if b then "true" else "false"
-    | .not r       =>
-        parenIf (prec > 80) s!"¬{ppRExprPrec 81 r}"
-    | .app f args  =>
-        let argStr := ", ".intercalate (args.map (ppRExprPrec 0))
-        s!"{f}({argStr})"
-    | .arith op l r =>
-        let p := arithPrec op
-        parenIf (prec > p) s!"{ppRExprPrec p l} {op} {ppRExprPrec (p+1) r}"
-    | .cmp op l r   =>
-        let p := cmpPrec op
-        parenIf (prec > p) s!"{ppRExprPrec (p+1) l} {op} {ppRExprPrec (p+1) r}"
-    | .bop op l r   =>
-        let p := bopPrec op
-        parenIf (prec > p) s!"{ppRExprPrec (p+1) l} {op} {ppRExprPrec p r}"
-end
-
-instance : ToString RExpr where toString r := ppRExprPrec 0 r
 
 private def ppRType : RType → String
   | .tvar α           => toString α
@@ -91,13 +51,16 @@ instance : ToString KVar where
 private def ppPred : Pred → String
   | .tru            => "⊤"
   | .fls            => "⊥"
-  | .rexpr r        => toString r
+  | .rexpr _        => "⟨expr⟩"
   | .kapp k args    =>
-      let ps := ", ".intercalate (args.map toString)
+      let ps := ", ".intercalate (args.map fun e =>
+        if e.isFVar then toString e.fvarId!.name else "⟨expr⟩")
       s!"{k.name}[{ps}]"
   | .conj p q       => s!"({ppPred p} ∧ {ppPred q})"
   | .disj p q       => s!"({ppPred p} ∨ {ppPred q})"
   | .exist x b p    => s!"∃ {x} : {b}. {ppPred p}"
+  | .eqVars pi ai   => s!"{pi} = {ai}"
+  | .eqExpr v e     => s!"{v} = ⟨expr⟩"
 
 instance : ToString Pred where toString := ppPred
 
@@ -113,36 +76,61 @@ private def ppConstraint (indent : Nat := 0) : Constraint → String
 
 instance : ToString Constraint where toString c := ppConstraint 0 c
 
+-- MetaM printer — use this in the tactic for readable Expr atoms
+partial def ppPredM (p : Pred) : Lean.MetaM String := do
+  match p with
+  | .tru          => return "⊤"
+  | .fls          => return "⊥"
+  | .rexpr e      => return toString (← Lean.Meta.ppExpr e)
+  | .kapp k args  => do
+      let ps ← args.mapM fun e =>
+        if e.isFVar then return toString e.fvarId!.name
+        else return toString (← Lean.Meta.ppExpr e)
+      return s!"{k.name}[{", ".intercalate ps}]"
+  | .conj p q     => return s!"({← ppPredM p} ∧ {← ppPredM q})"
+  | .disj p q     => return s!"({← ppPredM p} ∨ {← ppPredM q})"
+  | .exist x b p  => return s!"∃ {x} : {b}. {← ppPredM p}"
+  | .eqVars pi ai => return s!"{pi} = {ai}"
+  | .eqExpr v e   => return s!"{v} = {← Lean.Meta.ppExpr e}"
 
 section Examples
 
-def exRType : RType :=
-  .base `ν .int (.cmp .gt (.var `ν) (.int 0))
+private def fv (n : Name) : Expr := Lean.mkFVar { name := n }
 
-def exFnType : RType :=
-  .fn `x
-    (.base `ν .int (.cmp .gt (.var `ν) (.int 0)))
-    (.base `ν .int (.cmp .ge (.var `ν) (.var `x)))
+-- Pred (no Expr atoms) — uses ToString directly
+#eval toString (Pred.tru)
+-- "⊤"
+#eval toString (Pred.fls)
+-- "⊥"
+#eval toString (Pred.kapp ⟨`κ, [`x]⟩ [fv `a])
+-- "κ[a]"
+#eval toString (Pred.kapp ⟨`κ, [`x, `y]⟩ [fv `a, fv `b])
+-- "κ[a, b]"
+#eval toString (Pred.conj (Pred.kapp ⟨`κ, [`x]⟩ [fv `a]) Pred.tru)
+-- "(κ[a] ∧ ⊤)"
+#eval toString (Pred.exist `z .int (Pred.kapp ⟨`κ, [`z]⟩ [fv `z]))
+-- "∃ z : Int. κ[z]"
 
--- A Horn constraint: ∀ x : Int. κ(x) ∧ x > 0 ⇒ κ(x+1)
-def exConstraint : Constraint :=
-  .imp `x .int
-    (.conj (.kapp ⟨`κ, [`x]⟩ [`x]) (.rexpr (.cmp .gt (.var `x) (.int 0))))
-    (.pred (.kapp ⟨`κ, [`x]⟩ [`x]))
+-- Pred.rexpr shows ⟨expr⟩ (use ppPredM in MetaM for real content)
+#eval toString (Pred.rexpr (Lean.mkConst ``True))
+-- "⟨expr⟩"
 
-#eval toString exRType
--- {ν : Int | ν > 0}
+-- Constraint — uses ToString
+#eval toString (Constraint.imp `x .int Pred.tru
+  (Constraint.pred (Pred.kapp ⟨`κ, [`x]⟩ [fv `x])))
+-- "∀ x : Int.\n  ⊤\n  ⇒ κ[x]"
 
-#eval toString exFnType
--- (x : {ν : Int | ν > 0}) → {ν : Int | ν >= x}
-
-#eval toString exConstraint
--- ∀ x : Int.
---   (κ[x] ∧ x > 0)
---   ⇒ κ[x]
-
-#eval IO.println (toString exRType)
-#eval IO.println (toString exFnType)
-#eval IO.println (toString exConstraint)
+-- ppPredM — MetaM printer, shows Expr atoms via ppExpr
+#eval show Lean.MetaM Unit from
+  Lean.Meta.withLocalDeclD `x (Lean.mkConst ``Int) fun x =>
+  Lean.Meta.withLocalDeclD `y (Lean.mkConst ``Int) fun y => do
+    let eq ← Lean.Meta.mkAppM ``Eq #[x, y]
+    let le ← Lean.Meta.mkAppM ``LE.le #[x, y]
+    IO.println s!"{← ppPredM (Pred.rexpr eq)}"
+    -- "x = y"
+    IO.println s!"{← ppPredM (Pred.rexpr le)}"
+    -- "x ≤ y"
+    IO.println s!"{← ppPredM (Pred.conj (Pred.rexpr eq) (Pred.exist `z .int (Pred.rexpr le)))}"
+    -- "(x = y ∧ ∃ z : Int. x ≤ y)"
 
 end Examples

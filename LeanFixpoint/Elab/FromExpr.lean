@@ -21,18 +21,20 @@ inductive PropAST
   | or   : PropAST → PropAST → PropAST
   | imp  : PropAST → PropAST → PropAST
   | neg  : PropAST → PropAST
-  | eq   : Expr → Expr → PropAST
+  | eq   : Expr → Expr → PropAST   -- lhs = rhs (sub-exprs, for kvar-arg analysis)
   | le   : Expr → Expr → PropAST
   | nonNeg : Expr → PropAST
   | forall_ : Name → Expr → PropAST → PropAST
   | exists_ : Name → Expr → PropAST → PropAST
   | app  : Expr → Array Expr → PropAST  -- κ(ν₁, ..., νₙ)
+  | atom : Expr → PropAST               -- opaque Prop, pass through as-is
   deriving Repr
 
 partial def toPropASTWithTracking
     (fvarsRef : IO.Ref FVarMap)
     (kvarsRef : IO.Ref KVarSet)
     (e : Expr) : MetaM PropAST := do
+  let orig := e  -- keep original before whnf for passthrough
   let e ← whnf e
   match e with
   | .const ``True _  => return .tt
@@ -47,11 +49,11 @@ partial def toPropASTWithTracking
     else if let some p := e.not? then
       return .neg (← toPropASTWithTracking fvarsRef kvarsRef p)
     else if let some (_, lhs, rhs) := e.eq? then
-      return .eq lhs rhs
+      return .eq lhs rhs  -- keep .eq for neg/imp pattern matching
     else if e.isAppOfArity ``LE.le 4 then
-      return .le (e.getArg! 2) (e.getArg! 3)
+      return .atom orig
     else if e.isAppOfArity ``Int.NonNeg 1 then
-      return .nonNeg (e.getArg! 0)
+      return .atom orig
     -- ∃ κ : Int → Prop, body
     else if e.isAppOfArity ``Exists 2 then
       let pred := e.getArg! 1
@@ -103,75 +105,6 @@ partial def toPropASTWithTracking
     else
       throwError "toPropAST: unhandled: {e}"
 
-partial def exprToRExpr (fvars : FVarMap) (e : Expr) : MetaM RExpr := do
-  -- checks whether given `e` is a `fvar`
-  if e.isFVar then
-    let id := e.fvarId! -- get id
-    let name := (Std.HashMap.get? fvars id).getD `unknown
-    return .var name
-  -- natural/int literal
-  else if let some n := e.rawNatLit? then
-    return .int n
-
-  -- HAdd.hAdd α β γ inst lhs rhs
-  else if e.isAppOfArity ``HAdd.hAdd 6 then
-    let l ← exprToRExpr fvars (e.getArg! 4)
-    let r ← exprToRExpr fvars (e.getArg! 5)
-    return .arith .add l r
-
-  -- HSub.hSub α β γ inst lhs rhs
-  else if e.isAppOfArity ``HSub.hSub 6 then
-    let l ← exprToRExpr fvars (e.getArg! 4)
-    let r ← exprToRExpr fvars (e.getArg! 5)
-    return .arith .sub l r
-
-  -- HMul.hMul α β γ inst lhs rhs
-  -- represents `lhs * rhs`
-  else if e.isAppOfArity ``HMul.hMul 6 then
-    let l ← exprToRExpr fvars (e.getArg! 4)
-    let r ← exprToRExpr fvars (e.getArg! 5)
-    return .arith .mul l r
-
-  -- HDiv.hDiv α β γ inst lhs rhs
-  -- represents `lhs / rhs`
-  else if e.isAppOfArity ``HDiv.hDiv 6 then
-    let l ← exprToRExpr fvars (e.getArg! 4)
-    let r ← exprToRExpr fvars (e.getArg! 5)
-    return .arith .div l r
-
-  -- HMod.hMov α β γ inst lhs rhs
-  else if e.isAppOfArity ``HMod.hMod 6 then
-    let l ← exprToRExpr fvars (e.getArg! 4)
-    let r ← exprToRExpr fvars (e.getArg! 5)
-    return .arith .mod l r
-
-  -- OfNat.ofNat α n inst
-  -- represents numeric literals like `0`, `1`, `2`
-  -- 3 args: [0]=target type [1]=raw Nat literal [2]=instance
-  else if e.isAppOfArity ``OfNat.ofNat 3 then
-    let nExpr := e.getArg! 1
-    if let some n := nExpr.rawNatLit? then
-      return .int n
-    else
-      throwError "exprToRExpr: non-literal OfNat: {e}"
-
-  else if e.isApp && e.getAppFn.isFVar then
-    let fn := e.getAppFn
-    let fName := (Std.HashMap.get? fvars fn.fvarId!).getD `unknown
-    let args := e.getAppArgs
-    let argExprs ← args.toList.mapM (exprToRExpr fvars ·)
-    return .app fName argExprs
-
-  -- Constant application: fib_fib(arg1, ..., argN)
-  else if e.isApp && e.getAppFn.isConst then
-    let fnName := e.getAppFn.constName!
-    let args := e.getAppArgs
-    let argExprs ← args.toList.mapM (exprToRExpr fvars ·)
-    return .app fnName argExprs
-
-  else
-    throwError "exprToRExpr: unhandled: {e}"
-
 partial def toConstraint (fvars : FVarMap) (kvars : KVarSet)
     (ast : PropAST) : MetaM Constraint := do
   match ast with
@@ -193,47 +126,70 @@ partial def toConstraint (fvars : FVarMap) (kvars : KVarSet)
   | other =>
     return .pred (← toPred fvars kvars other)
 
-  where toPred (fvars : FVarMap) (kvars : KVarSet)
+  where
+    -- Replace fvars in `e` with stable name-keyed fvars.
+    -- Each fvar whose id appears in `fvars` is replaced by a synthetic fvar
+    -- whose FVarId.name == the variable name. This makes the expression
+    -- independent of the withLocalDecl scope, and Pred.toExpr can resolve
+    -- these stable fvars by name from VarMap.
+    normalizeFVars (fvars : FVarMap) (e : Expr) : MetaM Expr := do
+      return e.replace fun sub =>
+        if sub.isFVar then
+          let id := sub.fvarId!
+          if let some name := fvars.get? id then
+            -- Create a stable fvar whose FVarId is the name itself
+            some (mkFVar { name := name })
+          else none
+        else none
+
+    toPred (fvars : FVarMap) (kvars : KVarSet)
     (ast : PropAST) : MetaM Pred := do
     match ast with
-    | .tt => return .tru
-    | .ff => return .fls
+    | .tt   => return .tru
+    | .ff   => return .fls
+    | .atom e =>
+        return .rexpr (← normalizeFVars fvars e)   -- re-ground fvars before storing
     | .eq lhs rhs =>
-        return .rexpr (.cmp .eq (← exprToRExpr fvars lhs) (← exprToRExpr fvars rhs))
-    | .le lhs rhs =>
-        return .rexpr (.cmp .le (← exprToRExpr fvars lhs) (← exprToRExpr fvars rhs))
+        let lhsName : Option Name :=
+          if lhs.isFVar then fvars.get? lhs.fvarId! else none
+        let rhsName : Option Name :=
+          if rhs.isFVar then fvars.get? rhs.fvarId! else none
+        match lhsName, rhsName with
+        | some pi, some ai => return .eqVars pi ai   -- var = var
+        | some pi, none    =>                         -- var = expr
+            let rhsN ← normalizeFVars fvars rhs
+            return .eqExpr pi rhsN                   -- resolved at toExpr time
+        | _, _ =>
+            -- lhs is compound: normalize the whole original expression as rexpr
+            return .rexpr (← normalizeFVars fvars (← mkAppM ``Eq #[lhs, rhs]))
+    | .le _ _ | .nonNeg _ =>
+        -- these should be .atom now; shouldn't reach here
+        throwError "toPred: unexpected .le/.nonNeg (should be .atom)"
     | .app fn args =>
         let fnId := fn.fvarId!
-        -- We need to check whether it is a kvar or not
         if kvars.contains fnId then
-          let κName   := (Std.HashMap.get? fvars fn.fvarId!).getD `unknown
-          let argNames := args.toList.map fun arg =>
-              (Std.HashMap.get? fvars arg.fvarId!).getD `unknown
-          let canonParams := (List.range argNames.length).map fun i => Name.mkStr1 s!"z{i}"
+          let κName    := (Std.HashMap.get? fvars fn.fvarId!).getD `unknown
+          let argExprs ← args.toList.mapM fun arg => normalizeFVars fvars arg
+          let canonParams := (List.range argExprs.length).map fun i => Name.mkStr1 s!"z{i}"
           let kvar : KVar := { name := κName, params := canonParams }
-          return .kapp kvar argNames
+          return .kapp kvar argExprs
         else
-          -- Uninterpreted function (not in kvars)
-          let fName := (Std.HashMap.get? fvars fn.fvarId!).getD `unknown
-          let argExprs ← args.toList.mapM (exprToRExpr fvars .)
-          return .rexpr (.app fName argExprs)
-          -- throwError "toPred: uninterpreted predicate (not a κ-variable) -"
-    | .and l r  =>
+          return .rexpr (mkAppN fn args)
+    | .and l r =>
         return .conj (← toPred fvars kvars l) (← toPred fvars kvars r)
-    | .nonNeg arg =>
-        return .rexpr (.cmp .le (.int 0) (← exprToRExpr fvars arg))
-    | .neg p   =>
+    | .neg p =>
         match p with
-          | .le lhs rhs =>
-              return .rexpr (.cmp .lt (← exprToRExpr fvars rhs) (← exprToRExpr fvars lhs))
+          | .atom e => return .rexpr (← mkAppM ``Not #[e])
+          | .le lhs rhs => return .rexpr (← mkAppM ``LT.lt #[rhs, lhs])
           | .eq lhs rhs =>
-              return .rexpr (.cmp .ne (← exprToRExpr fvars lhs) (← exprToRExpr fvars rhs))
+              let eq ← mkAppM ``Eq #[lhs, rhs]
+              return .rexpr (← mkAppM ``Not #[eq])
           | _ => throwError "toPred: unsupported negation pattern: {repr p}"
-    | .imp (.eq lhs rhs) .ff =>
-        -- ¬(a = b) reduced to (a = b) → False
-        return .rexpr (.cmp .ne (← exprToRExpr fvars lhs) (← exprToRExpr fvars rhs))
+    | .imp (.atom e) .ff => return .rexpr (← mkAppM ``Not #[e])
+    | .imp (.eq lhs rhs) .ff => do
+        let eq ← mkAppM ``Eq #[lhs, rhs]
+        return .rexpr (← mkAppM ``Not #[eq])
     | .imp (.le lhs rhs) .ff =>
-        -- ¬(a ≤ b) reduced to (a ≤ b) → False
-        return .rexpr (.cmp .lt (← exprToRExpr fvars rhs) (← exprToRExpr fvars lhs))
+        return .rexpr (← mkAppM ``LT.lt #[rhs, lhs])
     | _ =>
         throwError "toPred: unhandled: {repr ast}"

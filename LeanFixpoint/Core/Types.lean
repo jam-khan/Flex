@@ -72,57 +72,6 @@ inductive UType where
 deriving BEq, Repr, Inhabited, DecidableEq
 
 /-!
-  ## Refinement Expressions
-
-  `RExpr` is the expression language for refinements.
-  These appear inside refined types `{x : b | r}` and
-  inside constraint predicates.
-
-  ### Design Choice
-
-  We use a custom deep embedding rather than `Lean.Syntax` or `Lean.Expr` because:
-  - Pattern matching on `Lean.Syntax` is verbose due to sugared constructs
-  - `Lean.Expr` is too abstract for direct manipulation
-  - A custom AST keeps the prototype simple while still supporting
-    elaboration to `Lean.Expr` (see `Elab.lean`)
--/
-
--- + | - | * | /
-inductive ArithOp where
-  | add | sub | mul | div | mod
-deriving BEq, Repr, DecidableEq
-
--- == | != | < | <= | > | >=
-inductive CmpOp where
-  | eq | ne | lt | le | gt | ge
-deriving BEq, Repr, DecidableEq
-
--- ∧ | ∨ | →
-inductive BoolOp where
-  | and | or | imp
-deriving BEq, Repr, DecidableEq
-
--- Refinement expressions
-inductive RExpr where
-  -- κ
-  | var   : Var → RExpr
-  -- i
-  | int   : Int → RExpr
-  -- bool (`true` or `false`)
-  | bool  : Bool → RExpr
-  -- r₁ `ArithOp` r₂
-  | arith : ArithOp → RExpr → RExpr → RExpr
-  -- r₁ `CmpOp` r₂
-  | cmp   : CmpOp → RExpr → RExpr → RExpr
-  -- r₁ `BoolOp` r₂
-  | bop   : BoolOp → RExpr → RExpr → RExpr
-  -- `!r`
-  | not   : RExpr → RExpr
-  -- `κ(r₁, …, rₙ)` — uninterpreted function application
-  | app   : Var → List RExpr → RExpr
-deriving BEq, Repr, Inhabited
-
-/-!
   ## Refined Types
 
   `RType` extends `UType` with refinement predicates.
@@ -140,7 +89,7 @@ inductive RType where -- Refined type `t`
   -- `α`
   | tvar     : TyVar → RType
   -- `{x : b | r}`
-  | base     : Var → BaseTy → RExpr → RType
+  | base     : Var → BaseTy → Expr → RType
   -- `x : t → t`, note here fun input and out
   -- types can be refined type `t` unlike `Utype`
   | fn       : Var → RType → RType → RType
@@ -206,16 +155,20 @@ inductive Pred where
   | tru   : Pred
   -- `false`
   | fls   : Pred
-  -- refinement `r`
-  | rexpr : RExpr → Pred
-  -- `κ(y₁, ..., yₙ)`
-  | kapp  : KVar → List Var → Pred
+  -- `r` gets passed through
+  | rexpr : Expr → Pred
+  -- `κ(e₁, ..., eₙ)` — args are stable-fvar-normalized Exprs
+  | kapp  : KVar → List Expr → Pred
   -- `p₁ ∧ p₂`
   | conj  : Pred → Pred → Pred
   -- `p₁ ∨ p₂`
   | disj  : Pred → Pred → Pred
   -- `∃x:b. p`
-  | exist : Var → BaseTy → Pred → Pred
+  | exist  : Var → BaseTy → Pred → Pred
+  -- `pi = ai` — deferred equality used by sol1, resolved to Lean.Expr in ToExpr
+  | eqVars : Var → Var → Pred
+  -- `x = expr` where x is a Var (resolved via VarMap) and expr uses stable fvars
+  | eqExpr : Var → Expr → Pred
 deriving Repr, Inhabited
 
 -- Constraints c
@@ -227,15 +180,6 @@ inductive Constraint where
   -- `∀ x : b. p ⇒ c`
   | imp  : Var → BaseTy → Pred → Constraint → Constraint
 deriving Repr, Inhabited
-
-/-!
-  ## Utility Definitions
--/
-
--- Sugar for common refinement expressions
-def RExpr.tt : RExpr := .bool true
-def RExpr.ff : RExpr := .bool false
-def RExpr.mkEq (l r : RExpr) : RExpr := .cmp .eq l r
 
 /-
   Wrapper for flattened constraint.
