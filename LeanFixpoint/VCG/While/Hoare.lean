@@ -1,17 +1,13 @@
 import LeanFixpoint.VCG.While.Semantics
 
-/-! # Hoare Logic Soundness Lemmas
-
-  Each lemma is a kernel-checked proof about `ValidHoareTriple` and `Ceval`.
-  These form the verified core of the VCGen pipeline.
--/
+/-! # Hoare Logic Soundness Lemmas -/
 
 theorem hoare_skip {P : Assertion} :
     ValidHoareTriple P .skip P := by
   intro s₁ s₂ h hp; cases h; exact hp
 
-theorem hoare_assign {Q : Assertion} {x : CVar} {a : AExpr} :
-    ValidHoareTriple (fun s => Q (s[x ↦ a.eval s])) (.assign x a) Q := by
+theorem hoare_assign {Q : Assertion} {x : CVar} {f : State → Int} :
+    ValidHoareTriple (fun s => Q (s[x ↦ f s])) (.assign x f) Q := by
   intro s₁ s₂ h hp; cases h; exact hp
 
 theorem hoare_seq {P Q R : Assertion} {c₁ c₂ : Cmd} :
@@ -22,36 +18,34 @@ theorem hoare_seq {P Q R : Assertion} {c₁ c₂ : Cmd} :
   cases heval
   exact hc2 _ _ ‹_› (hc1 _ _ ‹_› hp)
 
-theorem hoare_if {P Q : Assertion} {b : BExpr} {c₁ c₂ : Cmd} :
-    ValidHoareTriple (fun s => P s ∧ b.eval s = true) c₁ Q →
-    ValidHoareTriple (fun s => P s ∧ b.eval s = false) c₂ Q →
-    ValidHoareTriple P (.ite b c₁ c₂) Q := by
+theorem hoare_if {P Q : Assertion} {g : State → Bool} {c₁ c₂ : Cmd} :
+    ValidHoareTriple (fun s => P s ∧ g s = true) c₁ Q →
+    ValidHoareTriple (fun s => P s ∧ g s = false) c₂ Q →
+    ValidHoareTriple P (.ite g c₁ c₂) Q := by
   intro ht hf s₁ s₂ heval hp
   cases heval
   · exact ht _ _ ‹_› ⟨hp, ‹_›⟩
   · exact hf _ _ ‹_› ⟨hp, ‹_›⟩
 
-/-- Helper: if `Inv` is preserved by one iteration and `Ceval (.cwhile b c) s₁ s₂`,
-    then `Inv s₁ → Q s₂`. Proved by induction on the evaluation derivation. -/
 private theorem while_inv
-    {Inv Q : Assertion} {b : BExpr} {c : Cmd}
-    (hpres : ValidHoareTriple (fun s => Inv s ∧ b.eval s = true) c Inv)
-    (hpost : ∀ s, Inv s ∧ b.eval s = false → Q s)
-    {s₁ s₂ : State} (heval : Ceval (.cwhile b c) s₁ s₂) :
+    {Inv Q : Assertion} {g : State → Bool} {c : Cmd}
+    (hpres : ValidHoareTriple (fun s => Inv s ∧ g s = true) c Inv)
+    (hpost : ∀ s, Inv s ∧ g s = false → Q s)
+    {s₁ s₂ : State} (heval : Ceval (.cwhile g c) s₁ s₂) :
     Inv s₁ → Q s₂ := by
-  generalize hcmd : Cmd.cwhile b c = cmd at heval
+  generalize hcmd : Cmd.cwhile g c = cmd at heval
   induction heval with
   | while_false hb =>
     intro hi; cases hcmd; exact hpost _ ⟨hi, hb⟩
-  | @while_true _ s₁' s₂' b' s₃' hb hc _ ih_body ih_while =>
+  | @while_true _ s₁' s₂' g' s₃' hb hc _ ih_body ih_while =>
     intro hi; cases hcmd; exact ih_while rfl (hpres _ _ hc ⟨hi, hb⟩)
   | _ => intro; simp_all
 
-theorem hoare_while {P Q Inv : Assertion} {b : BExpr} {c : Cmd} :
+theorem hoare_while {P Q Inv : Assertion} {g : State → Bool} {c : Cmd} :
     (∀ s, P s → Inv s) →
-    ValidHoareTriple (fun s => Inv s ∧ b.eval s = true) c Inv →
-    (∀ s, Inv s ∧ b.eval s = false → Q s) →
-    ValidHoareTriple P (.cwhile b c) Q := by
+    ValidHoareTriple (fun s => Inv s ∧ g s = true) c Inv →
+    (∀ s, Inv s ∧ g s = false → Q s) →
+    ValidHoareTriple P (.cwhile g c) Q := by
   intro hinit hpres hpost s₁ s₂ heval hp
   exact while_inv hpres hpost heval (hinit _ hp)
 

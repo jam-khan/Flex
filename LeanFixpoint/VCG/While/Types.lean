@@ -1,6 +1,8 @@
-import Lean
+/-! # While-Language AST (Shallow Embedding)
 
-open Lean
+  Expressions and guards are native Lean functions over `State`,
+  so VCs come out as clean Lean Props with no custom AST to evaluate.
+-/
 
 abbrev CVar := String
 
@@ -11,29 +13,12 @@ def State.update (s : State) (x : CVar) (v : Int) : State :=
 
 notation s "[" x " ↦ " v "]" => State.update s x v
 
-inductive AExpr where
-  | var : CVar → AExpr
-  | lit : Int → AExpr
-  | add : AExpr → AExpr → AExpr
-  | sub : AExpr → AExpr → AExpr
-  | mul : AExpr → AExpr → AExpr
-deriving Repr, Inhabited, BEq
-
-inductive BExpr where
-  | tt  : BExpr
-  | ff  : BExpr
-  | eq  : AExpr → AExpr → BExpr
-  | le  : AExpr → AExpr → BExpr
-  | lt  : AExpr → AExpr → BExpr
-  | not : BExpr → BExpr
-  | and : BExpr → BExpr → BExpr
-  | or  : BExpr → BExpr → BExpr
-deriving Repr, Inhabited, BEq
+def State.empty : State := fun _ => 0
+notation "∅" => State.empty
 
 inductive Cmd where
   | skip   : Cmd
-  | assign : CVar → AExpr → Cmd
+  | assign : CVar → (State → Int) → Cmd
   | seq    : Cmd → Cmd → Cmd
-  | ite    : BExpr → Cmd → Cmd → Cmd
-  | cwhile : BExpr → Cmd → Cmd
-deriving Repr, Inhabited
+  | ite    : (State → Bool) → Cmd → Cmd → Cmd
+  | cwhile : (State → Bool) → Cmd → Cmd
