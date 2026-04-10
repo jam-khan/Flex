@@ -16,10 +16,10 @@ import LeanFixpoint
 -/
 
 def lhHornProp : Prop :=
-  ∃ κ : Int → Prop,
+  ∃ κ : Int → Int → Prop,
     ∀ x : Int, 0 ≤ x →
-      (∀ v : Int, v = x - 1 → κ v)
-      ∧ (∀ y : Int, κ y → ∀ v : Int, v = y + 1 → 0 ≤ v)
+      (∀ v : Int, v = x - 1 → κ v x)
+      ∧ (∀ y : Int, κ y x → ∀ v : Int, v = y + 1 → 0 ≤ v)
 
 theorem lhHornProof : lhHornProp := by
   solve_fixpoint

@@ -167,7 +167,22 @@ private def solveFixpointImpl (qs? : Option (TSyntax `term)) : TacticM Unit := w
       let mut solutions : List (Name × Pred × List Name) := []
       let mut curr := constraint
       for κ in acyclic do
-        let sol := curr.sol1 κ
+        -- Use stripped solution only when kappa type includes scope variables
+        -- (i.e., kappa has more params than scope vars, so there are dedicated scope positions)
+        let scopedC := curr.scope κ
+        let scopeNames : List Name := collectScopeVars κ scopedC
+        let sol :=
+          if scopeNames.length > 0 && κ.params.length > scopeNames.length then
+            -- Stripped sol1: scope vars become free, then substitute with canonical params
+            let stripped := stripScope κ scopedC
+            let sol := stripped.sol1 κ
+            let numRefParams := κ.params.length - scopeNames.length
+            let scopeParams := κ.params.drop numRefParams
+            ((scopeNames.zip scopeParams).foldl
+              (fun acc (origName, canonName) => acc.substVar origName canonName) sol).simplify
+          else
+            -- Kappa type doesn't include scope vars — use full sol1
+            curr.sol1 κ
         solutions := solutions ++ [(κ.name, sol, κ.params)]
         curr := curr.elim1 κ
 
