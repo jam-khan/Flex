@@ -46,3 +46,9 @@ import LeanFixpoint.VCG.While.Semantics
   Utils
 -/
 import LeanFixpoint.Monad
+
+/-
+  Sound Verification Condition Generation
+-/
+import LeanFixpoint.VCG.While.Types
+import LeanFixpoint.VCG.While.Semantics
