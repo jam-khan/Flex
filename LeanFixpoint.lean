@@ -36,3 +36,9 @@ import LeanFixpoint.Solve.Qualifier
 import LeanFixpoint.Solve.Solver
 import LeanFixpoint.Solve.Weakening
 import LeanFixpoint.Solve.Fixpoint
+
+/-
+  Sound Verification Condition Generation
+-/
+import LeanFixpoint.VCG.While.Types
+import LeanFixpoint.VCG.While.Semantics
