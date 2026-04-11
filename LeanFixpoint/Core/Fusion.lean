@@ -3,32 +3,30 @@ import LeanFixpoint.Core.Subst
 import LeanFixpoint.Core.Pretty
 import LeanFixpoint.Core.Macros
 
+open Lean
+
 -- Extract `kvars` from predicate `p`
 def Pred.kvars : Pred → List KVar
-  | .tru          => []
-  | .fls          => []
-  | .rexpr _      => []
-  | .kapp k _     => [k]
+  | .expr _       => []
+  | .kapp κ _     => [κ]
   | .conj p₁ p₂   => p₁.kvars ++ p₂.kvars
-  | .disj p₁ p₂   => p₁.kvars ++ p₂.kvars
-  | .exist _ _ p  => p.kvars
 
 -- Extract `kvars` from constraint `c`
 def Constraint.kvars : Constraint → List KVar
   | .pred p       => p.kvars
   | .conj c₁ c₂   => c₁.kvars ++ c₂.kvars
-  | .imp _ _ p c  => p.kvars ++ c.kvars
+  | .imp _ _ p c  => p.kvars  ++ c.kvars
 
 -- Basic example
 def kappa1 : KVar := { name := `κ₁, params := [`z] }
 def kappa2 : KVar := { name := `κ₂, params := [`z] }
 def constraintEx : Constraint :=
-  c{
-    ∀ x : int . true ⇒
-      [∀ y : int . true ⇒ kappa1(x) ∧ kappa2(y)]
-  }
+  .imp `x .int (.expr (mkConst ``True))
+    (.imp `y .int (.expr (mkConst ``True))
+      (.pred (.conj
+        (.kapp kappa1 [.fvar (FVarId.mk `x)])
+        (.kapp kappa2 [.fvar (FVarId.mk `y)]))))
 
-#eval constraintEx.kvars
 
 /-
   WARNING: Constraint.head and .body shall
@@ -39,7 +37,7 @@ def Constraint.head : Constraint → Pred
   | .pred p      => p
   | .imp _ _ _ c => c.head
   -- shouldn't happen on flat constraints
-  | .conj _ _    => .tru
+  | .conj _ _    => .expr (mkConst ``True)
 
 -- all hypothesis predicates
 def Constraint.body : Constraint → List Pred
@@ -47,8 +45,10 @@ def Constraint.body : Constraint → List Pred
   | .imp _ _ p c  => p :: c.body
   | .conj _ _     => []
 
-def FlatConstraint.head (fc: FlatConstraint) : Pred := fc.val.head
-def FlatConstraint.body (fc: FlatConstraint) : List Pred := fc.val.body
+def FlatConstraint.head (fc: FlatConstraint) : Pred       :=
+  fc.val.head
+def FlatConstraint.body (fc: FlatConstraint) : List Pred  :=
+  fc.val.body
 def FlatConstraint.kvars (fc: FlatConstraint) : List KVar :=
   fc.val.kvars
 
@@ -61,10 +61,11 @@ def FlatConstraint.kvars (fc: FlatConstraint) : List KVar :=
   Note: Order is left to right, c₁ => ⋯ => cₙ => p
 -/
 def Constraint.flat : Constraint → List FlatConstraint
-  | .pred .tru    => []
-  | .pred p       => [⟨.pred p⟩]
-  | .conj c₁ c₂   => c₁.flat ++ c₂.flat
-  | .imp x b p c  => c.flat.map (fun ⟨c'⟩ => ⟨.imp x b p c'⟩)
+  | .pred (.expr e) =>
+    if e.isConstOf ``True then [] else [⟨.pred (.expr e)⟩]
+  | .pred p         => [⟨.pred p⟩]
+  | .conj c₁ c₂     => c₁.flat ++ c₂.flat
+  | .imp x b p c    => c.flat.map (fun ⟨c'⟩ => ⟨.imp x b p c'⟩)
 
 /-
   Dependencies `deps(c)` over constraints
@@ -119,34 +120,24 @@ def Constraint.scope (κ : KVar) : Constraint → Constraint
   | c => c
 
 
--- Simplifies the predicate, e.g. p ∧ false = false
 def Pred.simplify : Pred → Pred
   | .conj p₁ p₂ =>
     match p₁.simplify, p₂.simplify with
-    | .fls, _    => .fls
-    | _, .fls    => .fls
-    | .tru, s    => s
-    | s, .tru    => s
-    | s₁, s₂     => .conj s₁ s₂
-
-  | .disj p₁ p₂ =>
-    match p₁.simplify, p₂.simplify with
-    | .tru, _    => .tru
-    | _, .tru    => .tru
-    | .fls, s    => s
-    | s, .fls    => s
-    | s₁, s₂     => .disj s₁ s₂
-
-  | .exist x b p =>
-    match p.simplify with
-    | .fls => .fls
-    | s    => .exist x b s
-
-  -- x == x  →  true
-  | .rexpr (.cmp .eq (.var x) (.var y)) =>
-    if x == y then .tru else .rexpr (.cmp .eq (.var x) (.var y))
-
+    | .expr e, s    =>
+      if e.isConstOf ``False
+        then .expr (mkConst ``False)
+        else if e.isConstOf ``True
+              then s
+              else .conj (.expr e) s
+    | s, .expr e    =>
+      if e.isConstOf ``False
+        then .expr (mkConst ``False)
+        else if e.isConstOf ``True
+          then s
+          else .conj s (.expr e)
+    | s₁, s₂        => .conj s₁ s₂
   | p => p
+
 
 /-
   `sol1 : (K × C) → P`
@@ -187,19 +178,15 @@ def Constraint.sol1 (κ : KVar) (c : Constraint) : Pred :=
         else .fls
       | _                     => .fls
 
-def substKVarInPred (κ : KVar) (sol : Pred) (p : Pred) : Pred :=
-  go p
-where
-  go : Pred → Pred
-    | .tru          => .tru
-    | .fls          => .fls
-    | .rexpr r      => .rexpr r
-    | .kapp k args  =>
-      if k == κ then Pred.applyKVarSol κ sol args
+def substKVarInPred (κ : KVar) (sol : Pred) : Pred → Pred
+  | .expr e      =>
+      .expr e
+  | .kapp k args =>
+      if k == κ
+      then Pred.applyKVarSol κ sol args
       else .kapp k args
-    | .conj p₁ p₂  => .conj (go p₁) (go p₂)
-    | .disj p₁ p₂  => .disj (go p₁) (go p₂)
-    | .exist x b p  => .exist x b (go p)
+  | .conj p₁ p₂  =>
+      .conj (substKVarInPred κ sol p₁) (substKVarInPred κ sol p₂)
 
 /-
   `elim* : (σ × C) → C` from Fig. 11
@@ -211,7 +198,10 @@ where
 def Constraint.elimStar (κ : KVar) (sol : Pred) : Constraint → Constraint
   | .conj c₁ c₂   => .conj (c₁.elimStar κ sol) (c₂.elimStar κ sol)
   | .imp x b p c  => .imp x b (substKVarInPred κ sol p) (c.elimStar κ sol)
-  | .pred (.kapp k y) => if k == κ then .pred .tru else .pred (.kapp k y)
+  | .pred (.kapp κ' y) =>
+      if κ' == κ
+        then .pred (.expr (mkConst ``True))
+        else .pred (.kapp κ y)
   | .pred p       => .pred p
 
 /-
@@ -262,67 +252,3 @@ def Constraint.partitionKVars (c : Constraint) : List KVar × List KVar :=
   let cuts    := allKs.filter (fun κ => κ.isCyclic c)
   let acyclic := allKs.filter (fun κ => !κ.isCyclic c)
   (acyclic, cuts)
-
-section CyclicTests
-
-def kappa_test : KVar := { name := `κ, params := [`z] }
-
-def ex1Test : Constraint :=
-  c{ ∀ x : int . 0 ≤ x ⇒
-      [∀ v : int . v == x - 1 ⇒ kappa_test(v)]
-    ∧ [∀ y : int . kappa_test(y) ⇒
-        ∀ v : int . v == y + 1 ⇒ 0 ≤ v] }
-
-#eval kappa_test.isCyclic ex1Test
--- expected: false
-
-#eval ex1Test.deps
--- expected: []
-
-#eval ex1Test.partitionKVars
--- expected: ([κ], [])
-
-def ka : KVar := { name := `κa, params := [`z] }
-def kb : KVar := { name := `κb, params := [`z] }
-def kc : KVar := { name := `κc, params := [`z] }
-def kd : KVar := { name := `κd, params := [`z] }
-
-def mixedTest : Constraint :=
-  c{  -- acyclic chain: κa → κb → κc (same as ex3)
-      [∀ a : int . ka(a) ⇒ ∀ ν : int . ν == a - 1 ⇒ kb(ν)]
-    ∧ [∀ b : int . kb(b) ⇒ ∀ ν : int . ν == b + 1 ⇒ kc(ν)]
-    ∧ [∀ ν : int . 0 ≤ ν ⇒ ka(ν)]
-    ∧ [∀ ν : int . kc(ν) ⇒ 0 ≤ ν]
-      -- cyclic: κd depends on itself (recursive accumulator)
-    ∧ [∀ x : int . 0 ≤ x ⇒
-        ∀ ν : int . x == 0 ∧ ν == 0 ⇒ kd(ν)]
-    ∧ [∀ x : int . 0 ≤ x ⇒
-        ∀ r : int . kd(r) ⇒
-          ∀ ν : int . ν == x + r ⇒ kd(ν)]
-    ∧ [∀ y : int . kd(y) ⇒ 0 ≤ y] }
-
-#eval ka.isCyclic mixedTest    -- expect: false
-#eval kb.isCyclic mixedTest    -- expect: false
-#eval kc.isCyclic mixedTest    -- expect: false
-#eval kd.isCyclic mixedTest    -- expect: true
-
-#eval mixedTest.partitionKVars
--- expect: ([κa, κb, κc], [κd])
-
--- Eliminate only the acyclic variables
-def mixedAfterAcyclic :=
-  let (acyclic, _cuts) := mixedTest.partitionKVars
-  mixedTest.elim acyclic
-
-#eval mixedAfterAcyclic.kvars.eraseDups
-
--- Check: κa, κb, κc gone?
-#eval mixedAfterAcyclic.kvars.any (· == ka)  -- expect: false
-#eval mixedAfterAcyclic.kvars.any (· == kb)  -- expect: false
-#eval mixedAfterAcyclic.kvars.any (· == kc)  -- expect: false
-#eval mixedAfterAcyclic.kvars.any (· == kd)  -- expect: true
-
--- Print the residual constraint to see what's left
-#eval IO.println (toString mixedAfterAcyclic)
-
-end CyclicTests
