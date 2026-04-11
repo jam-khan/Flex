@@ -28,23 +28,11 @@ instance : ToString KVar where
       let ps := ", ".intercalate (k.params.map toString)
       s!"{k.name}({ps})"
 
-private def ppPred : Pred → String
-  | .expr r        => toString r
-  | .kapp k args    =>
-      let ps := ", ".intercalate (args.map toString)
-      s!"{k.name}[{ps}]"
-  | .conj p q       => s!"({ppPred p} ∧ {ppPred q})"
-  
-instance : ToString Pred where toString := ppPred
-
--- Indentation-aware printing for constraints
-private def ppConstraint (indent : Nat := 0) : Constraint → String
-  | .pred p        => ppPred p
-  | .conj c1 c2    =>
-      let pad := String.ofList (List.replicate indent ' ')
-      s!"{ppConstraint indent c1}\n{pad}∧ {ppConstraint indent c2}"
-  | .imp x b p c   =>
-      let pad  := String.ofList (List.replicate (indent + 2) ' ')
-      s!"∀ {x} : {b}.\n{pad}{ppPred p}\n{pad}⇒ {ppConstraint (indent + 2) c}"
-
-instance : ToString Constraint where toString c := ppConstraint 0 c
+def ppConstraint (indent : Nat := 0) : Constraint → MetaM String
+  | .pred p => do return s!"{← Meta.ppExpr p}"
+  | .conj c1 c2 => do
+      let pad := "".pushn ' ' indent
+      return s!"{← ppConstraint indent c1}\n{pad}∧ {← ppConstraint indent c2}"
+  | .imp x ty p c => do
+      let pad := "".pushn ' ' (indent + 2)
+      return s!"∀ {x} : {← Meta.ppExpr ty}.\n{pad}{← Meta.ppExpr p}\n{pad}⇒ {← ppConstraint (indent + 2) c}"
