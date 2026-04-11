@@ -120,24 +120,15 @@ deriving BEq, Hashable, Repr, Inhabited
 instance : Hashable KVar where
   hash k := hash k.name
 
--- Predicates `p`
-inductive Pred where
-  -- refinement `r` in terms of Lean4 Expr
-  | expr : Expr → Pred
-  -- `κ(y₁, ..., yₙ)`
-  | kapp  : KVar → List Expr → Pred
-  -- `p₁ ∧ p₂`
-  | conj  : Pred → Pred → Pred
-  deriving Repr, Inhabited
-
 -- Constraints c
 inductive Constraint where
   -- `p`
-  | pred : Pred → Constraint
+  | pred : Expr → Constraint
   -- `c₁ ∧ c₂`
   | conj : Constraint → Constraint → Constraint
   -- `∀ x : b. p ⇒ c`
-  | imp  : Var → BaseTy → Pred → Constraint → Constraint
+  | imp  : Var → Expr → Expr → Constraint → Constraint
+  -- note: base type `b` is using `Expr` as well
 deriving Repr, Inhabited
 
 /-
@@ -157,13 +148,13 @@ deriving Repr, Inhabited
   Each entry is `(κ, (params, body))` where `body` is the predicate
   solution with free variables from `params`.
 -/
-abbrev Assignment := List (KVar × (List Var × Pred))
+abbrev Assignment := List (KVar × (List Var × Expr))
 
 -- `{x: b | p}` — a single binding assumption in the environment
 structure Assumption where
   var  : Var
   ty   : BaseTy
-  pred : Pred
+  pred : Expr
 deriving Repr
 
 -- CHECK THIS CAREFULLY
