@@ -94,7 +94,7 @@ private def solveFusionImpl : TacticM Unit := withMainContext do
         IO.println s!"[solve_fusion] Acyclic κ-vars: {acyclic.map (fun (k : KVar) => k.name)}"
         IO.println s!"[solve_fusion] Cyclic κ-vars:  {_cyclic.map (fun (k : KVar) => k.name)}"
 
-        let mut solutions : List (Name × Expr × List Name) := []
+        let mut solutions : List (Name × Expr × List Name × List Expr) := []
         let mut curr := constraint
         for κ in acyclic do
           IO.println s!"[solve_fusion] --- Eliminating κ = {κ.name} (params: {κ.params}) ---"
@@ -124,29 +124,69 @@ private def solveFusionImpl : TacticM Unit := withMainContext do
           let solFmt ← ppExpr sol
           IO.println s!"[solve_fusion]   sol1({κ.name}) = {solFmt}"
 
-          solutions := solutions ++ [(κ.name, sol, κ.params)]
+          solutions := solutions ++ [(κ.name, sol, κ.params, κ.paramTypes)]
           curr ← (curr.elim1 κ).run kctx
           IO.println s!"[solve_fusion]   elim1 done, constraint updated"
 
         IO.println s!"[solve_fusion] --- All solutions ---"
-        for (κName, sol, params) in solutions do
+        for (κName, sol, params, _) in solutions do
           let solFmt ← ppExpr sol
           IO.println s!"[solve_fusion]   {κName}({params}) = {solFmt}"
 
-        -- Build witness Exprs (still inside CPS, fvars alive)
+        -- Build witness Exprs inside CPS (fvars alive for solToWitnessExpr)
         let mut witnessExprs : List Expr := []
-        for (κName, sol, params) in solutions do
-          let witness ← solToWitnessExpr sol params
+        for (κName, sol, params, paramTypes) in solutions do
+          let witness ← solToWitnessExpr sol params paramTypes
           let witFmt ← ppExpr witness
           IO.println s!"[solve_fusion]   witness for {κName}: {witFmt}"
           witnessExprs := witnessExprs ++ [witness]
         return witnessExprs
 
-      -- Phase 5: Provide ∃ witnesses (in TacticM, fvars no longer needed —
-      -- witnesses are closed Exprs thanks to Expr.abstract in sol1)
+      -- Phase 5: Apply witnesses directly as Exprs
       for witness in (witnesses : List Expr) do
-        let witnessSyn ← PrettyPrinter.delab witness
-        evalTactic (← `(tactic| refine ⟨$witnessSyn, ?_⟩))
+        let goal ← getMainGoal
+        let goalType ← goal.getType
+        let goalType ← whnf goalType
+
+        -- Debug: print goal type and witness type
+        let goalFmt ← ppExpr goalType
+        IO.println s!"[solve_fusion] Phase 5: goal type = {goalFmt}"
+
+        let witTy ← inferType witness
+        let witTyFmt ← ppExpr witTy
+        IO.println s!"[solve_fusion] Phase 5: witness type = {witTyFmt}"
+
+        -- Extract α and p from @Exists α p
+        let α := goalType.getArg! 0
+        let p := goalType.getArg! 1
+        let αFmt ← ppExpr α
+        let pFmt ← ppExpr p
+        IO.println s!"[solve_fusion] Phase 5: α = {αFmt}"
+        IO.println s!"[solve_fusion] Phase 5: p = {pFmt}"
+
+        let αTy ← inferType α
+        let αTyFmt ← ppExpr αTy
+        IO.println s!"[solve_fusion] Phase 5: type of α = {αTyFmt}"
+
+        -- Check: does witness typecheck against α?
+        let isDefEq ← isDefEq witTy α
+        IO.println s!"[solve_fusion] Phase 5: witTy =?= α: {isDefEq}"
+
+        -- Try to build and apply
+        try
+          let obligation ← mkAppM' p #[witness]
+          let oblFmt ← ppExpr obligation
+          IO.println s!"[solve_fusion] Phase 5: obligation = {oblFmt}"
+          let mvar ← mkFreshExprMVar (some obligation)
+          let lvl := if α.isProp then levelZero else levelOne
+          IO.println s!"[solve_fusion] Phase 5: using level = {lvl}"
+          let proof := mkApp4 (mkConst ``Exists.intro [lvl]) α p witness mvar
+          goal.assign proof
+          replaceMainGoal [mvar.mvarId!]
+          IO.println s!"[solve_fusion] Phase 5: assign OK"
+        catch e =>
+          IO.println s!"[solve_fusion] Phase 5: FAILED: {← e.toMessageData.toString}"
+          throw e
     )
     (fun e => do
       logInfo m!"[solve_fusion] ✗ Solver failed: {e.toMessageData}"

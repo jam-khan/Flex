@@ -13,10 +13,13 @@ def Constraint.toExpr : Constraint → MetaM Expr
         let imp ← mkArrow hyp body
         mkForallFVars #[fvar] imp
 
-def solToWitnessExpr (sol : Expr) (params : List Name) : MetaM Expr := do
-  let rec go (fvars : Array Expr) : List Name → MetaM Expr
+-- Build witness lambda: fun (z0 : T0) (z1 : T1) ... => sol
+-- Replaces fake canonical fvars (FVarId.mk `z0) with real fvars before abstracting
+def solToWitnessExpr (sol : Expr) (params : List Name) (paramTypes : List Expr) : MetaM Expr := do
+  let rec go (sol : Expr) (fvars : Array Expr) : List (Name × Expr) → MetaM Expr
     | [] => mkLambdaFVars fvars sol
-    | n :: rest =>
-      withLocalDeclD n (mkConst ``Int) fun fvar => do
-        go (fvars.push fvar) rest
-  go #[] params
+    | (n, ty) :: rest =>
+      withLocalDeclD n ty fun fvar => do
+        let sol' := sol.replaceFVar (.fvar (FVarId.mk n)) fvar
+        go sol' (fvars.push fvar) rest
+  go sol #[] (params.zip paramTypes)

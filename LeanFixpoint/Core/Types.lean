@@ -60,9 +60,10 @@ abbrev Var := Name
 
 -- κ(x₁, ..., xₙ)
 structure KVar where
-  name    : Name      -- κ
-  params  : List Name -- x₁, ..., xₙ
-  fvarId  : FVarId    -- actual FVarId from peeling ∃
+  name       : Name       -- κ
+  params     : List Name  -- x₁, ..., xₙ (canonical param names)
+  paramTypes : List Expr  -- types of each param (e.g. [Int, Int] or [BitVec 32])
+  fvarId     : FVarId     -- actual FVarId from peeling ∃
 deriving BEq, Hashable, Repr, Inhabited
 
 instance : Hashable KVar where

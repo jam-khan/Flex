@@ -22,4 +22,4 @@ def lhHornProp : Prop :=
       ∧ (∀ y : Int, κ y x → ∀ v : Int, v = y + 1 → 0 ≤ v)
 
 theorem lhHornProof : lhHornProp := by
-  solve_fixpoint
+  solve_fusion

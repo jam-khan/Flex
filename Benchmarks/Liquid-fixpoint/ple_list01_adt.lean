@@ -35,4 +35,4 @@ def pleListProp : Prop :=
     vecLen (Vec.vcons x (Vec.vcons y (Vec.vcons z Vec.vnil))) = 3
 
 theorem pleListProof : pleListProp := by
-  solve_fixpoint
+  solve_fusion

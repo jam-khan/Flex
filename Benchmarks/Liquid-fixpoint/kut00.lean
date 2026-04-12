@@ -30,4 +30,4 @@ def kut00Prop : Prop :=
     ∧ (∀ z : Int, κ1 z → 99 < 105)
 
 theorem kut00Proof : kut00Prop := by
-  solve_fixpoint
+  solve_fusion

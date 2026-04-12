@@ -335,3 +335,68 @@ def ex_stress : Prop :=
 
 theorem ex_stressProof : ex_stress := by
   try solve_fusion
+
+-- Nat refinement: predecessor is less than input
+def ex_nat : Prop :=
+  ∃ κ : Nat → Nat → Prop,
+    ∀ n : Nat,
+      0 < n →
+      (∀ m : Nat, m = n - 1 → κ m n)
+    ∧ (∀ m : Nat, κ m n → m < n)
+
+theorem ex_natProof : ex_nat := by
+  solve_fusion
+
+-- Bool-sorted κ: tracking a boolean property
+def ex_bool : Prop :=
+  ∃ κ : Bool → Int → Prop,
+    ∀ x : Int,
+      0 < x →
+      (∀ b : Bool, b = decide (x > 0) → κ b x)
+    ∧ (∀ b : Bool, κ b x → b = true)
+
+theorem ex_boolProof : ex_bool := by
+  solve_fusion
+
+structure Point where
+  x : Int
+  y : Int
+
+def ex_pair : Prop :=
+  ∃ κ : Point → Prop,
+    ∀ a : Int,
+      0 ≤ a →
+      ∀ b : Int,
+        0 ≤ b →
+        (∀ p : Point, p = ⟨a, b⟩ → κ p)
+      ∧ (∀ p : Point, κ p → 0 ≤ p.x ∧ 0 ≤ p.y)
+
+theorem ex_pairProof : ex_pair := by
+  solve_fusion
+
+def ex_prod : Prop :=
+  ∃ κ : (Int × Int) → Prop,
+    ∀ a : Int,
+      0 ≤ a →
+      ∀ b : Int,
+        0 ≤ b →
+        (∀ p : Int × Int, p = (a, b) → κ p)
+      ∧ (∀ p : Int × Int, κ p → 0 ≤ p.1 ∧ 0 ≤ p.2)
+
+theorem ex_prodProof : ex_prod := by
+  solve_fusion
+
+-- User-defined function in refinement
+def double (x : Int) : Int := x + x
+
+def ex_userfn : Prop :=
+  ∃ κ : Int → Int → Prop,
+    ∀ x : Int,
+      0 ≤ x →
+      (∀ ν : Int, ν = double x → κ ν x)
+    ∧ (∀ y : Int, κ y x → 0 ≤ y)
+
+theorem ex_userfnProof : ex_userfn := by
+  solve_fusion
+  unfold double
+  grind

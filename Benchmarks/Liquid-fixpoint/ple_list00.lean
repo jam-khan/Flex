@@ -30,4 +30,4 @@ def ple1Prop : Prop :=
     myLen (MyList.cons x (MyList.cons y (MyList.cons z MyList.nil))) = 3
 
 theorem ple1Proof : ple1Prop := by
-  solve_fixpoint
+  solve_fusion

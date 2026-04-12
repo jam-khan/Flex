@@ -44,4 +44,4 @@ def lhGroundProp : Prop :=
             0 ≤ v))
 
 theorem lhGroundProof : lhGroundProp := by
-  solve_fixpoint
+  solve_fusion

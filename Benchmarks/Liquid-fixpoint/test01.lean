@@ -20,4 +20,4 @@ def sumRec2Prop : Prop :=
     (∀ y : Int, y > x → ∀ v : Int, v = x + y → v > 0)
     ∧ (∀ z : Int, z > 100 → ∀ v : Int, v = x + z → v > 100)
 
-theorem sumRec2Proof : sumRec2Prop := by solve_fixpoint
+theorem sumRec2Proof : sumRec2Prop := by solve_fusion

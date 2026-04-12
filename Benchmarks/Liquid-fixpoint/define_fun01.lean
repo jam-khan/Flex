@@ -23,4 +23,4 @@ def lhDefineFun01Prop
 theorem lhDefineFun01Proof :
     ∀ magic0 magic1 magic2 magic3 : Int → Prop,
     lhDefineFun01Prop magic0 magic1 magic2 magic3 := by
-  solve_fixpoint
+  solve_fusion
