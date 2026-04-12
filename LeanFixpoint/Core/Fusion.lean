@@ -133,10 +133,15 @@ def Constraint.sol1 (κ : KVar) (c : Constraint) (simplify := false) : Expr :=
       | .conj c₁ c₂ =>
           mkApp2 (mkConst ``Or) (sol1Aux c₁) (sol1Aux c₂)
       | .imp _x ty p fv c =>
-          let body := mkApp2 (mkConst ``And) p (sol1Aux c)
-          let abstrBody := body.abstract #[fv]
+        let inner := mkApp2 (mkConst ``And) p (sol1Aux c)
+        let abstrBody := inner.abstract #[fv]
+        if abstrBody.hasLooseBVars then
+          -- fvar was used in body → real ∀, need ∃
           let lam := Expr.lam _x ty abstrBody .default
           mkApp2 (mkConst ``Exists [levelOne]) ty lam
+        else
+          -- fvar wasn't used → bare arrow, just conjoin
+          inner
       | .pred e =>
           if e.getAppFn.isFVar && e.getAppFn.fvarId! == κ.fvarId then
             let args := e.getAppArgs.toList

@@ -193,7 +193,7 @@ private def solveFusionImpl : TacticM Unit := withMainContext do
       logInfo m!"[solve_fusion] → falling back to closeResidualGoals"
     )
 
-  closeResidualGoals
+  -- closeResidualGoals
 
 syntax "solve_fusion" : tactic
 elab_rules : tactic
