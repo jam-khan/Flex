@@ -7,7 +7,7 @@ def Constraint.toExpr : Constraint → MetaM Expr
   | .pred e => return e
   | .conj c₁ c₂ => do
       mkAppM ``And #[← c₁.toExpr, ← c₂.toExpr]
-  | .imp x ty hyp c => do
+  | .imp x ty hyp _fv c => do
       withLocalDeclD x ty fun fvar => do
         let body ← c.toExpr
         let imp ← mkArrow hyp body

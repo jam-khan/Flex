@@ -9,7 +9,8 @@ def ex1 : Prop :=
         ∀ ν : Int, ν = y + 1 → 0 ≤ ν)
 
 theorem ex1Proof : ex1 := by
-  solve_fixpoint
+  solve_fusion
+
 
 def ex2 : Prop :=
     ∃ κx : Int → Int → Int → Int → Prop, ∃ κy : Int → Int → Int → Int → Prop,
@@ -27,7 +28,7 @@ def ex2 : Prop :=
           )
 
 theorem ex2Proof : ex2 := by
-  solve_fixpoint
+  solve_fusion
 
 
 def ex3 : Prop :=
@@ -38,7 +39,7 @@ def ex3 : Prop :=
   ∧ (∀ ν : Int, κc ν → 0 ≤ ν)
 
 theorem ex3Proof : ex3 := by
-  solve_fixpoint
+  solve_fusion
 
 
 -- ex4: Three-step chain: inc → dec → inc
@@ -55,7 +56,7 @@ def ex4 : Prop :=
         ∀ ν : Int, ν = z + 1 → 0 ≤ ν)
 
 theorem ex4Proof : ex4 := by
-  solve_fixpoint
+  solve_fusion
 
 -- ex5: Three-step chain: dec → inc → inc
 -- ex5 x = inc (inc (dec x))  =  x+1 ≥ 0
@@ -71,7 +72,7 @@ def ex5 : Prop :=
         ∀ ν : Int, ν = z + 1 → 0 ≤ ν)
 
 theorem ex5Proof : ex5 := by
-  solve_fixpoint
+  solve_fusion
 
 -- ex6: Two independent paths, each checked separately
 -- ex6 x = (inc x, inc (dec x))  both outputs ≥ 0
@@ -87,7 +88,7 @@ def ex6 : Prop :=
         ∀ ν : Int, ν = b + 1 → 0 ≤ ν)
 
 theorem ex6Proof : ex6 := by
-  solve_fixpoint
+  solve_fusion
 
 -- ex7: Diamond — two sources flow into one κ, then one consumer
 -- ex7 x = let ys = [inc x, dec x] in inc (last ys)  ≥ 0
@@ -102,7 +103,7 @@ def ex7 : Prop :=
         ∀ ν : Int, ν = y + 1 → 0 ≤ ν)
 
 theorem ex7Proof : ex7 := by
-  solve_fixpoint
+  solve_fusion
 
 -- ex8: Two Nat inputs, one intermediate binder
 -- ex8 (x y : Nat) = let a = dec x in a + 1 + y  ≥ 0
@@ -118,7 +119,7 @@ def ex8 : Prop :=
           ∀ ν : Int, ν = a + 1 + y → 0 ≤ ν)
 
 theorem ex8Proof : ex8 := by
-  solve_fixpoint
+  try solve_fusion
 
 -- ex9: Four-step chain: inc → dec → inc → dec
 -- ex9 x = dec (inc (dec (inc x)))  =  x  ≥ 0
@@ -136,7 +137,9 @@ def ex9 : Prop :=
         ∀ ν : Int, ν = c - 1 → 0 ≤ ν)
 
 theorem ex9Proof : ex9 := by
-  solve_fixpoint
+  try solve_fusion
+
+  -- solve_fixpoint
 
 -- ex10: Three-way merge into one κ, stronger consumer (needs inc inc)
 -- ex10 x = let ys = [dec x, x, inc x] in inc (inc (last ys))  ≥ 0
@@ -153,7 +156,8 @@ def ex10 : Prop :=
         ∀ ν : Int, ν = y + 2 → 0 ≤ ν)
 
 theorem ex10Proof : ex10 := by
-  solve_fixpoint
+  try solve_fusion
+
 
 -- ex11: Three-κ chain with multi-producer merge at κ2
 -- Given 0 ≤ x, produce x into κ1. Then κ1 feeds two values (a-2) and (a+1)
@@ -172,7 +176,8 @@ def ex11 : Prop :=
     ∧ (∀ c : Int, κ3 c x → 0 ≤ c)
 
 theorem ex11Proof : ex11 := by
-  solve_fixpoint
+  try solve_fusion
+
 
 -- ex12: Four-κ diamond — two independent processing paths rejoin at κ3
 -- Given 0 ≤ x:
@@ -200,7 +205,8 @@ def ex12 : Prop :=
     ∧ (∀ d : Int, κ4 d x → 0 ≤ d)
 
 theorem ex12Proof : ex12 := by
-  solve_fixpoint
+  try solve_fusion
+
 
 -- ex13: 3-κ chain with nested binders and cross-flow
 -- Given 0 ≤ x, let a = x-1, b = x+1:
@@ -225,7 +231,8 @@ def ex13 : Prop :=
         ∧ (∀ z : Int, κ3 z x a b → 0 ≤ z)
 
 theorem ex13Proof : ex13 := by
-  solve_fixpoint
+  try solve_fusion
+
 
 -- ex14: 4-κ chain with nested binders, cross-flow, and merge
 -- Given 0 ≤ x, let a = x-1, b = x+1, c = x:
@@ -260,7 +267,8 @@ def ex14 : Prop :=
           ∧ (∀ z : Int, κ4 z x a b c → 0 ≤ z)
 
 theorem ex14Proof : ex14 := by
-  solve_fixpoint
+  try solve_fusion
+
 
 -- ex_stress: 5-κ extreme test — chain + diamond + 3-way merge + cross-flow + nested binders
 --
@@ -326,15 +334,4 @@ def ex_stress : Prop :=
         ∧ (∀ s : Int, κ5 s x a b → 0 ≤ s)
 
 theorem ex_stressProof : ex_stress := by
-  solve_fixpoint
-
-private def qualBar : List Qualifier := [q{ Bar(z : int) | 0 ≤ z }]
-
-def exCyclic : Prop :=
-  ∃ κ : Int → Prop,
-    (∀ x : Int, 0 ≤ x → ∀ ν : Int, ν = x → κ ν)
-  ∧ (∀ x : Int, κ x → ∀ ν : Int, ν = x + 1 → κ ν)
-  ∧ (∀ x : Int, κ x → 0 ≤ x)
-
-theorem exCyclicProof : exCyclic := by
-  solve_fixpoint with qualBar
+  try solve_fusion

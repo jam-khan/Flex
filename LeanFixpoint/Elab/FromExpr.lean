@@ -5,8 +5,9 @@ import LeanFixpoint.Monad
 open Lean Meta
 
 partial def peelExistentials (e : Expr)
-    (kvars : Std.HashMap FVarId KVar := {}) :
-    MetaM (Std.HashMap FVarId KVar × Expr) := do
+    (kvars : Std.HashMap FVarId KVar := {})
+    (k : Std.HashMap FVarId KVar → Expr → MetaM α) :
+    MetaM α := do
   let e ← whnf e
   if e.isAppOfArity ``Exists 2 then
     let pred := e.getArg! 1
@@ -28,12 +29,12 @@ partial def peelExistentials (e : Expr)
         -- name of the `k`
         -- params created
         -- concrete free variable id
-        let kvar : KVar := {name, params := canonParams, fvarId := fvar.fvarId! }
-        let kvars' := kvars.insert fvar.fvarId! kvar
-        peelExistentials (body.instantiate1 fvar) kvars'
-    | _ => return (kvars, e)
+        let kvar : KVar := { name, params := canonParams, fvarId := fvar.fvarId! }
+        peelExistentials (body.instantiate1 fvar) (kvars.insert fvar.fvarId! kvar) k
+        -- peelExistentials (body.instantiate1 fvar) kvars'
+    | _ => k kvars e
   else
-    return (kvars, e)
+    k kvars e
 where
   countArrows (ty : Expr) : MetaM Nat := do
     let ty ← whnf ty
@@ -56,18 +57,17 @@ partial def exprToConstraint (e : Expr) : KM Constraint := do
     let domSort ← (inferType ty >>= whnf : MetaM Expr)
     if domSort.isProp then
       -- Bare arrow: P → Q
-      -- Since isArrow guarantees body doesn't reference bvar 0,
-      -- we can use body directly without instantiation
-      if e.isArrow then
-        let bodyC ← exprToConstraint body
-        return .imp name ty ty bodyC
-      else
-        -- dependent: ∀ (h : P), Q(h)
-        withLocalDeclD name ty fun fvar => do
+      -- No real binder variable — create a dummy fvar for the proof
+      withLocalDeclD name ty fun fvar => do
+        if e.isArrow then
+          let bodyC ← exprToConstraint body
+          return .imp name ty ty fvar bodyC
+        else
+          -- dependent: ∀ (h : P), Q(h)
           let bodyC ← exprToConstraint (body.instantiate1 fvar)
-          return .imp name ty ty bodyC
+          return .imp name ty ty fvar bodyC
     else
-      -- ∀ x : τ, body -- introduce x, then look for arrow inside
+      -- ∀ x : τ, body — introduce x, then look for arrow inside
       withLocalDeclD name ty fun fvar => do
         let body' ← whnf (body.instantiate1 fvar)
         if body'.isForall && body'.isArrow then
@@ -77,14 +77,14 @@ partial def exprToConstraint (e : Expr) : KM Constraint := do
           if innerSort.isProp then
             -- Combined: imp x τ hyp restC
             let restC ← exprToConstraint body'.bindingBody!
-            return .imp name ty innerDom restC
+            return .imp name ty innerDom fvar restC
           else
             -- Inner ∀ has non-Prop domain, don't combine
             let bodyC ← exprToConstraint body'
-            return .imp name ty (mkConst ``True) bodyC
+            return .imp name ty (mkConst ``True) fvar bodyC
         else
           -- No arrow follows, just ∀ x : τ, with trivial guard
           let bodyC ← exprToConstraint body'
-          return .imp name ty (mkConst ``True) bodyC
+          return .imp name ty (mkConst ``True) fvar bodyC
   else
     return .pred e

@@ -21,10 +21,11 @@ import LeanFixpoint.Elab.FromExpr
   verification conditions.
 -/
 import LeanFixpoint.Tactic.Command
-import LeanFixpoint.Tactic.Grind
-import LeanFixpoint.Tactic.SolveFixpoint
+-- import LeanFixpoint.Tactic.Grind        -- TODO: update for Expr passthrough
+-- import LeanFixpoint.Tactic.SolveFixpoint -- TODO: update for Expr passthrough
 import LeanFixpoint.Tactic.Tactics
 import LeanFixpoint.Tactic.Utils
+import LeanFixpoint.Tactic.SolveFusion
 
 /-
   Predicate Abstraction related code,
