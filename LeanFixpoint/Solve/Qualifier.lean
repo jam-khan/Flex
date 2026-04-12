@@ -1,6 +1,5 @@
 import Lean
 import LeanFixpoint.Core.Types
-import LeanFixpoint.Core.Subst
 import LeanFixpoint.Core.Pretty
 import LeanFixpoint.Core.Macros
 

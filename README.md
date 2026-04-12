@@ -76,7 +76,6 @@ See the [`Demo/`](./Demo/Basic.lean) folder for more worked examples.
 | `LeanFixpoint.Core.Macros` | Custom Lean macros |
 | `LeanFixpoint.Core.Pretty` | Pretty printing |
 | `LeanFixpoint.Core.Fusion` | Fusion algorithm |
-| `LeanFixpoint.Core.Subst` | Substitution |
 | `LeanFixpoint.Elab.ToExpr` | Elaboration → Lean `Expr` |
 | `LeanFixpoint.Elab.FromExpr` | Lean `Expr` → constraint AST |
 | `LeanFixpoint.Tactic.SolveFixpoint` | Main tactic for discharging VCs |
