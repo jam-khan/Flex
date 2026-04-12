@@ -365,8 +365,8 @@ structure Point where
 def ex_pair : Prop :=
   ∃ κ : Point → Prop,
     ∀ a : Int,
-      0 ≤ a →
       ∀ b : Int,
+      0 ≤ a →
         0 ≤ b →
         (∀ p : Point, p = ⟨a, b⟩ → κ p)
       ∧ (∀ p : Point, κ p → 0 ≤ p.x ∧ 0 ≤ p.y)
