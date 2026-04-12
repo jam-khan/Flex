@@ -74,9 +74,9 @@ inductive Constraint where
   | pred : Expr → Constraint
   -- `c₁ ∧ c₂`
   | conj : Constraint → Constraint → Constraint
-  -- `∀ x : b. p ⇒ c`
-  | imp  : Var → Expr → Expr → Constraint → Constraint
-  -- note: base type `b` is using `Expr` as well
+  -- `∀ x : τ. p ⇒ c`
+  -- fields: name, type, hypothesis, fvar (for abstraction), body
+  | imp  : Var → Expr → Expr → Expr → Constraint → Constraint
 deriving Repr, Inhabited
 
 /-

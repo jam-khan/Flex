@@ -15,6 +15,6 @@ def ppConstraint (indent : Nat := 0) : Constraint → MetaM String
   | .conj c1 c2 => do
       let pad := "".pushn ' ' indent
       return s!"{← ppConstraint indent c1}\n{pad}∧ {← ppConstraint indent c2}"
-  | .imp x ty p c => do
+  | .imp x ty p _fv c => do
       let pad := "".pushn ' ' (indent + 2)
       return s!"∀ {x} : {← Meta.ppExpr ty}.\n{pad}{← Meta.ppExpr p}\n{pad}⇒ {← ppConstraint (indent + 2) c}"
