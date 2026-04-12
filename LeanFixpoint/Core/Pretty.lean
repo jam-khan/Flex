@@ -3,24 +3,6 @@ import LeanFixpoint.Core.Types
 
 open Lean
 
-private def parenIf (p : Bool) (s : String) : String :=
-  if p then "(" ++ s ++ ")" else s
-
-instance : ToString BaseTy where
-  toString | .int => "Int" | .bool => "Bool"
-
-private def ppUType : UType → String
-  | .tvar α          => toString α
-  | .base b          => toString b
-  | .fn x dom cod    =>
-      let domStr := match dom with
-        | .fn _ _ _ => s!"({ppUType dom})"
-        | _         => ppUType dom
-      s!"({x} : {domStr}) → {ppUType cod}"
-  | .forallTy α t    => s!"∀ {α}. {ppUType t}"
-
-instance : ToString UType where toString := ppUType
-
 instance : ToString KVar where
   toString k :=
     if k.params.isEmpty then toString k.name

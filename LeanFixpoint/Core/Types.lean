@@ -2,30 +2,26 @@ import Lean
 
 open Lean List
 
-abbrev Var    := Name
-abbrev TyVar  := Name
+abbrev Var := Name
 
 /-!
-  # Types.lean — Core AST Definitions for Refinement Type Checking
+  # Types.lean — Core AST for Refinement Type Constraint Solving
 
-  This module defines the core abstract syntax for a refinement type system
-  based on the *Local Refinement Typing* framework (Cosman & Jhala, POPL 2017).
+  Based on *Local Refinement Typing* (Cosman & Jhala, POPL 2017).
 
-  ## Overview
+  ## Expr Passthrough Design
 
-  The system supports:
-  - **Base types** (`Int`, `Bool`) with logical refinements
-  - **Unrefined types** (`UType`) — standard types without refinements
-  - **Horn constraints** (`Constraint`) — the constraint language for type checking
-  - **κ-variables** (`KVar`) — unknown predicates to be solved by the constraint solver
+  Refinement expressions are native `Lean.Expr` values throughout the
+  entire pipeline — no custom expression AST, no translation to external
+  solvers. Substitution uses `Expr.replace`, validity checking uses
+  `omega`/`grind`.
 
   ## Key Types
 
   | Type | Role |
   |------|------|
-  | `Pred` | Predicates: Native Lean4 `expr`, `κ(args)`, `p₁ ∧ p₂`|
-  | `Constraint` | Horn clauses: `p`, `c₁ ∧ c₂`, `∀x:b. p ⇒ c` |
-  | `KVar` | Unknown predicate variables with parameter lists |
+  | `Constraint` | Horn clauses: `p`, `c₁ ∧ c₂`, `∀x:τ. p ⇒ c` |
+  | `KVar` | Unknown predicate variables (κ) with parameter lists |
   | `FlatConstraint` | A constraint known to be in flat (non-nested) form |
 
   ## Relationship to the Paper
@@ -33,40 +29,8 @@ abbrev TyVar  := Name
   The definitions here correspond to **Fig. 5** (Constraint Syntax) and
   **Fig. 8** (Constraint Generation) of the paper. The constraint language
   is in *Negation Normal Form* (NNF), where implications only appear
-  guarded by universal quantifiers (`∀x:b. p ⇒ c`).
+  guarded by universal quantifiers (`∀x:τ. p ⇒ c`).
 -/
-
-/-!
-  ## Base Types
-
-  `BaseTy` represents the ground types of the refinement language.
-  Currently supports integers and booleans.
--/
-inductive BaseTy where
-  | int   : BaseTy
-  | bool  : BaseTy
--- note: decidableEq allows us to get proof for equality
-deriving BEq, Repr, Inhabited, DecidableEq
-
-/-!
-  ## Unrefined Types
-
-  `UType` represents standard types without refinements.
-  These are used as the "shape" of refined types — every refined type
-  has an underlying unrefined type obtained by erasing refinements.
-
-  Corresponds to `shape(τ)` in the paper.
--/
-inductive UType where
-  -- type variable `α`
-  | tvar      : TyVar → UType
-  -- b (`int` or `bool`)
-  | base      : BaseTy → UType
-  -- `x : τ → τ`, where `τ` is a `UType`
-  | fn        : Var → UType → UType → UType
-  -- `∀α. τ`, where `α` is a type variable
-  | forallTy  : TyVar → UType → UType
-deriving BEq, Repr, Inhabited, DecidableEq
 
 /-!
   ## Horn Constraints
@@ -76,38 +40,22 @@ deriving BEq, Repr, Inhabited, DecidableEq
   ### κ-Variables (`KVar`)
 
   A κ-variable represents an unknown predicate to be solved.
-  It has a name and a list of parameter names that scope over its solution.
-
-  For example, `κ(x, y)` with `params = [x, y]` means the solution
-  will be a predicate over two integer variables.
-
-  ### Predicates (`Pred`)
-
-  Predicates appear in both hypothesis and conclusion positions
-  within constraints. They extend refinement expressions with:
-  - κ-applications (`κ(y₁, ..., yₙ)`) — applying an unknown predicate
-  - Conjunction of predicates
+  It has a name, a list of parameter names that scope over its solution,
+  and an `FVarId` from peeling the existential quantifier.
 
   ### Constraints (`Constraint`)
 
   Constraints are the core data structure for type checking.
+  Predicates and binder types are native `Lean.Expr` values.
   A constraint is either:
-  - A predicate `p` (leaf)
+  - A predicate `p` (leaf `Expr`)
   - A conjunction `c₁ ∧ c₂`
-  - A guarded implication `∀x:b. p ⇒ c` (the key Horn clause form)
-
-  The guarded implication `∀x:b. p ⇒ c` introduces variable `x` of
-  base type `b`, assumes hypothesis `p`, and requires body `c`.
-  This corresponds to one level of a Horn clause.
+  - A guarded implication `∀x:τ. p ⇒ c` (the key Horn clause form)
 
   ### Flat Constraints (`FlatConstraint`)
 
-  A flat constraint has the form `∀x₁:b₁. p₁ ⇒ ... ⇒ ∀xₙ:bₙ. pₙ ⇒ p`
-  (no nested conjunctions). The `FlatConstraint` wrapper provides a
-  type-level guarantee that flattening has been applied, preventing
-  accidental calls to `.head` and `.body` on non-flat constraints.
-
-  See `Constraint.flat` in `Constraint.lean` (corresponds to `flat` in **Fig. 12**).
+  A flat constraint has the form `∀x₁:τ₁. p₁ ⇒ ... ⇒ ∀xₙ:τₙ. pₙ ⇒ p`
+  (no nested conjunctions).
 -/
 
 -- κ(x₁, ..., xₙ)
@@ -150,12 +98,11 @@ deriving Repr, Inhabited
 -/
 abbrev Assignment := List (KVar × (List Var × Expr))
 
--- `{x: b | p}` — a single binding assumption in the environment
+-- `{x : τ | p}` — a single binding assumption in the environment
 structure Assumption where
   var  : Var
-  ty   : BaseTy
+  ty   : Expr
   pred : Expr
 deriving Repr
 
--- CHECK THIS CAREFULLY
 abbrev Assumptions := List Assumption
