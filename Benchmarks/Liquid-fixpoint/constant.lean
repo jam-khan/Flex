@@ -33,4 +33,4 @@ def constantProp : Prop :=
 
 
 theorem constantProof : constantProp := by
-  solve_fixpoint
+  solve_fusion

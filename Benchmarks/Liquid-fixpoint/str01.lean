@@ -52,6 +52,6 @@ def str01Prop : Prop :=
     ∀ z : String, z = "hotdog" → x ++ y = z)
 
 theorem str01Proof : str01Prop := by
-  solve_fixpoint
+  solve_fusion
   -- sorry
-  -- solve_fixpoint
+  -- solve_fusion

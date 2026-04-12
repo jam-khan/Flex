@@ -19,4 +19,4 @@ def boolNeqProp : Prop :=
     ∀ b : Bool, ¬(b ↔ (x ≤ 0 ∨ y ≤ 0)) → b)
 
 theorem boolNeqProof : boolNeqProp := by
-  solve_fixpoint
+  solve_fusion

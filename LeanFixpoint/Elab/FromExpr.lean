@@ -20,26 +20,24 @@ partial def peelExistentials (e : Expr)
       --
       -- fvar gets unique `FVarId`
       withLocalDeclD name tyBind fun fvar => do
-        -- here, we get no. of `→` in the `k`'s type, e.g. 2 means `Int → Int → Prop`
-        let arity ← countArrows tyBind
-        -- below creates parameters for `κ`
-        -- based on arity, e.g. [\`z0, \`z1]
+        let (arity, pTypes) ← collectArrowTypes tyBind
         let canonParams := (List.range arity).map fun i => Name.mkStr1 s!"z{i}"
-        -- Create a custom `KVar`
-        -- name of the `k`
-        -- params created
-        -- concrete free variable id
-        let kvar : KVar := { name, params := canonParams, fvarId := fvar.fvarId! }
+        let kvar : KVar := {
+          name, params := canonParams, paramTypes := pTypes, fvarId := fvar.fvarId!
+        }
         peelExistentials (body.instantiate1 fvar) (kvars.insert fvar.fvarId! kvar) k
-        -- peelExistentials (body.instantiate1 fvar) kvars'
     | _ => k kvars e
   else
     k kvars e
 where
-  countArrows (ty : Expr) : MetaM Nat := do
+  -- Collect arity and domain types from arrow type: Int → Int → Prop → (2, [Int, Int])
+  collectArrowTypes (ty : Expr) : MetaM (Nat × List Expr) := do
     let ty ← whnf ty
-    if ty.isForall then return 1 + (← countArrows ty.bindingBody!)
-    else return 0
+    if ty.isForall then
+      let domTy := ty.bindingDomain!
+      let (n, rest) ← collectArrowTypes ty.bindingBody!
+      return (1 + n, domTy :: rest)
+    else return (0, [])
 
 -- Walk Expr to build Constraint
 partial def exprToConstraint (e : Expr) : KM Constraint := do

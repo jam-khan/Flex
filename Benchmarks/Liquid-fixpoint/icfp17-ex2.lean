@@ -43,4 +43,4 @@ def icfp17Ex2Prop : Prop :=
       ∧ (∀ y : Int, κy y x → ∀ v : Int, v = y + 1 → 0 ≤ v)
 
 theorem icfp17Ex2Proof : icfp17Ex2Prop := by
-  solve_fixpoint
+  solve_fusion

@@ -133,8 +133,6 @@ def Constraint.sol1 (κ : KVar) (c : Constraint) (simplify := false) : Expr :=
       | .conj c₁ c₂ =>
           mkApp2 (mkConst ``Or) (sol1Aux c₁) (sol1Aux c₂)
       | .imp _x ty p fv c =>
-          -- Build: ∃ x : ty, p ∧ sol1(κ, c)
-          -- Use Expr.abstract to replace fvar with bvar 0
           let body := mkApp2 (mkConst ``And) p (sol1Aux c)
           let abstrBody := body.abstract #[fv]
           let lam := Expr.lam _x ty abstrBody .default
@@ -142,8 +140,8 @@ def Constraint.sol1 (κ : KVar) (c : Constraint) (simplify := false) : Expr :=
       | .pred e =>
           if e.getAppFn.isFVar && e.getAppFn.fvarId! == κ.fvarId then
             let args := e.getAppArgs.toList
-            let eqs := (κ.params.zip args).map fun (pi, ai) =>
-              mkApp3 (mkConst ``Eq [levelOne]) (mkConst ``Int)
+            let eqs := (κ.params.zip (args.zip κ.paramTypes)).map fun (pi, (ai, ty)) =>
+              mkApp3 (mkConst ``Eq [levelOne]) ty
                 (.fvar (FVarId.mk pi)) ai
             match eqs with
             | []      => mkConst ``True
