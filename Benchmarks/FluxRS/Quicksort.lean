@@ -153,8 +153,4 @@ def SortQuicksortRange :=
 set_option maxHeartbeats 1600000 in
 
 theorem SortQuicksortRange_proof : SortQuicksortRange := by
-  solve_fusion; dsimp only; zap
-  all_goals (
-    split_hyps
-    all_goals simp_all
-    all_goals grind)
+  solve_fusion; dsimp only; zap; all_goals (split_hyps; all_goals simp_all; all_goals grind)
