@@ -1,15 +1,14 @@
 /-
   Core implementation, includes fusion algorithm
-  and the AST for constraint manipulation, along
-  with custom Macros and pretty printing.
+  and types for κ-variables, along with pretty printing.
 -/
 import LeanFixpoint.Core.Types
-import LeanFixpoint.Core.Macros
 import LeanFixpoint.Core.Pretty
 import LeanFixpoint.Core.Fusion
 
 /-
-  Elaboration to and from Lean `Expr`
+  Elaboration helpers for peeling existentials
+  and building witness expressions.
 -/
 import LeanFixpoint.Elab.ToExpr
 import LeanFixpoint.Elab.FromExpr
@@ -17,7 +16,7 @@ import LeanFixpoint.Elab.FromExpr
 /-
   Meta-programming related code, including
   tactics, commands, and monadic code written
-  in MetaM. `SolveFixpoint` is tactic to discharge
+  in MetaM. `SolveFusion` is the main tactic to discharge
   verification conditions.
 -/
 import LeanFixpoint.Tactic.Command

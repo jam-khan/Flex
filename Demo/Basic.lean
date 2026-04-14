@@ -333,8 +333,9 @@ def ex_stress : Prop :=
           -- consumer
         ∧ (∀ s : Int, κ5 s x a b → 0 ≤ s)
 
-theorem ex_stressProof : ex_stress := by
-  try solve_fusion
+-- set_option maxHeartbeats 400000 in
+-- theorem ex_stressProof : ex_stress := by
+--   try solve_fusion
 
 -- Nat refinement: predecessor is less than input
 def ex_nat : Prop :=

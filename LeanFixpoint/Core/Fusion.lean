@@ -1,92 +1,7 @@
 import LeanFixpoint.Core.Types
-import LeanFixpoint.Core.Pretty
-import LeanFixpoint.Core.Macros
 import LeanFixpoint.Monad
 
-open Lean
-
--- Extract `kvars` from constraint `c`
-def Constraint.kvars : Constraint → KM (List KVar)
-  | .pred e          => KM.exprKVars e
-  | .conj c₁ c₂      => return (← c₁.kvars) ++ (← c₂.kvars)
-  | .imp _ _ p _ c   => return (← KM.exprKVars p) ++ (← c.kvars)
-
-/-
-  WARNING: Constraint.head and .body shall
-  only be called on Flattened Horn Constraints
--/
--- the innermost predicate (the goal)
-def Constraint.head : Constraint → Expr
-  | .pred e          => e
-  | .imp _ _ _ _ c   => c.head
-  -- shouldn't happen on flat constraints
-  | .conj _ _        => (mkConst ``True)
-
--- all hypothesis predicates (which are in terms of Lean4 `Expr`)
-def Constraint.body : Constraint → List Expr
-  | .pred _          => []
-  | .imp _ _ p _ c   => p :: c.body
-  | .conj _ _        => []
-
-def FlatConstraint.head (fc: FlatConstraint)  : Expr           := fc.val.head
-def FlatConstraint.body (fc: FlatConstraint)  : List Expr      := fc.val.body
-def FlatConstraint.kvars (fc: FlatConstraint) : KM (List KVar) := fc.val.kvars
-
-/-
-  `flat : Constraint → list FlatConstraint`
-
-  It performs flattening on Horn Clauses
-  based on `flat` in `Fig. 12.`
-
-  Note: Order is left to right, c₁ => ⋯ => cₙ => p
--/
-def Constraint.flat : Constraint → List FlatConstraint
-  | .pred e            => if e.isConstOf ``True then [] else [⟨.pred e⟩]
-  | .conj c₁ c₂        => c₁.flat ++ c₂.flat
-  | .imp x ty p fv c   => c.flat.map (fun ⟨c'⟩ => ⟨.imp x ty p fv c'⟩)
-
-/-
-  Dependencies `deps(c)` over constraints
--/
-def FlatConstraint.deps (fc : FlatConstraint) : KM (List (KVar × KVar)) := do
-  let bodyKs := (← fc.body.mapM KM.exprKVars).flatten
-  let headKs ← KM.exprKVars fc.head
-  return (bodyKs.map (fun kb => headKs.map (fun kh => (kb, kh)))).flatten
-
-def Constraint.deps (c : Constraint) : KM (List (KVar × KVar)) := do
-  let deps ← c.flat.mapM (fun c' => c'.deps)
-  return deps.flatten
-
--- Dependencies in `deps(σ)`
-def Assignment.deps (σ : Assignment) : KM (List (KVar × KVar)) := do
-  let mut result : List (KVar × KVar) := []
-  for (k', (_, body)) in σ do
-    let ks ← KM.exprKVars body
-    result := result ++ ks.map fun k => (k, k')
-  return result
-
--- `deps(K̂, c) = deps(c) \ (K × K̂ U K̂ × K)`, exclude pairs involving K̂
-def Constraint.depsExcluding (c : Constraint) (khat : List KVar) : KM (List (KVar × KVar)) := do
-  let deps ← c.deps
-  return deps.filter fun (k1, k2) => !khat.contains k1 && !khat.contains k2
-
-/-
-  `scope : (K × C) → C`
-
-  Based on `Fig. 9` of the paper `Local Refinement Typing`
--/
-def Constraint.scope (κ : KVar) : Constraint → KM Constraint
-  | .conj c₁ c₂ => do
-    let inC₁ := (← c₁.kvars).contains κ
-    let inC₂ := (← c₂.kvars).contains κ
-    if inC₁ && !inC₂ then c₁.scope κ
-    else if !inC₁ && inC₂ then c₂.scope κ
-    else return .conj c₁ c₂
-  | .imp x ty p fv c' => do
-    if !(← KM.exprKVars p).contains κ
-    then return .imp x ty p fv (← c'.scope κ)
-    else return .imp x ty p fv c'
-  | c => return c
+open Lean Meta
 
 -- Expr-level simplification of And/Or/Exists with True/False propagation
 partial def simplifyExpr (e : Expr) : Expr :=
@@ -118,44 +33,6 @@ partial def simplifyExpr (e : Expr) : Expr :=
     | _ => e
   else e
 
-/-
-  `sol1 : (K × C) → Expr`
-
-  sol1(κ, c) is strongest solution (Section 5.2).
-  Uses Expr.abstract to properly close fvars into bvars
-  when building ∃ binders.
--/
-def Constraint.sol1 (κ : KVar) (c : Constraint) (simplify := false) : Expr :=
-  let raw := sol1Aux c
-  if simplify then simplifyExpr raw else raw
-  where
-    sol1Aux : Constraint → Expr
-      | .conj c₁ c₂ =>
-          mkApp2 (mkConst ``Or) (sol1Aux c₁) (sol1Aux c₂)
-      | .imp _x ty p fv c =>
-        let inner := mkApp2 (mkConst ``And) p (sol1Aux c)
-        let abstrBody := inner.abstract #[fv]
-        if abstrBody.hasLooseBVars then
-          -- fvar was used in body → real ∀, need ∃
-          let lam := Expr.lam _x ty abstrBody .default
-          mkApp2 (mkConst ``Exists [levelOne]) ty lam
-        else
-          -- fvar wasn't used → bare arrow, just conjoin
-          inner
-      | .pred e =>
-          if e.getAppFn.isFVar && e.getAppFn.fvarId! == κ.fvarId then
-            let args := e.getAppArgs.toList
-            let eqs := (κ.params.zip (args.zip κ.paramTypes)).map fun (pi, (ai, ty)) =>
-              mkApp3 (mkConst ``Eq [levelOne]) ty
-                (.fvar (FVarId.mk pi)) ai
-            match eqs with
-            | []      => mkConst ``True
-            | [e]     => e
-            | e :: es => es.foldl (mkApp2 (mkConst ``And)) e
-          else mkConst ``False
-
--- Replace κ(arg₁, ..., argₙ) with sol[z₀ := arg₁, ..., zₙ := argₙ]
--- sol has free canonical params (z0, z1, ...) which get replaced by actual args
 -- Replace κ(arg₁, ..., argₙ) with sol[z₀ := arg₁, ..., zₙ := argₙ]
 def substKVarInExpr (κ : KVar) (sol : Expr) (e : Expr) : Expr :=
   e.replace fun sub =>
@@ -166,56 +43,254 @@ def substKVarInExpr (κ : KVar) (sol : Expr) (e : Expr) : Expr :=
       some result
     else none
 
-/-
-  `elim* : (σ × C) → C` from Fig. 11
+/-! ## Expr-direct fusion functions
+
+  These operate directly on `Lean.Expr` instead of the `Constraint` AST.
+  Each `∀`-binder is processed with `withLocalDeclD` to create temporary fvars,
+  then `Expr.abstract` re-closes them before returning.
+
+  Mapping from `Constraint` constructors to `Expr` patterns:
+  - `.pred e`         → any `Expr` that is not `And` and not `forallE`
+  - `.conj c₁ c₂`    → `e.and? = some (l, r)`
+  - `.imp x τ p fv c` → `e.isForall`
 -/
-def Constraint.elimStar (κ : KVar) (sol : Expr) : Constraint → Constraint
-  | .conj c₁ c₂       => .conj (c₁.elimStar κ sol) (c₂.elimStar κ sol)
-  | .imp x ty p fv c   => .imp x ty (substKVarInExpr κ sol p) fv (c.elimStar κ sol)
-  | .pred e            =>
-      if e.getAppFn.isFVar && e.getAppFn.fvarId! == κ.fvarId
-      then .pred (mkConst ``True)
-      else .pred (substKVarInExpr κ sol e)
 
-def stripScope (κ : KVar) : Constraint → KM Constraint
-  | .imp x ty p fv c => do
-      if !(← KM.exprKVars p).contains κ then stripScope κ c
-      else return .imp x ty p fv c
-  | c => return c
+/-- Flatten: split `And` at top level, distribute `∀` over `And`. -/
+partial def exprFlat (e : Expr) : KM (List Expr) := do
+  let e ← whnf e
+  if e.isConstOf ``True then return []
+  else if let some (l, r) := e.and? then
+    return (← exprFlat l) ++ (← exprFlat r)
+  else if e.isForall then
+    withLocalDeclD e.bindingName! e.bindingDomain! fun fvar => do
+      let flatBodies ← exprFlat (e.bindingBody!.instantiate1 fvar)
+      flatBodies.mapM fun fb => do
+        let abstr := fb.abstract #[fvar]
+        pure (Expr.forallE e.bindingName! e.bindingDomain! abstr e.bindingInfo!)
+  else
+    return [e]
 
-def collectScopeVars (κ : KVar) : Constraint → KM (List Var)
-  | .imp x _ p _ c => do
-      if !(← KM.exprKVars p).contains κ then return x :: (← collectScopeVars κ c)
-      else return []
-  | _ => return []
+/-- Dependencies for a single flat `Expr`.
+    Chases through `∀`-binders, collecting κ-vars in domains (body)
+    and in the innermost leaf (head). -/
+partial def exprFlatDeps (e : Expr) : KM (List (KVar × KVar)) := do
+  let rec go (e : Expr) (bodyKVars : List KVar) : KM (List (KVar × KVar)) := do
+    let e ← whnf e
+    if e.isForall then
+      let dom := e.bindingDomain!
+      let ks ← KM.exprKVars dom
+      withLocalDeclD e.bindingName! dom fun fvar =>
+        go (e.bindingBody!.instantiate1 fvar) (bodyKVars ++ ks)
+    else
+      let headKs ← KM.exprKVars e
+      return (bodyKVars.map (fun kb => headKs.map (fun kh => (kb, kh)))).flatten
+  go e []
 
--- Collect the fvars of scope variables (needed to replace them in solutions)
-def collectScopeFVars (κ : KVar) : Constraint → KM (List Expr)
-  | .imp _ _ p fv c => do
-      if !(← KM.exprKVars p).contains κ then return fv :: (← collectScopeFVars κ c)
-      else return []
-  | _ => return []
+/-- Dependencies for an `Expr`: flatten then compute deps on each piece. -/
+def exprDeps (e : Expr) : KM (List (KVar × KVar)) := do
+  let flats ← exprFlat e
+  let deps ← flats.mapM exprFlatDeps
+  return deps.flatten
 
-def Constraint.elim1 (κ : KVar) (c : Constraint) : KM Constraint := do
-  let scoped' ← c.scope κ
-  let c'      ← stripScope κ scoped'
-  let sol     := c'.sol1 κ
-  return c.elimStar κ sol
+/-- Dependencies excluding pairs that involve any κ in `khat`. -/
+def exprDepsExcluding (e : Expr) (khat : List KVar) : KM (List (KVar × KVar)) := do
+  let deps ← exprDeps e
+  return deps.filter fun (k1, k2) => !khat.contains k1 && !khat.contains k2
 
-def Constraint.elim (kvars : List KVar) (c : Constraint) : KM Constraint := do
-  let mut acc := c
+/-- `scope(κ, e)` — extract the sub-expression relevant to κ (Fig. 9). -/
+partial def exprScope (κ : KVar) (e : Expr) : KM Expr := do
+  let e ← whnf e
+  if let some (l, r) := e.and? then
+    let inL := (← KM.exprKVars l).contains κ
+    let inR := (← KM.exprKVars r).contains κ
+    if inL && !inR then exprScope κ l
+    else if !inL && inR then exprScope κ r
+    else return e
+  else if e.isForall then
+    let dom := e.bindingDomain!
+    if !(← KM.exprKVars dom).contains κ then
+      withLocalDeclD e.bindingName! e.bindingDomain! fun fvar => do
+        let sc ← exprScope κ (e.bindingBody!.instantiate1 fvar)
+        let abstr := sc.abstract #[fvar]
+        pure (Expr.forallE e.bindingName! dom abstr e.bindingInfo!)
+    else
+      return e
+  else
+    return e
+
+/-- `sol1(κ, e)` — strongest solution (Section 5.2).
+    Maps: `And → Or`, `∀(Prop) → And`, `∀(non-Prop) → ∃`, leaf κ-app → equality. -/
+partial def exprSol1 (κ : KVar) (e : Expr) (simplify := false) : KM Expr := do
+  let raw ← sol1Aux e
+  if simplify then return simplifyExpr raw else return raw
+where
+  sol1Aux (e : Expr) : KM Expr := do
+    let e ← whnf e
+    if let some (l, r) := e.and? then
+      return mkApp2 (mkConst ``Or) (← sol1Aux l) (← sol1Aux r)
+    else if e.isForall then
+      let name := e.bindingName!
+      let dom  := e.bindingDomain!
+      withLocalDeclD name dom fun fvar => do
+        let body := e.bindingBody!.instantiate1 fvar
+        let domSort ← (inferType dom >>= whnf : MetaM Expr)
+        if domSort.isProp then
+          -- Prop domain: conjoin hypothesis
+          let inner := mkApp2 (mkConst ``And) dom (← sol1Aux body)
+          let abstrBody := inner.abstract #[fvar]
+          if abstrBody.hasLooseBVars then
+            let lam := Expr.lam name dom abstrBody .default
+            return mkApp2 (mkConst ``Exists [levelZero]) dom lam
+          else
+            return inner
+        else
+          -- Non-Prop domain: recurse, wrap with ∃ if variable is used
+          let inner ← sol1Aux body
+          let abstrBody := inner.abstract #[fvar]
+          if abstrBody.hasLooseBVars then
+            let lam := Expr.lam name dom abstrBody .default
+            return mkApp2 (mkConst ``Exists [levelOne]) dom lam
+          else
+            return inner
+    else
+      -- Leaf: check if κ-application
+      if e.getAppFn.isFVar && e.getAppFn.fvarId! == κ.fvarId then
+        let args := e.getAppArgs.toList
+        let eqs := (κ.params.zip (args.zip κ.paramTypes)).map fun (pi, (ai, ty)) =>
+          mkApp3 (mkConst ``Eq [levelOne]) ty (.fvar (FVarId.mk pi)) ai
+        match eqs with
+        | []      => return mkConst ``True
+        | [eq]    => return eq
+        | eq :: rest => return rest.foldl (mkApp2 (mkConst ``And)) eq
+      else
+        return mkConst ``False
+
+/-- `elim*(κ, sol, e)` — substitute κ with its solution throughout `e` (Fig. 11).
+    Head-position κ-apps become `True`; hypothesis-position κ-apps get `substKVarInExpr`. -/
+partial def exprElimStar (κ : KVar) (sol : Expr) (e : Expr) : KM Expr := do
+  let e ← whnf e
+  if let some (l, r) := e.and? then
+    let l' ← exprElimStar κ sol l
+    let r' ← exprElimStar κ sol r
+    return mkApp2 (mkConst ``And) l' r'
+  else if e.isForall then
+    withLocalDeclD e.bindingName! e.bindingDomain! fun fvar => do
+      let dom'  := substKVarInExpr κ sol e.bindingDomain!
+      let body  := e.bindingBody!.instantiate1 fvar
+      let body' ← exprElimStar κ sol body
+      let abstr := body'.abstract #[fvar]
+      pure (Expr.forallE e.bindingName! dom' abstr e.bindingInfo!)
+  else
+    -- Leaf (conclusion position)
+    if e.getAppFn.isFVar && e.getAppFn.fvarId! == κ.fvarId then
+      return mkConst ``True
+    else
+      return substKVarInExpr κ sol e
+
+/-- Count scope variables: outer non-Prop `∀`-binders whose domains don't mention κ.
+    Only value binders (non-Prop domains like `Int`) are counted — Prop guards
+    (like `0 ≤ x →`) are skipped but not counted, matching the original
+    `Constraint.imp` behavior where each imp bundled a type binder with its guard. -/
+partial def countScopeVars (κ : KVar) (e : Expr) : KM Nat := do
+  let e ← whnf e
+  if e.isForall then
+    let dom := e.bindingDomain!
+    if !(← KM.exprKVars dom).contains κ then
+      let domSort ← (inferType dom >>= whnf : MetaM Expr)
+      withLocalDeclD e.bindingName! dom fun fvar => do
+        let rest ← countScopeVars κ (e.bindingBody!.instantiate1 fvar)
+        if domSort.isProp then
+          -- Prop guard: strip but don't count
+          return rest
+        else
+          -- Value binder: count as scope var
+          return 1 + rest
+    else return 0
+  else return 0
+
+/-- Compute solution with scope stripping.
+    Opens scope `∀`-binders inside `withLocalDeclD`, computes `sol1` there,
+    and replaces scope fvars with canonical κ-params before returning.
+    Only non-Prop binders are added to `scopeInfo` for param replacement. -/
+partial def computeSolStripped (κ : KVar) (e : Expr) (simplify : Bool)
+    (scopeInfo : List (Expr × Name) := []) : KM (Expr × List Name) := do
+  let e ← whnf e
+  if e.isForall then
+    let dom := e.bindingDomain!
+    if !(← KM.exprKVars dom).contains κ then
+      let domSort ← (inferType dom >>= whnf : MetaM Expr)
+      withLocalDeclD e.bindingName! dom fun fvar => do
+        if domSort.isProp then
+          -- Prop guard: strip but don't add to scopeInfo
+          computeSolStripped κ (e.bindingBody!.instantiate1 fvar) simplify scopeInfo
+        else
+          -- Value binder: strip and add to scopeInfo
+          computeSolStripped κ (e.bindingBody!.instantiate1 fvar) simplify
+            (scopeInfo ++ [(fvar, e.bindingName!)])
+    else
+      -- Domain contains κ → stop stripping, compute sol1 here
+      finalizeSol κ e simplify scopeInfo
+  else
+    -- No forall at top level (e.g., And) → stop stripping
+    finalizeSol κ e simplify scopeInfo
+where
+  finalizeSol (κ : KVar) (e : Expr) (simplify : Bool)
+      (scopeInfo : List (Expr × Name)) : KM (Expr × List Name) := do
+    let sol ← exprSol1 κ e simplify
+    let scopeNames := scopeInfo.map (·.2)
+    if scopeInfo.isEmpty then return (sol, scopeNames)
+    let numRefParams := κ.params.length - scopeInfo.length
+    let scopeParamNames := κ.params.drop numRefParams
+    let sFixed := (scopeInfo.zip scopeParamNames).foldl
+      (fun acc ((scopeFV, _), paramName) =>
+        acc.replaceFVar scopeFV (.fvar (FVarId.mk paramName))) sol
+    return (sFixed, scopeNames)
+
+/-- Compute solution for κ, deciding whether to use scope stripping or full `sol1`. -/
+def computeSol (κ : KVar) (fullConstraint : Expr) (simplify := false) : KM (Expr × List Name) := do
+  let sc ← exprScope κ fullConstraint
+  let nScope ← countScopeVars κ sc
+  if nScope > 0 && κ.params.length > nScope then
+    computeSolStripped κ sc simplify
+  else
+    let sol ← exprSol1 κ fullConstraint simplify
+    return (sol, [])
+
+/-- Single κ elimination: compute solution then substitute. -/
+def exprElim1 (κ : KVar) (e : Expr) : KM Expr := do
+  let (sol, _) ← computeSol κ e
+  exprElimStar κ sol e
+
+/-- Eliminate multiple κ-variables sequentially. -/
+def exprElim (kvars : List KVar) (e : Expr) : KM Expr := do
+  let mut acc := e
   for κ in kvars do
-    acc ← acc.elim1 κ
+    acc ← exprElim1 κ acc
   return acc
 
-/-- Check if κ appears in both head and body of any flat clause -/
-def KVar.isCyclic (κ : KVar) (c : Constraint) : KM Bool := do
-  let deps ← c.deps
-  return deps.any fun (κ1, κ2) => κ1 == κ && κ2 == κ
+/-- Collect κ-vars from an Expr in left-to-right depth-first order,
+    matching the traversal order of `Constraint.kvars`. -/
+partial def exprKVarsOrdered (e : Expr) : KM (List KVar) := do
+  let e ← whnf e
+  if let some (l, r) := e.and? then
+    return (← exprKVarsOrdered l) ++ (← exprKVarsOrdered r)
+  else if e.isForall then
+    let dom := e.bindingDomain!
+    let domKs ← KM.exprKVars dom
+    withLocalDeclD e.bindingName! dom fun fvar => do
+      let bodyKs ← exprKVarsOrdered (e.bindingBody!.instantiate1 fvar)
+      return domKs ++ bodyKs
+  else
+    KM.exprKVars e
 
-/-- Split kvars into (acyclic, cyclic) -/
-def Constraint.partitionKVars (c : Constraint) : KM (List KVar × List KVar) := do
-  let allKs := (← c.kvars).eraseDups
-  let cuts ← allKs.filterM (fun κ => κ.isCyclic c)
-  let acyclic ← allKs.filterM (fun κ => return !(← κ.isCyclic c))
+/-- Check if κ is cyclic (appears in both head and body of some flat clause). -/
+def exprIsCyclic (κ : KVar) (e : Expr) : KM Bool := do
+  let deps ← exprDeps e
+  return deps.any fun (k1, k2) => k1 == κ && k2 == κ
+
+/-- Split κ-vars into (acyclic, cyclic). -/
+def exprPartitionKVars (e : Expr) : KM (List KVar × List KVar) := do
+  let allKs := (← exprKVarsOrdered e).eraseDups
+  let cuts ← allKs.filterM (fun κ => exprIsCyclic κ e)
+  let acyclic ← allKs.filterM (fun κ => return !(← exprIsCyclic κ e))
   return (acyclic, cuts)
