@@ -1,3 +1,4 @@
+import LeanFixpoint
 /-
 ;; test that `--scrape` works with ADTs and bit-vectors
 (fixpoint "--scrape=both")
@@ -15,7 +16,46 @@
      (forall ((a2 (BitVec Size32)) (true))
       (forall ((a3 (BitVec Size32)) (true))
        (and
-        (tag ((= (let ((a8 (bvand (bvlshr (let ((a4 (int_to_bv32 5))) (bvand (let ((a5 (int_to_bv32 1))) (if (= (mkadt0$1 ) (mkadt0$0 )) (bvand (let ((a6 (int_to_bv32 0))) (if (= (mkadt0$1 ) (mkadt0$0 )) (bvand a1 (bvnot (bvshl (lit "#x00000001" (BitVec Size32)) a6))) (bvor a1 (bvshl (lit "#x00000001" (BitVec Size32)) a6)))) (bvnot (bvshl (lit "#x00000001" (BitVec Size32)) a5))) (bvor (let ((a7 (int_to_bv32 0))) (if (= (mkadt0$1 ) (mkadt0$0 )) (bvand a1 (bvnot (bvshl (lit "#x00000001" (BitVec Size32)) a7))) (bvor a1 (bvshl (lit "#x00000001" (BitVec Size32)) a7)))) (bvshl (lit "#x00000001" (BitVec Size32)) a5)))) (bvnot (bvshl (lit "#x00000001" (BitVec Size32)) a4)))) (int_to_bv32 0)) (lit "#x00000001" (BitVec Size32))))) (if (= a8 (lit "#x00000000" (BitVec Size32))) (mkadt0$0 ) (mkadt0$1 ))) (mkadt0$1 ))) "0")
-        (tag ((= (let ((a13 (bvand (bvlshr (let ((a9 (int_to_bv32 5))) (bvand (let ((a10 (int_to_bv32 1))) (if (= (mkadt0$1 ) (mkadt0$0 )) (bvand (let ((a11 (int_to_bv32 0))) (if (= (mkadt0$1 ) (mkadt0$0 )) (bvand a1 (bvnot (bvshl (lit "#x00000001" (BitVec Size32)) a11))) (bvor a1 (bvshl (lit "#x00000001" (BitVec Size32)) a11)))) (bvnot (bvshl (lit "#x00000001" (BitVec Size32)) a10))) (bvor (let ((a12 (int_to_bv32 0))) (if (= (mkadt0$1 ) (mkadt0$0 )) (bvand a1 (bvnot (bvshl (lit "#x00000001" (BitVec Size32)) a12))) (bvor a1 (bvshl (lit "#x00000001" (BitVec Size32)) a12)))) (bvshl (lit "#x00000001" (BitVec Size32)) a10)))) (bvnot (bvshl (lit "#x00000001" (BitVec Size32)) a9)))) (int_to_bv32 1)) (lit "#x00000001" (BitVec Size32))))) (if (= a13 (lit "#x00000000" (BitVec Size32))) (mkadt0$0 ) (mkadt0$1 ))) (mkadt0$1 ))) "1")
-        (tag ((= (let ((a18 (bvand (bvlshr (let ((a14 (int_to_bv32 5))) (bvand (let ((a15 (int_to_bv32 1))) (if (= (mkadt0$1 ) (mkadt0$0 )) (bvand (let ((a16 (int_to_bv32 0))) (if (= (mkadt0$1 ) (mkadt0$0 )) (bvand a1 (bvnot (bvshl (lit "#x00000001" (BitVec Size32)) a16))) (bvor a1 (bvshl (lit "#x00000001" (BitVec Size32)) a16)))) (bvnot (bvshl (lit "#x00000001" (BitVec Size32)) a15))) (bvor (let ((a17 (int_to_bv32 0))) (if (= (mkadt0$1 ) (mkadt0$0 )) (bvand a1 (bvnot (bvshl (lit "#x00000001" (BitVec Size32)) a17))) (bvor a1 (bvshl (lit "#x00000001" (BitVec Size32)) a17)))) (bvshl (lit "#x00000001" (BitVec Size32)) a15)))) (bvnot (bvshl (lit "#x00000001" (BitVec Size32)) a14)))) (int_to_bv32 5)) (lit "#x00000001" (BitVec Size32))))) (if (= a18 (lit "#x00000000" (BitVec Size32))) (mkadt0$0 ) (mkadt0$1 ))) (mkadt0$0 ))) "2")))))))))
+        (tag ... "0")   -- bit 0 extraction = true (mkadt0$1)
+        (tag ... "1")   -- bit 1 extraction = true (mkadt0$1)
+        (tag ... "2"))))))))) -- bit 5 extraction = false (mkadt0$0)
 -/
+
+-- Adt0 maps to Bool: mkadt0$0 = false, mkadt0$1 = true
+-- κ0 : Bool → Prop
+--
+-- The constraint builds an intermediate bitvector from a1 by:
+--   1. Setting bit 0:  a1 | (1 << 0)
+--   2. Setting bit 1:  ... | (1 << 1)
+--   3. Clearing bit 5: ... & ~(1 << 5)
+-- Then checks: bit 0 = 1, bit 1 = 1, bit 5 = 0
+--
+-- mkadt0$1 ≠ mkadt0$0 (true ≠ false) is always true,
+-- so all if-branches take the else path (set, not clear).
+
+-- Helper: extract single bit as Bool
+def extractBit (v : BitVec 32) (pos : BitVec 32) : Bool :=
+  ((v >>> pos.toNat) &&& 1) != 0
+
+-- The intermediate value computed by the nested lets/ifs
+-- (since mkadt0$1 ≠ mkadt0$0, all ifs take else branch)
+def computeV (a1 : BitVec 32) : BitVec 32 :=
+  let one : BitVec 32 := 1
+  let step1 := a1 ||| (one <<< 0)          -- set bit 0
+  let step2 := step1 ||| (one <<< 1)       -- set bit 1
+  step2 &&& ~~~(one <<< 5)                  -- clear bit 5
+
+def scrape03 : Prop :=
+  ∃ κ : Bool → Prop,
+    (∀ a0 : Bool, κ a0)
+  ∧ (∀ a0 : Bool, κ a0 →
+      ∀ a1 : BitVec 32,
+        ∀ a2 : BitVec 32,
+          ∀ a3 : BitVec 32,
+              extractBit (computeV a1) 0 = true
+            ∧ extractBit (computeV a1) 1 = true
+            ∧ extractBit (computeV a1) 5 = false)
+
+theorem scrape03_proof : scrape03 := by
+  solve_fusion
+  all_goals (simp [computeV, extractBit]; bv_decide)

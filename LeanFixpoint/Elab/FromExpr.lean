@@ -1,239 +1,88 @@
 import Lean
-
 import LeanFixpoint.Core.Types
-import LeanFixpoint.Core.Macros
-import LeanFixpoint.Core.Fusion
-import LeanFixpoint.Elab.ToExpr
-import LeanFixpoint.Solve.Solver
-import LeanFixpoint.Solve.Qualifier
+import LeanFixpoint.Monad
 
-open Lean Elab Meta Command Tactic
+open Lean Meta
 
--- Maps fvar ids to names (for κx, κy, x, n, etc.)
-abbrev FVarMap := Std.HashMap FVarId Name
--- Tracking set of `kappa` variables from `Prop` existentials
-abbrev KVarSet := Std.HashSet FVarId
-
-inductive PropAST
-  | tt   : PropAST
-  | ff   : PropAST
-  | and  : PropAST → PropAST → PropAST
-  | or   : PropAST → PropAST → PropAST
-  | imp  : PropAST → PropAST → PropAST
-  | neg  : PropAST → PropAST
-  | eq   : Expr → Expr → PropAST
-  | le   : Expr → Expr → PropAST
-  | nonNeg : Expr → PropAST
-  | forall_ : Name → Expr → PropAST → PropAST
-  | exists_ : Name → Expr → PropAST → PropAST
-  | app  : Expr → Array Expr → PropAST  -- κ(ν₁, ..., νₙ)
-  deriving Repr
-
-partial def toPropASTWithTracking
-    (fvarsRef : IO.Ref FVarMap)
-    (kvarsRef : IO.Ref KVarSet)
-    (e : Expr) : MetaM PropAST := do
+partial def peelExistentials (e : Expr)
+    (kvars : Std.HashMap FVarId KVar := {})
+    (k : Std.HashMap FVarId KVar → Expr → MetaM α) :
+    MetaM α := do
   let e ← whnf e
-  match e with
-  | .const ``True _  => return .tt
-  | .const ``False _ => return .ff
-  | _ =>
-    if let some (p, q) := e.and? then
-      return .and (← toPropASTWithTracking fvarsRef kvarsRef p)
-                  (← toPropASTWithTracking fvarsRef kvarsRef q)
-    else if e.isAppOfArity ``Or 2 then
-      return .or (← toPropASTWithTracking fvarsRef kvarsRef (e.getArg! 0))
-                 (← toPropASTWithTracking fvarsRef kvarsRef (e.getArg! 1))
-    else if let some p := e.not? then
-      return .neg (← toPropASTWithTracking fvarsRef kvarsRef p)
-    else if let some (_, lhs, rhs) := e.eq? then
-      return .eq lhs rhs
-    else if e.isAppOfArity ``LE.le 4 then
-      return .le (e.getArg! 2) (e.getArg! 3)
-    else if e.isAppOfArity ``Int.NonNeg 1 then
-      return .nonNeg (e.getArg! 0)
-    -- ∃ κ : Int → Prop, body
-    else if e.isAppOfArity ``Exists 2 then
-      let pred := e.getArg! 1
-      match pred with
-      | .lam name ty body _ =>
-        let ast ← withLocalDecl name .default ty fun fvar => do
-          -- Record: this fvar is a κ-variable
-          fvarsRef.modify fun m => Std.HashMap.insert m fvar.fvarId! name
-          kvarsRef.modify fun s => Std.HashSet.insert s fvar.fvarId!
-          let body := body.instantiate1 fvar
-          toPropASTWithTracking fvarsRef kvarsRef body
-        return .exists_ name ty ast
-      | _ => throwError "toPropAST: Exists with non-lambda: {e}"
-
-    -- ∀ and →
-    else if e.isForall then
-      let name := e.bindingName!
-      let ty   := e.bindingDomain!
-      let body := e.bindingBody!
-      if e.isArrow then
-        let pSort ← inferType ty >>= whnf
-        if pSort.isProp then
-          let p ← toPropASTWithTracking fvarsRef kvarsRef ty
-          let q ← withLocalDecl name .default ty fun fvar => do
-            fvarsRef.modify fun m => m.insert fvar.fvarId! name
-            toPropASTWithTracking fvarsRef kvarsRef (body.instantiate1 fvar)
-          return .imp p q
-        else
-          let ast ← withLocalDecl name .default ty fun fvar => do
-            fvarsRef.modify fun m => m.insert fvar.fvarId! name
-            toPropASTWithTracking fvarsRef kvarsRef (body.instantiate1 fvar)
-          return .forall_ name ty ast
-      else
-        let ast ← withLocalDecl name .default ty fun fvar => do
-          fvarsRef.modify fun m => m.insert fvar.fvarId! name
-          toPropASTWithTracking fvarsRef kvarsRef (body.instantiate1 fvar)
-        return .forall_ name ty ast
-
-    else if e.isAppOfArity ``Iff 2 then
-      let p ← toPropASTWithTracking fvarsRef kvarsRef (e.getArg! 0)
-      let q ← toPropASTWithTracking fvarsRef kvarsRef (e.getArg! 1)
-      return .and (.imp p q) (.imp q p)
-
-    -- κ(ν₁, ..., vₙ) (predicate variable applied to multiple args)
-    else if e.getAppFn.isFVar then
-      let fn := e.getAppFn
-      let args := e.getAppArgs
-      return .app fn args
-    else
-      throwError "toPropAST: unhandled: {e}"
-
-partial def exprToRExpr (fvars : FVarMap) (e : Expr) : MetaM RExpr := do
-  -- checks whether given `e` is a `fvar`
-  if e.isFVar then
-    let id := e.fvarId! -- get id
-    let name := (Std.HashMap.get? fvars id).getD `unknown
-    return .var name
-  -- natural/int literal
-  else if let some n := e.rawNatLit? then
-    return .int n
-
-  -- HAdd.hAdd α β γ inst lhs rhs
-  else if e.isAppOfArity ``HAdd.hAdd 6 then
-    let l ← exprToRExpr fvars (e.getArg! 4)
-    let r ← exprToRExpr fvars (e.getArg! 5)
-    return .arith .add l r
-
-  -- HSub.hSub α β γ inst lhs rhs
-  else if e.isAppOfArity ``HSub.hSub 6 then
-    let l ← exprToRExpr fvars (e.getArg! 4)
-    let r ← exprToRExpr fvars (e.getArg! 5)
-    return .arith .sub l r
-
-  -- HMul.hMul α β γ inst lhs rhs
-  -- represents `lhs * rhs`
-  else if e.isAppOfArity ``HMul.hMul 6 then
-    let l ← exprToRExpr fvars (e.getArg! 4)
-    let r ← exprToRExpr fvars (e.getArg! 5)
-    return .arith .mul l r
-
-  -- HDiv.hDiv α β γ inst lhs rhs
-  -- represents `lhs / rhs`
-  else if e.isAppOfArity ``HDiv.hDiv 6 then
-    let l ← exprToRExpr fvars (e.getArg! 4)
-    let r ← exprToRExpr fvars (e.getArg! 5)
-    return .arith .div l r
-
-  -- HMod.hMov α β γ inst lhs rhs
-  else if e.isAppOfArity ``HMod.hMod 6 then
-    let l ← exprToRExpr fvars (e.getArg! 4)
-    let r ← exprToRExpr fvars (e.getArg! 5)
-    return .arith .mod l r
-
-  -- OfNat.ofNat α n inst
-  -- represents numeric literals like `0`, `1`, `2`
-  -- 3 args: [0]=target type [1]=raw Nat literal [2]=instance
-  else if e.isAppOfArity ``OfNat.ofNat 3 then
-    let nExpr := e.getArg! 1
-    if let some n := nExpr.rawNatLit? then
-      return .int n
-    else
-      throwError "exprToRExpr: non-literal OfNat: {e}"
-
-  else if e.isApp && e.getAppFn.isFVar then
-    let fn := e.getAppFn
-    let fName := (Std.HashMap.get? fvars fn.fvarId!).getD `unknown
-    let args := e.getAppArgs
-    let argExprs ← args.toList.mapM (exprToRExpr fvars ·)
-    return .app fName argExprs
-
-  -- Constant application: fib_fib(arg1, ..., argN)
-  else if e.isApp && e.getAppFn.isConst then
-    let fnName := e.getAppFn.constName!
-    let args := e.getAppArgs
-    let argExprs ← args.toList.mapM (exprToRExpr fvars ·)
-    return .app fnName argExprs
-
+  if e.isAppOfArity ``Exists 2 then
+    let pred := e.getArg! 1
+    match pred with
+    | .lam name tyBind body _ =>
+      -- create a fresh free variable fvar with (`name`, `tyBind`)
+      -- add to the local context, so `inferType` and `whnf` can use it
+      -- run the call back provided `fun fvar => do ...`
+      -- reset/cleanup local context once callback returns
+      --
+      -- fvar gets unique `FVarId`
+      withLocalDeclD name tyBind fun fvar => do
+        let (arity, pTypes) ← collectArrowTypes tyBind
+        let canonParams := (List.range arity).map fun i => Name.mkStr1 s!"z{i}"
+        let kvar : KVar := {
+          name, params := canonParams, paramTypes := pTypes, fvarId := fvar.fvarId!
+        }
+        peelExistentials (body.instantiate1 fvar) (kvars.insert fvar.fvarId! kvar) k
+    | _ => k kvars e
   else
-    throwError "exprToRExpr: unhandled: {e}"
+    k kvars e
+where
+  -- Collect arity and domain types from arrow type: Int → Int → Prop → (2, [Int, Int])
+  collectArrowTypes (ty : Expr) : MetaM (Nat × List Expr) := do
+    let ty ← whnf ty
+    if ty.isForall then
+      let domTy := ty.bindingDomain!
+      let (n, rest) ← collectArrowTypes ty.bindingBody!
+      return (1 + n, domTy :: rest)
+    else return (0, [])
 
-partial def toConstraint (fvars : FVarMap) (kvars : KVarSet)
-    (ast : PropAST) : MetaM Constraint := do
-  match ast with
-  | .and l r =>
-    return .conj (← toConstraint fvars kvars l) (← toConstraint fvars kvars r)
-  | .exists_ _ _ty body =>
-    toConstraint fvars kvars body
-  | .forall_ name _ty (.imp guard body) =>
-      let guardPred ← toPred fvars kvars guard
-      let bodyC ← toConstraint fvars kvars body
-      return .imp name .int guardPred bodyC
-  | .forall_ name _ty body =>
-    let bodyC ← toConstraint fvars kvars body
-    return .imp name .int .tru bodyC
-  | .imp guard body =>
-      let guardPred ← toPred fvars kvars guard
-      let bodyC ← toConstraint fvars kvars body
-      return .imp `_anon .int guardPred bodyC
-  | other =>
-    return .pred (← toPred fvars kvars other)
-
-  where toPred (fvars : FVarMap) (kvars : KVarSet)
-    (ast : PropAST) : MetaM Pred := do
-    match ast with
-    | .tt => return .tru
-    | .ff => return .fls
-    | .eq lhs rhs =>
-        return .rexpr (.cmp .eq (← exprToRExpr fvars lhs) (← exprToRExpr fvars rhs))
-    | .le lhs rhs =>
-        return .rexpr (.cmp .le (← exprToRExpr fvars lhs) (← exprToRExpr fvars rhs))
-    | .app fn args =>
-        let fnId := fn.fvarId!
-        -- We need to check whether it is a kvar or not
-        if kvars.contains fnId then
-          let κName   := (Std.HashMap.get? fvars fn.fvarId!).getD `unknown
-          let argNames := args.toList.map fun arg =>
-              (Std.HashMap.get? fvars arg.fvarId!).getD `unknown
-          let canonParams := (List.range argNames.length).map fun i => Name.mkStr1 s!"z{i}"
-          let kvar : KVar := { name := κName, params := canonParams }
-          return .kapp kvar argNames
+-- Walk Expr to build Constraint
+partial def exprToConstraint (e : Expr) : KM Constraint := do
+  let e ← whnf e
+  -- P ∧ Q
+  if let some (l, r) := e.and? then
+    return .conj (← exprToConstraint l) (← exprToConstraint r)
+  -- ∀ x : τ, body (where τ is NOT Prop)
+  -- or P → Q (where domain IS Prop)
+  else if e.isForall then
+    let name    := e.bindingName!
+    let ty      := e.bindingDomain!
+    let body    := e.bindingBody!
+    -- lifting required as we are in KM
+    let domSort ← (inferType ty >>= whnf : MetaM Expr)
+    if domSort.isProp then
+      -- Bare arrow: P → Q
+      -- No real binder variable — create a dummy fvar for the proof
+      withLocalDeclD name ty fun fvar => do
+        if e.isArrow then
+          let bodyC ← exprToConstraint body
+          return .imp name ty ty fvar bodyC
         else
-          -- Uninterpreted function (not in kvars)
-          let fName := (Std.HashMap.get? fvars fn.fvarId!).getD `unknown
-          let argExprs ← args.toList.mapM (exprToRExpr fvars .)
-          return .rexpr (.app fName argExprs)
-          -- throwError "toPred: uninterpreted predicate (not a κ-variable) -"
-    | .and l r  =>
-        return .conj (← toPred fvars kvars l) (← toPred fvars kvars r)
-    | .nonNeg arg =>
-        return .rexpr (.cmp .le (.int 0) (← exprToRExpr fvars arg))
-    | .neg p   =>
-        match p with
-          | .le lhs rhs =>
-              return .rexpr (.cmp .lt (← exprToRExpr fvars rhs) (← exprToRExpr fvars lhs))
-          | .eq lhs rhs =>
-              return .rexpr (.cmp .ne (← exprToRExpr fvars lhs) (← exprToRExpr fvars rhs))
-          | _ => throwError "toPred: unsupported negation pattern: {repr p}"
-    | .imp (.eq lhs rhs) .ff =>
-        -- ¬(a = b) reduced to (a = b) → False
-        return .rexpr (.cmp .ne (← exprToRExpr fvars lhs) (← exprToRExpr fvars rhs))
-    | .imp (.le lhs rhs) .ff =>
-        -- ¬(a ≤ b) reduced to (a ≤ b) → False
-        return .rexpr (.cmp .lt (← exprToRExpr fvars rhs) (← exprToRExpr fvars lhs))
-    | _ =>
-        throwError "toPred: unhandled: {repr ast}"
+          -- dependent: ∀ (h : P), Q(h)
+          let bodyC ← exprToConstraint (body.instantiate1 fvar)
+          return .imp name ty ty fvar bodyC
+    else
+      -- ∀ x : τ, body — introduce x, then look for arrow inside
+      withLocalDeclD name ty fun fvar => do
+        let body' ← whnf (body.instantiate1 fvar)
+        if body'.isForall && body'.isArrow then
+          let innerDom := body'.bindingDomain!
+          -- lifting required as we are in KM
+          let innerSort ← (inferType innerDom >>= whnf : MetaM Expr)
+          if innerSort.isProp then
+            -- Combined: imp x τ hyp restC
+            let restC ← exprToConstraint body'.bindingBody!
+            return .imp name ty innerDom fvar restC
+          else
+            -- Inner ∀ has non-Prop domain, don't combine
+            let bodyC ← exprToConstraint body'
+            return .imp name ty (mkConst ``True) fvar bodyC
+        else
+          -- No arrow follows, just ∀ x : τ, with trivial guard
+          let bodyC ← exprToConstraint body'
+          return .imp name ty (mkConst ``True) fvar bodyC
+  else
+    return .pred e

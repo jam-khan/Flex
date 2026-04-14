@@ -7,7 +7,6 @@ import LeanFixpoint.Core.Types
 import LeanFixpoint.Core.Macros
 import LeanFixpoint.Core.Pretty
 import LeanFixpoint.Core.Fusion
-import LeanFixpoint.Core.Subst
 
 /-
   Elaboration to and from Lean `Expr`
@@ -22,17 +21,23 @@ import LeanFixpoint.Elab.FromExpr
   verification conditions.
 -/
 import LeanFixpoint.Tactic.Command
-import LeanFixpoint.Tactic.Grind
-import LeanFixpoint.Tactic.SolveFixpoint
+-- import LeanFixpoint.Tactic.Grind        -- TODO: update for Expr passthrough
+-- import LeanFixpoint.Tactic.SolveFixpoint -- TODO: update for Expr passthrough
 import LeanFixpoint.Tactic.Tactics
 import LeanFixpoint.Tactic.Utils
+import LeanFixpoint.Tactic.SolveFusion
 
 /-
   Predicate Abstraction related code,
   includes the Qualifier AST and the
   Solve method.
 -/
-import LeanFixpoint.Solve.Qualifier
-import LeanFixpoint.Solve.Solver
-import LeanFixpoint.Solve.Weakening
-import LeanFixpoint.Solve.Fixpoint
+-- import LeanFixpoint.Solve.Qualifier
+-- import LeanFixpoint.Solve.Solver
+-- import LeanFixpoint.Solve.Weakening
+-- import LeanFixpoint.Solve.Fixpoint
+
+/-
+  Utils
+-/
+import LeanFixpoint.Monad

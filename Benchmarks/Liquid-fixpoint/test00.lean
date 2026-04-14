@@ -25,4 +25,4 @@ import LeanFixpoint
 def sumRec1Prop : Prop :=
   ∀ x : Int, x > 0 → ∀ y : Int, y > x → ∀ v : Int, v = x + y → v > 0
 
-theorem sumRec1Proof : sumRec1Prop := by solve_fixpoint
+theorem sumRec1Proof : sumRec1Prop := by solve_fusion

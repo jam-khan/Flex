@@ -21,4 +21,4 @@ def pleSumProp : Prop :=
   ∀ x : Int, x = 5 → mySum x = 15
 
 theorem pleSumProof : pleSumProp := by
-  solve_fixpoint
+  solve_fusion

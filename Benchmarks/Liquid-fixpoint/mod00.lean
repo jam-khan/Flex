@@ -34,5 +34,5 @@ def mod00Prop : Prop :=
     ∧ (∀ a2 : Int, True → ∀ _ : Int, κ0 a2 → a2 % 2 = 0)
 
 theorem mod00Proof : mod00Prop := by
-  solve_fixpoint
+  solve_fusion
   
