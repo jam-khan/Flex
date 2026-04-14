@@ -156,16 +156,11 @@ def SortQuicksortRange :=
                )
 
 set_option maxHeartbeats 1600000 in
+
 def SortQuicksortRange_proof : SortQuicksortRange := by
-  solve_fusion
-  dsimp only
-  zap
-  · simp [sort_is_sorted_between]; grind
-  · simp [is_perm]; grind
-  -- Goals 3-6: split all ∨/∧/∃ in hypotheses, then simp_all + grind
+  solve_fusion; dsimp only; zap
   all_goals (
     split_hyps
     all_goals simp_all [sort_is_sorted_between, sort_is_partitioned_by,
       sort_is_bigger, sort_is_smaller, sort_is_perm, is_perm, is_frame]
     all_goals grind)
-  
