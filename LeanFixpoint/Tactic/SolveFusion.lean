@@ -7,6 +7,7 @@ import LeanFixpoint.Elab.ToExpr
 import LeanFixpoint.Elab.FromExpr
 import LeanFixpoint.Monad
 import LeanFixpoint.Tactic.Utils
+import LeanFixpoint.Tactic.Tactics
 
 open Lean Elab Meta Tactic
 
@@ -49,10 +50,18 @@ private def closeResidualGoals : TacticM Unit := do
   let goals ← getGoals
   if goals.isEmpty then pure ()
   else
-    let _ ← attemptTactic (evalTactic (← `(tactic| simp only [])))
+    -- Phase 1: dsimp + zap to decompose ∀/∧ and close trivial goals
+    let _ ← attemptTactic (evalTactic (← `(tactic| dsimp only)))
+    let _ ← attemptTactic (evalTactic (← `(tactic| zap)))
     let goals ← getGoals
     if goals.isEmpty then pure ()
-    else closeLoop
+    else
+      -- Phase 2: split all ∨/∧/∃ in hypotheses, then simp_all + grind
+      let _ ← attemptTactic (evalTactic (←
+        `(tactic| all_goals (split_hyps; all_goals simp_all; all_goals grind))))
+      let goals ← getGoals
+      if goals.isEmpty then pure ()
+      else closeLoop
 
 /-!
   ## `solve_fusion` tactic
@@ -171,7 +180,7 @@ private def solveFusionImpl : TacticM Unit := withMainContext do
       logInfo m!"[solve_fusion] → falling back to closeResidualGoals"
     )
 
-  -- closeResidualGoals
+  closeResidualGoals
 
 syntax "solve_fusion" : tactic
 elab_rules : tactic
