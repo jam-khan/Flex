@@ -7,6 +7,7 @@ import LeanFixpoint.Elab.ToExpr
 import LeanFixpoint.Elab.FromExpr
 import LeanFixpoint.Monad
 import LeanFixpoint.Tactic.Utils
+import LeanFixpoint.Tactic.Tactics
 
 open Lean Elab Meta Tactic
 
@@ -49,10 +50,18 @@ private def closeResidualGoals : TacticM Unit := do
   let goals ← getGoals
   if goals.isEmpty then pure ()
   else
-    let _ ← attemptTactic (evalTactic (← `(tactic| simp only [])))
+    -- Phase 1: dsimp + zap to decompose ∀/∧ and close trivial goals
+    let _ ← attemptTactic (evalTactic (← `(tactic| dsimp only)))
+    let _ ← attemptTactic (evalTactic (← `(tactic| zap)))
     let goals ← getGoals
     if goals.isEmpty then pure ()
-    else closeLoop
+    else
+      -- Phase 2: split all ∨/∧/∃ in hypotheses, then simp_all + grind
+      let _ ← attemptTactic (evalTactic (←
+        `(tactic| all_goals (split_hyps; all_goals simp_all; all_goals grind))))
+      let goals ← getGoals
+      if goals.isEmpty then pure ()
+      else closeLoop
 
 /-!
   ## `solve_fusion` tactic
@@ -84,48 +93,26 @@ private def solveFusionImpl : TacticM Unit := withMainContext do
       let witnesses : List Expr ← peelExistentials reduced emptyKvars fun kvarMap body => do
         let kctx : KContext := { kvars := kvarMap }
 
-        -- Phase 2: Expr → Constraint
-        let constraint ← (exprToConstraint body).run kctx
+        -- Phase 2: Partition acyclic / cyclic (body Expr IS the constraint)
+        let (acyclic, _cyclic) ← (exprPartitionKVars body).run kctx
 
-        -- Phase 3: Partition acyclic / cyclic
-        let (acyclic, _cyclic) ← (constraint.partitionKVars).run kctx
-
-        -- Phase 4: Fusion — eliminate acyclic κ-vars via sol1 + elim1
+        -- Phase 3: Fusion — eliminate acyclic κ-vars via sol1 + elim1
         IO.println s!"[solve_fusion] Acyclic κ-vars: {acyclic.map (fun (k : KVar) => k.name)}"
         IO.println s!"[solve_fusion] Cyclic κ-vars:  {_cyclic.map (fun (k : KVar) => k.name)}"
 
         let mut solutions : List (Name × Expr × List Name × List Expr) := []
-        let mut curr := constraint
+        let mut curr := body
         for κ in acyclic do
           IO.println s!"[solve_fusion] --- Eliminating κ = {κ.name} (params: {κ.params}) ---"
 
-          let scopedC ← (curr.scope κ).run kctx
-          let scopeNames ← (collectScopeVars κ scopedC).run kctx
-          let scopeFVars ← (collectScopeFVars κ scopedC).run kctx
+          let (sol, scopeNames) ← (computeSol κ curr (simplify := true)).run kctx
           IO.println s!"[solve_fusion]   scopeNames = {scopeNames}"
-
-          let sol ← do
-            if scopeNames.length > 0 && κ.params.length > scopeNames.length then
-              let stripped ← (stripScope κ scopedC).run kctx
-              let s := stripped.sol1 κ (simplify := true)
-              IO.println s!"[solve_fusion]   using STRIPPED sol1"
-              -- Replace scope fvars with corresponding canonical params
-              let numRefParams := κ.params.length - scopeFVars.length
-              let scopeParamNames := κ.params.drop numRefParams
-              let sFixed := (scopeFVars.zip scopeParamNames).foldl
-                (fun acc (scopeFV, paramName) =>
-                  acc.replaceFVar scopeFV (.fvar (FVarId.mk paramName))) s
-              pure sFixed
-            else
-              let s := curr.sol1 κ (simplify := true)
-              IO.println s!"[solve_fusion]   using FULL sol1"
-              pure s
 
           let solFmt ← ppExpr sol
           IO.println s!"[solve_fusion]   sol1({κ.name}) = {solFmt}"
 
           solutions := solutions ++ [(κ.name, sol, κ.params, κ.paramTypes)]
-          curr ← (curr.elim1 κ).run kctx
+          curr ← (exprElim1 κ curr).run kctx
           IO.println s!"[solve_fusion]   elim1 done, constraint updated"
 
         IO.println s!"[solve_fusion] --- All solutions ---"
@@ -193,7 +180,7 @@ private def solveFusionImpl : TacticM Unit := withMainContext do
       logInfo m!"[solve_fusion] → falling back to closeResidualGoals"
     )
 
-  -- closeResidualGoals
+  closeResidualGoals
 
 syntax "solve_fusion" : tactic
 elab_rules : tactic
