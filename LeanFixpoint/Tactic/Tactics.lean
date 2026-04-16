@@ -335,10 +335,6 @@ macro_rules
       )
     )
 
-
-
-
-
 -- example : ∃ x : Nat, x > 100 ∧ 4 > 2 := by
 --   zapTrue  -- goal becomes: ∃ x : Nat, x > 100
 --   exact ⟨101, by omega⟩
