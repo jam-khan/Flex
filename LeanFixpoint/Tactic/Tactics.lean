@@ -374,6 +374,130 @@ open Lean Meta Elab Tactic in
   setGoals (mvarNew.mvarId! :: rest)
 
 
+theorem and_exists_hoist {α : Sort u} {P : Prop} {Q : α → Prop} :
+    (P ∧ (∃ x, Q x)) ↔ ∃ x, P ∧ Q x := by
+  constructor
+  · intro h
+    rcases h with ⟨hP, ⟨x, hQ⟩⟩
+    exact ⟨x, hP, hQ⟩
+  · intro h
+    rcases h with ⟨x, hP, hQ⟩
+    exact ⟨hP, ⟨x, hQ⟩⟩
+
+theorem exists_and_hoist {α : Sort u} {P : α → Prop} {Q : Prop} :
+    ((∃ x, P x) ∧ Q) ↔ ∃ x, P x ∧ Q := by
+  constructor
+  · intro h
+    rcases h with ⟨⟨x, hP⟩, hQ⟩
+    exact ⟨x, hP, hQ⟩
+  · intro h
+    rcases h with ⟨x, hP, hQ⟩
+    exact ⟨⟨x, hP⟩, hQ⟩
+
+theorem reorder_exists {P : α → β → Prop}
+  : (∀ x : α, ∃ y: β, P x y) ↔ (∃ y : α → β, ∀ x : α, P x (y x)) := by
+  apply Iff.intro
+  · intro h
+    classical
+    refine ⟨fun x => Classical.choose (h x), ?_⟩
+    intro x
+    exact Classical.choose_spec (h x)
+  · intro h x
+    rcases h with ⟨wit, h⟩
+    exists wit x
+    apply_assumption
+
+open Lean Elab Tactic Meta in
+private partial def collectExistsNamesHoist (e : Expr) : MetaM (List Name) := do
+  let e ← whnfR e
+  match e with
+  | .forallE n α body bi =>
+      withLocalDecl n bi α fun x => collectExistsNamesHoist (body.instantiate1 x)
+  | _ =>
+      if e.isAppOfArity ``Exists 2 then
+        let α := e.appFn!.appArg!
+        let p := e.appArg!
+        withLocalDecl p.bindingName! p.bindingInfo! α fun x => do
+          let rest ← collectExistsNamesHoist (p.beta #[x])
+          pure (p.bindingName! :: rest)
+      else if e.isAppOfArity ``And 2 then
+        let l := e.appFn!.appArg!
+        let r := e.appArg!
+        return (← collectExistsNamesHoist r) ++ (← collectExistsNamesHoist l)
+      else
+        pure []
+
+open Lean Elab Tactic Meta in
+private partial def collectTopForallNames (e : Expr) : MetaM (List Name) := do
+  let e ← whnfR e
+  match e with
+  | .forallE n α body bi =>
+      withLocalDecl n bi α fun x => do
+        pure (n :: (← collectTopForallNames (body.instantiate1 x)))
+  | _ => pure []
+
+open Lean Elab Tactic Meta in
+private partial def renameTopExists (e : Expr) (names : List Name) : MetaM Expr := do
+  match names with
+  | [] => pure e
+  | n :: ns =>
+    let e ← whnfR e
+    if e.isAppOfArity ``Exists 2 then
+      let α := e.appFn!.appArg!
+      let p := e.appArg!
+      withLocalDecl n .default α fun x => do
+        let body := p.beta #[x]
+        let body' ← renameTopExists body ns
+        let p' ← mkLambdaFVars #[x] body'
+        mkAppM ``Exists #[p']
+    else
+      pure e
+
+open Lean Elab Tactic Meta in
+private partial def renameTopForalls (e : Expr) (names : List Name) : MetaM Expr := do
+  match names with
+  | [] => pure e
+  | n :: ns =>
+    let e ← whnfR e
+    match e with
+    | .forallE _ α body bi =>
+        withLocalDecl n bi α fun x => do
+          let body' ← renameTopForalls (body.instantiate1 x) ns
+          mkForallFVars #[x] body'
+    | _ => pure e
+
+open Lean Elab Tactic Meta in
+private partial def renameTopExistsThenForalls
+    (e : Expr) (exNames : List Name) (forallNames : List Name) : MetaM Expr := do
+  match exNames with
+  | [] => renameTopForalls e forallNames
+  | n :: ns =>
+    let e ← whnfR e
+    if e.isAppOfArity ``Exists 2 then
+      let α := e.appFn!.appArg!
+      let p := e.appArg!
+      withLocalDecl n .default α fun x => do
+        let body := p.beta #[x]
+        let body' ← renameTopExistsThenForalls body ns forallNames
+        let p' ← mkLambdaFVars #[x] body'
+        mkAppM ``Exists #[p']
+    else
+      renameTopForalls e forallNames
+
+open Lean Elab Tactic Meta in
+elab "hoist_exists" : tactic => do
+  let g ← getMainGoal
+  let targetBefore ← g.getType
+  let exNames ← collectExistsNamesHoist targetBefore
+  let forallNames ← collectTopForallNames targetBefore
+  evalTactic (← `(tactic|
+    repeat simp only [and_assoc, and_exists_hoist, exists_and_hoist, reorder_exists]
+  ))
+  let g' ← getMainGoal
+  let targetAfter ← g'.getType
+  let renamed ← renameTopExistsThenForalls targetAfter exNames forallNames
+  let newGoal ← g'.replaceTargetDefEq renamed
+  replaceMainGoal [newGoal]
 
 -- example : ∃ x : Nat, x > 100 ∧ 4 > 2 := by
 --   zapTrue  -- goal becomes: ∃ x : Nat, x > 100
