@@ -8,11 +8,13 @@ abbrev CVar := String
 
 abbrev State := CVar → Int
 
+@[simp]
 def State.update (s : State) (x : CVar) (v : Int) : State :=
   fun y => if x == y then v else s y
 
 notation s "[" x " ↦ " v "]" => State.update s x v
 
+@[simp]
 def State.empty : State := fun _ => 0
 notation "∅" => State.empty
 

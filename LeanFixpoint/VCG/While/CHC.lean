@@ -1,5 +1,6 @@
 import LeanFixpoint.VCG.While.Hoare
-import LeanFixpoint.VCG.While.Tactics
+import LeanFixpoint.Tactic.Tactics
+import LeanFixpoint.Tactic.SolveFusion
 
 /-! # Constrained Horn Clause Generation
 
@@ -15,6 +16,7 @@ import LeanFixpoint.VCG.While.Tactics
     existential `κ` representing the unknown loop invariant.
 
     The output is a Lean `Prop` with `∃ κ, (init) ∧ (preserve) ∧ (exit)`. -/
+@[simp]
 def whileCHC (pre : Assertion) (c : Cmd) (post : Assertion) : Prop :=
   match c with
   | .skip =>
@@ -37,6 +39,7 @@ def whileCHC (pre : Assertion) (c : Cmd) (post : Assertion) : Prop :=
     ∧ (∀ s, κ s ∧ g s = false → post s)                       -- exit
 
 /-- Soundness: if the CHC system is satisfiable, the Hoare triple holds. -/
+@[simp]
 theorem whileCHC_sound (pre : Assertion) (c : Cmd) (post : Assertion) :
     whileCHC pre c post → ValidHoareTriple pre c post := by
   induction c generalizing pre post with
@@ -69,33 +72,25 @@ def countToN : Cmd :=
 example : ValidHoareTriple (fun s => 0 ≤ s "n") countToN (fun s => s "x" = s "n") := by
   apply whileCHC_sound
   dsimp [whileCHC, countToN, State.update]
-  hoist_while_chc_exists
-  sorry
-  -- Goal is now:
-  -- ∃ mid κ, (∀ s, 0 ≤ s "n" → mid (s["x" ↦ 0]))
-  --        ∧ (∀ s, mid s → κ s)
-  --        ∧ (∀ s, κ s ∧ decide (s "x" < s "n") = true → κ (s["x" ↦ s "x" + 1]))
-  --        ∧ (∀ s, κ s ∧ decide (s "x" < s "n") = false → s "x" = s "n")
+  hoist_exists
+  exists fun s => s "x" ≤ s "n"
+  exists fun s => s "x" ≤ s "n"
+  simp
+  solve_fusion
 
 -- Program: while x ≠ 0 do x := x - 1 end
 -- Pre: True, Post: x = 0
+@[simp]
 def reduceToZero : Cmd :=
   .cwhile (fun s => s "x" != 0)
           (.assign "x" (fun s => s "x" - 1))
 
+set_option maxHeartbeats 1600000 in
 -- Prove manually by providing κ:
 theorem reduceToZero_correct :
     ValidHoareTriple (fun _ => True) reduceToZero (fun s => s "x" = 0) := by
   apply whileCHC_sound
-  dsimp [whileCHC, reduceToZero, State.update]
-  -- Goal: ∃ κ, (∀ s, True → κ s)
-  --          ∧ (∀ s, κ s ∧ (s "x" != 0) = true → κ (s["x" ↦ s "x" - 1]))
-  --          ∧ (∀ s, κ s ∧ (s "x" != 0) = false → s "x" = 0)
-  exists fun _ => True
-  refine ⟨?_, ?_, ?_⟩
-  · intro _ _; trivial
-  · intro _ _; trivial
-  · intro s ⟨_, hg⟩; simp at hg; omega
+  solve_fusion
 
 -- Program: x := n; y := 0; while x ≠ 0 do x := x-1; y := y+1 end
 -- Pre: 0 ≤ n, Post: y = n
@@ -112,27 +107,10 @@ theorem slowAssign_correct :
     ValidHoareTriple (fun s => 0 ≤ s "n") slowAssign (fun s => s "y" = s "n") := by
   apply whileCHC_sound
   dsimp [whileCHC, slowAssign, State.update]
-  hoist_while_chc_exists
+  hoist_exists
   -- Provide mid for x := n
   exists fun s => s "x" = s "n" ∧ 0 ≤ s "n"
   exists fun s => s "x" + s "y" = s "n" ∧ 0 ≤ s "x"
   exists fun s => s "x" + s "y" = s "n" ∧ 0 ≤ s "x"
   exists fun s => s "x" + (s "y" + 1) = s "n" ∧ 0 ≤ s "x"
-  refine ⟨?_, ?_⟩
-  · intro s h; show _ ∧ _; simp [State.update] at *; omega
-  -- Provide mid for y := 0
-  · refine ⟨?_, ?_⟩
-    · intro s ⟨hx, hn⟩; show _ ∧ _; simp [State.update] at *; omega
-    -- Provide κ for the while loop
-    · refine ⟨?_, ?_, ?_⟩
-      · intro s h; exact h
-      · -- body is seq: need ∃ mid for x := x-1 ; y := y+1
-        intro s h
-        constructor
-        · simp [State.update] at *; omega
-        · simp [State.update] at *; omega
-      · constructor
-        · intro s h
-          simp [State.update] at *; omega
-        · intro s h
-          simp at h ; omega
+  solve_fusion
