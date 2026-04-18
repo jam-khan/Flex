@@ -7,6 +7,11 @@ def fib_spec_fib (n : Int) : Int :=
   else fib_spec_fib (n - 1) + fib_spec_fib (n - 2)
   termination_by n.toNat
 
+@[qualif] def q_le          (a b : Int) : Prop := a ≤ b
+@[qualif] def q_gt_one      (v : Int)   : Prop := v > 1
+@[qualif] def q_eq_fib      (v i : Int) : Prop := v = fib_spec_fib i
+@[qualif] def q_eq_fib_pred (v i : Int) : Prop := v = fib_spec_fib (i - 1)
+
 @[simp]
 def fib_fast_inv (i : Int) (prev : Int) (curr : Int) (n : Int) : Prop :=
   i > 1 ∧ i ≤ n ∧ prev = fib_spec_fib (i - 1) ∧ curr = fib_spec_fib i

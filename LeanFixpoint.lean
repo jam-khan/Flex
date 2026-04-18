@@ -31,7 +31,7 @@ import LeanFixpoint.Tactic.SolveFusion
   includes the Qualifier AST and the
   Solve method.
 -/
--- import LeanFixpoint.Solve.Qualifier
+import LeanFixpoint.Solve.Qualifier
 -- import LeanFixpoint.Solve.Solver
 -- import LeanFixpoint.Solve.Weakening
 -- import LeanFixpoint.Solve.Fixpoint
@@ -46,4 +46,3 @@ import LeanFixpoint.VCG.While.Semantics
   Utils
 -/
 import LeanFixpoint.Monad
-
