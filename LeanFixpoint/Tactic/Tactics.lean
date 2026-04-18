@@ -74,9 +74,6 @@ elab "trivialk" : tactic => trivialkCore
 /-- Sequences `trivialk`, `simp`, and `zap`. -/
 macro "zapt" : tactic => `(tactic| (trivialk; simp; zap))
 
-
-
-
 open Lean Elab Tactic Meta in
 private partial def splitAndsAllCore : TacticM Unit := do
   let ctx ← getLCtx
@@ -375,13 +372,14 @@ open Lean Meta Elab Tactic in
 
 
 
--- example : ∃ x : Nat, x > 100 ∧ 4 > 2 := by
---   zapTrue  -- goal becomes: ∃ x : Nat, x > 100
---   exact ⟨101, by omega⟩
+example : ∃ x : Nat, ∃ y : Nat, x > 100 ∧ 4 > 2 := by
+  zapTrue  -- goal becomes: ∃ x : Nat, x > 100
+  sorry
+  -- exact ⟨101, by omega⟩
 
--- example (P Q : Nat → Prop) : ∃ x, P x ∧ (Q x → Q x) := by
---   zapTrue  -- goal becomes: ∃ x, P x
---   sorry
+example (P Q : Nat → Prop) : ∃ x, P x ∧ (Q x → Q x) := by
+  zapTrue  -- goal becomes: ∃ x, P x
+  sorry
 
 -- def ex1 {P Q: Prop}: (P -> Q) ∧ 5 > 0 := by
 --     zapTrue -- some_tactic // turns goal into `P -> Q`
