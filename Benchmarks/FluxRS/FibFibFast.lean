@@ -30,10 +30,17 @@ def FibFibFast := ∃ k0 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) 
    ((n₀ ≤ 1) ->
     (1 = (fib_spec_fib n₀)))
 
-@[qualif] def q_le          (a b : Int) : Prop := a ≤ b
-@[qualif] def q_gt_one      (v : Int)   : Prop := v > 1
-@[qualif] def q_eq_fib      (v i : Int) : Prop := v = fib_spec_fib i
-@[qualif] def q_eq_fib_pred (v i : Int) : Prop := v = fib_spec_fib (i - 1)
+@[qualif]
+def q_le (a b : Int) : Prop := a ≤ b
+
+@[qualif]
+def q_gt_one (v : Int) : Prop := v > 1
+
+@[qualif]
+def q_eq_fib (v i : Int) : Prop := v = fib_spec_fib i
+
+@[qualif]
+def q_eq_fib_pred (v i : Int) : Prop := v = fib_spec_fib (i - 1)
 
 theorem FibFibFast_proof : FibFibFast := by
   solve_fixpoint
