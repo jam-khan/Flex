@@ -32,6 +32,7 @@ import LeanFixpoint.Tactic.SolveFusion
   Solve method.
 -/
 import LeanFixpoint.Solve.Qualifier
+import LeanFixpoint.Solve.Instantiation
 -- import LeanFixpoint.Solve.Solver
 -- import LeanFixpoint.Solve.Weakening
 -- import LeanFixpoint.Solve.Fixpoint

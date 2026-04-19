@@ -11,6 +11,13 @@ def getQualifiers : MetaM (Array Expr) := do
   names.toArray.mapM fun n => do
     mkConstWithLevelParams n
 
--- Instantiate a qualifier by β-reduction
-def Expr.instQualifier (q : Expr) (args : Array Expr) : MetaM Expr :=
-  whnf (mkAppN q args)
+-- Instantiate a qualifier by β-reduction.
+-- Unfolds ONLY the qualifier's own lambda (via `unfoldDefinition?`) and then
+-- collapses the resulting redex with `headBeta`. We deliberately avoid `whnf`
+-- because it would further unfold relations like `≤` into their kernel defs
+-- (e.g. `(b - a).NonNeg`), producing unreadable trace output.
+def Expr.instQualifier (q : Expr) (args : Array Expr) : MetaM Expr := do
+  let applied := mkAppN q args
+  match ← unfoldDefinition? applied with
+  | some unfolded => return unfolded.headBeta
+  | none          => return applied

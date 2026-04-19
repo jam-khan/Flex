@@ -38,3 +38,15 @@ def KM.isKApp (e : Expr) : KM (Option (KVar × Array Expr)) := do
 def KM.exprKVars (e : Expr) : KM (List KVar) := do
   let kvars ← KM.getKVarList
   return kvars.filter fun κ => e.containsFVar κ.fvarId
+
+-- walk outer `∀`-binders of a flat clause to reach the leaf head.
+-- if leaf is κ-application, return that κ; otherwise, return `none`.
+partial def findHeadKVar (fc : Expr) : KM (Option KVar) := do
+  let fc ← whnf fc
+  if fc.isForall then
+    withLocalDeclD fc.bindingName! fc.bindingDomain! fun fvar =>
+      findHeadKVar (fc.bindingBody!.instantiate1 fvar)
+  else
+    match ← KM.isKApp fc with
+    | some (κ, _) => return some κ
+    | none        => return none
