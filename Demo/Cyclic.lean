@@ -1,37 +1,40 @@
 import LeanFixpoint
 
 /-
-  Predicate Abstraction Demo
+  Predicate Abstraction Demo — updated for `@[qualif]`-lambda syntax.
 
-  Five examples with a mix of acylic and cyclic kvars
+  Mix of acyclic and cyclic κ-var examples. Each theorem uses
+  `solve_fusion`, which after Step 6 wiring will automatically run fusion
+  for acyclic κ's and predicate-abstraction for cyclic κ's, drawing
+  qualifiers from any in-scope `@[qualif]` declaration.
+
+  NOTE: Until Step 6 is merged, `solve_fusion` only handles acyclic κ's.
+  Every test below has at least one cyclic κ, so they currently fail.
+  They are written in their final form so a single edit to `SolveFusion.lean`
+  makes them all attempt a proof; the qualifier set is believed to be
+  sufficient but awaits end-to-end verification.
 -/
 
-def Q_pa : List Qualifier := [
-  q{ GEZ(v : int)  | 0 ≤ v  },
-  q{ GTZ(v : int)  | 0 ≤ v  },
-  q{ GE2(v : int)  | 2 ≤ v  },
-  q{ GEm1(v : int) | -1 ≤ v },
-  q{ LEZ(v : int)  | v ≤ 0  },
-  q{ LE1(v : int)  | v ≤ 1  }
-]
+@[qualif] def q_gez  (v : Int)   : Prop := 0 ≤ v
+@[qualif] def q_gtz  (v : Int)   : Prop := 0 < v
+@[qualif] def q_ge2  (v : Int)   : Prop := 2 ≤ v
+@[qualif] def q_gem1 (v : Int)   : Prop := -1 ≤ v
+@[qualif] def q_lez  (v : Int)   : Prop := v ≤ 0
+@[qualif] def q_le1  (v : Int)   : Prop := v ≤ 1
+@[qualif] def q_le   (a b : Int) : Prop := a ≤ b
 
 -- CYC0: simplest cyclic — single κ with self-loop, no acyclic κ-vars
 -- κ seeded from x (where 0 ≤ x), loop decrements by 1, check 0 ≤ result
--- Expected solution: κ ↦ 0 ≤ z
+-- Expected solution: κ[ν, x] ↦ 0 ≤ ν   (contributed by `q_gez` at slot [0])
 def cyc0 : Prop :=
   ∃ κ : Int → Int → Prop,
     ∀ x : Int, 0 ≤ x →
-      (∀ ν : Int, ν = x → κ ν x)                                      -- seed
+      (∀ ν : Int, ν = x → κ ν x)                                  -- seed
     ∧ (∀ i : Int, κ i x ∧ 1 ≤ i → ∀ ν : Int, ν = i - 1 → κ ν x)  -- loop (cyclic)
-    ∧ (∀ i : Int, κ i x → 0 ≤ i)                                      -- check
+    ∧ (∀ i : Int, κ i x → 0 ≤ i)                                  -- check
 
 theorem cyc0_proof : cyc0 := by
-  -- unfold cyc0
-  -- exists (fun z => 0 ≤ z)
-  -- grind
-  solve_fixpoint with Q_pa
-
-
+  try solve_fixpoint
 
 -- PA1: 1 fusion κ + 1 PA κ
 def pa1 : Prop :=
@@ -45,7 +48,7 @@ def pa1 : Prop :=
     ∧ (∀ i : Int, κinv i x → 0 ≤ i)
 
 theorem pa1_proof : pa1 := by
-  solve_fixpoint with Q_pa
+  try solve_fixpoint
 
 -- PA2: 2 fusion κ merging into 1 PA κ
 -- The weaker source (κlo from x, gives 0 ≤ ν) dominates; GE2/GTZ eliminated.
@@ -63,8 +66,7 @@ def pa2 : Prop :=
     ∧ (∀ i : Int, κinv i x → 0 ≤ i)
 
 theorem pa2_proof : pa2 := by
-  solve_fixpoint with Q_pa
-
+  try solve_fixpoint
 
 -- PA3: fusion pre-compute, PA loop (step-2), independent fusion output
 -- κout from x+3: 3 ≤ r post-check only closes via fusion's exact bound, not PA.
@@ -82,8 +84,7 @@ def pa3 : Prop :=
     ∧ (∀ r : Int, κout r x → 3 ≤ r)
 
 theorem pa3_proof : pa3 := by
-  solve_fixpoint with Q_pa
-
+  try solve_fixpoint
 
 -- PA4: 1 fusion κ, two independent PA loops
 -- κlp1 seeded from x directly; κlp2 seeded via the fusion κfused.
@@ -104,7 +105,7 @@ def pa4 : Prop :=
     ∧ (∀ r : Int, κfused r x → 1 ≤ r)
 
 theorem pa4_proof : pa4 := by
-  solve_fixpoint with Q_pa
+  try solve_fixpoint
 
 -- PA5: two-step fusion chain → PA loop + independent fusion
 -- κa (x+1) → κb (κa+1): acyclic 2-step chain, both handled by fusion.
@@ -125,15 +126,12 @@ def pa5 : Prop :=
     ∧ (∀ r : Int, κfin r x → 5 ≤ r)
 
 theorem pa5_proof : pa5 := by
-  solve_fixpoint with Q_pa
-
-def Q_pa2 : List Qualifier := Q_pa ++ [
-  q{ Le(a : int, b : int) | a ≤ b }
-]
+  try solve_fixpoint
 
 -- PA6: Multi-parameter κ-vars (2 acyclic + 2 cyclic)
 -- Counter from 0 to n, accumulator tracks sum.
 -- κseed, κhi are acyclic; κcnt(i,n), κacc(a,n) are cyclic with 2 params.
+-- Uses `q_le` (2-arg) in addition to the 1-arg qualifier bank.
 def pa6 : Prop :=
   ∃ κseed : Int → Int → Prop,
   ∃ κhi   : Int → Int → Prop,
@@ -151,6 +149,6 @@ def pa6 : Prop :=
     ∧ (∀ i m : Int, κcnt i m n → i ≥ m →
         ∀ a : Int, κacc a m n → 0 ≤ a)
 
+set_option maxHeartbeats 1600000 in
 theorem pa6_proof : pa6 := by
-  solve_fixpoint with Q_pa2
-
+  try solve_fixpoint

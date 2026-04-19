@@ -1,237 +1,159 @@
--- import Lean
+import Lean
+import Aesop
 
--- import Aesop
--- import LeanFixpoint.Core.Types
--- import LeanFixpoint.Core.Macros
--- import LeanFixpoint.Core.Fusion
--- import LeanFixpoint.Elab.ToExpr
--- import LeanFixpoint.Solve.Fixpoint
--- import LeanFixpoint.Solve.Qualifier
--- import LeanFixpoint.Elab.FromExpr
--- import LeanFixpoint.Tactic.Utils
+import LeanFixpoint.Core.Types
+import LeanFixpoint.Core.Fusion
+import LeanFixpoint.Elab.ToExpr
+import LeanFixpoint.Elab.FromExpr
+import LeanFixpoint.Monad
+import LeanFixpoint.Tactic.Utils
+import LeanFixpoint.Tactic.Tactics
+import LeanFixpoint.Solve.Fixpoint
 
--- open Lean Elab Meta Command Tactic
+open Lean Elab Meta Tactic
 
--- -- Register a trace class (toggle with `set_option trace.solveFixpoint true`)
--- initialize Lean.registerTraceClass `solveFixpoint
+initialize Lean.registerTraceClass `solveFixpoint
 
--- private def tryClosers : TacticM Bool := do
---   let b ← attemptTactic (evalTactic (← `(tactic| native_decide)))
---   match b with
---   | Bool.true => logInfo m!"[solve_fixpoint] closed by: native_decide"; pure Bool.true
---   | Bool.false =>
---   let b ← attemptTactic (evalTactic (← `(tactic| grind)))
---   match b with
---   | Bool.true => logInfo m!"[solve_fixpoint] closed by: grind"; pure Bool.true
---   | Bool.false =>
---   let b ← attemptTactic (evalTactic (← `(tactic| aesop)))
---   match b with
---   | Bool.true => logInfo m!"[solve_fixpoint] closed by: aesop"; pure Bool.true
---   | Bool.false =>
---   let b ← attemptTactic (evalTactic (← `(tactic| omega)))
---   match b with
---   | Bool.true => logInfo m!"[solve_fixpoint] closed by: omega"; pure Bool.true
---   | Bool.false =>
---   let b ← attemptTactic (evalTactic (← `(tactic| (constructor <;> grind))))
---   match b with
---   | Bool.true => logInfo m!"[solve_fixpoint] closed by: constructor+grind"; pure Bool.true
---   | Bool.false =>
---   let b ← attemptTactic (evalTactic (← `(tactic| (simp_all; grind))))
---   match b with
---   | Bool.true => logInfo m!"[solve_fixpoint] closed by: simp_all+grind"; pure Bool.true
---   | Bool.false => pure Bool.false
+private partial def closeLoop : TacticM Unit := do
+  let goals ← getGoals
+  match goals with
+  | [] => pure ()
+  | g :: restGoals =>
+    let ty ← whnfR (← g.getType)
+    if ty.isForall then
+      evalTactic (← `(tactic| intro _))
+      closeLoop
+    else if ty.isAppOfArity ``And 2 then
+      evalTactic (← `(tactic| and_intros))
+      closeLoop
+    else
+      let closers := #[
+        `(tactic| omega),
+        `(tactic| grind),
+        `(tactic| aesop),
+        `(tactic| (constructor <;> grind)),
+        `(tactic| (simp_all; grind))
+      ]
+      let mut closed := false
+      for c in closers do
+        if !closed then
+          let b ← attemptTactic (evalTactic (← c))
+          if b then closed := true
+      if closed then
+        closeLoop
+      else
+        setGoals restGoals
+        closeLoop
+        let remaining ← getGoals
+        setGoals (g :: remaining)
 
--- private partial def closeLoop : TacticM Unit := do
---   let goals ← getGoals
---   match goals with
---   | [] => pure ()
---   | g :: restGoals =>
---     let ty ← whnfR (← g.getType)
---     if ty.isForall then
---       evalTactic (← `(tactic| intro _))
---       closeLoop
---     else if ty.isAppOfArity ``And 2 then
---       evalTactic (← `(tactic| and_intros))
---       closeLoop
---     else
---       let closed ← tryClosers
---       if closed then
---         closeLoop
---       else
---         -- Try unfolding if required
---         let didUnfold ← attemptTactic do
---           let newGoal ← g.withContext do
---             let target ← g.getType
---             let u ← unfoldDefinition target
---             g.replaceTargetDefEq u
---           replaceMainGoal (newGoal :: restGoals)
---         if didUnfold then
---           closeLoop
---         else
---           setGoals restGoals
---           closeLoop
---           let remaining ← getGoals
---           setGoals (g :: remaining)
+private def closeResidualGoals : TacticM Unit := do
+  let goals ← getGoals
+  if goals.isEmpty then pure ()
+  else
+    let _ ← attemptTactic (evalTactic (← `(tactic| dsimp only)))
+    let _ ← attemptTactic (evalTactic (← `(tactic| zap)))
+    let goals ← getGoals
+    if goals.isEmpty then pure ()
+    else
+      let _ ← attemptTactic (evalTactic (←
+        `(tactic| all_goals (split_hyps; all_goals simp_all; all_goals grind))))
+      let goals ← getGoals
+      if goals.isEmpty then pure ()
+      else closeLoop
 
--- private def closeResidualGoals : TacticM Unit := do
---   let goals ← getGoals
---   if goals.isEmpty then pure ()
---   else
---     let _ ← attemptTactic (evalTactic (← `(tactic| simp only [])))
---     let goals ← getGoals
---     if goals.isEmpty then pure ()
---     else closeLoop
+/-!
+  ## `solve_fixpoint` tactic
 
--- -- Format qualifiers for printing
--- private def formatQualifier (q : Qualifier) : String :=
---   let ps := String.intercalate ", " (q.params.map fun p => s!"{p.sym} : {toString p.sort}")
---   s!"{q.name}({ps}) | {toString q.body}"
+  Fusion for acyclic κ's (copy of `solve_fusion`) PLUS predicate abstraction
+  for cyclic κ's, drawing qualifiers from `@[qualif]`-tagged decls.
 
--- private def elaborateQualifiers (qs? : Option (TSyntax `term)) : TacticM (Option (List Qualifier)) :=
---   -- logging the qualifiers first
---   match qs? with
---   -- no qualifiers passed
---   | none       => do
---     logInfo m!"[solve_fixpoint] Qualifiers: no argument passed"
---     return none
---   -- term passed for qualifiers
---   | some qsSyn =>
---       tryCatch
---         (do
---           -- elaborate the qualifier syntax into a term with expected type
---           -- of a list of qualifiers
---           let qsExpr ← elabTerm qsSyn
---             (some (mkApp (mkConst ``List [.zero]) (mkConst ``Qualifier)))
---           -- resolve `?m` meta-variables inside
---           let qsExpr  ← instantiateMVars qsExpr
---           -- finally, evaluate the expression and give an evaluated lean value
---           -- takes the type `List Qualifier` which is top-level `Lean` type
---           -- also, take `Expr` of the same type
---           -- and the expression to evaluate, here `qsExpr`
---           let quals   ← unsafe Lean.Meta.evalExpr (List Qualifier)
---                         (mkApp (mkConst ``List [.zero]) (mkConst ``Qualifier)) qsExpr
+  Expected to handle every example in `Demo/Cyclic.lean` and benchmarks with
+  invariants expressible as a conjunction of tagged qualifier instantiations.
+-/
+private def solveFixpointImpl : TacticM Unit := withMainContext do
+  let _ ← attemptTactic (evalTactic (← `(tactic| intros)))
 
---           if quals.isEmpty then
---             logInfo m!"[solve_fixpoint] Qualifiers: empty list provided"
---           else
---             let lines := String.intercalate "\n" (quals.map fun q => s!" · {formatQualifier q}")
---             logInfo m!"[solve_fixpoint] Qualifiers ({quals.length}):\n{lines}"
---           return quals
---         )
---         (fun _ => do
---           logInfo m!"[solve_fixpoint] Qualifiers: argument could not be reflected as List Qualifier"
---           return none
---         )
+  let goal ← getMainGoal
+  let _ ← attemptTactic
+    (do let newGoal ← goal.withContext do
+          let target   ← goal.getType
+          let unfolded ← unfoldDefinition target
+          goal.replaceTargetDefEq unfolded
+        replaceMainGoal [newGoal])
 
--- private def solveFixpointImpl (qs? : Option (TSyntax `term)) : TacticM Unit := withMainContext do
+  let goal ← getMainGoal
+  let _ ← tryCatch
+    (do
+      let goalType ← goal.getType
+      let reduced  ← reduce goalType
 
---   -- elaborate and log qualifiers
---   let quals? ← elaborateQualifiers qs?
---   let _ ← attemptTactic (evalTactic (← `(tactic| intros)))
+      let emptyKvars : Std.HashMap FVarId KVar := {}
+      let witnesses : List Expr ← peelExistentials reduced emptyKvars fun kvarMap body => do
+        let kctx : KContext := { kvars := kvarMap }
 
---   let goal ← getMainGoal
---   let _ ← attemptTactic
---     (do let newGoal ← goal.withContext do
---           let target   ← goal.getType
---           let unfolded ← unfoldDefinition target
---           goal.replaceTargetDefEq unfolded
---         replaceMainGoal [newGoal])
+        -- Phase 2: Partition
+        let (acyclic, cyclic) ← (exprPartitionKVars body).run kctx
+        IO.println s!"[solve_fixpoint] Acyclic κ-vars: {acyclic.map (·.name)}"
+        IO.println s!"[solve_fixpoint] Cyclic κ-vars:  {cyclic.map (·.name)}"
 
---   let goal ← getMainGoal
---   let solverResult ← tryCatch
---     (do
---       let fvarsRef ← IO.mkRef ({} : FVarMap)
---       let kvarsRef ← IO.mkRef ({} : KVarSet)
+        -- Phase 3: Fusion for acyclic
+        let mut solutions : List (Name × Expr × List Name × List Expr) := []
+        let mut curr := body
+        for κ in acyclic do
+          IO.println s!"[solve_fixpoint] --- Fusion: {κ.name} (params: {κ.params}) ---"
+          let (sol, _) ← (computeSol κ curr (simplify := true)).run kctx
+          let solFmt ← ppExpr sol
+          IO.println s!"[solve_fixpoint]   sol1({κ.name}) = {solFmt}"
+          solutions := solutions ++ [(κ.name, sol, κ.params, κ.paramTypes)]
+          curr ← (exprElim1 κ curr).run kctx
 
---       -- Below we add any local context variables in the fvars
---       let lctx ← getLCtx
---       for decl in lctx do
---         if !decl.isAuxDecl then
---           fvarsRef.modify fun m => m.insert decl.fvarId decl.userName
+        -- Phase 4: Predicate abstraction for cyclic (NEW vs solve_fusion)
+        if !cyclic.isEmpty then
+          IO.println s!"[solve_fixpoint] --- PA on cyclic κ's ---"
+          let flatCs ← (exprFlat curr).run kctx
+          IO.println s!"[solve_fixpoint]   {flatCs.length} flat clauses"
+          let paSols ← predicateAbstraction kctx cyclic flatCs
+          for (κ, sol) in paSols do
+            let solFmt ← ppExpr sol
+            IO.println s!"[solve_fixpoint]   PA sol for {κ.name}: {solFmt}"
+            solutions := solutions ++ [(κ.name, sol, κ.params, κ.paramTypes)]
 
---       let goalType ← goal.getType
---       let reduced  ← reduce goalType
---       let propAST  ← toPropASTWithTracking fvarsRef kvarsRef reduced
---       let fvarMap  ← fvarsRef.get
---       let kvarSet  ← kvarsRef.get
---       let constraint ← toConstraint fvarMap kvarSet propAST
---       -- let kvars := constraint.kvars.eraseDups
+        IO.println s!"[solve_fixpoint] --- All solutions ---"
+        for (κName, sol, params, _) in solutions do
+          let solFmt ← ppExpr sol
+          IO.println s!"[solve_fixpoint]   {κName}({params}) = {solFmt}"
 
---       -- Phase 1: Partition into acyclic / cyclic
---       let (acyclic, cyclic) := constraint.partitionKVars
---       logInfo m!"[solve_fixpoint] Acyclic: {acyclic.map (·.name)}"
---       logInfo m!"[solve_fixpoint] Cyclic:  {cyclic.map (·.name)}"
+        -- Build witness Exprs
+        let mut witnessExprs : List Expr := []
+        for (κName, sol, params, paramTypes) in solutions do
+          let witness ← solToWitnessExpr sol params paramTypes
+          let witFmt ← ppExpr witness
+          IO.println s!"[solve_fixpoint]   witness for {κName}: {witFmt}"
+          witnessExprs := witnessExprs ++ [witness]
+        return witnessExprs
 
---       -- Phase 2: Fusion - eliminate acyclic κ-vars
---       -- solutions need name of κ, solution pred and list of κ formal params
---       let mut solutions : List (Name × Pred × List Name) := []
---       let mut curr := constraint
---       for κ in acyclic do
---         -- Use stripped solution only when kappa type includes scope variables
---         -- (i.e., kappa has more params than scope vars, so there are dedicated scope positions)
---         let scopedC := curr.scope κ
---         let scopeNames : List Name := collectScopeVars κ scopedC
---         let sol :=
---           if scopeNames.length > 0 && κ.params.length > scopeNames.length then
---             -- Stripped sol1: scope vars become free, then substitute with canonical params
---             let stripped := stripScope κ scopedC
---             let sol := stripped.sol1 κ
---             let numRefParams := κ.params.length - scopeNames.length
---             let scopeParams := κ.params.drop numRefParams
---             ((scopeNames.zip scopeParams).foldl
---               (fun acc (origName, canonName) => acc.substVar origName canonName) sol).simplify
---           else
---             -- Kappa type doesn't include scope vars — use full sol1
---             curr.sol1 κ
---         solutions := solutions ++ [(κ.name, sol, κ.params)]
---         curr := curr.elim1 κ
+      -- Phase 5: Apply witnesses
+      for witness in (witnesses : List Expr) do
+        let goal ← getMainGoal
+        let goalType ← goal.getType
+        let goalType ← whnf goalType
+        let α := goalType.getArg! 0
+        let p := goalType.getArg! 1
+        let obligation ← mkAppM' p #[witness]
+        let mvar ← mkFreshExprMVar (some obligation)
+        let lvl := if α.isProp then levelZero else levelOne
+        let proof := mkApp4 (mkConst ``Exists.intro [lvl]) α p witness mvar
+        goal.assign proof
+        replaceMainGoal [mvar.mvarId!]
+    )
+    (fun e => do
+      logInfo m!"[solve_fixpoint] ✗ Solver failed: {e.toMessageData}"
+      logInfo m!"[solve_fixpoint] → falling back to closeResidualGoals"
+    )
 
---       for (κName, sol) in solutions do
---         logInfo m!"[solve_fixpoint] Solution: {κName} := {toString sol}"
+  closeResidualGoals
 
---       -- Phase 3: Predicate abstraction - handle cyclic κ-vars
---       if !cyclic.isEmpty then
---         match quals? with
---         | some Q => do
---           let pa ← predicateAbstraction curr Q
---           for (κ, qs) in pa do
---             let sol   := conjoinQualifiers qs
---             solutions := solutions ++ [(κ.name, sol, κ.params)]
---             curr      := curr.elimStar κ sol
---         | none   => logWarning m!"[solve_fixpoint] Cyclic κ-vars present but no qualifiers provided"
-
---       -- NOTE: One may need to be careful with order of instantiations
---       -- Phase 4: Witness synthesis for acyclic solutions
---       for (_κName, sol, params) in solutions do
---         logInfo m!"[solve_fixpoint] Elaborating witness for: {toString sol}"
---         let mut env₀ : VarMap := {}
---         let lctx ← getLCtx
---         for decl in lctx do
---           if !decl.isAuxDecl then
---             env₀ := env₀.insert decl.userName (mkFVar decl.fvarId)
---         let witness ← solToWitnessExpr sol params env₀
---         let witnessSyn ← PrettyPrinter.delab witness
---         evalTactic (← `(tactic| refine ⟨$witnessSyn, ?_⟩))
---     )
---     (fun e => do
---       logInfo m!"[solve_fixpoint] ✗ Solver failed: {e.toMessageData}"
---       logInfo m!"[solve_fixpoint] → falling back to closeResidualGoals"
---       )
-
---   let _ := solverResult
---   let _ := qs?
-
---   closeResidualGoals
-
--- -- declare syntax for solve_fixpoint
--- syntax "solve_fixpoint" : tactic
--- syntax "solve_fixpoint" "with" term : tactic
-
--- elab_rules : tactic
---   | `(tactic| solve_fixpoint)           => solveFixpointImpl none
---   | `(tactic| solve_fixpoint with $qs)  => solveFixpointImpl (some qs)
-
--- syntax "solve_residual" : tactic
--- elab_rules : tactic
---   | `(tactic | solve_residual) => do
---     closeResidualGoals
+syntax "solve_fixpoint" : tactic
+elab_rules : tactic
+  | `(tactic| solve_fixpoint) => solveFixpointImpl

@@ -36,7 +36,9 @@ inductive Ceval : Cmd → State → State → Prop where
 
 /-! ## Assertions and Hoare Triples -/
 
+@[simp]
 def Assertion := State → Prop
 
+@[simp]
 def ValidHoareTriple (P : Assertion) (c : Cmd) (Q : Assertion) : Prop :=
   ∀ s₁ s₂, Ceval c s₁ s₂ → P s₁ → Q s₂

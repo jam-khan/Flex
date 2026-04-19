@@ -4,10 +4,12 @@ import LeanFixpoint.Monad
 
 open Lean Meta
 
-partial def peelExistentials (e : Expr)
+partial def peelExistentials {m : Type → Type} {α : Type}
+    [Monad m] [MonadLiftT MetaM m] [MonadControlT MetaM m] [Inhabited (m α)]
+    (e : Expr)
     (kvars : Std.HashMap FVarId KVar := {})
-    (k : Std.HashMap FVarId KVar → Expr → MetaM α) :
-    MetaM α := do
+    (k : Std.HashMap FVarId KVar → Expr → m α) :
+    m α := do
   let e ← whnf e
   if e.isAppOfArity ``Exists 2 then
     let pred := e.getArg! 1

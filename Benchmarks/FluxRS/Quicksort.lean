@@ -39,63 +39,6 @@ noncomputable def is_frame (old new : Arr Int) (lo hi : Int) : Prop :=
 noncomputable def sort_is_perm (old new : Arr Int) (lo hi : Int) : Prop :=
   is_perm old new lo hi /\ is_frame old new lo hi
 
--- acyclic (non-cut) kvars
--- def k0 (lo₀ : Int) (p₀ : Int) (v₀ : (VectorsAVec Int)) (hi₀ : Int) (old₀ : (VectorsAVec Int)) (a'₆ : (Arr Int)) (a'₇ : Int) (a'₈ : (Arr Int)) (a'₉ : Int) (a'₁₀ : Int) (a'₁₁ : Int) (a'₁₂ : Int) (a'₁₃ : (Arr Int)) (a'₁₄ : Int) : Prop :=
---   (((∃ (a'₁₅ : (VectorsAVec Int)), ((((((((((sort_is_sorted_between) : (((Arr Int) -> (Int -> (Int -> Prop))))) (VectorsAVec.elems a'₁₅))) : ((Int -> (Int -> Prop)))) lo₀)) : ((Int -> Prop))) ((p₀ - 1) + 1)) ∧ ((((((((((((sort_is_perm) : (((Arr Int) -> ((Arr Int) -> (Int -> (Int -> Prop)))))) (VectorsAVec.elems v₀))) : (((Arr Int) -> (Int -> (Int -> Prop))))) (VectorsAVec.elems a'₁₅))) : ((Int -> (Int -> Prop)))) lo₀)) : ((Int -> Prop))) (p₀ - 1)) ∧ (a'₆ = (VectorsAVec.elems a'₁₅)) ∧ (a'₇ = (VectorsAVec.len a'₁₅)) ∧ ((VectorsAVec.len a'₁₅) = (VectorsAVec.len v₀)) ∧ ((VectorsAVec.len a'₁₅) ≥ 0))) ∧ (((((((((((((((sort_is_partitioned_by) : (((Arr Int) -> (Int -> (Int -> (Int -> (Int -> Prop))))))) (VectorsAVec.elems v₀))) : ((Int -> (Int -> (Int -> (Int -> Prop)))))) lo₀)) : ((Int -> (Int -> (Int -> Prop))))) p₀)) : ((Int -> (Int -> Prop)))) (hi₀ + 1))) : ((Int -> Prop))) p₀) ∧ ((((((((((((sort_is_perm) : (((Arr Int) -> ((Arr Int) -> (Int -> (Int -> Prop)))))) (VectorsAVec.elems old₀))) : (((Arr Int) -> (Int -> (Int -> Prop))))) (VectorsAVec.elems v₀))) : ((Int -> (Int -> Prop)))) lo₀)) : ((Int -> Prop))) hi₀) ∧ (a'₈ = (VectorsAVec.elems old₀)) ∧ (a'₉ = (VectorsAVec.len old₀)) ∧ (a'₁₀ = lo₀) ∧ (a'₁₁ = hi₀) ∧ (a'₁₂ = p₀) ∧ (a'₁₃ = (VectorsAVec.elems v₀)) ∧ (a'₁₄ = (VectorsAVec.len v₀)) ∧ ((VectorsAVec.len v₀) = (VectorsAVec.len old₀)) ∧ (p₀ ≥ 0) ∧ (hi₀ ≥ 0) ∧ (lo₀ ≥ 0) ∧ ((VectorsAVec.len v₀) ≥ 0) ∧ ((VectorsAVec.len old₀) ≥ 0) ∧ (hi₀ < (VectorsAVec.len old₀)) ∧ (lo₀ < p₀) ∧ (lo₀ < hi₀) ∧ (lo₀ < (VectorsAVec.len old₀)) ∧ (p₀ ≤ hi₀) ∧ (lo₀ ≤ p₀)) ∨ ((((((((((((((((sort_is_partitioned_by) : (((Arr Int) -> (Int -> (Int -> (Int -> (Int -> Prop))))))) (VectorsAVec.elems v₀))) : ((Int -> (Int -> (Int -> (Int -> Prop)))))) lo₀)) : ((Int -> (Int -> (Int -> Prop))))) p₀)) : ((Int -> (Int -> Prop)))) (hi₀ + 1))) : ((Int -> Prop))) p₀) ∧ ((((((((((((sort_is_perm) : (((Arr Int) -> ((Arr Int) -> (Int -> (Int -> Prop)))))) (VectorsAVec.elems old₀))) : (((Arr Int) -> (Int -> (Int -> Prop))))) (VectorsAVec.elems v₀))) : ((Int -> (Int -> Prop)))) lo₀)) : ((Int -> Prop))) hi₀) ∧ (¬(lo₀ < p₀)) ∧ (a'₆ = (VectorsAVec.elems v₀)) ∧ (a'₇ = (VectorsAVec.len v₀)) ∧ (a'₈ = (VectorsAVec.elems old₀)) ∧ (a'₉ = (VectorsAVec.len old₀)) ∧ (a'₁₀ = lo₀) ∧ (a'₁₁ = hi₀) ∧ (a'₁₂ = p₀) ∧ (a'₁₃ = (VectorsAVec.elems v₀)) ∧ (a'₁₄ = (VectorsAVec.len v₀)) ∧ ((VectorsAVec.len v₀) = (VectorsAVec.len old₀)) ∧ (p₀ ≥ 0) ∧ (hi₀ ≥ 0) ∧ (lo₀ ≥ 0) ∧ ((VectorsAVec.len v₀) ≥ 0) ∧ ((VectorsAVec.len old₀) ≥ 0) ∧ (hi₀ < (VectorsAVec.len old₀)) ∧ (lo₀ < hi₀) ∧ (lo₀ < (VectorsAVec.len old₀)) ∧ (p₀ ≤ hi₀) ∧ (lo₀ ≤ p₀)))
--- def k1 (p₀ : Int) (hi₀ : Int) (a'₃ : (VectorsAVec Int)) (v₀ : (VectorsAVec Int)) (lo₀ : Int) (old₀ : (VectorsAVec Int)) (a'₁₆ : (Arr Int)) (a'₁₇ : Int) (a'₁₈ : (Arr Int)) (a'₁₉ : Int) (a'₂₀ : Int) (a'₂₁ : Int) (a'₂₂ : Int) (a'₂₃ : (Arr Int)) (a'₂₄ : Int) (a'₂₅ : (Arr Int)) (a'₂₆ : Int) : Prop :=
---   (((∃ (a'₂₇ : (VectorsAVec Int)), ((((((((((sort_is_sorted_between) : (((Arr Int) -> (Int -> (Int -> Prop))))) (VectorsAVec.elems a'₂₇))) : ((Int -> (Int -> Prop)))) (p₀ + 1))) : ((Int -> Prop))) (hi₀ + 1)) ∧ ((((((((((((sort_is_perm) : (((Arr Int) -> ((Arr Int) -> (Int -> (Int -> Prop)))))) (VectorsAVec.elems a'₃))) : (((Arr Int) -> (Int -> (Int -> Prop))))) (VectorsAVec.elems a'₂₇))) : ((Int -> (Int -> Prop)))) (p₀ + 1))) : ((Int -> Prop))) hi₀) ∧ (a'₁₆ = (VectorsAVec.elems a'₂₇)) ∧ (a'₁₇ = (VectorsAVec.len a'₂₇)) ∧ ((VectorsAVec.len a'₂₇) = (VectorsAVec.len a'₃)) ∧ ((VectorsAVec.len a'₂₇) ≥ 0))) ∧ (((((((((((((((sort_is_partitioned_by) : (((Arr Int) -> (Int -> (Int -> (Int -> (Int -> Prop))))))) (VectorsAVec.elems v₀))) : ((Int -> (Int -> (Int -> (Int -> Prop)))))) lo₀)) : ((Int -> (Int -> (Int -> Prop))))) p₀)) : ((Int -> (Int -> Prop)))) (hi₀ + 1))) : ((Int -> Prop))) p₀) ∧ ((((((((((((sort_is_perm) : (((Arr Int) -> ((Arr Int) -> (Int -> (Int -> Prop)))))) (VectorsAVec.elems old₀))) : (((Arr Int) -> (Int -> (Int -> Prop))))) (VectorsAVec.elems v₀))) : ((Int -> (Int -> Prop)))) lo₀)) : ((Int -> Prop))) hi₀) ∧ (((∃ (a'₂₈ : (VectorsAVec Int)), (((VectorsAVec.len a'₂₈) = (VectorsAVec.len v₀)) ∧ (((((((((sort_is_sorted_between) : (((Arr Int) -> (Int -> (Int -> Prop))))) (VectorsAVec.elems a'₂₈))) : ((Int -> (Int -> Prop)))) lo₀)) : ((Int -> Prop))) ((p₀ - 1) + 1)) ∧ ((((((((((((sort_is_perm) : (((Arr Int) -> ((Arr Int) -> (Int -> (Int -> Prop)))))) (VectorsAVec.elems v₀))) : (((Arr Int) -> (Int -> (Int -> Prop))))) (VectorsAVec.elems a'₂₈))) : ((Int -> (Int -> Prop)))) lo₀)) : ((Int -> Prop))) (p₀ - 1)) ∧ ((VectorsAVec.len a'₂₈) ≥ 0) ∧ ((VectorsAVec.len a'₂₈) ≥ 0) ∧ ((VectorsAVec.elems a'₃) = (VectorsAVec.elems a'₂₈)) ∧ ((VectorsAVec.len a'₃) = (VectorsAVec.len a'₂₈)))) ∧ (lo₀ < p₀)) ∨ ((¬(lo₀ < p₀)) ∧ (¬(lo₀ < p₀)) ∧ ((VectorsAVec.elems a'₃) = (VectorsAVec.elems v₀)) ∧ ((VectorsAVec.len a'₃) = (VectorsAVec.len v₀)))) ∧ (a'₂₆ = (VectorsAVec.len a'₃)) ∧ (a'₁₈ = (VectorsAVec.elems old₀)) ∧ (a'₁₉ = (VectorsAVec.len old₀)) ∧ (a'₂₀ = lo₀) ∧ (a'₂₁ = hi₀) ∧ (a'₂₂ = p₀) ∧ (a'₂₃ = (VectorsAVec.elems v₀)) ∧ (a'₂₄ = (VectorsAVec.len v₀)) ∧ (a'₂₅ = (VectorsAVec.elems a'₃)) ∧ ((VectorsAVec.len v₀) = (VectorsAVec.len old₀)) ∧ (p₀ ≥ 0) ∧ (hi₀ ≥ 0) ∧ (lo₀ ≥ 0) ∧ ((VectorsAVec.len v₀) ≥ 0) ∧ ((VectorsAVec.len old₀) ≥ 0) ∧ (p₀ < hi₀) ∧ (hi₀ < (VectorsAVec.len old₀)) ∧ (lo₀ < hi₀) ∧ (lo₀ < (VectorsAVec.len old₀)) ∧ (p₀ ≤ hi₀) ∧ (lo₀ ≤ p₀)) ∨ ((((((((((((((((sort_is_partitioned_by) : (((Arr Int) -> (Int -> (Int -> (Int -> (Int -> Prop))))))) (VectorsAVec.elems v₀))) : ((Int -> (Int -> (Int -> (Int -> Prop)))))) lo₀)) : ((Int -> (Int -> (Int -> Prop))))) p₀)) : ((Int -> (Int -> Prop)))) (hi₀ + 1))) : ((Int -> Prop))) p₀) ∧ ((((((((((((sort_is_perm) : (((Arr Int) -> ((Arr Int) -> (Int -> (Int -> Prop)))))) (VectorsAVec.elems old₀))) : (((Arr Int) -> (Int -> (Int -> Prop))))) (VectorsAVec.elems v₀))) : ((Int -> (Int -> Prop)))) lo₀)) : ((Int -> Prop))) hi₀) ∧ (((∃ (a'₂₉ : (VectorsAVec Int)), (((VectorsAVec.len a'₂₉) = (VectorsAVec.len v₀)) ∧ (((((((((sort_is_sorted_between) : (((Arr Int) -> (Int -> (Int -> Prop))))) (VectorsAVec.elems a'₂₉))) : ((Int -> (Int -> Prop)))) lo₀)) : ((Int -> Prop))) ((p₀ - 1) + 1)) ∧ ((((((((((((sort_is_perm) : (((Arr Int) -> ((Arr Int) -> (Int -> (Int -> Prop)))))) (VectorsAVec.elems v₀))) : (((Arr Int) -> (Int -> (Int -> Prop))))) (VectorsAVec.elems a'₂₉))) : ((Int -> (Int -> Prop)))) lo₀)) : ((Int -> Prop))) (p₀ - 1)) ∧ ((VectorsAVec.len a'₂₉) ≥ 0) ∧ ((VectorsAVec.len a'₂₉) ≥ 0) ∧ ((VectorsAVec.elems a'₃) = (VectorsAVec.elems a'₂₉)) ∧ ((VectorsAVec.len a'₃) = (VectorsAVec.len a'₂₉)))) ∧ (lo₀ < p₀)) ∨ ((¬(lo₀ < p₀)) ∧ (¬(lo₀ < p₀)) ∧ ((VectorsAVec.elems a'₃) = (VectorsAVec.elems v₀)) ∧ ((VectorsAVec.len a'₃) = (VectorsAVec.len v₀)))) ∧ (¬(p₀ < hi₀)) ∧ (a'₁₆ = (VectorsAVec.elems a'₃)) ∧ (a'₁₇ = (VectorsAVec.len a'₃)) ∧ (a'₂₆ = (VectorsAVec.len a'₃)) ∧ (a'₁₈ = (VectorsAVec.elems old₀)) ∧ (a'₁₉ = (VectorsAVec.len old₀)) ∧ (a'₂₀ = lo₀) ∧ (a'₂₁ = hi₀) ∧ (a'₂₂ = p₀) ∧ (a'₂₃ = (VectorsAVec.elems v₀)) ∧ (a'₂₄ = (VectorsAVec.len v₀)) ∧ (a'₂₅ = (VectorsAVec.elems a'₃)) ∧ ((VectorsAVec.len v₀) = (VectorsAVec.len old₀)) ∧ (p₀ ≥ 0) ∧ (hi₀ ≥ 0) ∧ (lo₀ ≥ 0) ∧ ((VectorsAVec.len v₀) ≥ 0) ∧ ((VectorsAVec.len old₀) ≥ 0) ∧ (hi₀ < (VectorsAVec.len old₀)) ∧ (lo₀ < hi₀) ∧ (lo₀ < (VectorsAVec.len old₀)) ∧ (p₀ ≤ hi₀) ∧ (lo₀ ≤ p₀)))
-@[simp]
-theorem bigger_perm :
-  sort_is_bigger a lo p p -> sort_is_perm a a' lo (p-1) -> sort_is_bigger a' lo p p
-  := by
-  intros; simp_all [sort_is_bigger, sort_is_perm, is_perm, is_frame]; grind
-
-@[simp]
-theorem sort_is_perm_trans :
-  sort_is_perm old new lo hi -> sort_is_perm new new' lo hi -> sort_is_perm old new' lo hi
-  := by
-  intros; simp_all [sort_is_perm, is_perm, is_frame]; grind
-
-@[simp]
-theorem sort_is_perm_id : sort_is_perm arr arr lo hi := by
-  intros; simp_all [sort_is_perm, is_perm, is_frame]; intros i _ _; exists i
-
-@[simp]
-theorem is_perm_trans :
-  is_perm old new lo hi -> is_perm new new' lo hi -> is_perm old new' lo hi
-  := by
-  intros; simp_all [is_perm]; grind
-
-@[simp]
-theorem is_perm_id : is_perm arr arr lo hi := by
-  intros; simp_all [is_perm]; intros i _ _; exists i
-
--- theorem is_smaller_perm :
---   sort_is_smaller a lo p p -> sort_is_perm a a' lo (p-1) -> sort_is_smaller a' lo p p
---   := by
---   intros; simp_all [sort_is_smaller, sort_is_perm, is_perm, is_frame]; grind
-@[simp]
-theorem is_smaller_perm' :
-  sort_is_smaller a p hi p -> sort_is_perm a a' lo (p - 1) -> sort_is_smaller a' p hi p
-  := by
-  intros; simp_all [sort_is_smaller, sort_is_perm, is_perm, is_frame]; grind
-
-@[simp]
-theorem is_smaller_perm :
-  sort_is_smaller a1 p (hi + 1) p -> sort_is_perm a1 a2 (p + 1) hi -> sort_is_smaller a2 p (hi + 1) p
-  := by
-  intros; simp_all [sort_is_smaller, sort_is_perm, is_perm, is_frame]; grind
-
-@[simp]
-theorem is_sorted_using_pivot :
-  sort_is_sorted_between a lo p ->
-  sort_is_sorted_between a (p + 1) (hi + 1) ->
-  sort_is_bigger a lo p p ->
-  sort_is_smaller a p (hi + 1) p ->
-  sort_is_sorted_between a lo (hi + 1)
-  := by
-  simp_all [sort_is_smaller, sort_is_bigger, sort_is_sorted_between]; grind
-
 def SortQuicksortRange :=
  ∃ k0 : (Arr Int) → Int → (Arr Int) → Int → Int → Int → Int → (Arr Int) → Int → (VectorsAVec Int) → Int → Int → Int → (VectorsAVec Int) → Prop,
  ∃ k1 : (Arr Int) → Int → (Arr Int) → Int → Int → Int → Int → (Arr Int) → Int → (Arr Int) → Int → (VectorsAVec Int) → Int → Int → Int → (VectorsAVec Int) → (VectorsAVec Int) → Prop,
