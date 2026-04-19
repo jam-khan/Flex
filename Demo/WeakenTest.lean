@@ -1,13 +1,13 @@
 import LeanFixpoint
-import LeanFixpoint.Solve.Weaken
 
 open Lean Meta Elab Term
 
 -- Dedicated qualifiers for testing. Separate from FibFibFast's q_gt_one etc.
 -- so the environment tagset stays predictable.
-@[qualif] private def _wt_gt_one (v : Int)    : Prop := v > 1
-@[qualif] private def _wt_le     (a b : Int)  : Prop := a ≤ b
-@[qualif] private def _wt_eq     (a b : Int)  : Prop := a = b
+@[qualif] private def _wt_gt_one  (v : Int)    : Prop := v > 1
+@[qualif] private def _wt_le      (a b : Int)  : Prop := a ≤ b
+@[qualif] private def _wt_eq      (a b : Int)  : Prop := a = b
+@[qualif] private def _wt_lt_zero (v : Int)    : Prop := v < 0
 
 /-- Runs `specializeClauseForHead` on every flat clause of `stmt`'s body
     (which must be of the form `∃ κ : …, body`) and prints before/after.
@@ -108,4 +108,91 @@ run_cmd Lean.Elab.Command.liftTermElabM do
   runSpec "H  FibFibFast seed shape, q_le at [0, 3]" sH qLe [0, 3]
   -- Expect: ∀ n : Int, n ≥ 0 → 2 ≤ n
   -- (args = #[2, 1, 2, n]; qSlots=[0,3] picks 2 and n; q_le 2 n = 2 ≤ n.)
-  
+
+run_cmd Lean.Elab.Command.liftTermElabM do
+  let qGt ← mkConstWithLevelParams ``_wt_gt_one
+  -- q_le not used here — we pick 1-arg κ's so only q_gt_one is slot-compatible
+
+  ----------------------------------------------------------------------
+  -- Weaken-A: candidate SHOULD be dropped.
+  --
+  -- Constraint: ∃ κ : Int → Prop, ∀ x : Int, 0 ≤ x → κ x
+  -- Candidates: [(q_gt_one, [0])]    -- i.e. claim is "κ x means x > 1"
+  -- VC: 0 ≤ x → x > 1                -- FALSE (x could be 0)
+  -- checkExprVC rejects → weakenOnce drops the candidate → survivors: 0
+  ----------------------------------------------------------------------
+  let stmt1 ← elabTerm (← `(∃ κ : Int → Prop, ∀ x : Int, 0 ≤ x → κ x)) none
+  peelExistentials stmt1 {} fun kvarMap body => do
+    let kctx : KContext := { kvars := kvarMap }
+    match kvarMap.values with
+    | [κ] =>
+      let initial : List (KVar × List (Expr × List Nat)) := [(κ, [(qGt, [0])])]
+      let flat ← (exprFlat body).run kctx
+      IO.println s!"\nWeaken-A (should DROP):"
+      IO.println s!"  input:     1 candidate"
+      let after ← weakenOnce kctx flat initial
+      for (_, cands) in after do
+        IO.println s!"  survivors: {cands.length}   (expect 0)"
+    | _ => IO.println "unexpected κ count"
+
+  ----------------------------------------------------------------------
+  -- Weaken-B: candidate SHOULD be kept.
+  --
+  -- Constraint: ∃ κ : Int → Prop, ∀ x : Int, x = 2 → κ x
+  -- Candidates: [(q_gt_one, [0])]
+  -- VC: x = 2 → x > 1                -- TRUE
+  -- checkExprVC accepts → weakenOnce keeps the candidate → survivors: 1
+  ----------------------------------------------------------------------
+  let stmt2 ← elabTerm (← `(∃ κ : Int → Prop, ∀ x : Int, x = 2 → κ x)) none
+  peelExistentials stmt2 {} fun kvarMap body => do
+    let kctx : KContext := { kvars := kvarMap }
+    match kvarMap.values with
+    | [κ] =>
+      let initial : List (KVar × List (Expr × List Nat)) := [(κ, [(qGt, [0])])]
+      let flat ← (exprFlat body).run kctx
+      IO.println s!"\nWeaken-B (should KEEP):"
+      IO.println s!"  input:     1 candidate"
+      let after ← weakenOnce kctx flat initial
+      for (_, cands) in after do
+        IO.println s!"  survivors: {cands.length}   (expect 1)"
+    | _ => IO.println "unexpected κ count"
+
+  ----------------------------------------------------------------------
+  -- Weaken-C: mixed starting set, exactly one survives.
+  --
+  -- Constraint: ∃ κ : Int → Prop, ∀ x : Int, x = 2 → κ x
+  -- Candidates:
+  --   (q_gt_one,  [0])  – expect KEEP  (x = 2 ⇒ x > 1)
+  --   (q_lt_zero, [0])  – expect DROP  (x = 2 does NOT ⇒ x < 0)
+  ----------------------------------------------------------------------
+  let qLt ← mkConstWithLevelParams ``_wt_lt_zero
+  peelExistentials stmt2 {} fun kvarMap body => do
+    let kctx : KContext := { kvars := kvarMap }
+    match kvarMap.values with
+    | [κ] =>
+      let initial : List (KVar × List (Expr × List Nat)) :=
+        [(κ, [(qGt, [0]), (qLt, [0])])]
+      let flat ← (exprFlat body).run kctx
+      IO.println s!"\nWeaken-C (mixed, should keep exactly 1):"
+      IO.println s!"  input:     2 candidates  (q_gt_one, q_lt_zero)"
+      let after ← weakenOnce kctx flat initial
+      for (_, cands) in after do
+        IO.println s!"  survivors: {cands.length}   (expect 1 — only q_gt_one)"
+    | _ => IO.println "unexpected κ count"
+
+run_cmd Lean.Elab.Command.liftTermElabM do
+  -- Same minimal example as Weaken-B: κ x is seeded by x = 2, never mutated.
+  -- Expected: after PA, κ's solution is a conjunction of the (few) qualifiers
+  -- that hold for `x = 2`. Notably includes `x > 1`; excludes `x < 0`.
+  let stmt ← elabTerm (← `(∃ κ : Int → Prop, ∀ x : Int, x = 2 → κ x)) none
+  peelExistentials stmt {} fun kvarMap body => do
+    let kctx : KContext := { kvars := kvarMap }
+    match kvarMap.values with
+    | [κ] =>
+      let flat ← (exprFlat body).run kctx
+      IO.println s!"\nPA-1:"
+      let sols ← predicateAbstraction kctx [κ] flat
+      for (κ', solExpr) in sols do
+        IO.println s!"  κ = {κ'.name}"
+        IO.println s!"  sol = {← ppExpr solExpr}"
+    | _ => IO.println "unexpected κ count"

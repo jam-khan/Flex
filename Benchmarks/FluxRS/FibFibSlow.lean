@@ -28,19 +28,5 @@ def FibFibSlow :=
    ((n₀ ≤ 1) ->
     (1 = (fib_spec_fib n₀)))
 
-def FibFibSlow_proof : FibFibSlow := by
-  -- solve_fixpoint
-  sorry
-
-#eval show MetaM Unit from do
-  let qs ← getQualifiers
-  for q in qs do
-    let ty ← inferType q
-    let ci ← getConstInfo q.constName!
-    IO.println s!" {q} : {← ppExpr ty}"
-    if let some val := ci.value? then
-      IO.println s!"    = {← ppExpr val}"
-
-example (i n : Int)   :
-    (i + 1) ≤ n → fib_spec_fib i = fib_spec_fib ((i + 1) - 1) := by
-  grind
+theorem FibFibSlow_proof : FibFibSlow := by
+  solve_fixpoint

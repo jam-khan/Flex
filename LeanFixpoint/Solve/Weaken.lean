@@ -3,6 +3,7 @@ import Lean
 import LeanFixpoint.Monad
 import LeanFixpoint.Core.Fusion
 import LeanFixpoint.Solve.Qualifier
+import LeanFixpoint.Solve.Check
 
 open Lean Meta Elab Term Tactic
 
@@ -54,3 +55,62 @@ partial def specializeClauseForHead
       for (κ, sol) in assignment do
         acc := substKVarInExpr κ sol acc
       return acc
+
+/-- One iteration of Houdini weakening.
+
+    For each flat clause whose conclusion is a κ-application:
+    · Identify the head κ.
+    · For each candidate `(q, qSlots)` currently assigned to that κ,
+      specialize the clause — substitute hypothesis κ-apps by their current
+      conjunctive solution, and replace the head leaf with `q` β-applied at
+      the head-args projected by `qSlots`.
+    · Check the resulting VC via `checkExprVC`. Keep candidate iff it passes.
+
+    Returns the updated assignment (with failed candidates dropped). Monotone:
+    `kept ⊆ original` for every κ. -/
+partial def weakenOnce
+    (kctx       : KContext)
+    (flatCs     : List Expr)
+    (assignment : List (KVar × List (Expr × List Nat)))
+    : TermElabM (List (KVar × List (Expr × List Nat))) := do
+  -- Pre-materialize one `currentSol` Expr per κ for hypothesis-position
+  -- substitution. Each candidate is β-applied at κ.params' canonical-fvar
+  -- placeholders, then conjoined. `substKVarInExpr` later re-substitutes
+  -- those placeholders with actual κ-app args at each hypothesis site.
+  let currentSols : List (KVar × Expr) ← assignment.mapM fun (κ, cands) => do
+    -- create fvars for the parameters of the `κ`
+    let paramFvars : Array Expr :=
+      (κ.params.map fun n => Expr.fvar (FVarId.mk n)).toArray
+    -- here, we map through each candidate qualifier
+    -- for each `q`, we take the qualifier `q`
+    -- and create a β-reduced `Expr` body by applying combination of args
+    -- why? let's say qualifier has two params but 4 args are being passed
+    -- then, naturally some goes to waste and some need combination.
+    let bodies ← cands.mapM fun (q, slots) => do
+      let chosen : Array Expr := (slots.map fun i => paramFvars[i]!).toArray
+      Expr.instQualifier q chosen
+    -- after getting all β-reduced kappas we return the conjoined expression
+    -- overall the bodies
+    return (κ, conjoinExprs bodies)
+  -- Iterate flat clauses, weakening the head κ's candidate list
+  -- this is initial assignment of κ ↦ solutions
+  -- that gets mutated as the algorithm runs and performing weakening
+  let mut out := assignment
+  -- take one flat clause
+  for fc in flatCs do
+    -- return head κ if found inside the head of `∀`-chain inside `fc`
+    let some headKVar ← (findHeadKVar fc).run kctx | continue
+    -- find if there is an assignment for `headKVar` in the `assignment`
+    let some (_, candidates) := out.find? (·.1 == headKVar) | continue
+    -- now, iterate through the `κ` qualifiers from the candidates
+    let mut kept : List (Expr × List Nat) := []
+    for (q, slots) in candidates do
+      -- specialize clause with that κ and current solutions
+      -- note: below performs κ specialization for all the clauses
+      let vc ← (specializeClauseForHead headKVar q slots currentSols fc).run kctx
+      if ← checkExprVC vc then
+        kept := kept.concat (q, slots)
+    out := out.map fun (κ, qs) =>
+      if κ == headKVar then (κ, kept) else (κ, qs)
+
+  return out
