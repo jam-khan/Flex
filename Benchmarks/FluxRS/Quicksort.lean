@@ -39,9 +39,7 @@ noncomputable def is_frame (old new : Arr Int) (lo hi : Int) : Prop :=
 noncomputable def sort_is_perm (old new : Arr Int) (lo hi : Int) : Prop :=
   is_perm old new lo hi /\ is_frame old new lo hi
 
-def SortQuicksortRange :=
- ∃ k0 : (Arr Int) → Int → (Arr Int) → Int → Int → Int → Int → (Arr Int) → Int → (VectorsAVec Int) → Int → Int → Int → (VectorsAVec Int) → Prop,
- ∃ k1 : (Arr Int) → Int → (Arr Int) → Int → Int → Int → Int → (Arr Int) → Int → (Arr Int) → Int → (VectorsAVec Int) → Int → Int → Int → (VectorsAVec Int) → (VectorsAVec Int) → Prop,
+def SortQuicksortRange := ∃ k0 : (a0 : Int) -> (a1 : Int) -> (a2 : (VectorsAVec Int)) -> (a3 : Int) -> (a4 : (VectorsAVec Int)) -> (a5 : (Arr Int)) -> (a6 : Int) -> (a7 : (Arr Int)) -> (a8 : Int) -> (a9 : Int) -> (a10 : Int) -> (a11 : Int) -> (a12 : (Arr Int)) -> (a13 : Int) -> Prop, ∃ k1 : (a0 : Int) -> (a1 : Int) -> (a2 : (VectorsAVec Int)) -> (a3 : (VectorsAVec Int)) -> (a4 : Int) -> (a5 : (VectorsAVec Int)) -> (a6 : (Arr Int)) -> (a7 : Int) -> (a8 : (Arr Int)) -> (a9 : Int) -> (a10 : Int) -> (a11 : Int) -> (a12 : Int) -> (a13 : (Arr Int)) -> (a14 : Int) -> (a15 : (Arr Int)) -> (a16 : Int) -> Prop,
  ∀ (old₀ : (VectorsAVec Int)),
   ∀ (lo₀ : Int),
    ∀ (hi₀ : Int),
@@ -62,7 +60,7 @@ def SortQuicksortRange :=
              ((VectorsAVec.len v₀) ≥ 0) ->
               (p₀ ≥ 0) ->
                ((¬(lo₀ < p₀)) ->
-                ((k0 (VectorsAVec.elems v₀) (VectorsAVec.len v₀) (VectorsAVec.elems old₀) (VectorsAVec.len old₀) lo₀ hi₀ p₀ (VectorsAVec.elems v₀) (VectorsAVec.len v₀) old₀ lo₀ hi₀ p₀ v₀))) ∧
+                ((k0 lo₀ p₀ v₀ hi₀ old₀ (VectorsAVec.elems v₀) (VectorsAVec.len v₀) (VectorsAVec.elems old₀) (VectorsAVec.len old₀) lo₀ hi₀ p₀ (VectorsAVec.elems v₀) (VectorsAVec.len v₀)))) ∧
                ((lo₀ < p₀) ->
                 (((p₀ - 1) ≥ 0)) ∧
                 ((lo₀ < (VectorsAVec.len v₀))) ∧
@@ -70,22 +68,22 @@ def SortQuicksortRange :=
                 (∀ (v₁ : (VectorsAVec Int)),
                  (((VectorsAVec.len v₁) = (VectorsAVec.len v₀)) ∧ (sort_is_sorted_between (VectorsAVec.elems v₁) lo₀ ((p₀ - 1) + 1)) ∧ (sort_is_perm (VectorsAVec.elems v₀) (VectorsAVec.elems v₁) lo₀ (p₀ - 1))) ->
                   ((VectorsAVec.len v₁) ≥ 0) ->
-                   ((k0 (VectorsAVec.elems v₁) (VectorsAVec.len v₁) (VectorsAVec.elems old₀) (VectorsAVec.len old₀) lo₀ hi₀ p₀ (VectorsAVec.elems v₀) (VectorsAVec.len v₀) old₀ lo₀ hi₀ p₀ v₀)))
+                   ((k0 lo₀ p₀ v₀ hi₀ old₀ (VectorsAVec.elems v₁) (VectorsAVec.len v₁) (VectorsAVec.elems old₀) (VectorsAVec.len old₀) lo₀ hi₀ p₀ (VectorsAVec.elems v₀) (VectorsAVec.len v₀))))
                 ) ∧
                (∀ (a'₃ : (VectorsAVec Int)),
-                ((k0 (VectorsAVec.elems a'₃) (VectorsAVec.len a'₃) (VectorsAVec.elems old₀) (VectorsAVec.len old₀) lo₀ hi₀ p₀ (VectorsAVec.elems v₀) (VectorsAVec.len v₀) old₀ lo₀ hi₀ p₀ v₀)) ->
+                ((k0 lo₀ p₀ v₀ hi₀ old₀ (VectorsAVec.elems a'₃) (VectorsAVec.len a'₃) (VectorsAVec.elems old₀) (VectorsAVec.len old₀) lo₀ hi₀ p₀ (VectorsAVec.elems v₀) (VectorsAVec.len v₀))) ->
                  ((¬(p₀ < hi₀)) ->
-                  ((k1 (VectorsAVec.elems a'₃) (VectorsAVec.len a'₃) (VectorsAVec.elems old₀) (VectorsAVec.len old₀) lo₀ hi₀ p₀ (VectorsAVec.elems v₀) (VectorsAVec.len v₀) (VectorsAVec.elems a'₃) (VectorsAVec.len a'₃) old₀ lo₀ hi₀ p₀ v₀ a'₃))) ∧
+                  ((k1 p₀ hi₀ a'₃ v₀ lo₀ old₀ (VectorsAVec.elems a'₃) (VectorsAVec.len a'₃) (VectorsAVec.elems old₀) (VectorsAVec.len old₀) lo₀ hi₀ p₀ (VectorsAVec.elems v₀) (VectorsAVec.len v₀) (VectorsAVec.elems a'₃) (VectorsAVec.len a'₃)))) ∧
                  ((p₀ < hi₀) ->
                   (((p₀ + 1) < (VectorsAVec.len a'₃))) ∧
                   ((hi₀ < (VectorsAVec.len a'₃))) ∧
                   (∀ (v₂ : (VectorsAVec Int)),
                    (((VectorsAVec.len v₂) = (VectorsAVec.len a'₃)) ∧ (sort_is_sorted_between (VectorsAVec.elems v₂) (p₀ + 1) (hi₀ + 1)) ∧ (sort_is_perm (VectorsAVec.elems a'₃) (VectorsAVec.elems v₂) (p₀ + 1) hi₀)) ->
                     ((VectorsAVec.len v₂) ≥ 0) ->
-                     ((k1 (VectorsAVec.elems v₂) (VectorsAVec.len v₂) (VectorsAVec.elems old₀) (VectorsAVec.len old₀) lo₀ hi₀ p₀ (VectorsAVec.elems v₀) (VectorsAVec.len v₀) (VectorsAVec.elems a'₃) (VectorsAVec.len a'₃) old₀ lo₀ hi₀ p₀ v₀ a'₃)))
+                     ((k1 p₀ hi₀ a'₃ v₀ lo₀ old₀ (VectorsAVec.elems v₂) (VectorsAVec.len v₂) (VectorsAVec.elems old₀) (VectorsAVec.len old₀) lo₀ hi₀ p₀ (VectorsAVec.elems v₀) (VectorsAVec.len v₀) (VectorsAVec.elems a'₃) (VectorsAVec.len a'₃))))
                   ) ∧
                  (∀ (a'₅ : (VectorsAVec Int)),
-                  ((k1 (VectorsAVec.elems a'₅) (VectorsAVec.len a'₅) (VectorsAVec.elems old₀) (VectorsAVec.len old₀) lo₀ hi₀ p₀ (VectorsAVec.elems v₀) (VectorsAVec.len v₀) (VectorsAVec.elems a'₃) (VectorsAVec.len a'₃) old₀ lo₀ hi₀ p₀ v₀ a'₃)) ->
+                  ((k1 p₀ hi₀ a'₃ v₀ lo₀ old₀ (VectorsAVec.elems a'₅) (VectorsAVec.len a'₅) (VectorsAVec.elems old₀) (VectorsAVec.len old₀) lo₀ hi₀ p₀ (VectorsAVec.elems v₀) (VectorsAVec.len v₀) (VectorsAVec.elems a'₃) (VectorsAVec.len a'₃))) ->
                    (((VectorsAVec.len a'₅) = (VectorsAVec.len old₀))) ∧
                    ((sort_is_sorted_between (VectorsAVec.elems a'₅) lo₀ (hi₀ + 1))) ∧
                    ((sort_is_perm (VectorsAVec.elems old₀) (VectorsAVec.elems a'₅) lo₀ hi₀))
@@ -97,3 +95,4 @@ set_option maxHeartbeats 1600000 in
 
 theorem SortQuicksortRange_proof : SortQuicksortRange := by
   solve_fusion
+

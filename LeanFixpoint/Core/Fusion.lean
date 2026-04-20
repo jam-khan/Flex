@@ -208,6 +208,26 @@ partial def countScopeVars (κ : KVar) (e : Expr) : KM Nat := do
     else return 0
   else return 0
 
+/-- Collect ALL κ-applications in `e`, returning a list of their argument arrays.
+    Skips into inner binders without instantiating, so args may contain loose bvars.
+    The caller should filter for args matching intended free variables. -/
+partial def collectKAppArgs (κ : KVar) (e : Expr) : List (Array Expr) :=
+  let hit : List (Array Expr) :=
+    if e.getAppFn.isFVar && e.getAppFn.fvarId! == κ.fvarId then [e.getAppArgs]
+    else []
+  let rec childArgs (e : Expr) : List (Array Expr) :=
+    collectKAppArgs κ e
+  let childHits : List (Array Expr) :=
+    match e with
+    | .app f a       => childArgs f ++ childArgs a
+    | .forallE _ d b _ => childArgs d ++ childArgs b
+    | .lam _ d b _   => childArgs d ++ childArgs b
+    | .letE _ t v b _ => childArgs t ++ childArgs v ++ childArgs b
+    | .mdata _ e'    => childArgs e'
+    | .proj _ _ e'   => childArgs e'
+    | _              => []
+  hit ++ childHits
+
 /-- Compute solution with scope stripping.
     Opens scope `∀`-binders inside `withLocalDeclD`, computes `sol1` there,
     and replaces scope fvars with canonical κ-params before returning.
@@ -234,16 +254,62 @@ partial def computeSolStripped (κ : KVar) (e : Expr) (simplify : Bool)
     -- No forall at top level (e.g., And) → stop stripping
     finalizeSol κ e simplify scopeInfo
 where
+  /-- Given all κ-app arg arrays, locate which κ-arg position `scopeFV`
+      appears in bare. Prefer a position where it appears bare in EVERY
+      κ-app; if no such universal position exists, fall back to the
+      last bare occurrence across all calls. Returns `none` if the scope
+      fvar never appears as a bare argument. -/
+  resolveScopeParam (κ : KVar) (allArgs : List (Array Expr))
+      (scopeFV : Expr) : Option Name :=
+    -- Find positions where scopeFV appears bare in EACH κ-app (as a set).
+    let perCall : List (List Nat) :=
+      allArgs.map fun args =>
+        (List.range args.size).filter fun i => args[i]? == some scopeFV
+    -- Universal positions: present in every call.
+    let universal : List Nat :=
+      match perCall with
+      | [] => []
+      | first :: rest =>
+        first.filter fun i => rest.all (·.contains i)
+    let chosen : Option Nat :=
+      match universal with
+      | i :: _ => some i
+      | []     =>
+        -- No universal position: pick the last bare occurrence overall.
+        let all := perCall.flatten
+        all.foldl (fun acc i => some i) (none : Option Nat)
+    match chosen with
+    | some idx => κ.params[idx]?
+    | none     => none
   finalizeSol (κ : KVar) (e : Expr) (simplify : Bool)
       (scopeInfo : List (Expr × Name)) : KM (Expr × List Name) := do
     let sol ← exprSol1 κ e simplify
     let scopeNames := scopeInfo.map (·.2)
     if scopeInfo.isEmpty then return (sol, scopeNames)
+    -- Legacy fallback: last-N positional mapping, but only if type-compatible.
     let numRefParams := κ.params.length - scopeInfo.length
-    let scopeParamNames := κ.params.drop numRefParams
-    let sFixed := (scopeInfo.zip scopeParamNames).foldl
-      (fun acc ((scopeFV, _), paramName) =>
-        acc.replaceFVar scopeFV (.fvar (FVarId.mk paramName))) sol
+    let legacyParams := κ.params.drop numRefParams
+    let legacyTypes  := κ.paramTypes.drop numRefParams
+    -- Collect κ-apps once; reuse for all scope vars.
+    let allArgs := collectKAppArgs κ e
+    -- For each scope fvar: try to find its bare-arg position; fall back to
+    -- legacy-positional only if the types agree. Otherwise leave unsubstituted.
+    let resolved : List (Option Name) ←
+      (scopeInfo.zip (legacyParams.zip legacyTypes)).mapM
+        fun ((scopeFV, _), (legacy, legacyTy)) => do
+          match resolveScopeParam κ allArgs scopeFV with
+          | some p => pure (some p)
+          | none =>
+            let scopeTy ← inferType scopeFV
+            if ← isDefEq scopeTy legacyTy then
+              pure (some legacy)
+            else
+              pure none
+    let sFixed := (scopeInfo.zip resolved).foldl
+      (fun acc ((scopeFV, _), mParam) =>
+        match mParam with
+        | some paramName => acc.replaceFVar scopeFV (.fvar (FVarId.mk paramName))
+        | none           => acc) sol
     return (sFixed, scopeNames)
 
 /-- Compute solution for κ, deciding whether to use scope stripping or full `sol1`. -/

@@ -3,39 +3,17 @@ import LeanFixpoint
   Liquid Haskell test
   `https://github.com/ucsd-progsys/liquid-fixpoint/blob/develop/tests/horn/pos/abs02-re.smt2`
 
-  (constraint
-  (and
-    (and
-      (forall ((x Int) (true))
-        (forall ((VV Int) ((= VV 10)))
-          ((>= VV 0))))
-      (forall ((z Int) (true))
-        (and
-          (forall ((r Int) ((>= r 0)))
-            (forall ((v Int) ((and (= v r) (>= v 0))))
-              ((>= v 0))))
-          (forall ((_t1 Int) ((>= _t1 0)))
-            (forall ((v Int) ((>= v 0)))
-              ((>= v 0)))))))))
+  Ground constraint (no κ-vars):
+    ∀x. true ⇒ ∀VV. VV=10 ⇒ VV≥0
+  ∧ ∀z. true ⇒ ∀r. r≥0 ⇒ ∀v. v=r ∧ v≥0 ⇒ v≥0
+  ∧ ∀z. true ⇒ ∀t1. t1≥0 ⇒ ∀v. v≥0 ⇒ v≥0
 -/
 
-def lhGround : Constraint :=
-  c{  [∀ x : int . true ⇒
-        ∀ VV : int . VV == 10 ⇒ VV ≥ 0]
-    ∧ [∀ z : int . true ⇒
-        ∀ r : int . r ≥ 0 ⇒
-          ∀ v : int . v == r ∧ v ≥ 0 ⇒ v ≥ 0]
-    ∧ [∀ z : int . true ⇒
-        ∀ t1 : int . t1 ≥ 0 ⇒
-          ∀ v : int . v ≥ 0 ⇒ v ≥ 0] }
-
-#solve_constraint lhGround
-
 def lhGroundProp : Prop :=
-  (∀ x : Int, True →
+  (∀ _x : Int, True →
     ∀ VV : Int, VV = 10 →
       0 ≤ VV)
-  ∧ (∀ z : Int, True →
+  ∧ (∀ _z : Int, True →
       (∀ r : Int, 0 ≤ r →
         ∀ v : Int, v = r ∧ 0 ≤ v →
           0 ≤ v)

@@ -333,7 +333,7 @@ def ex_stress : Prop :=
           -- consumer
         ∧ (∀ s : Int, κ5 s x a b → 0 ≤ s)
 
--- set_option maxHeartbeats 400000 in
+-- set_option maxHeartbeats 1600000 in
 -- theorem ex_stressProof : ex_stress := by
 --   try solve_fusion
 
@@ -388,16 +388,16 @@ theorem ex_prodProof : ex_prod := by
   solve_fusion
 
 -- User-defined function in refinement
+@[simp]
 def double (x : Int) : Int := x + x
 
 def ex_userfn : Prop :=
   ∃ κ : Int → Int → Prop,
     ∀ x : Int,
       0 ≤ x →
-      (∀ ν : Int, ν = double x → κ ν x)
-    ∧ (∀ y : Int, κ y x → 0 ≤ y)
+      (∀ ν : Int, ν = double x → κ x ν)
+    ∧ (∀ y : Int, κ x y → 0 ≤ y)
 
 theorem ex_userfnProof : ex_userfn := by
   solve_fusion
-  unfold double
-  grind
+  

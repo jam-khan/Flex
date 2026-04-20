@@ -1,50 +1,57 @@
+import LeanFixpoint
 /-
-;; Tag 0: Ret at 26:5: 26:11
+  Liquid-fixpoint test — ANF form
+  https://github.com/ucsd-progsys/liquid-fixpoint/blob/develop/tests/horn/pos/arbitrary-kvar-arg-cyclic-anf.smt2
 
-(datatype (Adt0 0) ((mkadt0$0 ((fld00 int) (fld01 int)))))
-(qualif EqTrue ((a0 bool)) (a0))
-(qualif EqFalse ((a0 bool)) ((not a0)))
-(qualif EqZero ((a0 int)) ((= a0 0)))
-(qualif GtZero ((a0 int)) ((> a0 0)))
-(qualif GeZero ((a0 int)) ((>= a0 0)))
-(qualif LtZero ((a0 int)) ((< a0 0)))
-(qualif LeZero ((a0 int)) ((<= a0 0)))
-(qualif Eq ((a0 int) (a1 int)) ((= a0 a1)))
-(qualif Gt ((a0 int) (a1 int)) ((> a0 a1)))
-(qualif Ge ((a0 int) (a1 int)) ((>= a0 a1)))
-(qualif Lt ((a0 int) (a1 int)) ((< a0 a1)))
-(qualif Le ((a0 int) (a1 int)) ((<= a0 a1)))
-(qualif Le1 ((a0 int) (a1 int)) ((<= a0 (- a1 1))))
-(constant gt (func 1 (@(0) @(0) ) bool))
-(constant ge (func 1 (@(0) @(0) ) bool))
-(constant lt (func 1 (@(0) @(0) ) bool))
-(constant le (func 1 (@(0) @(0) ) bool))
-(var $k0 (int int int int int)) ;; orig: $k0
-(var $k1 (int int int int)) ;; orig: $k0
-(var $k2 (int int int)) ;; orig: $k0
+  Original SMT (cyclic):
+    (datatype (Adt0 0) ((mkadt0$0 ((fld00 int) (fld01 int)))))
+    (var $k0 (int int int int int))
+    (var $k1 (int int int int))
+    (var $k2 (int int int))
 
-(constraint
- (forall ((p0 (Adt0)) (true))
-  (forall ((p00 int) ((= p00 (fld00 p0))))
-   (forall ((p01 int) ((= p01 (fld01 p0))))
-    (and
-     (and
-      ($k0 0 p00 p01 p00 p01)
-      ($k1 p00 p01 p00 p01)
-      ($k2 p01 p00 p01))
-     (forall ((a0 int) (true))
-      (forall ((a1 (Adt0)) (true))
-       (forall ((a10 int) ((= a10 (fld00 a1))))
-        (forall ((a11 int) ((= a11 (fld01 a1))))
-         (forall ((_$ int) (and ($k0 a0 a10 a11 p00 p01) ($k1 a10 a11 p00 p01) ($k2 a11 p00 p01)))
-          (and
-           (forall ((_$ int) ((not (< a0 10))))
-            (tag ((= a10 p00)) "0"))
-           (forall ((_$ int) ((< a0 10)))
-            (forall  ((a0_plus int) ((= a0_plus (+ a0 1))))
-             (forall  ((a11_plus int) ((= a11_plus (+ a11 1))))
-              (and
-               ($k0 a0_plus a10 a11_plus p00 p01)
-               ($k1 a10 a11_plus p00 p01)
-               ($k2 a11_plus p00 p01))))))))))))))))
+    Seed: $k0 0 p00 p01 p00 p01 ∧ $k1 p00 p01 p00 p01 ∧ $k2 p01 p00 p01
+    Loop: $k0 a0 a10 a11 p00 p01 ∧ $k1 a10 a11 p00 p01 ∧ $k2 a11 p00 p01 ⇒
+          (¬(a0 < 10) ⇒ a10 = p00)                       -- exit assertion
+        ∧ (a0 < 10    ⇒ $k0 (a0+1) a10 (a11+1) p00 p01
+                       ∧ $k1 a10 (a11+1) p00 p01
+                       ∧ $k2 (a11+1) p00 p01)
+
+  Key invariant: (2nd arg) = (4th arg) for k0, (1st) = (3rd) for k1, so
+  when the exit condition fires we can conclude a10 = p00.
 -/
+
+structure Adt0 where
+  fld00 : Int
+  fld01 : Int
+
+@[qualif] def q_eq  (a b : Int) : Prop := a = b
+
+def arbitraryKvarArgCyclicAnf : Prop :=
+  ∃ k0 : Int → Int → Int → Int → Int → Prop,
+  ∃ k1 : Int → Int → Int → Int → Prop,
+  ∃ k2 : Int → Int → Int → Prop,
+    ∀ p0 : Adt0,
+    ∀ p00 : Int, p00 = p0.fld00 →
+    ∀ p01 : Int, p01 = p0.fld01 →
+      -- seed
+      (k0 0 p00 p01 p00 p01)
+    ∧ (k1 p00 p01 p00 p01)
+    ∧ (k2 p01 p00 p01)
+      -- body
+    ∧ (∀ a0 : Int,
+       ∀ a1 : Adt0,
+       ∀ a10 : Int, a10 = a1.fld00 →
+       ∀ a11 : Int, a11 = a1.fld01 →
+         k0 a0 a10 a11 p00 p01 ∧ k1 a10 a11 p00 p01 ∧ k2 a11 p00 p01 →
+           -- exit: a10 = p00
+           ((¬(a0 < 10)) → a10 = p00)
+         ∧ -- loop
+           ((a0 < 10) →
+              ∀ a0_plus : Int, a0_plus = a0 + 1 →
+              ∀ a11_plus : Int, a11_plus = a11 + 1 →
+                (k0 a0_plus a10 a11_plus p00 p01)
+              ∧ (k1 a10 a11_plus p00 p01)
+              ∧ (k2 a11_plus p00 p01)))
+
+theorem arbitraryKvarArgCyclicAnf_proof : arbitraryKvarArgCyclicAnf := by
+  solve_fixpoint
