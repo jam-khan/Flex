@@ -90,7 +90,7 @@ private def solveFusionImpl : TacticM Unit := withMainContext do
       -- Phase 1-4: Run inside peelExistentials CPS (MetaM) to keep fvars alive.
       -- Compute solutions and witness Exprs, return them for Phase 5.
       let emptyKvars : Std.HashMap FVarId KVar := {}
-      let witnesses : List Expr ← peelExistentials reduced emptyKvars fun kvarMap body => do
+      let witnesses : List Expr ← peelExistentials reduced emptyKvars [] fun kvarMap kvarsInOrder body => do
         let kctx : KContext := { kvars := kvarMap }
 
         -- Phase 2: Partition acyclic / cyclic (body Expr IS the constraint)
@@ -100,7 +100,7 @@ private def solveFusionImpl : TacticM Unit := withMainContext do
         IO.println s!"[solve_fusion] Acyclic κ-vars: {acyclic.map (fun (k : KVar) => k.name)}"
         IO.println s!"[solve_fusion] Cyclic κ-vars:  {_cyclic.map (fun (k : KVar) => k.name)}"
 
-        let mut solutions : List (Name × Expr × List Name × List Expr) := []
+        let mut solutions : List (KVar × Expr) := []
         let mut curr := body
         for κ in acyclic do
           IO.println s!"[solve_fusion] --- Eliminating κ = {κ.name} (params: {κ.params}) ---"
@@ -111,21 +111,23 @@ private def solveFusionImpl : TacticM Unit := withMainContext do
           let solFmt ← ppExpr sol
           IO.println s!"[solve_fusion]   sol1({κ.name}) = {solFmt}"
 
-          solutions := solutions ++ [(κ.name, sol, κ.params, κ.paramTypes)]
+          solutions := solutions ++ [(κ, sol)]
           curr ← (exprElim1 κ curr).run kctx
           IO.println s!"[solve_fusion]   elim1 done, constraint updated"
 
         IO.println s!"[solve_fusion] --- All solutions ---"
-        for (κName, sol, params, _) in solutions do
+        for (κ, sol) in solutions do
           let solFmt ← ppExpr sol
-          IO.println s!"[solve_fusion]   {κName}({params}) = {solFmt}"
+          IO.println s!"[solve_fusion]   {κ.name}({κ.params}) = {solFmt}"
 
         -- Build witness Exprs inside CPS (fvars alive for solToWitnessExpr)
         let mut witnessExprs : List Expr := []
-        for (κName, sol, params, paramTypes) in solutions do
-          let witness ← solToWitnessExpr sol params paramTypes
+        for κ in kvarsInOrder do
+          let some (κSolved, sol) := solutions.find? (fun (k, _) => k.fvarId == κ.fvarId)
+            | throwError "[solve_fusion] missing solution for κ {κ.name}"
+          let witness ← solToWitnessExpr sol κSolved.params κSolved.paramTypes
           let witFmt ← ppExpr witness
-          IO.println s!"[solve_fusion]   witness for {κName}: {witFmt}"
+          IO.println s!"[solve_fusion]   witness for {κSolved.name}: {witFmt}"
           witnessExprs := witnessExprs ++ [witness]
         return witnessExprs
 
