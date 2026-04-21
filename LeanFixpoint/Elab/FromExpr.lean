@@ -8,7 +8,8 @@ partial def peelExistentials {m : Type → Type} {α : Type}
     [Monad m] [MonadLiftT MetaM m] [MonadControlT MetaM m] [Inhabited (m α)]
     (e : Expr)
     (kvars : Std.HashMap FVarId KVar := {})
-    (k : Std.HashMap FVarId KVar → Expr → m α) :
+    (kvarsRev : List KVar := [])
+    (k : Std.HashMap FVarId KVar → List KVar → Expr → m α) :
     m α := do
   let e ← whnf e
   if e.isAppOfArity ``Exists 2 then
@@ -27,10 +28,14 @@ partial def peelExistentials {m : Type → Type} {α : Type}
         let kvar : KVar := {
           name, params := canonParams, paramTypes := pTypes, fvarId := fvar.fvarId!
         }
-        peelExistentials (body.instantiate1 fvar) (kvars.insert fvar.fvarId! kvar) k
-    | _ => k kvars e
+        peelExistentials
+          (body.instantiate1 fvar)
+          (kvars.insert fvar.fvarId! kvar)
+          (kvar :: kvarsRev)
+          k
+    | _ => k kvars kvarsRev.reverse e
   else
-    k kvars e
+    k kvars kvarsRev.reverse e
 where
   -- Collect arity and domain types from arrow type: Int → Int → Prop → (2, [Int, Int])
   collectArrowTypes (ty : Expr) : MetaM (Nat × List Expr) := do

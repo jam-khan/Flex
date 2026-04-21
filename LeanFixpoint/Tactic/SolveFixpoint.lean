@@ -89,7 +89,7 @@ private def solveFixpointImpl : TacticM Unit := withMainContext do
       let reduced  ← reduce goalType
 
       let emptyKvars : Std.HashMap FVarId KVar := {}
-      let witnesses : List Expr ← peelExistentials reduced emptyKvars fun kvarMap body => do
+      let witnesses : List Expr ← peelExistentials reduced emptyKvars [] fun kvarMap kvarsInOrder body => do
         let kctx : KContext := { kvars := kvarMap }
 
         -- Phase 2: Partition
@@ -98,14 +98,14 @@ private def solveFixpointImpl : TacticM Unit := withMainContext do
         IO.println s!"[solve_fixpoint] Cyclic κ-vars:  {cyclic.map (·.name)}"
 
         -- Phase 3: Fusion for acyclic
-        let mut solutions : List (Name × Expr × List Name × List Expr) := []
+        let mut solutions : List (KVar × Expr) := []
         let mut curr := body
         for κ in acyclic do
           IO.println s!"[solve_fixpoint] --- Fusion: {κ.name} (params: {κ.params}) ---"
           let (sol, _) ← (computeSol κ curr (simplify := true)).run kctx
           let solFmt ← ppExpr sol
           IO.println s!"[solve_fixpoint]   sol1({κ.name}) = {solFmt}"
-          solutions := solutions ++ [(κ.name, sol, κ.params, κ.paramTypes)]
+          solutions := solutions ++ [(κ, sol)]
           curr ← (exprElim1 κ curr).run kctx
 
         -- Phase 4: Predicate abstraction for cyclic (NEW vs solve_fusion)
@@ -117,19 +117,21 @@ private def solveFixpointImpl : TacticM Unit := withMainContext do
           for (κ, sol) in paSols do
             let solFmt ← ppExpr sol
             IO.println s!"[solve_fixpoint]   PA sol for {κ.name}: {solFmt}"
-            solutions := solutions ++ [(κ.name, sol, κ.params, κ.paramTypes)]
+            solutions := solutions ++ [(κ, sol)]
 
         IO.println s!"[solve_fixpoint] --- All solutions ---"
-        for (κName, sol, params, _) in solutions do
+        for (κ, sol) in solutions do
           let solFmt ← ppExpr sol
-          IO.println s!"[solve_fixpoint]   {κName}({params}) = {solFmt}"
+          IO.println s!"[solve_fixpoint]   {κ.name}({κ.params}) = {solFmt}"
 
-        -- Build witness Exprs
+        -- Build witness Exprs in existential binder order
         let mut witnessExprs : List Expr := []
-        for (κName, sol, params, paramTypes) in solutions do
-          let witness ← solToWitnessExpr sol params paramTypes
+        for κ in kvarsInOrder do
+          let some (κSolved, sol) := solutions.find? (fun (k, _) => k.fvarId == κ.fvarId)
+            | throwError "[solve_fixpoint] missing solution for κ {κ.name}"
+          let witness ← solToWitnessExpr sol κSolved.params κSolved.paramTypes
           let witFmt ← ppExpr witness
-          IO.println s!"[solve_fixpoint]   witness for {κName}: {witFmt}"
+          IO.println s!"[solve_fixpoint]   witness for {κSolved.name}: {witFmt}"
           witnessExprs := witnessExprs ++ [witness]
         return witnessExprs
 

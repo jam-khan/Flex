@@ -152,3 +152,19 @@ def pa6 : Prop :=
 set_option maxHeartbeats 1600000 in
 theorem pa6_proof : pa6 := by
   try solve_fixpoint
+
+-- PA7: Witness-order regression test.
+-- Declares cyclic κ before acyclic κ so existential order differs
+-- from solver's current acyclic-then-cyclic solution order.
+def pa7 : Prop :=
+  ∃ κinv  : Int → Int → Int → Prop,
+  ∃ κseed : Int → Int → Prop,
+    ∀ n : Int, 0 ≤ n →
+      (∀ ν : Int, ν = 0 → κseed ν n)
+    ∧ (∀ v : Int, κseed v n → κinv v n n)
+    ∧ (∀ i b : Int, κinv i b n → i < b →
+        ∀ ν : Int, ν = i + 1 → κinv ν b n)
+    ∧ (∀ i b : Int, κinv i b n → i ≥ b → 0 ≤ i)
+
+theorem pa7_proof : pa7 := by
+  solve_fixpoint
