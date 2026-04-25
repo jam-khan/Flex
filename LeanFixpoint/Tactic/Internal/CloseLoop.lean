@@ -8,6 +8,7 @@ import LeanFixpoint.Elab.FromExpr
 import LeanFixpoint.Monad
 import LeanFixpoint.Tactic.Internal.Utils
 import LeanFixpoint.Tactic.Closers
+import LeanFixpoint.Tactic.SplitHyps
 
 open Lean Elab Meta Tactic
 
@@ -56,13 +57,11 @@ private def tryDecomposeGoal : TacticM Bool := do
 
   Operates only on the main goal (not `any_goals`) or sub-goals
 -/
-private def tryDecomposeHypotheses : TacticM Bool :=
-  -- attemptTactic (evalTactic (←
-  --   `(tactic| repeat (first
-  --       | split_hyp_ands
-  --       | split_hyp_ors
-  --       | split_hyp_exists)))
-  pure true
+private def tryDecomposeHypotheses : TacticM Bool := do
+  attemptTactic (evalTactic (← `(tactic| first
+      | split_hyp_ands
+      | split_hyp_ors
+      | split_hyp_exists)))
 
 /--
   Walk the goal list, decomposing each goal further into sub-goals/leaf form.
@@ -111,35 +110,20 @@ partial def closeLoopWith (tryClose : TacticM Bool) : TacticM Unit := do
 def closeLoop : TacticM Unit :=
   closeLoopWith tryLeafClosers
 
--- private partial def closeLoop : TacticM Unit := do
---   let goals ← getGoals
---   match goals with
---   | [] => pure ()
---   | g :: restGoals =>
---     let ty ← whnfR (← g.getType)
---     if ty.isForall then
---       evalTactic (← `(tactic| intro _))
---       closeLoop
---     else if ty.isAppOfArity ``And 2 then
---       evalTactic (← `(tactic| and_intros))
---       closeLoop
---     else
---       let closers := #[
---         `(tactic| omega),
---         `(tactic| grind),
---         `(tactic| aesop),
---         `(tactic| (constructor <;> grind)),
---         `(tactic| (simp_all; grind))
---       ]
---       let mut closed := false
---       for c in closers do
---         if !closed then
---           let b ← attemptTactic (evalTactic (← c))
---           if b then closed := true
---       if closed then
---         closeLoop
---       else
---         setGoals restGoals
---         closeLoop
---         let remaining ← getGoals
---         setGoals (g :: remaining)
+section CloseLoopTests
+
+syntax "close_loop" : tactic
+
+elab_rules : tactic
+  | `(tactic| close_loop) => closeLoop
+
+example
+    (P Q : Nat → Prop) (f : Nat → Nat)
+    (hf : ∀ x, f x = x + 1)
+    (h₁ : ∃ a, P a ∧ ((a > 100 ∧ Q a) ∨ (a < 5 ∧ ¬ Q a)))
+    (a b : Nat) (hab : a + b ≤ 50) :
+    ∀ k, k = a + b → ∀ j, j = f k →
+    (k ≤ 50 ∧ j = k + 1) ∧ (k ≤ 50 ∧ j = k + 1) ∧ (k = 0 ↔ j = 1) := by
+  close_loop
+
+end CloseLoopTests

@@ -24,6 +24,7 @@ import LeanFixpoint.Tactic.Tactics
 import LeanFixpoint.Tactic.Internal.Utils
 import LeanFixpoint.Tactic.SolveFusion
 import LeanFixpoint.Tactic.Closers
+import LeanFixpoint.Tactic.SplitHyps
 
 /-
   Predicate Abstraction related code,
