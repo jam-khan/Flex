@@ -23,6 +23,7 @@ import LeanFixpoint.Tactic.SolveFixpoint
 import LeanFixpoint.Tactic.Tactics
 import LeanFixpoint.Tactic.Internal.Utils
 import LeanFixpoint.Tactic.SolveFusion
+import LeanFixpoint.Tactic.Closers
 
 /-
   Predicate Abstraction related code,
