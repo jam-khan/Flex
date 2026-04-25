@@ -21,7 +21,7 @@ private def runSpec
     (assignment : List (KVar × Expr) := [])
     : TermElabM Unit := do
   IO.println s!"\n===== {desc} ====="
-  peelExistentials stmt {} fun kvarMap body => do
+  peelExistentials (m := TermElabM) stmt {} [] fun kvarMap _kvarsRev body => do
     let kctx : KContext := { kvars := kvarMap }
     let kvars : List KVar := kvarMap.values
     match kvars with
@@ -44,52 +44,38 @@ run_cmd Lean.Elab.Command.liftTermElabM do
   let qGt ← mkConstWithLevelParams ``_wt_gt_one
   let qLe ← mkConstWithLevelParams ``_wt_le
 
-  ----------------------------------------------------------------------
   -- A: simplest — 1-arg κ, single clause with head-only κ-app
-  ----------------------------------------------------------------------
   let sA ← elabTerm (← `(∃ κ : Int → Prop, ∀ x : Int, κ x)) none
   runSpec "A  1-arg κ, head-only, q_gt_one at [0]" sA qGt [0]
   -- Expect: ∀ x : Int, x > 1
 
-  ----------------------------------------------------------------------
   -- B: 1-arg κ, hypothesis (non-κ) + head
-  ----------------------------------------------------------------------
   let sB ← elabTerm (← `(∃ κ : Int → Prop, ∀ x : Int, 0 ≤ x → κ x)) none
   runSpec "B  1-arg κ, (0 ≤ x) → κ x,   q_gt_one at [0]" sB qGt [0]
   -- Expect: ∀ x : Int, 0 ≤ x → x > 1
 
-  ----------------------------------------------------------------------
   -- C: 2-arg κ, q_le at [0, 1] — identity slot mapping
-  ----------------------------------------------------------------------
   let sC ← elabTerm (← `(∃ κ : Int → Int → Prop, ∀ a b : Int, κ a b)) none
   runSpec "C  2-arg κ, q_le at [0, 1]" sC qLe [0, 1]
   -- Expect: ∀ a b : Int, a ≤ b
 
-  ----------------------------------------------------------------------
   -- D: same clause, reversed slot mapping (b ≤ a) — tests slot perm
-  ----------------------------------------------------------------------
   runSpec "D  2-arg κ, q_le at [1, 0]  (slot reversal)" sC qLe [1, 0]
   -- Expect: ∀ a b : Int, b ≤ a
 
-  ----------------------------------------------------------------------
   -- E: 4-arg κ, 1-ary qualifier bound to middle slot — ghost args [0,1,3]
-  ----------------------------------------------------------------------
   let sE ← elabTerm (← `(∃ κ : Int → Int → Int → Int → Prop,
                            ∀ a b c d : Int, κ a b c d)) none
   runSpec "E  4-arg κ, q_gt_one at [2]  (ghost args 0,1,3)" sE qGt [2]
   -- Expect: ∀ a b c d : Int, c > 1
 
-  ----------------------------------------------------------------------
   -- F: 1-arg κ, chained foralls — verifies scoping preservation
-  ----------------------------------------------------------------------
   let sF ← elabTerm (← `(∃ κ : Int → Prop,
                            ∀ x : Int, 0 ≤ x → ∀ y : Int, y = x + 1 → κ y)) none
   runSpec "F  1-arg κ, chained ∀ and hyps, q_gt_one at [0]" sF qGt [0]
   -- Expect: ∀ x, 0 ≤ x → ∀ y, y = x + 1 → y > 1
 
-  ----------------------------------------------------------------------
   -- G: 2-arg κ, clause with TWO head κ-apps in conjunction
-  ----------------------------------------------------------------------
   let sG ← elabTerm (← `(∃ κ : Int → Int → Prop,
                            ∀ a b : Int, κ a b ∧ κ b a)) none
   runSpec "G  2-arg κ, conj (κ a b ∧ κ b a), q_le at [0, 1]" sG qLe [0, 1]
@@ -100,9 +86,7 @@ run_cmd Lean.Elab.Command.liftTermElabM do
   --  we project [b, a] and β-apply q_le → b ≤ a. Slot reversal happens
   --  *automatically* because the κ-app in the clause uses (b, a), not (a, b).)
 
-  ----------------------------------------------------------------------
   -- H: FibFibFast-shaped seed clause — 4-arg κ, constants as head args
-  ----------------------------------------------------------------------
   let sH ← elabTerm (← `(∃ κ : Int → Int → Int → Int → Prop,
                            ∀ n : Int, n ≥ 0 → κ 2 1 2 n)) none
   runSpec "H  FibFibFast seed shape, q_le at [0, 3]" sH qLe [0, 3]
@@ -122,7 +106,7 @@ run_cmd Lean.Elab.Command.liftTermElabM do
   -- checkExprVC rejects → weakenOnce drops the candidate → survivors: 0
   ----------------------------------------------------------------------
   let stmt1 ← elabTerm (← `(∃ κ : Int → Prop, ∀ x : Int, 0 ≤ x → κ x)) none
-  peelExistentials stmt1 {} fun kvarMap body => do
+  peelExistentials (m := TermElabM) stmt1 {} [] fun kvarMap _kvarsRev body => do
     let kctx : KContext := { kvars := kvarMap }
     match kvarMap.values with
     | [κ] =>
@@ -144,7 +128,7 @@ run_cmd Lean.Elab.Command.liftTermElabM do
   -- checkExprVC accepts → weakenOnce keeps the candidate → survivors: 1
   ----------------------------------------------------------------------
   let stmt2 ← elabTerm (← `(∃ κ : Int → Prop, ∀ x : Int, x = 2 → κ x)) none
-  peelExistentials stmt2 {} fun kvarMap body => do
+  peelExistentials (m := TermElabM) stmt2 {} [] fun kvarMap _kvarsRev body => do
     let kctx : KContext := { kvars := kvarMap }
     match kvarMap.values with
     | [κ] =>
@@ -166,7 +150,7 @@ run_cmd Lean.Elab.Command.liftTermElabM do
   --   (q_lt_zero, [0])  – expect DROP  (x = 2 does NOT ⇒ x < 0)
   ----------------------------------------------------------------------
   let qLt ← mkConstWithLevelParams ``_wt_lt_zero
-  peelExistentials stmt2 {} fun kvarMap body => do
+  peelExistentials (m := TermElabM) stmt2 {} [] fun kvarMap _kvarsRev body => do
     let kctx : KContext := { kvars := kvarMap }
     match kvarMap.values with
     | [κ] =>
@@ -185,7 +169,7 @@ run_cmd Lean.Elab.Command.liftTermElabM do
   -- Expected: after PA, κ's solution is a conjunction of the (few) qualifiers
   -- that hold for `x = 2`. Notably includes `x > 1`; excludes `x < 0`.
   let stmt ← elabTerm (← `(∃ κ : Int → Prop, ∀ x : Int, x = 2 → κ x)) none
-  peelExistentials stmt {} fun kvarMap body => do
+  peelExistentials (m := TermElabM) stmt {} [] fun kvarMap _kvarsRev body => do
     let kctx : KContext := { kvars := kvarMap }
     match kvarMap.values with
     | [κ] =>
