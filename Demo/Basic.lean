@@ -1,44 +1,15 @@
 import LeanFixpoint
 
 def ex1 : Prop :=
-  ∃ κ₁ : Int → Int → Prop,
+  ∃ κ : Int → Int → Prop,
     ∀ x : Int,
       0 ≤ x →
       (∀ ν : Int, ν = x - 1 → κ ν x)
     ∧ (∀ y : Int, κ y x →
         ∀ ν : Int, ν = y + 1 → 0 ≤ ν)
 
-/-
-State : Kappas
-
-elim1 : Prop -> Prop
-elim1 p@(∃ κ. c) =
-  put κ
-  κSol ← sol1 c
-  put κ ↦ κSol
-  -- 1. which meta-variable/free-variable belongs κ
-  exists κSol p -- substitutes κ all the way in p
-
-
-sol1 : Prop -> (Aᵢ -> ... -> Aₙ -> Prop)
-  κ = fun z₁ z₂ => ∃ ν, ν = z₂ - 1 ∧ z₁ = ν ∧ z₂ = z₂
-
-
--/
-
-
-
-
-
-
-
-
-
-
-
 theorem ex1Proof : ex1 := by
   solve_fusion
-  dsimp only
 
 
 def ex2 : Prop :=
@@ -131,29 +102,8 @@ def ex7 : Prop :=
     ∧ (∀ y : Int, κ y x →
         ∀ ν : Int, ν = y + 1 → 0 ≤ ν)
 
-/-
-Pass 1: Compute Solution
-Pass 2: Compute Proof
-
-κ :=
-    (∃ ν, ν = z1 + 1 ∧ z0 = ν ∧ z1 = z1)
-  ∨ (∃ ν, ν = z1 - 1 ∧ z0 = ν ∧ z1 = z1)
-
-.inl/.inr ⟨ ⟩
-data Proof =
-  | ChooseLeft
-  | ChooseRight
-  | UseHypothesis
-  | PickName Index/DeBruijn
-
-data Proof
-  | Left Proof
-  | Right Proof
-
--/
 theorem ex7Proof : ex7 := by
   solve_fusion
-  dsimp only
 
 -- ex8: Two Nat inputs, one intermediate binder
 -- ex8 (x y : Nat) = let a = dec x in a + 1 + y  ≥ 0
@@ -320,6 +270,72 @@ theorem ex14Proof : ex14 := by
   try solve_fusion
 
 
+
+-- Nat refinement: predecessor is less than input
+def ex_nat : Prop :=
+  ∃ κ : Nat → Nat → Prop,
+    ∀ n : Nat,
+      0 < n →
+      (∀ m : Nat, m = n - 1 → κ m n)
+    ∧ (∀ m : Nat, κ m n → m < n)
+
+theorem ex_natProof : ex_nat := by
+  solve_fusion
+
+-- Bool-sorted κ: tracking a boolean property
+def ex_bool : Prop :=
+  ∃ κ : Bool → Int → Prop,
+    ∀ x : Int,
+      0 < x →
+      (∀ b : Bool, b = decide (x > 0) → κ b x)
+    ∧ (∀ b : Bool, κ b x → b = true)
+
+theorem ex_boolProof : ex_bool := by
+  solve_fusion
+
+structure Point where
+  x : Int
+  y : Int
+
+def ex_pair : Prop :=
+  ∃ κ : Point → Prop,
+    ∀ a : Int,
+      ∀ b : Int,
+      0 ≤ a →
+        0 ≤ b →
+        (∀ p : Point, p = ⟨a, b⟩ → κ p)
+      ∧ (∀ p : Point, κ p → 0 ≤ p.x ∧ 0 ≤ p.y)
+
+theorem ex_pairProof : ex_pair := by
+  solve_fusion
+
+def ex_prod : Prop :=
+  ∃ κ : (Int × Int) → Prop,
+    ∀ a : Int,
+      0 ≤ a →
+      ∀ b : Int,
+        0 ≤ b →
+        (∀ p : Int × Int, p = (a, b) → κ p)
+      ∧ (∀ p : Int × Int, κ p → 0 ≤ p.1 ∧ 0 ≤ p.2)
+
+theorem ex_prodProof : ex_prod := by
+  solve_fusion
+
+-- User-defined function in refinement
+@[simp]
+def double (x : Int) : Int := x + x
+
+def ex_userfn : Prop :=
+  ∃ κ : Int → Int → Prop,
+    ∀ x : Int,
+      0 ≤ x →
+      (∀ ν : Int, ν = double x → κ x ν)
+    ∧ (∀ y : Int, κ x y → 0 ≤ y)
+
+theorem ex_userfnProof : ex_userfn := by
+  solve_fusion
+
+
 -- ex_stress: 5-κ extreme test — chain + diamond + 3-way merge + cross-flow + nested binders
 --
 -- Topology (10 conjuncts):
@@ -385,70 +401,4 @@ def ex_stress : Prop :=
 
 -- set_option maxHeartbeats 1600000 in
 -- theorem ex_stressProof : ex_stress := by
---   solve_fusion
---   elimT
-  -- sorry
-
--- -- Nat refinement: predecessor is less than input
--- def ex_nat : Prop :=
---   ∃ κ : Nat → Nat → Prop,
---     ∀ n : Nat,
---       0 < n →
---       (∀ m : Nat, m = n - 1 → κ m n)
---     ∧ (∀ m : Nat, κ m n → m < n)
-
--- theorem ex_natProof : ex_nat := by
---   solve_fusion
-
--- -- Bool-sorted κ: tracking a boolean property
--- def ex_bool : Prop :=
---   ∃ κ : Bool → Int → Prop,
---     ∀ x : Int,
---       0 < x →
---       (∀ b : Bool, b = decide (x > 0) → κ b x)
---     ∧ (∀ b : Bool, κ b x → b = true)
-
--- theorem ex_boolProof : ex_bool := by
---   solve_fusion
-
--- structure Point where
---   x : Int
---   y : Int
-
--- def ex_pair : Prop :=
---   ∃ κ : Point → Prop,
---     ∀ a : Int,
---       ∀ b : Int,
---       0 ≤ a →
---         0 ≤ b →
---         (∀ p : Point, p = ⟨a, b⟩ → κ p)
---       ∧ (∀ p : Point, κ p → 0 ≤ p.x ∧ 0 ≤ p.y)
-
--- theorem ex_pairProof : ex_pair := by
---   solve_fusion
-
--- def ex_prod : Prop :=
---   ∃ κ : (Int × Int) → Prop,
---     ∀ a : Int,
---       0 ≤ a →
---       ∀ b : Int,
---         0 ≤ b →
---         (∀ p : Int × Int, p = (a, b) → κ p)
---       ∧ (∀ p : Int × Int, κ p → 0 ≤ p.1 ∧ 0 ≤ p.2)
-
--- theorem ex_prodProof : ex_prod := by
---   solve_fusion
-
--- -- User-defined function in refinement
--- @[simp]
--- def double (x : Int) : Int := x + x
-
--- def ex_userfn : Prop :=
---   ∃ κ : Int → Int → Prop,
---     ∀ x : Int,
---       0 ≤ x →
---       (∀ ν : Int, ν = double x → κ x ν)
---     ∧ (∀ y : Int, κ x y → 0 ≤ y)
-
--- theorem ex_userfnProof : ex_userfn := by
 --   solve_fusion

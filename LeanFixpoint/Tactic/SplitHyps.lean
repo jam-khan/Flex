@@ -326,34 +326,21 @@ macro "split_hyps" : tactic =>
 
 section SplitHypsTests
 
--- Hard #1: a single deeply-nested mixed hypothesis (∃ → ∧ → ∨).
--- Forces the macro to: peel ∃, split ∧, then `cases` ∨ — in that order,
--- across passes. The goal flips the disjunction (Q ∨ R → R ∨ Q) so each
--- branch must actively use the *right* disjunct, not just any closer.
 example (P Q R : Nat → Prop) (h : ∃ x, P x ∧ (Q x ∨ R x)) :
     ∃ y, P y ∧ (R y ∨ Q y) := by
   split_hyps
-  -- Two goals, one per `∨` branch:
-  --   Goal 1 (inl): w : Nat, hP : P w, hQ : Q w
-  --   Goal 2 (inr): w : Nat, hP : P w, hR : R w
   · exact ⟨_, by assumption, .inr (by assumption)⟩
   · exact ⟨_, by assumption, .inl (by assumption)⟩
 
--- Hard #2: multiple top-level hypotheses with cross-cutting connectives.
--- `h₁` is ∨ of two ∃s, `h₂` is ∧. Tests that:
---   * split_hyp_ors fires *before* the inner ∃s are visible,
---   * split_hyp_exists then fires per ∨-branch,
---   * split_hyp_ands chops h₂ into two atoms regardless of branch,
---   * `any_goals` keeps the macro pumping in each branch independently.
--- Goal mixes a ∃ at the top, a ∨ inside, and an atomic carry-through (R).
 example (P Q : Nat → Prop) (R : Prop)
     (h₁ : (∃ x, P x) ∨ (∃ y, Q y)) (h₂ : R ∧ R) :
     ∃ z, (P z ∨ Q z) ∧ R := by
   split_hyps
-  -- Two goals:
-  --   Goal 1 (h₁ inl): w : Nat, hP : P w, hR₁ : R, hR₂ : R
-  --   Goal 2 (h₁ inr): w : Nat, hQ : Q w, hR₁ : R, hR₂ : R
   · exact ⟨_, .inl (by assumption), by assumption⟩
   · exact ⟨_, .inr (by assumption), by assumption⟩
+
+example (P Q R : Nat → Prop) (h : ∃ x, P x ∧ Q x ∧ R x) : True := by
+  split_hyp_and_exist
+  trivial
 
 end SplitHypsTests
