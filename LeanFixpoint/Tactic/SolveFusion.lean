@@ -7,7 +7,7 @@ import LeanFixpoint.Elab.ToExpr
 import LeanFixpoint.Elab.FromExpr
 import LeanFixpoint.Monad
 import LeanFixpoint.Tactic.Internal.Utils
-import LeanFixpoint.Tactic.Tactics
+import LeanFixpoint.Tactic.Zap
 import LeanFixpoint.Tactic.Internal.CloseLoop
 import LeanFixpoint.Tactic.SplitHyps
 
