@@ -21,7 +21,7 @@ import LeanFixpoint.Elab.FromExpr
 -/
 import LeanFixpoint.Tactic.SolveFixpoint
 import LeanFixpoint.Tactic.Tactics
-import LeanFixpoint.Tactic.Utils
+import LeanFixpoint.Tactic.Internal.Utils
 import LeanFixpoint.Tactic.SolveFusion
 
 /-

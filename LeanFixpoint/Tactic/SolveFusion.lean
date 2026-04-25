@@ -6,7 +6,7 @@ import LeanFixpoint.Core.Fusion
 import LeanFixpoint.Elab.ToExpr
 import LeanFixpoint.Elab.FromExpr
 import LeanFixpoint.Monad
-import LeanFixpoint.Tactic.Utils
+import LeanFixpoint.Tactic.Internal.Utils
 import LeanFixpoint.Tactic.Tactics
 
 open Lean Elab Meta Tactic

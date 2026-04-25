@@ -1,6 +1,6 @@
 import Lean
 import Aesop
-import LeanFixpoint.Tactic.Utils
+import LeanFixpoint.Tactic.Internal.Utils
 import LeanFixpoint.Tactic.Tactics
 
 open Lean Meta Elab Tactic
