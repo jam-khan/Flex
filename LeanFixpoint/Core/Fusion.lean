@@ -354,9 +354,31 @@ def exprIsCyclic (κ : KVar) (e : Expr) : KM Bool := do
   let deps ← exprDeps e
   return deps.any fun (k1, k2) => k1 == κ && k2 == κ
 
-/-- Split κ-vars into (acyclic, cyclic). -/
+/-- Topologically sort the acyclic κ-vars so dependency sinks come first.
+    If `(u, v) ∈ deps` (u in body where v in head), then u must be eliminated
+    before v so v's sol doesn't leak a free reference to u. -/
+partial def topoSortAcyclic (acyclic : List KVar) (deps : List (KVar × KVar)) :
+    List KVar :=
+  let rec go (remaining : List KVar) (acc : List KVar) : List KVar :=
+    match remaining with
+    | [] => acc.reverse
+    | _ =>
+      -- Pick κ with no predecessor in `remaining`: no `(κ', κ) ∈ deps`
+      -- such that κ' is still in `remaining` and κ' ≠ κ.
+      let ready? := remaining.find? fun κ =>
+        !deps.any fun (u, v) => v == κ && u != κ && remaining.contains u
+      match ready? with
+      | some κ => go (remaining.filter (· != κ)) (κ :: acc)
+      | none   => acc.reverse ++ remaining  -- cycle in "acyclic" (shouldn't happen)
+  go acyclic []
+
+/-- Split κ-vars into (acyclic, cyclic). The acyclic list is topologically
+    sorted so dependency sinks (no κ-deps) appear first — required so each
+    κ's sol is built only after its dependencies have been eliminated. -/
 def exprPartitionKVars (e : Expr) : KM (List KVar × List KVar) := do
   let allKs := (← exprKVarsOrdered e).eraseDups
   let cuts ← allKs.filterM (fun κ => exprIsCyclic κ e)
-  let acyclic ← allKs.filterM (fun κ => return !(← exprIsCyclic κ e))
+  let acyclicRaw ← allKs.filterM (fun κ => return !(← exprIsCyclic κ e))
+  let deps ← exprDeps e
+  let acyclic := topoSortAcyclic acyclicRaw deps
   return (acyclic, cuts)

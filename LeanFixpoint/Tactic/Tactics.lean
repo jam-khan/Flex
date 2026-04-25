@@ -72,7 +72,7 @@ private partial def trivialkCore : TacticM Unit := do
 elab "trivialk" : tactic => trivialkCore
 
 /-- Sequences `trivialk`, `simp`, and `zap`. -/
-macro "zapt" : tactic => `(tactic| (trivialk; simp; zap))
+macro "elimT" : tactic => `(tactic| (trivialk; simp; zap))
 
 open Lean Elab Tactic Meta in
 private partial def splitAndsAllCore : TacticM Unit := do

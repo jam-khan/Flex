@@ -7,11 +7,6 @@ def fib_spec_fib (n : Int) : Int :=
   else fib_spec_fib (n - 1) + fib_spec_fib (n - 2)
   termination_by n.toNat
 
-
--- @[simp]
--- def fib_fast_inv (i : Int) (prev : Int) (curr : Int) (n : Int) : Prop :=
---   i > 1 ∧ i ≤ n ∧ prev = fib_spec_fib (i - 1) ∧ curr = fib_spec_fib i
-
 def FibFibFast := ∃ k0 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> Prop,
  ∀ (n₀ : Int),
   (n₀ ≥ 0) ->
@@ -44,3 +39,6 @@ def q_eq_fib_pred (v i : Int) : Prop := v = fib_spec_fib (i - 1)
 
 theorem FibFibFast_proof : FibFibFast := by
   solve_fixpoint
+  
+  dsimp only
+  elimT

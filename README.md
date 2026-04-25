@@ -80,7 +80,6 @@ See the [`Demo/`](./Demo/Basic.lean) folder for more worked examples.
 | `LeanFixpoint.Elab.FromExpr` | Lean `Expr` → constraint AST |
 | `LeanFixpoint.Tactic.SolveFixpoint` | Main tactic for discharging VCs |
 | `LeanFixpoint.Tactic.Tactics` | Additional tactics |
-| `LeanFixpoint.Tactic.Command` | Meta-level commands |
 | `LeanFixpoint.Tactic.Grind` | Grind integration |
 | `LeanFixpoint.Solve.Solver` | Fixpoint solver |
 | `LeanFixpoint.Solve.Qualifier` | Qualifier / predicate AST |

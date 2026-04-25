@@ -19,7 +19,6 @@ import LeanFixpoint.Elab.FromExpr
   in MetaM. `SolveFusion` is the main tactic to discharge
   verification conditions.
 -/
-import LeanFixpoint.Tactic.Command
 import LeanFixpoint.Tactic.SolveFixpoint
 import LeanFixpoint.Tactic.Tactics
 import LeanFixpoint.Tactic.Utils

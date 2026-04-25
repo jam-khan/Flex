@@ -1,24 +1,38 @@
+import Mathlib.Data.Set.Basic
+import LeanFixpoint
 /-
-;; Tag 0: Ret at 57:1: 57:2 (ESpan { span: tests/tests/pos/enums/list01.rs:51:48: 51:79 (#0), base: None })
+  Liquid-fixpoint test — list append (as sets).
+  Source: Rust tests/pos/enums/list01.rs:51.
 
-(var $k0 ((Set_Set int) (Set_Set int) (Set_Set int))) ;; orig: $k0
-(var $k1 ((Set_Set int) (Set_Set int) (Set_Set int) int (Set_Set int))) ;; orig: $k1
+  2 acyclic κs:
+    $k0 (Set Set Set)             — "output = xs1 ∪ xs2"
+    $k1 (Set Set Set Int Set)     — "output = tail ∪ xs2"
 
-(constraint
- (forall ((xs1 (Set_Set int)) (true))
-  (forall ((xs2 (Set_Set int)) (true))
-   (and
-    (forall ((_$ int) ((= xs1 (Set_empty 0))))
-     ($k0 xs2 xs1 xs2))
-    (forall ((a0 int) (true))
-     (forall ((a1 (Set_Set int)) (true))
-      (forall ((_$ int) ((= xs1 (Set_cup (Set_sng a0) a1))))
-       (and
-        ($k1 (Set_cup a1 xs2) xs1 xs2 a0 a1)
-        (forall ((a2 (Set_Set int)) (true))
-         (forall ((_$ int) ($k1 a2 xs1 xs2 a0 a1))
-          ($k0 (Set_cup (Set_sng a0) a2) xs1 xs2)))))))
-    (forall ((a3 (Set_Set int)) (true))
-     (forall ((_$ int) ($k0 a3 xs1 xs2))
-      (tag ((= a3 (Set_cup xs1 xs2))) "0")))))))
+  Scope: ∀ xs1, xs2 : Set Int
+    • Empty case:  xs1 = ∅ ⇒ k0 xs2 xs1 xs2
+    • Cons case:   xs1 = {a0} ∪ a1 ⇒
+                     k1 (a1 ∪ xs2) xs1 xs2 a0 a1
+                   ∧ (∀ a2, k1 a2 xs1 xs2 a0 a1 ⇒ k0 ({a0} ∪ a2) xs1 xs2)
+    • Consumer:    ∀ a3, k0 a3 xs1 xs2 ⇒ a3 = xs1 ∪ xs2
+
+  No self-loops → ACYCLIC → `solve_fusion`.
 -/
+
+def lhListAppendSet : Prop :=
+  -- k1 has no κ-dependencies (sink); order it before k0 so existentials
+  -- match the solver's topological elimination order.
+  ∃ k1 : Set Int → Set Int → Set Int → Int → Set Int → Prop,
+  ∃ k0 : Set Int → Set Int → Set Int → Prop,
+    ∀ xs1 : Set Int, ∀ xs2 : Set Int,
+        (xs1 = (∅ : Set Int) → k0 xs2 xs1 xs2)
+      ∧ (∀ a0 : Int, ∀ a1 : Set Int,
+            xs1 = {a0} ∪ a1 →
+              k1 (a1 ∪ xs2) xs1 xs2 a0 a1
+            ∧ (∀ a2 : Set Int, k1 a2 xs1 xs2 a0 a1 → k0 ({a0} ∪ a2) xs1 xs2))
+      ∧ (∀ a3 : Set Int, k0 a3 xs1 xs2 → a3 = xs1 ∪ xs2)
+
+set_option maxHeartbeats 1600000 in
+theorem lhListAppendSetProof : lhListAppendSet := by
+  solve_fusion
+  dsimp only
+  elimT

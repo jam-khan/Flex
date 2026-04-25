@@ -20,4 +20,12 @@ where kappa occurs
     |  κ ∈ p  = sol1
 
 
+sol1 : Prop (Type) -> fun Prop/Type, I: ? -> Term/Proof)
+
+Prop in the head
+Here is the proof
+
+Type in the head
+Here is the term
+
 -/

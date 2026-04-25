@@ -20,11 +20,15 @@ import LeanFixpoint
   when the exit condition fires we can conclude a10 = p00.
 -/
 
+@[qualif] def q1  (a b : Int) : Prop := a = b
+@[qualif] def q2  (a b : Int) : Prop := a ≥ b
+@[qualif] def q3  (a b : Int) : Prop := a > b
+@[qualif] def q4  (a b : Int) : Prop := a ≤ b
+@[qualif] def q5  (a b : Int) : Prop := a != b
+
 structure Adt0 where
   fld00 : Int
   fld01 : Int
-
-@[qualif] def q_eq  (a b : Int) : Prop := a = b
 
 def arbitraryKvarArgCyclicAnf : Prop :=
   ∃ k0 : Int → Int → Int → Int → Int → Prop,

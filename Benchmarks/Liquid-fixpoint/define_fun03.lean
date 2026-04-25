@@ -1,11 +1,19 @@
+import LeanFixpoint
 /-
-(define_fun foo ((m (Map_t int int))) bool ((= 99 (Map_select m 0))))
-
-(constraint
- (forall ((moo (Map_t int int)) ((foo moo)))
-   (and
-     (tag ((= (Map_select moo 10) (Map_select moo (+ 1 9)))) "1")
-     (tag ((foo moo)) "0")
-   )
-  ))
+  Liquid-fixpoint test — ground constraint over an Int→Int map:
+    define_fun foo m := (m 0 = 99)
+    ∀ moo, foo moo →
+        (moo 10 = moo (1 + 9))      -- follows from `10 = 1 + 9`
+      ∧ foo moo                     -- trivially by hypothesis
 -/
+
+def foo (m : Int → Int) : Prop := m 0 = 99
+
+def lhMapProp : Prop :=
+  ∀ moo : Int → Int, foo moo →
+      moo 10 = moo (1 + 9)
+    ∧ foo moo
+
+theorem lhMapProof : lhMapProp := by
+  intro moo hfoo
+  exact ⟨rfl, hfoo⟩

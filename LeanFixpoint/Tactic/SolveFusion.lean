@@ -27,9 +27,9 @@ private partial def closeLoop : TacticM Unit := do
       closeLoop
     else
       let closers := #[
-        `(tactic| omega),
         `(tactic| grind),
-        `(tactic| aesop),
+        -- `(tactic| aesop),
+        `(tactic| omega),
         `(tactic| (constructor <;> grind)),
         `(tactic| (simp_all; grind))
       ]

@@ -1,56 +1,53 @@
+import Mathlib.Data.Set.Basic
+import LeanFixpoint
 /-
-;; Tag 0: Ret at 45:5: 45:6 (ESpan { span: tests/tests/pos/surface/restrictable_variants.rs:34:38: 34:39 (#0), base: None })
+  Liquid-fixpoint test — restrictable-variants dispatch (Rust enum over 6 cases).
+  Source: tests/pos/surface/restrictable_variants.rs:34.
 
-(datatype (Adt0 0) ((mkadt0$0 ()) (mkadt0$1 ()) (mkadt0$2 ()) (mkadt0$3 ()) (mkadt0$4 ()) (mkadt0$5 ())))
-(qualif EqTrue ((a0 bool)) (a0))
-(qualif EqFalse ((a0 bool)) ((not a0)))
-(qualif EqZero ((a0 int)) ((= a0 0)))
-(qualif GtZero ((a0 int)) ((> a0 0)))
-(qualif GeZero ((a0 int)) ((>= a0 0)))
-(qualif LtZero ((a0 int)) ((< a0 0)))
-(qualif LeZero ((a0 int)) ((<= a0 0)))
-(qualif Eq ((a0 int) (a1 int)) ((= a0 a1)))
-(qualif Gt ((a0 int) (a1 int)) ((> a0 a1)))
-(qualif Ge ((a0 int) (a1 int)) ((>= a0 a1)))
-(qualif Lt ((a0 int) (a1 int)) ((< a0 a1)))
-(qualif Le ((a0 int) (a1 int)) ((<= a0 a1)))
-(qualif Le1 ((a0 int) (a1 int)) ((<= a0 (- a1 1))))
-(constant gt (func 1 (@(0) @(0) ) bool))
-(constant ge (func 1 (@(0) @(0) ) bool))
-(constant lt (func 1 (@(0) @(0) ) bool))
-(constant le (func 1 (@(0) @(0) ) bool))
-(var $k0 ((Set_Set (Adt0)) (Set_Set (Adt0)))) ;; orig: $k0
-(var $k1 ((Set_Set (Adt0)) (Set_Set (Adt0)) (Set_Set (Adt0)))) ;; orig: $k1
+  2 acyclic κs:
+    $k0 (Set Set)              — "output = s"
+    $k1 (Set Set Set)          — "first_arg = s"
 
-(constraint
- (forall ((reftgen$s$0 (Set_Set (Adt0))) (true))
-  (and
-   (forall ((_$ int) ((= reftgen$s$0 (Set_cup (Set_empty 0) (Set_sng (mkadt0$0 ))))))
-    (forall ((a0 int) (true))
-     ($k0 (Set_cup (Set_empty 0) (Set_sng (mkadt0$0 ))) reftgen$s$0)))
-   (forall ((_$ int) ((= reftgen$s$0 (Set_cup (Set_empty 0) (Set_sng (mkadt0$1 ))))))
-    (forall ((a1 bool) (true))
-     ($k0 (Set_cup (Set_empty 0) (Set_sng (mkadt0$1 ))) reftgen$s$0)))
-   (forall ((a2 (Set_Set (Adt0))) (true))
-    (forall ((_$ int) ((= reftgen$s$0 (Set_cup a2 (Set_cup (Set_empty 0) (Set_sng (mkadt0$2 )))))))
-     ($k0 (Set_cup a2 (Set_cup (Set_empty 0) (Set_sng (mkadt0$2 )))) reftgen$s$0)))
-   (forall ((a3 (Set_Set (Adt0))) (true))
-    (forall ((a4 (Set_Set (Adt0))) (true))
-     (forall ((_$ int) ((= reftgen$s$0 (Set_cup (Set_cup a3 a4) (Set_cup (Set_empty 0) (Set_sng (mkadt0$3 )))))))
-      ($k0 (Set_cup (Set_cup a3 a4) (Set_cup (Set_empty 0) (Set_sng (mkadt0$3 )))) reftgen$s$0))))
-   (forall ((a5 (Set_Set (Adt0))) (true))
-    (forall ((a6 (Set_Set (Adt0))) (true))
-     (forall ((_$ int) ((= reftgen$s$0 (Set_cup (Set_cup a5 a6) (Set_cup (Set_empty 0) (Set_sng (mkadt0$4 )))))))
-      ($k0 (Set_cup (Set_cup a5 a6) (Set_cup (Set_empty 0) (Set_sng (mkadt0$4 )))) reftgen$s$0))))
-   (forall ((a7 (Set_Set (Adt0))) (true))
-    (forall ((a8 (Set_Set (Adt0))) (true))
-     (forall ((_$ int) ((= reftgen$s$0 (Set_cup (Set_cup a7 a8) (Set_cup (Set_empty 0) (Set_sng (mkadt0$5 )))))))
-      ($k0 (Set_cup (Set_cup a7 a8) (Set_cup (Set_empty 0) (Set_sng (mkadt0$5 )))) reftgen$s$0))))
-   (forall ((a9 (Set_Set (Adt0))) (true))
-    (forall ((_$ int) ($k0 a9 reftgen$s$0))
-     (and
-      ($k1 a9 reftgen$s$0 a9)
-      (forall ((a10 (Set_Set (Adt0))) (true))
-       (forall ((_$ int) ($k1 a10 reftgen$s$0 a9))
-        (tag ((= a10 reftgen$s$0)) "0")))))))))
+  Scope: ∀ s : Set Adt0
+    • 6 constructor-branch seeds (one per variant) populate k0 with values
+      that equal `s` (by the branch hypothesis).
+    • Consumer: ∀ a9, k0 a9 s ⇒ k1 a9 s a9 ∧ (∀ a10, k1 a10 s a9 ⇒ a10 = s).
+
+  Dep (k0, k1) — k0 in k1's body. Topo-sort: k0 first, k1 last.
 -/
+
+@[grind]
+inductive Adt0 : Type
+  | mk0 | mk1 | mk2 | mk3 | mk4 | mk5
+
+def fluxNoAnfDup : Prop :=
+  ∃ k0 : Set Adt0 → Set Adt0 → Prop,
+  ∃ k1 : Set Adt0 → Set Adt0 → Set Adt0 → Prop,
+    ∀ s : Set Adt0,
+        (s = ((∅ : Set Adt0) ∪ {Adt0.mk0}) →
+            k0 ((∅ : Set Adt0) ∪ {Adt0.mk0}) s)
+      ∧ (s = ((∅ : Set Adt0) ∪ {Adt0.mk1}) →
+            k0 ((∅ : Set Adt0) ∪ {Adt0.mk1}) s)
+      ∧ (∀ a2 : Set Adt0,
+            s = a2 ∪ ((∅ : Set Adt0) ∪ {Adt0.mk2}) →
+              k0 (a2 ∪ ((∅ : Set Adt0) ∪ {Adt0.mk2})) s)
+      ∧ (∀ a3 a4 : Set Adt0,
+            s = (a3 ∪ a4) ∪ ((∅ : Set Adt0) ∪ {Adt0.mk3}) →
+              k0 ((a3 ∪ a4) ∪ ((∅ : Set Adt0) ∪ {Adt0.mk3})) s)
+      ∧ (∀ a5 a6 : Set Adt0,
+            s = (a5 ∪ a6) ∪ ((∅ : Set Adt0) ∪ {Adt0.mk4}) →
+              k0 ((a5 ∪ a6) ∪ ((∅ : Set Adt0) ∪ {Adt0.mk4})) s)
+      ∧ (∀ a7 a8 : Set Adt0,
+            s = (a7 ∪ a8) ∪ ((∅ : Set Adt0) ∪ {Adt0.mk5}) →
+              k0 ((a7 ∪ a8) ∪ ((∅ : Set Adt0) ∪ {Adt0.mk5})) s)
+      ∧ (∀ a9 : Set Adt0, k0 a9 s →
+            k1 a9 s a9
+          ∧ (∀ a10 : Set Adt0, k1 a10 s a9 → a10 = s))
+
+-- to be fixed, some issue
+set_option maxHeartbeats 1600000 in
+theorem fluxNoAnfDup_proof : fluxNoAnfDup := by
+  solve_fixpoint
+  dsimp only
+  elimT
+  -- sorry

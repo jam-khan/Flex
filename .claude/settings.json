@@ -11,7 +11,8 @@
       "Bash(timeout 180 lake env lean Benchmarks/Liquid-fixpoint/bitvec-ii.lean)",
       "mcp__lean-lsp__lean_loogle",
       "mcp__lean-lsp__lean_local_search",
-      "mcp__lean-lsp__lean_leansearch"
+      "mcp__lean-lsp__lean_leansearch",
+      "Bash(lake env *)"
     ]
   }
 }
