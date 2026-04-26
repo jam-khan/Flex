@@ -65,22 +65,3 @@ def ex1 : Prop :=
 ```
 
 See the [`Demo/`](./Demo/Basic.lean) folder for more worked examples.
-
----
-
-## Module Overview
-
-| Module | Description |
-|---|---|
-| `LeanFixpoint.Core.Types` | Core AST for constraints |
-| `LeanFixpoint.Core.Macros` | Custom Lean macros |
-| `LeanFixpoint.Core.Pretty` | Pretty printing |
-| `LeanFixpoint.Core.Fusion` | Fusion algorithm |
-| `LeanFixpoint.Elab.ToExpr` | Elaboration → Lean `Expr` |
-| `LeanFixpoint.Elab.FromExpr` | Lean `Expr` → constraint AST |
-| `LeanFixpoint.Tactic.SolveFixpoint` | Main tactic for discharging VCs |
-| `LeanFixpoint.Tactic.Tactics` | Additional tactics |
-| `LeanFixpoint.Tactic.Grind` | Grind integration |
-| `LeanFixpoint.Solve.Solver` | Fixpoint solver |
-| `LeanFixpoint.Solve.Qualifier` | Qualifier / predicate AST |
-

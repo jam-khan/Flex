@@ -12,7 +12,8 @@
       "mcp__lean-lsp__lean_loogle",
       "mcp__lean-lsp__lean_local_search",
       "mcp__lean-lsp__lean_leansearch",
-      "Bash(lake env *)"
+      "Bash(lake env *)",
+      "mcp__lean-lsp__lean_build"
     ]
   }
 }

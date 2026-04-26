@@ -20,7 +20,8 @@ import LeanFixpoint.Elab.FromExpr
   verification conditions.
 -/
 import LeanFixpoint.Tactic.SolveFixpoint
-import LeanFixpoint.Tactic.Tactics
+import LeanFixpoint.Tactic.Hoist
+import LeanFixpoint.Tactic.Zap
 import LeanFixpoint.Tactic.Internal.Utils
 import LeanFixpoint.Tactic.SolveFusion
 import LeanFixpoint.Tactic.Closers
@@ -36,7 +37,6 @@ import LeanFixpoint.Solve.Instantiation
 import LeanFixpoint.Solve.Weaken
 import LeanFixpoint.Solve.Fixpoint
 
-
 /-
   Sound Verification Condition Generation
 -/
@@ -47,3 +47,11 @@ import LeanFixpoint.VCG.While.Semantics
   Utils
 -/
 import LeanFixpoint.Monad
+
+/-
+  Sound verified gen for λᵣ
+-/
+import LeanFixpoint.VCG.STLC.Syntax
+import LeanFixpoint.VCG.STLC.Entailment
+import LeanFixpoint.VCG.STLC.Typing
+import LeanFixpoint.VCG.STLC.VCGen
