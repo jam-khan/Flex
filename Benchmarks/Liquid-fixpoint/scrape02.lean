@@ -133,11 +133,5 @@ def scrape02 : Prop :=
 
 set_option maxHeartbeats 6400000 in
 theorem scrape02_proof : scrape02 := by
-  -- solve_fixpoint
-  -- With `q_eq_mode` in the qualifier bank, PA finds non-trivial invariants
-  -- (see trace), but the generated witnesses currently trigger a kernel
-  -- application-type-mismatch — the qualifier instantiator's slot/type
-  -- matching produces `f_get_mode reftgen reftgen` (BV32 in the Int slot)
-  -- somewhere during witness substitution. Tracked as a solver bug; closing
-  -- with sorry to keep the benchmark compiling.
+  try solve_fixpoint
   sorry
