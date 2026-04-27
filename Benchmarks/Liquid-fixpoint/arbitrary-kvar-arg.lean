@@ -43,4 +43,4 @@ def arbitraryKvarArg : Prop :=
            a10 = p00)
 
 theorem arbitraryKvarArg_proof : arbitraryKvarArg := by
-  solve_fusion
+  solve_fixpoint

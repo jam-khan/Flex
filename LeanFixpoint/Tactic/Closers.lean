@@ -18,6 +18,8 @@ macro_rules
     `(tactic| first
         | omega                   -- decidable arithmetic, instant fail/succeed
         | grind                   -- general decision procedure
+        | native_decide
+        | bv_decide
         | (simp_all; grind)       -- normalize first, then grind
         | (constructor <;> grind) -- commit to constructor (∃, ∨, structs)
         | aesop                   -- last resort: best-first search

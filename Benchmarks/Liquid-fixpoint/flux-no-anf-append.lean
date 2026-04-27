@@ -33,6 +33,4 @@ def lhListAppendSet : Prop :=
 
 set_option maxHeartbeats 1600000 in
 theorem lhListAppendSetProof : lhListAppendSet := by
-  solve_fusion
-  dsimp only
-  elimT
+  solve_fixpoint

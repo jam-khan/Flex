@@ -41,12 +41,18 @@ import LeanFixpoint
                                 ($k0 a6 a0 a1)
                                 ($k1 a5 a6 a0 a1)))))))))))))))))
 -/
-
-def qLe : Qualifier := q{ Le(a0 : int, a1 : int) | a0 ≤ a1 }
-def qDiff : Qualifier := q{ Diff(v : int, a : int, b : int) | v == a - b }
-
-def qualifiers : List Qualifier := [qLe, qDiff]
-
+@[qualif] def q_eq_zero (v : Int)   : Prop := v = 0
+@[qualif] def q_gt_zero (v : Int)   : Prop := 0 < v
+@[qualif] def q_ge_zero (v : Int)   : Prop := 0 ≤ v
+@[qualif] def q_lt_zero (v : Int)   : Prop := v < 0
+@[qualif] def q_le_zero (v : Int)   : Prop := v ≤ 0
+@[qualif] def q_eq      (a b : Int) : Prop := a = b
+@[qualif] def q_gt      (a b : Int) : Prop := a > b
+@[qualif] def q_ge      (a b : Int) : Prop := a ≥ b
+@[qualif] def q_lt      (a b : Int) : Prop := a < b
+@[qualif] def q_le      (a b : Int) : Prop := a ≤ b
+@[qualif] def q_le1     (a b : Int) : Prop := a ≤ b - 1
+@[qualif] def q_diff    (v a b : Int) : Prop := v = a - b
 
 def scrape01Prop : Prop :=
   ∃ κ0 : Int → Int → Int → Prop,
@@ -60,4 +66,4 @@ def scrape01Prop : Prop :=
               κ0 a6 a0 a1 ∧ κ1 a5 a6 a0 a1))
 
 theorem scrape01Proof : scrape01Prop := by
-  solve_fixpoint with qualifiers
+  solve_fixpoint

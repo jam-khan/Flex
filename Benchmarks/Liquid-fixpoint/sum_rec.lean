@@ -34,10 +34,17 @@ GOOD EXAMPLE FOR PREDICATE ABSTRACTION
 (constraint ...)
 -/
 
-def qBarSR : Qualifier := q{ Bar(v : int) | 0 ≤ v }
-def qBazSR : Qualifier := q{ Baz(v : int, a : int) | v ≥ a }
-
-def qualifiers : List Qualifier := [qBarSR, qBazSR]
+@[qualif] def q_eq_zero (v : Int)   : Prop := v = 0
+@[qualif] def q_gt_zero (v : Int)   : Prop := 0 < v
+@[qualif] def q_ge_zero (v : Int)   : Prop := 0 ≤ v
+@[qualif] def q_lt_zero (v : Int)   : Prop := v < 0
+@[qualif] def q_le_zero (v : Int)   : Prop := v ≤ 0
+@[qualif] def q_eq      (a b : Int) : Prop := a = b
+@[qualif] def q_gt      (a b : Int) : Prop := a > b
+@[qualif] def q_ge      (a b : Int) : Prop := a ≥ b
+@[qualif] def q_lt      (a b : Int) : Prop := a < b
+@[qualif] def q_le      (a b : Int) : Prop := a ≤ b
+@[qualif] def q_le1     (a b : Int) : Prop := a ≤ b - 1
 
 def sumRecProp : Prop :=
   ∃ κ1 : Int → Int → Prop,
@@ -50,5 +57,4 @@ def sumRecProp : Prop :=
     ∧ (∀ y : Int, ∀ r : Int, κ1 r y → 0 ≤ r)
 
 theorem sumRecProof : sumRecProp := by
-  solve_fixpoint with qualifiers
-  
+  solve_fixpoint

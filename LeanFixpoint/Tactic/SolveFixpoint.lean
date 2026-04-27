@@ -25,11 +25,20 @@ private def closeResidualGoals : TacticM Unit := do
     let goals ← getGoals
     if goals.isEmpty then pure ()
     else
-      let _ ← attemptTactic (evalTactic (←
-        `(tactic| all_goals (split_hyps; all_goals simp_all; all_goals grind))))
+      -- Try elimT before the heavier simp_all/grind fixpoint or closeLoop.
+      -- elimT (= trivialk; simp; zap) is bounded and handles the typical
+      -- post-fusion shape: trivial witnesses for leftover ∃-κ binders,
+      -- one simp pass, then ∀/∧ decomposition with grind at leaves.
+      let _ ← attemptTactic (evalTactic (← `(tactic| elimT)))
       let goals ← getGoals
       if goals.isEmpty then pure ()
-      else closeLoop
+      else
+        let _ ← attemptTactic (evalTactic (←
+          `(tactic| all_goals (split_hyps; all_goals simp_all; all_goals grind))))
+        let goals ← getGoals
+        if goals.isEmpty then pure ()
+        else closeLoop
+
 
 /-!
   ## `solve_fixpoint` tactic
@@ -101,17 +110,27 @@ private def solveFixpointImpl : TacticM Unit := withMainContext do
           let witness ← solToWitnessExpr sol κSolved.params κSolved.paramTypes
           let witFmt ← ppExpr witness
           IO.println s!"[solve_fixpoint]   witness for {κSolved.name}: {witFmt}"
+          -- DEBUG: dump the inferred type of the witness to detect a mismatch
+          -- between the lambda binders and the κ's expected param types.
+          let witTy ← inferType witness
+          let witTyFmt ← ppExpr witTy
+          IO.println s!"[solve_fixpoint]   witness type for {κSolved.name}: {witTyFmt}"
+          let ptFmts ← κSolved.paramTypes.mapM (fun e => do let f ← ppExpr e; return f.pretty)
+          IO.println s!"[solve_fixpoint]   κ.paramTypes for {κSolved.name}: {ptFmts}"
           witnessExprs := witnessExprs ++ [witness]
         return witnessExprs
 
       -- Phase 5: Apply witnesses
-      for witness in (witnesses : List Expr) do
+      for (witness, i) in (witnesses : List Expr).zipIdx do
         let goal ← getMainGoal
         let goalType ← goal.getType
         let goalType ← whnf goalType
         let α := goalType.getArg! 0
         let p := goalType.getArg! 1
         let obligation ← mkAppM' p #[witness]
+        IO.println s!"[debug Phase 5 #{i}] α = {← ppExpr α}"
+        IO.println s!"[debug Phase 5 #{i}] witness type = {← ppExpr (← inferType witness)}"
+        IO.println s!"[debug Phase 5 #{i}] obligation = {← ppExpr obligation}"
         let mvar ← mkFreshExprMVar (some obligation)
         let lvl := if α.isProp then levelZero else levelOne
         let proof := mkApp4 (mkConst ``Exists.intro [lvl]) α p witness mvar
@@ -124,7 +143,7 @@ private def solveFixpointImpl : TacticM Unit := withMainContext do
     )
 
   closeResidualGoals
-
+  
 syntax "solve_fixpoint" : tactic
 elab_rules : tactic
   | `(tactic| solve_fixpoint) => solveFixpointImpl

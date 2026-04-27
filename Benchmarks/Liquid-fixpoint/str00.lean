@@ -22,4 +22,4 @@ def scrape03Prop : Prop :=
   ∀ x : String, x = "cat" → ∀ y : String, y = "dog" → x = "cat" ∧ y = "dog"
 
 theorem scrape03Proof : scrape03Prop := by
-  solve_fusion
+  solve_fixpoint

@@ -12,4 +12,4 @@ def bitvec_ii_vc : Prop :=
         x.signExtend 64 = y.signExtend 64)
 
 theorem bitvec_ii_proof : bitvec_ii_vc := by
-  solve_fusion
+  solve_fixpoint

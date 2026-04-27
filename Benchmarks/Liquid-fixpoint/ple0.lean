@@ -19,4 +19,4 @@ def adderProp : Prop :=
   ∀ x : Int, x = 5 → ∀ y : Int, y = 6 → adder x y = 11
 
 theorem adderProof : adderProp := by
-  solve_fusion  -- unfolds adder, omega closes
+  solve_fixpoint  -- unfolds adder, omega closes

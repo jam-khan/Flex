@@ -1,9 +1,12 @@
-/-
-(datatype (MyData 1) ((mkdata ((field1 @(0))))))
+import LeanFixpoint
+import Mathlib.Data.Set.Basic
 
-(constraint
-  (forall ((x (MyData (Set_Set int))) ((Set_mem 0 (field1 x))))
-    ((Set_mem 0 (field1 x)))
-  )
-)
--/
+structure MyData (α : Type) where
+  mkdata :: field1 : α
+
+def issue701 : Prop :=
+  ∀ x : MyData (Set Int), 0 ∈ x.field1 → 0 ∈ x.field1
+
+theorem issue701_proof : issue701 := by
+  solve_fixpoint
+  

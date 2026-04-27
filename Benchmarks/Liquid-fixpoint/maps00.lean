@@ -1,4 +1,5 @@
 import Mathlib
+import LeanFixpoint
 /-
 (fixpoint "--eliminate=horn")
 

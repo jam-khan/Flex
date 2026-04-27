@@ -22,4 +22,4 @@ def lhGroundProp : Prop :=
             0 ≤ v))
 
 theorem lhGroundProof : lhGroundProp := by
-  solve_fusion
+  solve_fixpoint

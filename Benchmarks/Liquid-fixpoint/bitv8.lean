@@ -37,4 +37,4 @@ def bitv8_vc : Prop :=
               res_.toInt = 3)
 
 theorem bitv8_proof : bitv8_vc := by
-  solve_fusion
+  solve_fixpoint

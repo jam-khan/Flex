@@ -80,24 +80,39 @@ private def solveFusionImpl : TacticM Unit := withMainContext do
           let solFmt ← ppExpr sol
           IO.println s!"[solve_fusion]   sol1({κ.name}) = {solFmt}"
 
-          solutions := solutions ++ [(κ, sol)]
-          curr ← (exprElim1 κ curr).run kctx
-          IO.println s!"[solve_fusion]   elim1 done, constraint updated"
+          -- Cleanliness filter: only keep sols with NO κ-references.
+          -- A sol that references another κ (cyclic OR not-yet-eliminated acyclic)
+          -- can't be used as a closed witness Expr after CPS exit — using it
+          -- triggers `unknown free variable`. Skip such sols; that κ falls
+          -- through Phase 5's break logic and stays as a residual ∃-goal.
+          let solKVars ← (KM.exprKVars sol).run kctx
+          if solKVars.isEmpty then
+            solutions := solutions ++ [(κ, sol)]
+            curr ← (exprElim1 κ curr).run kctx
+            IO.println s!"[solve_fusion]   elim1 done, constraint updated"
+          else
+            IO.println s!"[solve_fusion]   {κ.name}: sol references {solKVars.map (·.name)} — skipping (would yield free-var)"
 
         IO.println s!"[solve_fusion] --- All solutions ---"
         for (κ, sol) in solutions do
           let solFmt ← ppExpr sol
           IO.println s!"[solve_fusion]   {κ.name}({κ.params}) = {solFmt}"
 
-        -- Build witness Exprs inside CPS (fvars alive for solToWitnessExpr)
+        -- Build witness Exprs inside CPS (fvars alive for solToWitnessExpr).
+        -- Walk kvarsInOrder; on first κ without a fusion solution (i.e. cyclic),
+        -- stop — Phase 5 will leave the remaining ∃-binders as a residual goal.
+        -- Convention: cyclic κ's must appear last in the source ∃-order.
         let mut witnessExprs : List Expr := []
         for κ in kvarsInOrder do
-          let some (κSolved, sol) := solutions.find? (fun (k, _) => k.fvarId == κ.fvarId)
-            | throwError "[solve_fusion] missing solution for κ {κ.name}"
-          let witness ← solToWitnessExpr sol κSolved.params κSolved.paramTypes
-          let witFmt ← ppExpr witness
-          IO.println s!"[solve_fusion]   witness for {κSolved.name}: {witFmt}"
-          witnessExprs := witnessExprs ++ [witness]
+          match solutions.find? (fun (k, _) => k.fvarId == κ.fvarId) with
+          | some (κSolved, sol) =>
+            let witness ← solToWitnessExpr sol κSolved.params κSolved.paramTypes
+            let witFmt ← ppExpr witness
+            IO.println s!"[solve_fusion]   witness for {κSolved.name}: {witFmt}"
+            witnessExprs := witnessExprs ++ [witness]
+          | none =>
+            IO.println s!"[solve_fusion]   {κ.name} has no fusion solution — leaving residual ∃-goal"
+            break
         return witnessExprs
 
       -- Phase 5: Apply witnesses directly as Exprs
@@ -151,7 +166,7 @@ private def solveFusionImpl : TacticM Unit := withMainContext do
       logInfo m!"[solve_fusion] → falling back to closeResidualGoals"
     )
 
-  closeResidualGoals
+  -- closeResidualGoals 
 
 syntax "solve_fusion" : tactic
 elab_rules : tactic

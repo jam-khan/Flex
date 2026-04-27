@@ -47,7 +47,4 @@ def fluxNoAnfDup : Prop :=
 -- to be fixed, some issue
 set_option maxHeartbeats 1600000 in
 theorem fluxNoAnfDup_proof : fluxNoAnfDup := by
-  solve_fixpoint
-  dsimp only
-  elimT
-  -- sorry
+  solve_fusion; dsimp only; elimT

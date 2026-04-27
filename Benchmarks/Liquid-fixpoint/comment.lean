@@ -20,16 +20,26 @@ import LeanFixpoint
   Required invariant: `a0 ≤ first_arg` on k4.
 -/
 
-@[qualif] def q_le (a b : Int) : Prop := a ≤ b
+@[qualif] def q_eq_zero (v : Int)   : Prop := v = 0
+@[qualif] def q_gt_zero (v : Int)   : Prop := 0 < v
+@[qualif] def q_ge_zero (v : Int)   : Prop := 0 ≤ v
+@[qualif] def q_lt_zero (v : Int)   : Prop := v < 0
+@[qualif] def q_le_zero (v : Int)   : Prop := v ≤ 0
+@[qualif] def q_eq      (a b : Int) : Prop := a = b
+@[qualif] def q_gt      (a b : Int) : Prop := a > b
+@[qualif] def q_ge      (a b : Int) : Prop := a ≥ b
+@[qualif] def q_lt      (a b : Int) : Prop := a < b
+@[qualif] def q_le      (a b : Int) : Prop := a ≤ b
+@[qualif] def q_le1     (a b : Int) : Prop := a ≤ b - 1
 
 def comment_vc : Prop :=
-  -- acyclic first
-  ∃ k0 : Int → Int → Int → Prop,
+  -- acyclic first (per corrected SCC: only k1, k2, k3 are acyclic)
   ∃ k1 : Int → Int → Prop,
   ∃ k2 : Int → Int → Int → Prop,
   ∃ k3 : Int → Int → Int → Prop,
+  -- cyclic last (k0, k4, k5 form one SCC via k0↔k4 and k4↔k5)
+  ∃ k0 : Int → Int → Int → Prop,
   ∃ k5 : Int → Int → Int → Prop,
-  -- cyclic last
   ∃ k4 : Int → Int → Int → Prop,
     ∀ a0 : Int,
     ∀ a1 : Int,
@@ -60,8 +70,15 @@ def comment_vc : Prop :=
                   ∀ a13 : Int, k3 a13 a0 a1 →
                     0 ≤ a11 - a0))
 
--- set_option maxHeartbeats 1600000 in
--- set_option maxRecDepth 2000 in
+set_option maxHeartbeats 1600000 in
+set_option maxRecDepth 2000 in
 theorem comment_proof : comment_vc := by
-  -- try solve_fixpoint
+  -- solve_fixpoint
+
+  -- dsimp only
+  solve_fusion
+  
+  dsimp only
+  -- solve_fusion
+
   sorry

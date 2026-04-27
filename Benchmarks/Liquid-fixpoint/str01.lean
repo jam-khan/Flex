@@ -32,8 +32,6 @@ Below requires addition of native_decide
 )
 -/
 
-
-
 def str01Prop : Prop :=
   -- strLen
   (∀ x : String, x = "cat" → ∀ y : String, y = "dogeral" →
@@ -52,6 +50,7 @@ def str01Prop : Prop :=
     ∀ z : String, z = "hotdog" → x ++ y = z)
 
 theorem str01Proof : str01Prop := by
-  solve_fusion
+  solve_fixpoint
+
   -- sorry
   -- solve_fusion

@@ -1,1 +1,0 @@
--- Macros for constraint construction (removed — fusion operates directly on Expr)

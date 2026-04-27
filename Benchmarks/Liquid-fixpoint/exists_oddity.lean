@@ -7,4 +7,4 @@ def existsOddityProp : Prop :=
     ∧ (∀ a2 : Int, True → ∀ _x : Int, a2 = 0 → κ0 a2)
 
 theorem existsOddityProof : existsOddityProp := by
-  solve_fusion
+  solve_fixpoint

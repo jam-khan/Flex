@@ -9,4 +9,4 @@ def constantProp : Prop :=
 
 
 theorem constantProof : constantProp := by
-  solve_fusion
+  solve_fixpoint

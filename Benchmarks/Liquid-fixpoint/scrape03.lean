@@ -34,11 +34,13 @@ import LeanFixpoint
 -- so all if-branches take the else path (set, not clear).
 
 -- Helper: extract single bit as Bool
+@[simp]
 def extractBit (v : BitVec 32) (pos : BitVec 32) : Bool :=
   ((v >>> pos.toNat) &&& 1) != 0
 
 -- The intermediate value computed by the nested lets/ifs
 -- (since mkadt0$1 ≠ mkadt0$0, all ifs take else branch)
+@[simp]
 def computeV (a1 : BitVec 32) : BitVec 32 :=
   let one : BitVec 32 := 1
   let step1 := a1 ||| (one <<< 0)          -- set bit 0
@@ -58,4 +60,4 @@ def scrape03 : Prop :=
 
 theorem scrape03_proof : scrape03 := by
   solve_fusion
-  all_goals (simp [computeV, extractBit]; bv_decide)
+  elimT; all_goals bv_decide

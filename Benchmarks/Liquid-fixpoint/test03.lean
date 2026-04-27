@@ -33,4 +33,4 @@ def sumRec3Prop : Prop :=
       ∧ (∀ z : Int, κ0 z → ∀ v : Int, v = x + z → v > 100)
 
 theorem sumRec3Proof : sumRec3Prop := by
-  solve_fusion
+  solve_fixpoint

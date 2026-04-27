@@ -35,5 +35,4 @@ def icfp17Ex3Prop : Prop :=
     ∧ (∀ v : Int, κc v → 0 ≤ v)
 
 theorem icfp17Ex3Proof : icfp17Ex3Prop := by
-  solve_fusion
-
+  solve_fixpoint
