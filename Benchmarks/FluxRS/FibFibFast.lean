@@ -39,6 +39,3 @@ def q_eq_fib_pred (v i : Int) : Prop := v = fib_spec_fib (i - 1)
 
 theorem FibFibFast_proof : FibFibFast := by
   solve_fixpoint
-  
-  dsimp only
-  elimT

@@ -102,9 +102,40 @@ def ex7 : Prop :=
     ∧ (∀ y : Int, κ y x →
         ∀ ν : Int, ν = y + 1 → 0 ≤ ν)
 
-theorem ex7Proof : ex7 := by
-  solve_fusion
+theorem prove_ex7_exact : ex7 := by
+  -- 1. Give a name to your witness using `let`
+  let k : Int → Int → Prop :=
+    fun z0 z1 => (∃ ν, ν = z1 + 1 ∧ z0 = ν ∧ z1 = z1) ∨ ∃ ν, ν = z1 - 1 ∧ z0 = ν ∧ z1 = z1
 
+  -- 2. Discharge the `∃` by passing our named variable `k`
+  -- use k
+  exists k
+
+  -- Now, everywhere in our goal, we literally just see `k` instead of the big formula!
+  intro x hx
+  constructor
+
+  -- GOAL 1
+  · intro v hv
+    -- The goal is `k v x`. We manually unfold `k` here!
+    unfold k
+    exact Or.inl ⟨v, hv, rfl, rfl⟩
+
+  · constructor
+    -- GOAL 2
+    · intro v hv
+      -- The goal is `k v x`. We manually unfold `k` here too!
+      unfold k
+      exact Or.inr ⟨v, hv, rfl, rfl⟩
+
+    -- GOAL 3
+    · intro y h_kappa v hv
+
+      -- Here, `h_kappa` is of type `k y x`.
+      -- We can manually unfold `k` INSIDE the hypothesis!
+      unfold k at h_kappa
+
+      grind
 -- ex8: Two Nat inputs, one intermediate binder
 -- ex8 (x y : Nat) = let a = dec x in a + 1 + y  ≥ 0
 -- κ = almost-nat; consumer uses both κ a and 0 ≤ y
