@@ -80,3 +80,18 @@ theorem comment_vc_iff : comment_vc ↔ comment_vc_reordered := by
     exact ⟨k0, k4, k5, k1, k2, k3, h⟩
   · rintro ⟨k0, k4, k5, k1, k2, k3, h⟩
     exact ⟨k1, k2, k3, k0, k5, k4, h⟩
+
+theorem baz :
+    ∃ k1 : Int -> Prop,
+    ∃ k2 : Int -> Prop,
+    ∀x,
+      (k1 x -> k2 x)
+     ∧ (k2 x -> x > 0) := by
+  apply Exists.imp (p := fun k1 => ∀x, k1 x -> x > 0)
+  · intro k1 x
+    exists (fun x => k1 x)
+    grind
+  · exists (fun x => x > 0)
+    intros
+    assumption
+  
