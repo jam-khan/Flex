@@ -81,6 +81,11 @@ theorem comment_vc_iff : comment_vc ↔ comment_vc_reordered := by
   · rintro ⟨k0, k4, k5, k1, k2, k3, h⟩
     exact ⟨k1, k2, k3, k0, k5, k4, h⟩
 
+theorem comment_vc_iff' : comment_vc := by
+  rw [comment_vc_iff]
+  
+  sorry
+
 theorem baz :
     ∃ k1 : Int -> Prop,
     ∃ k2 : Int -> Prop,
@@ -94,4 +99,3 @@ theorem baz :
   · exists (fun x => x > 0)
     intros
     assumption
-  

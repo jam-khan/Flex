@@ -98,7 +98,8 @@ elab_rules : tactic
       replaceMainGoal [goal]
 
 def ex6 : Prop :=
-  ∃ κ1 : Int → Int → Prop, ∃ κ2 : Int → Int → Prop,
+  ∃ κ1 : Int → Int → Prop,
+  ∃ κ2 : Int → Int → Prop,
     ∀ x : Int,
       0 ≤ x →
       (∀ ν : Int, ν = x + 1 → κ1 ν x)
@@ -111,7 +112,6 @@ theorem ex6Proof : ex6 := by
   unfold ex6
   name_witness fun z0 z1 => ∃ ν, ν = z1 + 1 ∧ z0 = ν
   name_witness fun z0 z1 => ∃ ν, ν = z1 - 1 ∧ z0 = ν
-  -- goal here still shows `κ1`, `κ2` — bodies are NOT unfolded
   lazy_unfold κ1
   lazy_unfold κ2
   sorry
