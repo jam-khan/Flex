@@ -33,3 +33,19 @@ def ex3Ty  : Ty  := Pos
 
 example : topVC [] ex3Exp ex3Ty := by
   simp [topVC, check, synth, implyBind, ex3Exp, ex3Ty, Pos, prim]
+
+/-! ## Declarative-side examples
+
+  Same programs as above, but stated as derivations of the new declarative
+  `Hastype` judgement. Each one routes through `topVC_decl_sound`,
+  reusing the `topVC` proof above. -/
+
+-- Identity (λ x. x) is declaratively typeable at x:Pos → Pos.
+example : Hastype [] ex2Exp ex2Ty := by
+  apply topVC_decl_sound
+  simp [topVC, check, synth, implyBind, ex2Exp, ex2Ty, Pos]
+
+-- let z = 5 in z is declaratively typeable at Pos.
+example : Hastype [] ex3Exp ex3Ty := by
+  apply topVC_decl_sound
+  simp [topVC, check, synth, implyBind, ex3Exp, ex3Ty, Pos, prim]

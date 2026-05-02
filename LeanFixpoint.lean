@@ -55,3 +55,4 @@ import LeanFixpoint.VCG.STLC.Syntax
 import LeanFixpoint.VCG.STLC.Entailment
 import LeanFixpoint.VCG.STLC.Typing
 import LeanFixpoint.VCG.STLC.VCGen
+import LeanFixpoint.VCG.STLC.Declarative

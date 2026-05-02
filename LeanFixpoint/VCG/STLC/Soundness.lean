@@ -1,4 +1,5 @@
 import LeanFixpoint.VCG.STLC.VCGen
+import LeanFixpoint.VCG.STLC.Declarative
 
 open STLC
 
@@ -297,4 +298,40 @@ mutual
           apply Check.sub
           · exact synth_sound _ _ _ _ hsy (fun ρ hΓ => (h ρ hΓ).1)
           · exact sub_sound _ _ _ _ hsub (fun ρ hΓ => (h ρ hΓ).2)
+
+  theorem synth_to_hastype {Γ : TEnv} {e : Exp} {t : Ty} :
+      Synth Γ e t → Hastype Γ e t := by
+    intro h
+    match h with
+    | .var hl       => exact .var hl
+    | .const        => exact .const
+    | .ann hck      => exact .ann (check_to_hastype hck)
+    | .app hsy hck  => exact .app (synth_to_hastype hsy) (check_to_hastype hck)
+
+  /-- Every bidirectional `Check` derivation gives a declarative `Hastype`. -/
+  theorem check_to_hastype {Γ : TEnv} {e : Exp} {t : Ty} :
+      Check Γ e t → Hastype Γ e t := by
+    intro h
+    match h with
+    | .sub hsy hsub   => exact .sub (synth_to_hastype hsy) hsub
+    | .lam hck        => exact .lam (check_to_hastype hck)
+    | .letin hsy hck  => exact .letin (synth_to_hastype hsy) (check_to_hastype hck)
+
 end
+
+theorem synth_decl_sound (Γ : TEnv) (e : Exp) (c : Constraint) (t : Ty) :
+    synth Γ e = some (c, t) → Entail Γ c → Hastype Γ e t :=
+  fun h hc => synth_to_hastype (synth_sound Γ e c t h hc)
+
+theorem check_decl_sound (Γ : TEnv) (e : Exp) (t : Ty) (c : Constraint) :
+    check Γ e t = some c → Entail Γ c → Hastype Γ e t :=
+  fun h hc => check_to_hastype (check_sound Γ e t c h hc)
+
+/-- End-to-end corollary: a valid top-level VC implies declarative typeability.
+    With `Γ = []`, `Entail [] c` reduces to `∀ ρ, c ρ` (Entail.emp). -/
+theorem topVC_decl_sound (e : Exp) (t : Ty) :
+    topVC [] e t → Hastype [] e t := by
+  unfold topVC
+  cases hck : check [] e t with
+  | none   => intro hf; exact hf.elim
+  | some c => intro h; exact check_decl_sound [] e t c hck (Entail.emp h)
