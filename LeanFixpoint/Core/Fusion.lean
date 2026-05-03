@@ -7,7 +7,7 @@ open Lean Meta
 -- Replace κ(arg₁, ..., argₙ) with sol[z₀ := arg₁, ..., zₙ := argₙ]
 def substKVarInExpr (κ : KVar) (sol : Expr) (e : Expr) : Expr :=
   e.replace fun sub =>
-    if sub.getAppFn.isFVar && sub.getAppFn.fvarId! == κ.fvarId then
+    if sub.getAppFn.isMVar && sub.getAppFn.mvarId! == κ.mvarId then
       let args := sub.getAppArgs
       let result := (κ.params.zip args.toList).foldl
         (fun acc (param, arg) => acc.replaceFVar (.fvar (FVarId.mk param)) arg) sol
@@ -125,7 +125,7 @@ where
             return inner
     else
       -- Leaf: check if κ-application
-      if e.getAppFn.isFVar && e.getAppFn.fvarId! == κ.fvarId then
+      if e.getAppFn.isMVar && e.getAppFn.mvarId! == κ.mvarId then
         let args := e.getAppArgs.toList
         let eqs := (κ.params.zip (args.zip κ.paramTypes)).map fun (pi, (ai, ty)) =>
           mkApp3 (mkConst ``Eq [levelOne]) ty (.fvar (FVarId.mk pi)) ai
@@ -153,7 +153,7 @@ partial def exprElimStar (κ : KVar) (sol : Expr) (e : Expr) : KM Expr := do
       pure (Expr.forallE e.bindingName! dom' abstr e.bindingInfo!)
   else
     -- Leaf (conclusion position)
-    if e.getAppFn.isFVar && e.getAppFn.fvarId! == κ.fvarId then
+    if e.getAppFn.isMVar && e.getAppFn.mvarId! == κ.mvarId then
       return mkConst ``True
     else
       return substKVarInExpr κ sol e
@@ -184,19 +184,19 @@ partial def countScopeVars (κ : KVar) (e : Expr) : KM Nat := do
     The caller should filter for args matching intended free variables. -/
 partial def collectKAppArgs (κ : KVar) (e : Expr) : List (Array Expr) :=
   let hit : List (Array Expr) :=
-    if e.getAppFn.isFVar && e.getAppFn.fvarId! == κ.fvarId then [e.getAppArgs]
+    if e.getAppFn.isMVar && e.getAppFn.mvarId! == κ.mvarId then [e.getAppArgs]
     else []
   let rec childArgs (e : Expr) : List (Array Expr) :=
     collectKAppArgs κ e
   let childHits : List (Array Expr) :=
     match e with
-    | .app f a       => childArgs f ++ childArgs a
+    | .app f a         => childArgs f ++ childArgs a
     | .forallE _ d b _ => childArgs d ++ childArgs b
-    | .lam _ d b _   => childArgs d ++ childArgs b
-    | .letE _ t v b _ => childArgs t ++ childArgs v ++ childArgs b
-    | .mdata _ e'    => childArgs e'
-    | .proj _ _ e'   => childArgs e'
-    | _              => []
+    | .lam _ d b _     => childArgs d ++ childArgs b
+    | .letE _ t v b _  => childArgs t ++ childArgs v ++ childArgs b
+    | .mdata _ e'      => childArgs e'
+    | .proj _ _ e'     => childArgs e'
+    | _                => []
   hit ++ childHits
 
 /-- Compute solution with scope stripping.
@@ -248,7 +248,7 @@ where
       | []     =>
         -- No universal position: pick the last bare occurrence overall.
         let all := perCall.flatten
-        all.foldl (fun acc i => some i) (none : Option Nat)
+        all.foldl (fun _acc i => some i) (none : Option Nat)
     match chosen with
     | some idx => κ.params[idx]?
     | none     => none
