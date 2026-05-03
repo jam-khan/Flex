@@ -2,6 +2,7 @@ import LeanFixpoint.Core.Types
 import LeanFixpoint.Monad
 import LeanFixpoint.Core.Utils
 import LeanFixpoint.Core.Fusion.Flatten
+import LeanFixpoint.Core.Fusion.Graph
 
 open Lean Meta
 
@@ -26,33 +27,6 @@ def substKVarInExpr (κ : KVar) (sol : Expr) (e : Expr) : Expr :=
   - `.conj c₁ c₂`    → `e.and? = some (l, r)`
   - `.imp x τ p fv c` → `e.isForall`
 -/
-
-/-- Dependencies for a single flat `Expr`.
-    Chases through `∀`-binders, collecting κ-vars in domains (body)
-    and in the innermost leaf (head). -/
-partial def exprFlatDeps (e : Expr) : KM (List (KVar × KVar)) := do
-  let rec go (e : Expr) (bodyKVars : List KVar) : KM (List (KVar × KVar)) := do
-    let e ← whnf e
-    if e.isForall then
-      let dom := e.bindingDomain!
-      let ks ← KM.exprKVars dom
-      withLocalDeclD e.bindingName! dom fun fvar =>
-        go (e.bindingBody!.instantiate1 fvar) (bodyKVars ++ ks)
-    else
-      let headKs ← KM.exprKVars e
-      return (bodyKVars.map (fun kb => headKs.map (fun kh => (kb, kh)))).flatten
-  go e []
-
-/-- Dependencies for an `Expr`: flatten then compute deps on each piece. -/
-def exprDeps (e : Expr) : KM (List (KVar × KVar)) := do
-  let flats ← exprFlat e
-  let deps ← flats.mapM exprFlatDeps
-  return deps.flatten
-
-/-- Dependencies excluding pairs that involve any κ in `khat`. -/
-def exprDepsExcluding (e : Expr) (khat : List KVar) : KM (List (KVar × KVar)) := do
-  let deps ← exprDeps e
-  return deps.filter fun (k1, k2) => !khat.contains k1 && !khat.contains k2
 
 /-- `scope(κ, e)` — extract the sub-expression relevant to κ (Fig. 9). -/
 partial def exprScope (κ : KVar) (e : Expr) : KM Expr := do
@@ -291,58 +265,7 @@ def exprElim (kvars : List KVar) (e : Expr) : KM Expr := do
     acc ← exprElim1 κ acc
   return acc
 
-/-- Collect κ-vars from an Expr in left-to-right depth-first order,
-    matching the traversal order of `Constraint.kvars`. -/
-partial def exprKVarsOrdered (e : Expr) : KM (List KVar) := do
-  let e ← whnf e
-  if let some (l, r) := e.and? then
-    return (← exprKVarsOrdered l) ++ (← exprKVarsOrdered r)
-  else if e.isForall then
-    let dom := e.bindingDomain!
-    let domKs ← KM.exprKVars dom
-    withLocalDeclD e.bindingName! dom fun fvar => do
-      let bodyKs ← exprKVarsOrdered (e.bindingBody!.instantiate1 fvar)
-      return domKs ++ bodyKs
-  else
-    KM.exprKVars e
 
-/-- κ-vars reachable from `start` via 1+ dep edges.
-    `deps` convention: `(u, v) ∈ deps` ⟺ u in body, v in head ⟹ edge u → v. -/
-private partial def reachableFrom
-    (start : KVar) (deps : List (KVar × KVar)) : List KVar :=
-  let succs (k : KVar) : List KVar :=
-    deps.filterMap fun (u, v) => if u == k then some v else none
-  let rec dfs (visited : List KVar) (frontier : List KVar) : List KVar :=
-    match frontier with
-    | []      => visited
-    | x :: xs =>
-      if visited.contains x then dfs visited xs
-      else dfs (x :: visited) (succs x ++ xs)
-  dfs [] (succs start)
-
-/-- κ is cyclic iff it lies on any directed cycle in the dep graph
-    (self-loop or longer cycle through other κ's). -/
-def exprIsCyclic (κ : KVar) (e : Expr) : KM Bool := do
-  let deps ← exprDeps e
-  return (reachableFrom κ deps).contains κ
-
-/-- Topologically sort the acyclic κ-vars so dependency sinks come first.
-    If `(u, v) ∈ deps` (u in body where v in head), then u must be eliminated
-    before v so v's sol doesn't leak a free reference to u. -/
-partial def topoSortAcyclic (acyclic : List KVar) (deps : List (KVar × KVar)) :
-    List KVar :=
-  let rec go (remaining : List KVar) (acc : List KVar) : List KVar :=
-    match remaining with
-    | [] => acc.reverse
-    | _ =>
-      -- Pick κ with no predecessor in `remaining`: no `(κ', κ) ∈ deps`
-      -- such that κ' is still in `remaining` and κ' ≠ κ.
-      let ready? := remaining.find? fun κ =>
-        !deps.any fun (u, v) => v == κ && u != κ && remaining.contains u
-      match ready? with
-      | some κ => go (remaining.filter (· != κ)) (κ :: acc)
-      | none   => acc.reverse ++ remaining  -- cycle in "acyclic" (shouldn't happen)
-  go acyclic []
 
 /-- Split κ-vars into (acyclic, cyclic). The acyclic list is topologically
     sorted so dependency sinks (no κ-deps) appear first — required so each
