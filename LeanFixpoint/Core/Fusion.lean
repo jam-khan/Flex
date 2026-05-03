@@ -1,6 +1,7 @@
 import LeanFixpoint.Core.Types
 import LeanFixpoint.Monad
 import LeanFixpoint.Core.Utils
+import LeanFixpoint.Core.Fusion.Flatten
 
 open Lean Meta
 
@@ -25,21 +26,6 @@ def substKVarInExpr (κ : KVar) (sol : Expr) (e : Expr) : Expr :=
   - `.conj c₁ c₂`    → `e.and? = some (l, r)`
   - `.imp x τ p fv c` → `e.isForall`
 -/
-
-/-- Flatten: split `And` at top level, distribute `∀` over `And`. -/
-partial def exprFlat (e : Expr) : KM (List Expr) := do
-  let e ← whnf e
-  if e.isConstOf ``True then return []
-  else if let some (l, r) := e.and? then
-    return (← exprFlat l) ++ (← exprFlat r)
-  else if e.isForall then
-    withLocalDeclD e.bindingName! e.bindingDomain! fun fvar => do
-      let flatBodies ← exprFlat (e.bindingBody!.instantiate1 fvar)
-      flatBodies.mapM fun fb => do
-        let abstr := fb.abstract #[fvar]
-        pure (Expr.forallE e.bindingName! e.bindingDomain! abstr e.bindingInfo!)
-  else
-    return [e]
 
 /-- Dependencies for a single flat `Expr`.
     Chases through `∀`-binders, collecting κ-vars in domains (body)

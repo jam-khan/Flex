@@ -6,6 +6,7 @@ import LeanFixpoint.Core.Types
 import LeanFixpoint.Core.Pretty
 import LeanFixpoint.Core.Fusion
 import LeanFixpoint.Core.Utils
+import LeanFixpoint.Core.Fusion.Flatten
 
 /-
   Elaboration helpers for peeling existentials
