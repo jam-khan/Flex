@@ -1,4 +1,5 @@
 import Lean
+import LeanFixpoint.Core.Fusion
 
 open Lean Meta Elab Tactic
 
@@ -74,3 +75,105 @@ elab "perm_exists" : tactic => withMainContext do
   else
     throwError "perm_exists: expected ↔ or → between ∃-chains, \
       got{indentExpr goalType}"
+
+/-! ## `rewriteKs` tactic
+
+  Reorders the head ∃-chain of the goal so that κ-vars appear in the
+  order `solve_fusion` expects: cyclic κ's first, then acyclic κ's in
+  `topoSortAcyclic` order. Uses `perm_exists` to discharge the
+  resulting `Iff`.
+-/
+
+/-- Peel ∃-binders, opening each with a fresh fvar. CPS so fvars stay
+    in scope while `k` runs. Returns `(name, type, fvar)` per binder. -/
+private partial def withPeeledExists (e : Expr)
+    (acc : Array (Name × Expr × Expr))
+    (k : Array (Name × Expr × Expr) → Expr → TacticM Unit) :
+    TacticM Unit := do
+  let e ← whnf e
+  if e.isAppOfArity ``Exists 2 then
+    let α    := e.getArg! 0
+    let pred := e.getArg! 1
+    if pred.isLambda then
+      withLocalDeclD pred.bindingName! α fun fvar =>
+        withPeeledExists (pred.bindingBody!.instantiate1 fvar)
+          (acc.push (pred.bindingName!, α, fvar)) k
+    else k acc e
+  else k acc e
+
+/-- Build `∃ x₀ : T₀, ∃ x₁ : T₁, …, body` by abstracting `fvar` out of
+    `body` for each binder, innermost first. -/
+private def mkExistsChain (binders : Array (Name × Expr × Expr))
+    (body : Expr) : MetaM Expr := do
+  let mut result := body
+  for i in (List.range binders.size).reverse do
+    let (_, _, fvar) := binders[i]!
+    let pred ← mkLambdaFVars #[fvar] result
+    result ← mkAppM ``Exists #[pred]
+  return result
+
+/-- Walk a curried function type `T₁ → T₂ → … → Tₙ → Sort` and return
+    the parameter types `[T₁, …, Tₙ]`. -/
+private partial def collectArrowTypes (ty : Expr) : MetaM (List Expr) := do
+  let ty ← whnf ty
+  if ty.isForall then
+    let dom := ty.bindingDomain!
+    let rest ← collectArrowTypes ty.bindingBody!
+    return dom :: rest
+  else return []
+
+/-- `rewriteKs` — reorder the head ∃-chain so cyclic κ's come first,
+    then acyclic κ's in topological-sort order (sinks first). -/
+elab "rewriteKs" : tactic => withMainContext do
+  let goal ← getMainGoal
+  let goalType ← goal.getType
+  withPeeledExists goalType #[] fun binders body => do
+    if binders.size == 0 then
+      throwError "rewriteKs: goal has no ∃-binders"
+
+    -- Bridge to KM: temp mvar per binder, substitute fvar → mvar in body
+    let mut kvars : Array KVar := #[]
+    let mut bodyWithMvars := body
+    for (name, ty, fvar) in binders do
+      let paramTypes ← collectArrowTypes ty
+      let params := (List.range paramTypes.length).map fun i =>
+        Name.mkSimple s!"z{i}"
+      let mvar ← mkFreshExprMVar (some ty) (kind := .syntheticOpaque)
+      kvars := kvars.push
+        { name, params, paramTypes, mvarId := mvar.mvarId! }
+      bodyWithMvars := bodyWithMvars.replaceFVar fvar mvar
+
+    -- Classify κ's into acyclic + cyclic
+    let kctxMap := kvars.foldl
+      (fun acc k => acc.insert k.mvarId k) (∅ : Std.HashMap MVarId KVar)
+    let kctx : KContext := { kvars := kctxMap }
+    let (acyclic, cyclic) ← (exprPartitionKVars bodyWithMvars).run kctx
+
+    -- Desired order: cyclic first, then acyclic (sinks first)
+    let desired : List KVar := cyclic ++ acyclic
+    let perm : Array Nat := desired.toArray.filterMap fun κ =>
+      (List.range kvars.size).find? fun i => kvars[i]!.mvarId == κ.mvarId
+
+    -- Identity check
+    let isIdentity := perm.size == kvars.size &&
+      (List.range kvars.size).all fun i => perm[i]? == some i
+    if isIdentity then
+      logInfo "rewriteKs: already in optimal order"
+      return
+
+    if perm.size != binders.size then
+      throwError "rewriteKs: failed to map all κ's into binder positions \
+        ({perm.size} of {binders.size})"
+
+    -- Build new goal type with reordered binders, same body
+    let newBinders := perm.map fun i => binders[i]!
+    let newType ← mkExistsChain newBinders body
+
+    -- Iff.mpr term-assignment + perm_exists discharge (Zap-style)
+    let iffType  ← mkAppM ``Iff #[goalType, newType]
+    let iffMVar  ← mkFreshExprMVar (some iffType) (kind := .syntheticOpaque)
+    let newGoalM ← mkFreshExprMVar (some newType) (kind := .syntheticOpaque)
+    goal.assign (← mkAppM ``Iff.mpr #[iffMVar, newGoalM])
+    setGoals [iffMVar.mvarId!, newGoalM.mvarId!]
+    evalTactic (← `(tactic| perm_exists))
+    setGoals [newGoalM.mvarId!]

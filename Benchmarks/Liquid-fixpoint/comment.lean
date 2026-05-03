@@ -71,21 +71,28 @@ def comment_vc_reordered : Prop :=
                   ∀ a13 : Int, k3 a13 a0 a1 →
                     0 ≤ a11 - a0))
 
+theorem test : comment_vc := by
+  unfold comment_vc
+  rewriteKs
+  sorry
+
 -- Equivalence proof: just destructure and reconstruct in the new order.
 theorem comment_vc_iff : comment_vc ↔ comment_vc_reordered := by
   unfold comment_vc comment_vc_reordered
   perm_exists
 
 theorem baz :
-    ∃ k1 : Int -> Prop,
     ∃ k2 : Int -> Prop,
+    ∃ k1 : Int -> Prop,
     ∀x,
       (k1 x -> k2 x)
      ∧ (k2 x -> x > 0) := by
-  apply Exists.imp (p := fun k1 => ∀x, k1 x -> x > 0)
-  · intro k1 x
-    exists (fun x => k1 x)
-    grind
-  · exists (fun x => x > 0)
-    intros
-    assumption
+  rewriteKs
+  sorry
+  -- apply Exists.imp (p := fun k1 => ∀x, k1 x -> x > 0)
+  -- · intro k1 x
+  --   exists (fun x => k1 x)
+  --   grind
+  -- · exists (fun x => x > 0)
+  --   intros
+  --   assumption
