@@ -1,5 +1,7 @@
 import LeanFixpoint.VCG.STLC.VCGen
-import LeanFixpoint.Tactic.SolveFusion
+import LeanFixpoint.Tactic.SolveFixpoint
+import LeanFixpoint.VCG.STLC.Soundness
+import LeanFixpoint.Tactic.Hoist
 
 open STLC
 
@@ -30,6 +32,63 @@ example : topVC [] ex2Exp ex2Ty := by
 
 def ex3Exp : Exp := .letin "z" (.const 5) (.var "z")
 def ex3Ty  : Ty  := Pos
+
+def int_k (k : Int → Prop)  : Ty := .refine .int ⟨fun _ ν => k ν⟩
+
+def exId : Exp := .lam "x" (.var "x")
+def ty_k (k1 : Int → Prop) : Ty := Ty.arrow "x" (int_k k1) (int_k k1)
+
+
+example : ∃ k, Check [] (.letin "z" (.const 99) (.app (.ann exId (ty_k k)) (.var "z"))) Pos := by
+  under_exists =>
+    apply check_sound
+    simp [exId, Pos, ty_k, int_k, check, synth]
+    repeat (first | unfold check | unfold synth)
+    simp ; rfl
+  solve_fixpoint
+
+-- example : ∃ k, topVC [] (.app (.ann exId (ty_k k)) (.const 99)) Pos := by
+--   refine ⟨?_, ?_⟩
+--   rotate_left 1
+--   unfold topVC check
+--   simp [topVC, check, synth, implyBind, exId, Pos, ty_k, int_k]
+
+-- Check [] (.app (.ann exId (ty_k k)) (.const 99)) Pos := by
+--   refine ⟨?_, ?_⟩
+--   rotate_left 1
+--   apply check_sound
+--   ·
+
+-- IntR x k := .refine .int (fun r v => k (r x) v)
+
+-- ty_k x k := .arrow x IntT (IntR x k)
+
+def IntR (x : String) (k : Int → Int → Prop) : Ty := .refine .int ⟨fun ρ v => k (ρ x) v⟩
+def ty_xk (x : String) (k : Int → Int → Prop) : Ty := .arrow "x" TT (IntR x k)
+
+example : ∃ k, Check [] (.letin "z" (.const 99) (.app (.ann exId (ty_xk "x" k)) (.var "z"))) (.refine .int ⟨fun _ v => v = 99⟩) := by
+  refine ⟨?_, ?_⟩
+  rotate_left 1
+  · apply check_sound
+    · simp [exId, ty_xk, IntR]
+      unfold check synth
+      simp
+      unfold check synth synth check
+      simp
+      unfold check synth sub
+      simp [TT]
+      rfl
+    · apply Entail.emp
+      intro ρ
+      simp [TT]
+      sorry
+  · sorry
+
+example : ∃ k : Int → Int → Prop, (∀ (v : Int) (v_1 : Int), k v v_1) ∧ ∀ (v : Int), k 99 v → v = 99 := by
+  solve_fixpoint
+
+example : ∃ k : Int → Prop,  k 99 ∧ ∀ (v : Int), k v → 0 < v := by
+  solve_fixpoint
 
 example : topVC [] ex3Exp ex3Ty := by
   simp [topVC, check, synth, implyBind, ex3Exp, ex3Ty, Pos, prim]

@@ -162,3 +162,62 @@ elab "hoist_exists" : tactic => do
   let renamed ← renameTopExistsThenForalls targetAfter exNames forallNames
   let newGoal ← g'.replaceTargetDefEq renamed
   replaceMainGoal [newGoal]
+
+-- `under_exists => tacs`
+-- Runs `tacs` with the existential witness replaced by a fresh metavar.
+-- If all subgoals are solved, the witness is determined and we're done.
+-- If subgoals remain, they are combined with ∧, abstracted over the witness,
+-- and re-wrapped as a single `∃ k, G1(k) ∧ ... ∧ Gn(k)` goal.
+syntax (name := underExists) "under_exists" "=>" tacticSeq : tactic
+
+open Lean Meta Elab Tactic in
+@[tactic underExists] def evalUnderExists : Tactic := fun stx => do
+  let tacs := stx[2]
+  let g ← getMainGoal
+  let target ← whnfR (← g.getType)
+  unless target.isAppOfArity ``Exists 2 do
+    throwError "under_exists: goal must be an existential (∃ ...)"
+  let α     := target.appFn!.appArg!
+  let p     := target.appArg!
+  let bName := p.bindingName!
+  -- Fresh metavar for the witness; instantiate the body with it
+  let witMVar  ← mkFreshExprMVar α (kind := .natural) (userName := bName)
+  let body     := p.beta #[witMVar]
+  -- Fresh metavar for the body proof; close original goal via Exists.intro
+  let bodyMVar ← mkFreshExprMVar body (kind := .natural)
+  g.assign (← mkAppOptM ``Exists.intro #[α, p, witMVar, bodyMVar])
+  -- Run user tactics on the body goal
+  setGoals [bodyMVar.mvarId!]
+  evalTactic tacs
+  let remaining ← getGoals
+  if remaining.isEmpty then return
+  -- If the witness was already determined, just expose remaining goals
+  let witExpr ← instantiateMVars witMVar
+  if !witExpr.isMVar then
+    setGoals remaining
+    return
+  -- Witness still undetermined: collect goal types and build a conjunction
+  let types ← remaining.mapM fun goal => do instantiateMVars (← goal.getType)
+  let conjType ← match types with
+    | []  => throwError "under_exists: impossible empty remaining"
+    | [t] => pure t
+    | _   => types.dropLast.foldrM (fun t acc => mkAppM ``And #[t, acc]) types.getLast!
+  -- Abstract the witness metavar to form the ∃ predicate
+  let predBody  ← kabstract conjType witMVar (occs := .all)
+  let pred       := mkLambda bName .default α predBody
+  let newTarget ← mkAppM ``Exists #[pred]
+  -- Create the new wrapped goal in the context of the first remaining goal
+  let decl      ← remaining.head!.getDecl
+  let newGoalMVar ← mkFreshExprMVarAt decl.lctx decl.localInstances newTarget
+  -- Use Classical.choose to extract witness and proof from the new goal
+  let chosen     ← mkAppOptM ``Classical.choose      #[α, pred, newGoalMVar]
+  let chosenSpec ← mkAppOptM ``Classical.choose_spec #[α, pred, newGoalMVar]
+  -- Assign the witness metavar so all remaining goals become concrete
+  witMVar.mvarId!.assign chosen
+  -- Distribute the conjunction proof back into the individual remaining goals
+  let mut proof := chosenSpec
+  for i in [: remaining.length - 1] do
+    remaining[i]!.assign (← mkAppM ``And.left #[proof])
+    proof ← mkAppM ``And.right #[proof]
+  remaining.getLast!.assign proof
+  setGoals [newGoalMVar.mvarId!]
