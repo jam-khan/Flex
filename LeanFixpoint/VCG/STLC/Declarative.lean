@@ -13,7 +13,7 @@ inductive Hastype : TEnv → Exp → Ty → Prop where
   -- TVar `Γ(x) = t ⇒ Γ ⊢ x : t`
   | var {Γ x t} :
       Γ.lookup x = some t →
-      Hastype Γ (.var x) t
+      Hastype Γ (.var x) (self x t)
   -- TCon `integer literal`
   | const {Γ n} :
       Hastype Γ (.const n) (prim n)

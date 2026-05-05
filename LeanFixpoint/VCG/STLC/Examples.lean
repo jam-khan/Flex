@@ -39,12 +39,17 @@ def exId : Exp := .lam "x" (.var "x")
 def ty_k (k1 : Int → Prop) : Ty := Ty.arrow "x" (int_k k1) (int_k k1)
 
 
+@[qualif]
+def Gt0 (v : Int) : Prop :=
+  v > 0
+
 example : ∃ k, Check [] (.letin "z" (.const 99) (.app (.ann exId (ty_k k)) (.var "z"))) Pos := by
   under_exists =>
     apply check_sound
-    simp [exId, Pos, ty_k, int_k, check, synth]
-    repeat (first | unfold check | unfold synth)
-    simp ; rfl
+    · simp [exId, Pos, ty_k, int_k, check, synth]
+      repeat (first | unfold check | unfold synth)
+      simp ; rfl
+    focus simp
   solve_fixpoint
 
 -- example : ∃ k, topVC [] (.app (.ann exId (ty_k k)) (.const 99)) Pos := by
@@ -67,27 +72,12 @@ def IntR (x : String) (k : Int → Int → Prop) : Ty := .refine .int ⟨fun ρ 
 def ty_xk (x : String) (k : Int → Int → Prop) : Ty := .arrow "x" TT (IntR x k)
 
 example : ∃ k, Check [] (.letin "z" (.const 99) (.app (.ann exId (ty_xk "x" k)) (.var "z"))) (.refine .int ⟨fun _ v => v = 99⟩) := by
-  refine ⟨?_, ?_⟩
-  rotate_left 1
-  · apply check_sound
-    · simp [exId, ty_xk, IntR]
-      unfold check synth
-      simp
-      unfold check synth synth check
-      simp
-      unfold check synth sub
-      simp [TT]
-      rfl
-    · apply Entail.emp
-      intro ρ
-      simp [TT]
-      sorry
-  · sorry
-
-example : ∃ k : Int → Int → Prop, (∀ (v : Int) (v_1 : Int), k v v_1) ∧ ∀ (v : Int), k 99 v → v = 99 := by
-  solve_fixpoint
-
-example : ∃ k : Int → Prop,  k 99 ∧ ∀ (v : Int), k v → 0 < v := by
+  under_exists =>
+    apply check_sound
+    · simp [exId, ty_xk, TT, IntR]
+      repeat (first | unfold check | unfold synth)
+      simp ; rfl
+    focus simp
   solve_fixpoint
 
 example : topVC [] ex3Exp ex3Ty := by
@@ -103,6 +93,7 @@ example : topVC [] ex3Exp ex3Ty := by
 example : Hastype [] ex2Exp ex2Ty := by
   apply topVC_decl_sound
   simp [topVC, check, synth, implyBind, ex2Exp, ex2Ty, Pos]
+  intros ; assumption
 
 -- let z = 5 in z is declaratively typeable at Pos.
 example : Hastype [] ex3Exp ex3Ty := by
