@@ -79,11 +79,14 @@ partial def exprSol1 (κ : KVar) (e : Expr) : KM Expr := do
     let dom := e.bindingDomain!
     let domSort ← (inferType dom >>= whnf : MetaM Expr)
     if domSort.isProp then
-      -- Bare implication at this level shouldn't appear --
-      -- implications are always handled inline by the value-binder below.
-      -- Throw to catch malformed input early.
-      throwError "sol1: bare implication outside enclosing value binder: \
-        ∀ _ : {← ppExpr dom}, ⋯"
+      -- Bare implication `p ⇒ c`. Algorithm: emit p ∧ sol1(c) with no ∃ wrap,
+      -- since there's no value binder at this level. The Prop binder is
+      -- conventionally unused, but instantiate via withLocalDeclD just in case.
+      return ← withLocalDeclD name dom fun pfvar => do
+        let body ← whnf (e.bindingBody!.instantiate1 pfvar)
+        let inner ← exprSol1 κ body
+        return mkApp2 (mkConst ``And) dom inner
+
     else
       -- ∀ x:b. body -- open x, and boyd is expected to be 'p ⇒ c'
       return ← withLocalDeclD name dom fun fvar => do

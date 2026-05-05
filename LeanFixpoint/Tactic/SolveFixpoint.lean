@@ -8,7 +8,7 @@ import LeanFixpoint.Elab.FromExpr
 import LeanFixpoint.Monad
 import LeanFixpoint.Tactic.Internal.Utils
 import LeanFixpoint.Tactic.Zap
-import LeanFixpoint.Tactic.Internal.CloseLoop
+-- import LeanFixpoint.Tactic.Internal.CloseLoop
 import LeanFixpoint.Tactic.SplitHyps
 import LeanFixpoint.Solve.Fixpoint
 
@@ -16,28 +16,72 @@ open Lean Elab Meta Tactic
 
 initialize Lean.registerTraceClass `solveFixpoint
 
+private def tryClosers : TacticM Bool := do
+  let b ← attemptTactic (evalTactic (← `(tactic| native_decide)))
+  match b with
+  | Bool.true => logInfo m!"[solve_fixpoint] closed by: native_decide"; pure Bool.true
+  | Bool.false =>
+  let b ← attemptTactic (evalTactic (← `(tactic| grind)))
+  match b with
+  | Bool.true => logInfo m!"[solve_fixpoint] closed by: grind"; pure Bool.true
+  | Bool.false =>
+  let b ← attemptTactic (evalTactic (← `(tactic| aesop)))
+  match b with
+  | Bool.true => logInfo m!"[solve_fixpoint] closed by: aesop"; pure Bool.true
+  | Bool.false =>
+  let b ← attemptTactic (evalTactic (← `(tactic| omega)))
+  match b with
+  | Bool.true => logInfo m!"[solve_fixpoint] closed by: omega"; pure Bool.true
+  | Bool.false =>
+  let b ← attemptTactic (evalTactic (← `(tactic| (constructor <;> grind))))
+  match b with
+  | Bool.true => logInfo m!"[solve_fixpoint] closed by: constructor+grind"; pure Bool.true
+  | Bool.false =>
+  let b ← attemptTactic (evalTactic (← `(tactic| (simp_all; grind))))
+  match b with
+  | Bool.true => logInfo m!"[solve_fixpoint] closed by: simp_all+grind"; pure Bool.true
+  | Bool.false => pure Bool.false
+
+private partial def closeLoop : TacticM Unit := do
+  let goals ← getGoals
+  match goals with
+  | [] => pure ()
+  | g :: restGoals =>
+    let ty ← whnfR (← g.getType)
+    if ty.isForall then
+      evalTactic (← `(tactic| intro _))
+      closeLoop
+    else if ty.isAppOfArity ``And 2 then
+      evalTactic (← `(tactic| and_intros))
+      closeLoop
+    else
+      let closed ← tryClosers
+      if closed then
+        closeLoop
+      else
+        -- Try unfolding if required
+        let didUnfold ← attemptTactic do
+          let newGoal ← g.withContext do
+            let target ← g.getType
+            let u ← unfoldDefinition target
+            g.replaceTargetDefEq u
+          replaceMainGoal (newGoal :: restGoals)
+        if didUnfold then
+          closeLoop
+        else
+          setGoals restGoals
+          closeLoop
+          let remaining ← getGoals
+          setGoals (g :: remaining)
+
 private def closeResidualGoals : TacticM Unit := do
   let goals ← getGoals
   if goals.isEmpty then pure ()
   else
-    let _ ← attemptTactic (evalTactic (← `(tactic| dsimp only)))
-    let _ ← attemptTactic (evalTactic (← `(tactic| zap)))
+    let _ ← attemptTactic (evalTactic (← `(tactic| simp_all)))
     let goals ← getGoals
     if goals.isEmpty then pure ()
-    else
-      -- Try elimT before the heavier simp_all/grind fixpoint or closeLoop.
-      -- elimT (= trivialk; simp; zap) is bounded and handles the typical
-      -- post-fusion shape: trivial witnesses for leftover ∃-κ binders,
-      -- one simp pass, then ∀/∧ decomposition with grind at leaves.
-      let _ ← attemptTactic (evalTactic (← `(tactic| elimT)))
-      let goals ← getGoals
-      if goals.isEmpty then pure ()
-      else
-        let _ ← attemptTactic (evalTactic (←
-          `(tactic| all_goals (split_hyps; all_goals simp_all; all_goals grind))))
-        let goals ← getGoals
-        if goals.isEmpty then pure ()
-        else closeLoop
+    else closeLoop
 
 
 /-!
