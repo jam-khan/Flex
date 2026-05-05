@@ -31,18 +31,26 @@ def substKVarInExpr (κ : KVar) (sol : Expr) (e : Expr) : Expr :=
 /-- `scope(κ, e)` — extract the sub-expression relevant to κ (Fig. 9). -/
 partial def exprScope (κ : KVar) (e : Expr) : KM Expr := do
   let e ← whnf e
-  -- scope(κ, cₗ ∧ cᵣ)
-  if let some (cₗ, cᵣ) := e.and? then
-    let inL := (← KM.exprKVars cₗ ).contains κ
-    let inR := (← KM.exprKVars cᵣ).contains κ
-    -- κ ∈ Cₗ, κ ∉ Cᵣ
-    if inL && !inR
-      then exprScope κ cₗ
-    -- κ ∉ Cₗ, κ ∈ Cᵣ
-    else if !inL && inR
-      then exprScope κ cᵣ
-    -- fallback: scope(κ, c) = c
-    else return e
+  -- -- scope(κ, cₗ ∧ cᵣ)
+  -- if let some (cₗ, cᵣ) := e.and? then
+  --   let inL := (← KM.exprKVars cₗ ).contains κ
+  --   let inR := (← KM.exprKVars cᵣ).contains κ
+  --   -- κ ∈ Cₗ, κ ∉ Cᵣ
+  --   if inL && !inR
+  --     then exprScope κ cₗ
+  --   -- κ ∉ Cₗ, κ ∈ Cᵣ
+  --   else if !inL && inR
+  --     then exprScope κ cᵣ
+  --   -- fallback: scope(κ, c) = c
+  --   else return e
+    -- scope(κ, cₗ ∧ cᵣ) — preserve full And-structure (no stripping).
+  -- Stripping breaks zapk's path-duality (path counts inLs/inRs based on c's
+  -- And-tree, sol's Or-tree must mirror it exactly). Semantic equivalence
+  -- is preserved: non-κ branches reduce to ⊥-leaves via sol1's catch-all,
+  -- and downstream simplifyExpr collapses `∨ ⊥` for tactics that use it.
+  if e.and?.isSome then
+    return e
+
   -- scope(κ, ∀ x : τ. body)
   -- Handles one forall at a time. The paper's `∀x:b. p ⇒ c'` pattern
   -- is two nested foralls, so this branch fires twice (once with dom = b,

@@ -68,14 +68,15 @@ elab_rules : tactic
       let kctx : KContext := { kvars := kvarMap }
       replaceMainGoal [bodyGoal]
 
-      -- Phase 1: compute all sols, but DO NOT assign yet.
-      -- (No simplifyExpr — duality requires unsimplified sol.)
+      -- Phase 1: compute all sols and build their closed lambdas, but
+      -- DO NOT assign yet. (No simplifyExpr — duality requires unsimplified sol.)
       let mut curr ← (← getMainGoal).getType
       let mut kSols : List (KVar × Expr) := []
       for κ in kvarsInOrder do
         let scoped' ← (exprScope κ curr).run kctx
         let sol    ← (exprSol1 κ scoped').run kctx
-        kSols := kSols ++ [(κ, sol)]
+        let lam ← solToWitnessExpr sol κ.params κ.paramTypes
+        kSols := kSols ++ [(κ, lam)]
         curr ← (exprElimStar κ sol curr).run kctx
 
       -- Phase 2: structural proof; solveHead assigns each κ on demand
