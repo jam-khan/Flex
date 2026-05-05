@@ -83,12 +83,13 @@ private def solveFusionImpl : TacticM Unit := withMainContext do
       let mut curr := body
       for κ in acyclic do
         IO.println s!"[solve_fusion] --- Fusion: {κ.name} ---"
-        let (sol, _) ← (computeSol κ curr (simplify := false)).run kctx
+        let (sol, curr') ← (exprElim1 κ curr).run kctx
         IO.println s!"[solve_fusion]  sol1({κ.name}) = {← ppExpr sol}"
         let lam ← solToWitnessExpr sol κ.params κ.paramTypes
         IO.println s!"[solve_fusion]  assign {κ.name} := {← ppExpr lam}"
         κ.mvarId.assign lam
-        curr ← (exprElim1 κ curr).run kctx
+        curr := curr'
+
     )
     (fun e => do
       logInfo m!"[solve_fusion] ✗ Fusion failed: {e.toMessageData}"
@@ -109,7 +110,7 @@ private def solveFusionImpl : TacticM Unit := withMainContext do
     setGoals (unfilled ++ [residual])
     logInfo m!"[solve_fusion] {unfilled.length} κ(s) left as user goal(s) — \
                  fill each with `exact (fun z0 z1 ... => ...)`."
-  
+
 syntax "solve_fusion" : tactic
 elab_rules : tactic
   | `(tactic| solve_fusion) => solveFusionImpl

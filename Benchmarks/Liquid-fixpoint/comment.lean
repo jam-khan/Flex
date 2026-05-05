@@ -74,7 +74,7 @@ def comment_vc_reordered : Prop :=
 theorem test : comment_vc := by
   unfold comment_vc
   rewriteKs
-  sorry
+  solve_fixpoint
 
 -- Equivalence proof: just destructure and reconstruct in the new order.
 theorem comment_vc_iff : comment_vc ↔ comment_vc_reordered := by

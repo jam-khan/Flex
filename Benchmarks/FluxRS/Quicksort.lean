@@ -93,7 +93,7 @@ def SortQuicksortRange := ∃ k0 : (a0 : Int) -> (a1 : Int) -> (a2 : (VectorsAVe
 
 -- set_option maxHeartbeats 800000 in
 theorem SortQuicksortRange_proof : SortQuicksortRange := by
-  solve_fusion
-  dsimp only
+  solve_fixpoint
+  -- dsimp only
   -- sorry
   -- elimT

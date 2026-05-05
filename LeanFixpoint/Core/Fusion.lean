@@ -31,12 +31,22 @@ def substKVarInExpr (κ : KVar) (sol : Expr) (e : Expr) : Expr :=
 /-- `scope(κ, e)` — extract the sub-expression relevant to κ (Fig. 9). -/
 partial def exprScope (κ : KVar) (e : Expr) : KM Expr := do
   let e ← whnf e
-  if let some (l, r) := e.and? then
-    let inL := (← KM.exprKVars l).contains κ
-    let inR := (← KM.exprKVars r).contains κ
-    if inL && !inR then exprScope κ l
-    else if !inL && inR then exprScope κ r
+  -- scope(κ, cₗ ∧ cᵣ)
+  if let some (cₗ, cᵣ) := e.and? then
+    let inL := (← KM.exprKVars cₗ ).contains κ
+    let inR := (← KM.exprKVars cᵣ).contains κ
+    -- κ ∈ Cₗ, κ ∉ Cᵣ
+    if inL && !inR
+      then exprScope κ cₗ
+    -- κ ∉ Cₗ, κ ∈ Cᵣ
+    else if !inL && inR
+      then exprScope κ cᵣ
+    -- fallback: scope(κ, c) = c
     else return e
+  -- scope(κ, ∀ x : τ. body)
+  -- Handles one forall at a time. The paper's `∀x:b. p ⇒ c'` pattern
+  -- is two nested foralls, so this branch fires twice (once with dom = b,
+  -- once with dom = p) — together that enforces κ ∉ p.
   else if e.isForall then
     let dom := e.bindingDomain!
     if !(← KM.exprKVars dom).contains κ then
@@ -45,56 +55,69 @@ partial def exprScope (κ : KVar) (e : Expr) : KM Expr := do
         let abstr := sc.abstract #[fvar]
         pure (Expr.forallE e.bindingName! dom abstr e.bindingInfo!)
     else
-      return e
+      return mkConst ``False
   else
     return e
 
+/-
+sol1(κ, c₁ ∧ c₂)        ≡ sol1(κ, c₁) ∨ sol1(κ, c₂)
+sol1(κ, ∀ x:b. p ⇒ c)   ≡ ∃x:b. p ∧ sol1(κ, c)
+sol1(κ, κ(y₁, ..., yₙ)) ≡ x₁ = y₁ ∧ ... ∧ xₙ = yₙ
+sol1(κ, p)              ≡ false
+-/
 /-- `sol1(κ, e)` — strongest solution (Section 5.2).
     Maps: `And → Or`, `∀(Prop) → And`, `∀(non-Prop) → ∃`, leaf κ-app → equality. -/
-partial def exprSol1 (κ : KVar) (e : Expr) (simplify := false) : KM Expr := do
-  let raw ← sol1Aux e
-  if simplify then return simplifyExpr raw else return raw
-where
-  sol1Aux (e : Expr) : KM Expr := do
-    let e ← whnf e
-    if let some (l, r) := e.and? then
-      return mkApp2 (mkConst ``Or) (← sol1Aux l) (← sol1Aux r)
-    else if e.isForall then
-      let name := e.bindingName!
-      let dom  := e.bindingDomain!
-      withLocalDeclD name dom fun fvar => do
-        let body := e.bindingBody!.instantiate1 fvar
-        let domSort ← (inferType dom >>= whnf : MetaM Expr)
-        if domSort.isProp then
-          -- Prop domain: conjoin hypothesis
-          let inner := mkApp2 (mkConst ``And) dom (← sol1Aux body)
-          let abstrBody := inner.abstract #[fvar]
-          if abstrBody.hasLooseBVars then
-            let lam := Expr.lam name dom abstrBody .default
-            return mkApp2 (mkConst ``Exists [levelZero]) dom lam
-          else
-            return inner
-        else
-          -- Non-Prop domain: recurse, wrap with ∃ if variable is used
-          let inner ← sol1Aux body
-          let abstrBody := inner.abstract #[fvar]
-          if abstrBody.hasLooseBVars then
-            let lam := Expr.lam name dom abstrBody .default
-            return mkApp2 (mkConst ``Exists [levelOne]) dom lam
-          else
-            return inner
+partial def exprSol1 (κ : KVar) (e : Expr) : KM Expr := do
+  let e ← whnf e
+  let e ← exprScope κ e
+  -- c₁ ∧ c₂
+  if let some (l, r) := e.and? then
+    return mkApp2 (mkConst ``Or) (← exprSol1 κ l) (← exprSol1 κ r)
+  -- ∀ x : b. p ⇒ c
+  else if e.isForall then
+    let name := e.bindingName!
+    let dom := e.bindingDomain!
+    let domSort ← (inferType dom >>= whnf : MetaM Expr)
+    if domSort.isProp then
+      -- Bare implication at this level shouldn't appear --
+      -- implications are always handled inline by the value-binder below.
+      -- Throw to catch malformed input early.
+      throwError "sol1: bare implication outside enclosing value binder: \
+        ∀ _ : {← ppExpr dom}, ⋯"
     else
-      -- Leaf: check if κ-application
-      if e.getAppFn.isMVar && e.getAppFn.mvarId! == κ.mvarId then
-        let args := e.getAppArgs.toList
-        let eqs := (κ.params.zip (args.zip κ.paramTypes)).map fun (pi, (ai, ty)) =>
-          mkApp3 (mkConst ``Eq [levelOne]) ty (.fvar (FVarId.mk pi)) ai
-        match eqs with
-        | []      => return mkConst ``True
-        | [eq]    => return eq
-        | eq :: rest => return rest.foldl (mkApp2 (mkConst ``And)) eq
-      else
-        return mkConst ``False
+      -- ∀ x:b. body -- open x, and boyd is expected to be 'p ⇒ c'
+      return ← withLocalDeclD name dom fun fvar => do
+        let body ← whnf (e.bindingBody!.instantiate1 fvar)
+        let conjunct ← do
+          if body.isForall then
+            let p := body.bindingDomain!
+            let pSort ← (inferType p >>= whnf : MetaM Expr)
+            if pSort.isProp then
+              -- Inline implication handling: extract p and c', recurse on c'
+              -- Implication binder is unused; but introducing fresh fvar just in case
+              withLocalDeclD body.bindingName! p fun pfvar => do
+                let c'  := body.bindingBody!.instantiate1 pfvar
+                let inner ← exprSol1 κ c'
+                return mkApp2 (mkConst ``And) p inner
+            else
+              exprSol1 κ body
+          else
+            exprSol1 κ body
+        -- Wrap ∃ x : b.
+        let abstr := conjunct.abstract #[fvar]
+        let lam   := Expr.lam name dom abstr .default
+        return mkApp2 (mkConst ``Exists [levelOne]) dom lam
+  -- κ(y₁, ..., yₙ)
+  else if e.getAppFn.isMVar && e.getAppFn.mvarId! == κ.mvarId then
+    let args := e.getAppArgs.toList
+    let eqs := (κ.params.zip (args.zip κ.paramTypes)).map fun (pi, (ai, ty)) =>
+      mkApp3 (mkConst ``Eq [levelOne]) ty (.fvar (FVarId.mk pi)) ai
+    match eqs with
+    | []      => return mkConst ``True
+    | [eq]    => return eq
+    | eq :: rest => return rest.foldl (mkApp2 (mkConst ``And)) eq
+  else
+    return mkConst ``False
 
 /-- `elim*(κ, sol, e)` — substitute κ with its solution throughout `e` (Fig. 11).
     Head-position κ-apps become `True`; hypothesis-position κ-apps get `substKVarInExpr`. -/
@@ -159,113 +182,34 @@ partial def collectKAppArgs (κ : KVar) (e : Expr) : List (Array Expr) :=
     | _                => []
   hit ++ childHits
 
-/-- Compute solution with scope stripping.
-    Opens scope `∀`-binders inside `withLocalDeclD`, computes `sol1` there,
-    and replaces scope fvars with canonical κ-params before returning.
-    Only non-Prop binders are added to `scopeInfo` for param replacement. -/
-partial def computeSolStripped (κ : KVar) (e : Expr) (simplify : Bool)
-    (scopeInfo : List (Expr × Name) := []) : KM (Expr × List Name) := do
-  let e ← whnf e
-  if e.isForall then
-    let dom := e.bindingDomain!
-    if !(← KM.exprKVars dom).contains κ then
-      let domSort ← (inferType dom >>= whnf : MetaM Expr)
-      withLocalDeclD e.bindingName! dom fun fvar => do
-        if domSort.isProp then
-          -- Prop guard: strip but don't add to scopeInfo
-          computeSolStripped κ (e.bindingBody!.instantiate1 fvar) simplify scopeInfo
-        else
-          -- Value binder: strip and add to scopeInfo
-          computeSolStripped κ (e.bindingBody!.instantiate1 fvar) simplify
-            (scopeInfo ++ [(fvar, e.bindingName!)])
-    else
-      -- Domain contains κ → stop stripping, compute sol1 here
-      finalizeSol κ e simplify scopeInfo
-  else
-    -- No forall at top level (e.g., And) → stop stripping
-    finalizeSol κ e simplify scopeInfo
-where
-  /-- Given all κ-app arg arrays, locate which κ-arg position `scopeFV`
-      appears in bare. Prefer a position where it appears bare in EVERY
-      κ-app; if no such universal position exists, fall back to the
-      last bare occurrence across all calls. Returns `none` if the scope
-      fvar never appears as a bare argument. -/
-  resolveScopeParam (κ : KVar) (allArgs : List (Array Expr))
-      (scopeFV : Expr) : Option Name :=
-    -- Find positions where scopeFV appears bare in EACH κ-app (as a set).
-    let perCall : List (List Nat) :=
-      allArgs.map fun args =>
-        (List.range args.size).filter fun i => args[i]? == some scopeFV
-    -- Universal positions: present in every call.
-    let universal : List Nat :=
-      match perCall with
-      | [] => []
-      | first :: rest =>
-        first.filter fun i => rest.all (·.contains i)
-    let chosen : Option Nat :=
-      match universal with
-      | i :: _ => some i
-      | []     =>
-        -- No universal position: pick the last bare occurrence overall.
-        let all := perCall.flatten
-        all.foldl (fun _acc i => some i) (none : Option Nat)
-    match chosen with
-    | some idx => κ.params[idx]?
-    | none     => none
-  finalizeSol (κ : KVar) (e : Expr) (simplify : Bool)
-      (scopeInfo : List (Expr × Name)) : KM (Expr × List Name) := do
-    let sol ← exprSol1 κ e simplify
-    let scopeNames := scopeInfo.map (·.2)
-    if scopeInfo.isEmpty then return (sol, scopeNames)
-    -- Legacy fallback: last-N positional mapping, but only if type-compatible.
-    let numRefParams := κ.params.length - scopeInfo.length
-    let legacyParams := κ.params.drop numRefParams
-    let legacyTypes  := κ.paramTypes.drop numRefParams
-    -- Collect κ-apps once; reuse for all scope vars.
-    let allArgs := collectKAppArgs κ e
-    -- For each scope fvar: try to find its bare-arg position; fall back to
-    -- legacy-positional only if the types agree. Otherwise leave unsubstituted.
-    let resolved : List (Option Name) ←
-      (scopeInfo.zip (legacyParams.zip legacyTypes)).mapM
-        fun ((scopeFV, _), (legacy, legacyTy)) => do
-          match resolveScopeParam κ allArgs scopeFV with
-          | some p => pure (some p)
-          | none =>
-            let scopeTy ← inferType scopeFV
-            if ← isDefEq scopeTy legacyTy then
-              pure (some legacy)
-            else
-              pure none
-    let sFixed := (scopeInfo.zip resolved).foldl
-      (fun acc ((scopeFV, _), mParam) =>
-        match mParam with
-        | some paramName => acc.replaceFVar scopeFV (.fvar (FVarId.mk paramName))
-        | none           => acc) sol
-    return (sFixed, scopeNames)
 
-/-- Compute solution for κ, deciding whether to use scope stripping or full `sol1`. -/
-def computeSol (κ : KVar) (fullConstraint : Expr) (simplify := false) : KM (Expr × List Name) := do
-  let sc ← exprScope κ fullConstraint
-  let nScope ← countScopeVars κ sc
-  if nScope > 0 && κ.params.length > nScope then
-    computeSolStripped κ sc simplify
-  else
-    let sol ← exprSol1 κ fullConstraint simplify
-    return (sol, [])
+/-- `elim1(κ, c)` per Cosman & Jhala 2017 §5.3 (Fig. 11).
+    Returns `(σ̂_body, elim*(σ̂, c))`:
+      - `σ̂_body` = `sol1(κ, scope(κ, c))`, the body of the scoped solution.
+        This is what you wrap as `λx̄. σ̂_body` to assign to κ-mvar.
+      - `elim*(σ̂, c)` is the constraint with κ-uses substituted away.
 
-/-- Single κ elimination: compute solution then substitute. -/
-def exprElim1 (κ : KVar) (e : Expr) : KM Expr := do
-  let (sol, _) ← computeSol κ e
-  exprElimStar κ sol e
+    Caller is responsible for assigning κ-mvar AFTER consuming the new
+    constraint — never before, or `whnf` will eagerly expand `?κ` and the
+    next iteration's elim1 will see no raw `?κ` to substitute. -/
+-- CHECK THIS
+def exprElim1 (κ : KVar) (e : Expr) : KM (Expr × Expr) := do
+  let scoped' ← exprScope κ e
+  let sol    ← exprSol1 κ scoped'
+  -- extra simplification added
+  -- let sol   := simplifyExpr sol
+  let newE   ← exprElimStar κ sol e
+  return (sol, newE)
 
-/-- Eliminate multiple κ-variables sequentially. -/
-def exprElim (kvars : List KVar) (e : Expr) : KM Expr := do
+-- CHECK THIS
+def exprElim (kvars : List KVar) (e : Expr) : KM (List (KVar × Expr) × Expr) := do
   let mut acc := e
+  let mut sols : List (KVar × Expr) := []
   for κ in kvars do
-    acc ← exprElim1 κ acc
-  return acc
-
-
+    let (sol, acc') ← exprElim1 κ acc
+    sols := sols ++ [(κ, sol)]
+    acc := acc'
+  return (sols, acc)
 
 /-- Split κ-vars into (acyclic, cyclic). The acyclic list is topologically
     sorted so dependency sinks (no κ-deps) appear first — required so each

@@ -85,20 +85,24 @@ private def solveFixpointImpl : TacticM Unit := withMainContext do
       let mut curr := body
       for κ in acyclic do
         IO.println s!"[solve] --- {κ.name} ---"
-        let (sol, _) ← (computeSol κ curr).run kctx
+
+        -- Compute sol AND substituted constraint in ONE call, BEFORE any assign.
+        let (sol, curr') ← (exprElim1 κ curr).run kctx
         IO.println s!"[solve]   sol = {← ppExpr sol}"
         let lam ← solToWitnessExpr sol κ.params κ.paramTypes
         IO.println s!"[solve]   lam = {← ppExpr lam}"
 
-        -- Occurs check: skip if lam references κ itself.
+        -- Occurs check on the lam BEFORE assigning. If sol references κ
+        -- (κ-in-hyp litter), leave κ as user goal — but still update curr,
+        -- because elim* already substituted what it could.
         let selfRef := lam.find? fun sub =>
           sub.isMVar && sub.mvarId! == κ.mvarId
         if selfRef.isSome then
           IO.println s!"[solve]   ⚠ {κ.name}: sol self-references — leaving as user goal"
-          -- don't assign, don't exprElim1; loop continues with curr unchanged
         else
           κ.mvarId.assign lam
-          curr ← (exprElim1 κ curr).run kctx
+
+        curr := curr'
 
       -- Predicate abstraction for cyclic κs.
       if !cyclic.isEmpty then
