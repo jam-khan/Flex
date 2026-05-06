@@ -99,4 +99,11 @@ mutual
         Synth Γ e₁ s →
         Check ((x, s) :: Γ) e₂ t →
         Check Γ (.letin x e₁ e₂) t
+
+    /-- CHK-ITE: synthesize the condition to bool, check both branches. -/
+    | ite {Γ e₀ e₁ e₂ r t} :
+        Synth Γ e₀ (.refine .bool r) →
+        Check Γ e₁ t →
+        Check Γ e₂ t →
+        Check Γ (.ite e₀ e₁ e₂) t
 end

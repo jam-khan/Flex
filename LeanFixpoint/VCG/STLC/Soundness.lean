@@ -232,13 +232,16 @@ mutual
     | .app e₁ (.iconst _) | .app e₁ (.bconst _) | .app e₁ (.letin _ _ _)
     | .app e₁ (.lam _ _)  | .app e₁ (.app _ _)  | .app e₁ (.ann _ _)
     | .app e₁ (.and _ _)  | .app e₁ (.not _)    | .app e₁ (.leq _ _)
-    | .lam _ _ | .letin _ _ _
+    | .app e₁ (.ite _ _ _)
+    | .lam _ _ | .letin _ _ _ | .ite _ _ _
     | .leq e₁ (.iconst _) | .leq e₁ (.bconst _) | .leq e₁ (.letin _ _ _)
     | .leq e₁ (.lam _ _)  | .leq e₁ (.leq _ _)  | .leq e₁ (.ann _ _)
     | .leq e₁ (.and _ _)  | .leq e₁ (.not _)    | .leq e₁ (.app _ _)
+    | .leq e₁ (.ite _ _ _)
     | .leq (.iconst _) (.var _) | .leq (.bconst _) (.var _) | .leq (.letin _ _ _) (.var _)
     | .leq (.lam _ _) (.var _) | .leq (.leq _ _) (.var _) | .leq (.ann _ _) (.var _)
-    | .leq (.and _ _) (.var _) | .leq (.not _) (.var _) | .leq (.app _ _) (.var _) =>
+    | .leq (.and _ _) (.var _) | .leq (.not _) (.var _) | .leq (.app _ _) (.var _)
+    | .leq (.ite _ _ _) (.var _) =>
       unfold synth at hsynth; simp at hsynth
 
 
@@ -386,6 +389,30 @@ mutual
           rw [hsub] at hck; simp at hck; subst hck; apply Check.sub
           · exact synth_sound _ _ _ _ hsy (fun ρ hΓ => (h ρ hΓ).1)
           · exact sub_sound _ _ _ _ hsub (fun ρ hΓ => (h ρ hΓ).2)
+    | .ite e₀ e₁ e₂ =>
+      unfold check at hck
+      cases hsy : synth Γ e₀ with
+      | none => rw [hsy] at hck; simp at hck
+      | some p =>
+        obtain ⟨c₀, ty₀⟩ := p
+        rw [hsy] at hck
+        cases ty₀ with
+        | arrow _ _ _ => simp at hck
+        | refine b r =>
+          cases b with
+          | int => simp at hck
+          | bool =>
+            cases hck1 : check Γ e₁ t with
+            | none => rw [hck1] at hck; simp at hck
+            | some c₁ =>
+              cases hck2 : check Γ e₂ t with
+              | none => rw [hck1, hck2] at hck; simp at hck
+              | some c₂ =>
+                rw [hck1, hck2] at hck; simp at hck; subst hck
+                apply Check.ite
+                · exact synth_sound _ _ _ _ hsy (fun ρ hΓ => (h ρ hΓ).1)
+                · exact check_sound _ _ _ _ hck1 (fun ρ hΓ => (h ρ hΓ).2.1)
+                · exact check_sound _ _ _ _ hck2 (fun ρ hΓ => (h ρ hΓ).2.2)
 
 
   theorem synth_to_hastype {Γ : TEnv} {e : Exp} {t : Ty} :
@@ -405,9 +432,10 @@ mutual
       Check Γ e t → Hastype Γ e t := by
     intro h
     match h with
-    | .sub hsy hsub  => exact .sub (synth_to_hastype hsy) hsub
-    | .lam hck       => exact .lam (check_to_hastype hck)
-    | .letin hsy hck => exact .letin (synth_to_hastype hsy) (check_to_hastype hck)
+    | .sub hsy hsub       => exact .sub (synth_to_hastype hsy) hsub
+    | .lam hck            => exact .lam (check_to_hastype hck)
+    | .letin hsy hck      => exact .letin (synth_to_hastype hsy) (check_to_hastype hck)
+    | .ite hsy hck1 hck2  => exact .ite (synth_to_hastype hsy) (check_to_hastype hck1) (check_to_hastype hck2)
 
 end
 

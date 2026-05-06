@@ -58,3 +58,9 @@ inductive Hastype : TEnv → Exp → Ty → Prop where
       Hastype Γ e₂ (.refine .bool r₂) →
       Hastype Γ (.and e₁ e₂)
         (.refine .bool ⟨fun ρ v => ∀ b₁ b₂, r₁.pred ρ b₁ → r₂.pred ρ b₂ → v = b₁ && b₂⟩)
+  -- TIte
+  | ite {Γ e₀ e₁ e₂ r t} :
+      Hastype Γ e₀ (.refine .bool r) →
+      Hastype Γ e₁ t →
+      Hastype Γ e₂ t →
+      Hastype Γ (.ite e₀ e₁ e₂) t
