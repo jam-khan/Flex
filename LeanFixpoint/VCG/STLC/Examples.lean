@@ -47,8 +47,8 @@ example : ∃ k, Check [] (.letin "z" (.iconst 99) (.app (.ann exId (ty_k k)) (.
   make_horn_under_k
   solve_fixpoint
 
-abbrev IntR (x : String) (k : Val → Int → Prop) : Ty := .refine .int ⟨fun ρ v => k (ρ x) v⟩
-abbrev ty_xk (x : String) (k : Val → Int → Prop) : Ty := .arrow "x" TT (IntR x k)
+abbrev IntR (x : String) (k : Int → Int → Prop) : Ty := .refine .int ⟨fun ρ v => k (ρ.ints x) v⟩
+abbrev ty_xk (x : String) (k : Int → Int → Prop) : Ty := .arrow "x" TT (IntR x k)
 
 example : ∃ k, Check [] (.letin "z" (.iconst 99) (.app (.ann exId (ty_xk "x" k)) (.var "z"))) (.refine .int ⟨fun _ v => v = 99⟩) := by
   make_horn_under_k

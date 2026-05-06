@@ -3,16 +3,7 @@ import LeanFixpoint.VCG.STLC.Entailment
 
 open STLC
 
-/-! ## Subtyping  Γ ⊢ s <: t
-  Two rules, mirroring the paper:
-  - **`refine`** reduces to an entailment between the two predicates.
-    The paper's alpha-renaming `p₂[v₂ := v₁]` vanishes here because
-    refinement binders are explicit `pred` arguments — there is no name to rename.
-  - **`arrow`** is contravariant in the input, covariant in the output, with
-    the output compared under an env extended with the (shared) parameter.
-    We require both arrows to use the **same binder name**, sidestepping the
-    paper's `t₁[x₁ := x₂]` rename. Generalize later via `Ty.rename` if needed.
--/
+/-! ## Subtyping  Γ ⊢ s <: t -/
 
 inductive Subtyp : TEnv → Ty → Ty → Prop where
   /-- SUB-BASE:  Γ ⊢ ∀v. p₁ ρ v → p₂ ρ v   ⟹   Γ ⊢ {ν:b|p₁} <: {ν:b|p₂} -/
@@ -27,11 +18,6 @@ inductive Subtyp : TEnv → Ty → Ty → Prop where
       Subtyp ((x₂, s₂) :: Γ) (t₁.rename x₁ x₂) t₂ →
       Subtyp Γ (.arrow x₁ s₁ t₁) (.arrow x₂ s₂ t₂)
 
-
--- NOTE: BELOW TYPING IS ADDED BUT WE NEED
--- TO MAKE CHOICE FOR BINDERS (LOCALLY NAMELESS etc later)
--- WHEN TRYING TO USE BELOW FOR MECHANIZATION
-
 -- refinement type for an integer constant
 @[simp]
 def prim (n : Int) : Ty :=
@@ -42,11 +28,11 @@ def prim (n : Int) : Ty :=
 def primBool (b : Bool) : Ty :=
   .refine .bool ⟨fun _ v => v = b⟩
 
-/-- `self x t` strengthens `t` with the self-equality `v = Val.asBase b (ρ x)`,
-    relating the synthesized value to the environment binding for `x`. -/
+/-- `self x t` strengthens `t` with `v = REnv.get b ρ x`, tying the synthesized
+    value back to the stored value of `x` in the environment. -/
 @[simp]
 def self : EVar → Ty → Ty
-    | x, .refine b p    => .refine b ⟨fun ρ v => p.pred ρ v ∧ v = Val.asBase b (ρ x)⟩
+    | x, .refine b p    => .refine b ⟨fun ρ v => p.pred ρ v ∧ v = REnv.get b ρ x⟩
     | _, .arrow x t1 t2 => .arrow x t1 t2
 
 

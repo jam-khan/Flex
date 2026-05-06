@@ -9,11 +9,10 @@ open STLC
 abbrev Constraint := REnv → Prop
 
 -- Implication-constraint helper from page 17 of the refinement-types tutorial.
--- Quantifies over `b.interp` and lifts the witness into `Val` via `Val.ofBase`.
-@[simp]
+@[simp, reducible]
 def implyBind (x : EVar) (t : Ty) (c : Constraint) : Constraint :=
   match t with
-  | .refine b r => fun ρ => ∀ v : b.interp, r.pred ρ v → c (ρ[x ↦ Val.ofBase b v])
+  | .refine b r => fun ρ => ∀ v : b.interp, r.pred ρ v → c (REnv.update b ρ x v)
   | .arrow ..   => c
 
 -- Algorithmic subtyping. Returns `none` on shape mismatch.
@@ -63,9 +62,9 @@ theorem sub_arrow_refine_eq (x : EVar) (s t : Ty)
 
 mutual
   def synth (Γ : TEnv) : Exp → Option (Constraint × Ty)
-    | .var x   => Γ.lookup x |>.map (fun t => ((fun _ => True), self x t))
+    | .var x    => Γ.lookup x |>.map (fun t => ((fun _ => True), self x t))
     | .iconst n => some ((fun _ => True), prim n)
-    | .bconst b  => some ((fun _ => True), primBool b)
+    | .bconst b => some ((fun _ => True), primBool b)
     | .ann e t =>
         match check Γ e t with
         | some c => some (c, t)
