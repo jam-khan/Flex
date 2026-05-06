@@ -116,7 +116,7 @@ mutual
       unfold synth at hsynth
       rw [Option.map_eq_some_iff] at hsynth
       obtain ⟨t', hl, hp⟩ := hsynth
-      have ht : t = t' := (Prod.mk.inj hp).2.symm
+      have ht : t = self x t' := (Prod.mk.inj hp).2.symm
       subst ht
       exact Synth.var hl
     | .const n =>

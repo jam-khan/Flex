@@ -18,7 +18,7 @@ inductive Base where
   | int : Base
   deriving Repr, DecidableEq
 
-@[reducible]
+@[simp, reducible]
 def Base.interp : Base → Type
   | .int => Int
 

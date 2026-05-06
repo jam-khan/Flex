@@ -37,13 +37,19 @@ inductive Subtyp : TEnv → Ty → Ty → Prop where
 def prim (n : Int) : Ty :=
   .refine .int ⟨fun _ v => v = n⟩
 
+@[simp]
+def self : EVar → Ty → Ty
+    | x, .refine b p    => .refine b ⟨fun ρ v => p.pred ρ v ∧ v = ρ x⟩
+    | _, .arrow x t1 t2 => .arrow x t1 t2
+
+
 mutual
   -- Γ ⊢ e ⇒ t : "e synthesizes type t"
   inductive Synth : TEnv → Exp → Ty → Prop where
     /-- SYN-VAR -/
     | var {Γ x t} :
         Γ.lookup x = some t →
-        Synth Γ (.var x) t
+        Synth Γ (.var x) (self x t)
 
     /-- SYN-CON: integer literal gets its singleton type. -/
     | const {Γ n} :

@@ -162,3 +162,84 @@ elab "hoist_exists" : tactic => do
   let renamed ← renameTopExistsThenForalls targetAfter exNames forallNames
   let newGoal ← g'.replaceTargetDefEq renamed
   replaceMainGoal [newGoal]
+
+-- `under_exists => tacs`
+-- Runs `tacs` with all existential witnesses replaced by fresh metavars.
+-- If all subgoals are solved, the witnesses are determined and we're done.
+-- If subgoals remain, they are combined with ∧, abstracted over any
+-- undetermined witnesses, and re-wrapped as nested ∃ goals.
+syntax (name := underExists) "under_exists" "=>" tacticSeq : tactic
+
+open Lean Meta Elab Tactic in
+@[tactic underExists] def evalUnderExists : Tactic := fun stx => do
+  let tacs := stx[2]
+  let g ← getMainGoal
+  -- Peel all top-level ∃ binders
+  let mut target ← whnfR (← g.getType)
+  let mut αs   : Array Expr := #[]
+  let mut ps   : Array Expr := #[]  -- predicate lambda for each ∃
+  let mut wits : Array Expr := #[]  -- fresh witness MVars
+  while target.isAppOfArity ``Exists 2 do
+    let α := target.appFn!.appArg!
+    let p := target.appArg!
+    let witMVar ← mkFreshExprMVar α (kind := .natural) (userName := p.bindingName!)
+    αs   := αs.push α
+    ps   := ps.push p
+    wits := wits.push witMVar
+    target ← whnfR (p.beta #[witMVar])
+  if αs.isEmpty then
+    throwError "under_exists: goal must be an existential (∃ ...)"
+  -- Create body metavar and close the original goal via nested Exists.intro
+  let bodyMVar ← mkFreshExprMVar target (kind := .natural)
+  let mut proof : Expr := bodyMVar
+  for i in (List.range αs.size).reverse do
+    proof ← mkAppOptM ``Exists.intro #[αs[i]!, ps[i]!, wits[i]!, proof]
+  g.assign proof
+  -- Run user tactics on the fully-instantiated body
+  setGoals [bodyMVar.mvarId!]
+  evalTactic tacs
+  let remaining ← getGoals
+  if remaining.isEmpty then return
+  -- Check which witnesses are still undetermined
+  let witExprs ← wits.mapM instantiateMVars
+  if witExprs.all (fun w => !w.isMVar) then
+    setGoals remaining
+    return
+  -- Separate Prop goals (to wrap) from non-Prop goals (synthesis mvars from
+  -- tactics like `rw` that create type-valued goals we must not put in ∧)
+  let (propGoals, otherGoals) ← remaining.partitionM fun goal => do
+    isProp (← instantiateMVars (← goal.getType))
+  -- Build conjunction of Prop goal types
+  let types ← propGoals.mapM fun goal => do instantiateMVars (← goal.getType)
+  let conjType ← match types with
+    | []  => throwError "under_exists: impossible empty remaining"
+    | [t] => pure t
+    | _   => types.dropLast.foldrM (fun t acc => mkAppM ``And #[t, acc]) types.getLast!
+  -- Re-wrap with ∃ for each undetermined witness (innermost → outermost)
+  -- and collect undetermined indices in outermost-first order
+  let mut undetermIdx : List Nat := []
+  let mut newTarget := conjType
+  for i in (List.range αs.size).reverse do
+    if witExprs[i]!.isMVar then
+      undetermIdx := i :: undetermIdx
+      let predBody ← kabstract newTarget witExprs[i]! (occs := .all)
+      let pred := mkLambda ps[i]!.bindingName! .default αs[i]! predBody
+      newTarget ← mkAppM ``Exists #[pred]
+  -- Create the new wrapped goal in the context of the first Prop goal
+  let decl ← propGoals.head!.getDecl
+  let newGoalMVar ← mkFreshExprMVarAt decl.lctx decl.localInstances newTarget
+  -- Extract witnesses via Classical.choose chain (outermost first)
+  let mut specProof : Expr := newGoalMVar
+  for i in undetermIdx do
+    let chosen     ← mkAppOptM ``Classical.choose      #[αs[i]!, none, specProof]
+    let chosenSpec ← mkAppOptM ``Classical.choose_spec #[αs[i]!, none, specProof]
+    wits[i]!.mvarId!.assign chosen
+    specProof := chosenSpec
+  -- Distribute the conjunction proof back into the individual Prop goals
+  let mut conjProof := specProof
+  for i in [: propGoals.length - 1] do
+    propGoals[i]!.assign (← mkAppM ``And.left #[conjProof])
+    conjProof ← mkAppM ``And.right #[conjProof]
+  propGoals.getLast!.assign conjProof
+  -- Re-expose the new wrapped goal plus any non-Prop synthesis goals
+  setGoals (newGoalMVar.mvarId! :: otherGoals)

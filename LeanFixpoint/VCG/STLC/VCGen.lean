@@ -54,7 +54,7 @@ theorem sub_arrow_refine_eq (x : EVar) (s t : Ty)
 
 mutual
   def synth (Γ : TEnv) : Exp → Option (Constraint × Ty)
-    | .var x   => Γ.lookup x |>.map (fun t => ((fun _ => True), t))
+    | .var x   => Γ.lookup x |>.map (fun t => ((fun _ => True), self x t))
     | .const n => some ((fun _ => True), prim n)
     | .ann e t =>
         match check Γ e t with
