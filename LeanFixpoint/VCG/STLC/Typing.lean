@@ -63,6 +63,24 @@ mutual
         Check Γ (.var y) s        →
         Synth Γ (.app e₁ (.var y)) (t.rename x y)
 
+    /-- SYN-LEQ (ANF): both operands must be int variables. -/
+    | leq_var {Γ x y} :
+        Synth Γ (.leq (.var x) (.var y))
+          (.refine .bool ⟨fun ρ v => v = decide (ρ.ints x ≤ ρ.ints y)⟩)
+
+    /-- SYN-NOT: synthesize the inner bool expression, then negate. -/
+    | not_ {Γ e r} :
+        Synth Γ e (.refine .bool r) →
+        Synth Γ (.not e)
+          (.refine .bool ⟨fun ρ v => ∀ b, r.pred ρ b → v = !b⟩)
+
+    /-- SYN-AND: synthesize both bool expressions, then AND. -/
+    | and_ {Γ e₁ e₂ r₁ r₂} :
+        Synth Γ e₁ (.refine .bool r₁) →
+        Synth Γ e₂ (.refine .bool r₂) →
+        Synth Γ (.and e₁ e₂)
+          (.refine .bool ⟨fun ρ v => ∀ b₁ b₂, r₁.pred ρ b₁ → r₂.pred ρ b₂ → v = b₁ && b₂⟩)
+
   -- Γ ⊢ e ⇐ t : "e checks against type t"
   inductive Check : TEnv → Exp → Ty → Prop where
     /-- CHK-SYN (subsumption): the *only* rule that emits a subtyping VC. -/

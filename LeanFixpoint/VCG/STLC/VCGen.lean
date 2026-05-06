@@ -76,6 +76,22 @@ mutual
             | some c' => some ((fun ρ => c ρ ∧ c' ρ), t.rename x y)
             | none    => none
         | _ => none
+    | .leq (.var x) (.var y) =>
+        some ((fun _ => True), .refine .bool ⟨fun ρ v => v = decide (ρ.ints x ≤ ρ.ints y)⟩)
+    | .not e =>
+        match synth Γ e with
+        | some (c, .refine .bool r) =>
+            some (c, .refine .bool ⟨fun ρ v => ∀ b, r.pred ρ b → v = !b⟩)
+        | _ => none
+    | .and e₁ e₂ =>
+        match synth Γ e₁ with
+        | some (c₁, .refine .bool r₁) =>
+            match synth Γ e₂ with
+            | some (c₂, .refine .bool r₂) =>
+                some (fun ρ => c₁ ρ ∧ c₂ ρ,
+                      .refine .bool ⟨fun ρ v => ∀ b₁ b₂, r₁.pred ρ b₁ → r₂.pred ρ b₂ → v = b₁ && b₂⟩)
+            | _ => none
+        | _ => none
     | _ => none
   termination_by e => 2 * sizeOf e
 
@@ -104,6 +120,34 @@ mutual
         | none => none
   termination_by e _ => 2 * sizeOf e + 1
 end
+
+-- One-step unfolding equations for the new synth cases — used in examples and soundness proofs.
+@[simp]
+theorem synth_leq_var_eq (Γ : TEnv) (x y : EVar) :
+    synth Γ (.leq (.var x) (.var y)) =
+      some ((fun _ => True), .refine .bool ⟨fun ρ v => v = decide (ρ.ints x ≤ ρ.ints y)⟩) := by
+  simp [synth]
+
+@[simp]
+theorem synth_not_eq (Γ : TEnv) (e : Exp) :
+    synth Γ (.not e) =
+      match synth Γ e with
+      | some (c, .refine .bool r) => some (c, .refine .bool ⟨fun ρ v => ∀ b, r.pred ρ b → v = !b⟩)
+      | _ => none := by
+  simp [synth]
+
+@[simp]
+theorem synth_and_eq (Γ : TEnv) (e₁ e₂ : Exp) :
+    synth Γ (.and e₁ e₂) =
+      match synth Γ e₁ with
+      | some (c₁, .refine .bool r₁) =>
+          match synth Γ e₂ with
+          | some (c₂, .refine .bool r₂) =>
+              some (fun ρ => c₁ ρ ∧ c₂ ρ,
+                    .refine .bool ⟨fun ρ v => ∀ b₁ b₂, r₁.pred ρ b₁ → r₂.pred ρ b₂ → v = b₁ && b₂⟩)
+          | _ => none
+      | _ => none := by
+  simp [synth]
 
 -- Top-level: produce a closed Lean `Prop` to hand to `solve_fixpoint`.
 @[simp]

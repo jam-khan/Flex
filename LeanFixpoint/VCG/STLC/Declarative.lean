@@ -43,3 +43,18 @@ inductive Hastype : TEnv → Exp → Ty → Prop where
       Hastype Γ e s →
       Subtyp Γ s t  →
       Hastype Γ e t
+  -- TLeq (ANF)
+  | leq_var {Γ x y} :
+      Hastype Γ (.leq (.var x) (.var y))
+        (.refine .bool ⟨fun ρ v => v = decide (ρ.ints x ≤ ρ.ints y)⟩)
+  -- TNot
+  | not_ {Γ e r} :
+      Hastype Γ e (.refine .bool r) →
+      Hastype Γ (.not e)
+        (.refine .bool ⟨fun ρ v => ∀ b, r.pred ρ b → v = !b⟩)
+  -- TAnd
+  | and_ {Γ e₁ e₂ r₁ r₂} :
+      Hastype Γ e₁ (.refine .bool r₁) →
+      Hastype Γ e₂ (.refine .bool r₂) →
+      Hastype Γ (.and e₁ e₂)
+        (.refine .bool ⟨fun ρ v => ∀ b₁ b₂, r₁.pred ρ b₁ → r₂.pred ρ b₂ → v = b₁ && b₂⟩)

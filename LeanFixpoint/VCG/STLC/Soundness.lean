@@ -162,10 +162,85 @@ mutual
               intro ρ hΓ; have := hc ρ hΓ; rw [← hc_eq] at this; exact this.1
             · apply check_sound _ _ _ _ hck
               intro ρ hΓ; have := hc ρ hΓ; rw [← hc_eq] at this; exact this.2
+    | .leq (.var x) (.var y) =>
+      unfold synth at hsynth
+      simp at hsynth
+      obtain ⟨hc_eq, ht_eq⟩ := hsynth
+      subst ht_eq
+      exact Synth.leq_var
+    | .not e' =>
+      unfold synth at hsynth
+      cases hinner : synth Γ e' with
+      | none => rw [hinner] at hsynth; simp at hsynth
+      | some p =>
+        obtain ⟨c', ty⟩ := p
+        rw [hinner] at hsynth
+        cases ty with
+        | arrow _ _ _ => simp at hsynth
+        | refine b r =>
+          cases b with
+          | int => simp at hsynth
+          | bool =>
+            simp at hsynth
+            obtain ⟨hc_eq, ht_eq⟩ := hsynth
+            subst ht_eq
+            have : (fun ρ v => (r.pred ρ false → v = true) ∧ (r.pred ρ true → v = false)) = fun ρ v => ∀ b, r.pred ρ b → v = !b := by
+              funext ; simp
+            rw [this] ; clear this
+            apply Synth.not_
+            apply synth_sound _ _ _ _ hinner
+            intro ρ hΓ; rw [hc_eq]; exact hc ρ hΓ
+    | .and e₁' e₂' =>
+      unfold synth at hsynth
+      cases hinner1 : synth Γ e₁' with
+      | none => rw [hinner1] at hsynth; simp at hsynth
+      | some p1 =>
+        obtain ⟨c₁, ty₁⟩ := p1
+        rw [hinner1] at hsynth
+        cases ty₁ with
+        | arrow _ _ _ => simp at hsynth
+        | refine b₁ r₁ =>
+          cases b₁ with
+          | int => simp at hsynth
+          | bool =>
+            cases hinner2 : synth Γ e₂' with
+            | none => rw [hinner2] at hsynth; simp at hsynth
+            | some p2 =>
+              obtain ⟨c₂, ty₂⟩ := p2
+              rw [hinner2] at hsynth
+              cases ty₂ with
+              | arrow _ _ _ => simp at hsynth
+              | refine b₂ r₂ =>
+                cases b₂ with
+                | int => simp at hsynth
+                | bool =>
+                  simp at hsynth
+                  obtain ⟨hc_eq, ht_eq⟩ := hsynth
+                  subst ht_eq
+                  have : (fun ρ v => ((r₁.pred ρ false → ¬r₂.pred ρ false) ∧ (r₁.pred ρ false → r₂.pred ρ true → v = false)) ∧ (r₁.pred ρ true → ¬r₂.pred ρ false) ∧ (r₁.pred ρ true → r₂.pred ρ true → v = true)) = (fun ρ v => ∀ b₁ b₂, r₁.pred ρ b₁ → r₂.pred ρ b₂ → v = b₁ && b₂) := by
+                    funext ; simp
+                  rw [this] ; clear this
+                  apply Synth.and_
+                  · apply synth_sound _ _ _ _ hinner1
+                    rw [←hc_eq] at hc ; simp at hc
+                    intro ρ hΓ
+                    exact (hc ρ hΓ).1
+                  · apply synth_sound _ _ _ _ hinner2
+                    rw [←hc_eq] at hc ; simp at hc
+                    intro ρ hΓ
+                    exact (hc ρ hΓ).2
     | .app e₁ (.iconst _) | .app e₁ (.bconst _) | .app e₁ (.letin _ _ _)
     | .app e₁ (.lam _ _)  | .app e₁ (.app _ _)  | .app e₁ (.ann _ _)
-    | .lam _ _ | .letin _ _ _ =>
+    | .app e₁ (.and _ _)  | .app e₁ (.not _)    | .app e₁ (.leq _ _)
+    | .lam _ _ | .letin _ _ _
+    | .leq e₁ (.iconst _) | .leq e₁ (.bconst _) | .leq e₁ (.letin _ _ _)
+    | .leq e₁ (.lam _ _)  | .leq e₁ (.leq _ _)  | .leq e₁ (.ann _ _)
+    | .leq e₁ (.and _ _)  | .leq e₁ (.not _)    | .leq e₁ (.app _ _)
+    | .leq (.iconst _) (.var _) | .leq (.bconst _) (.var _) | .leq (.letin _ _ _) (.var _)
+    | .leq (.lam _ _) (.var _) | .leq (.leq _ _) (.var _) | .leq (.ann _ _) (.var _)
+    | .leq (.and _ _) (.var _) | .leq (.not _) (.var _) | .leq (.app _ _) (.var _) =>
       unfold synth at hsynth; simp at hsynth
+
 
   theorem check_sound (Γ : TEnv) (e : Exp) (t : Ty) (c : Constraint) :
       check Γ e t = some c → Entail Γ c → Check Γ e t := by
@@ -275,6 +350,43 @@ mutual
           rw [hsub] at hck; simp at hck; subst hck; apply Check.sub
           · exact synth_sound _ _ _ _ hsy (fun ρ hΓ => (h ρ hΓ).1)
           · exact sub_sound _ _ _ _ hsub (fun ρ hΓ => (h ρ hΓ).2)
+    | .not e' =>
+      unfold check at hck
+      cases hsy : synth Γ (.not e') with
+      | none => rw [hsy] at hck; simp at hck
+      | some p =>
+        rw [hsy] at hck; simp at hck; obtain ⟨c', s⟩ := p
+        cases hsub : sub s t with
+        | none => rw [hsub] at hck; simp at hck
+        | some csub =>
+          rw [hsub] at hck; simp at hck; subst hck; apply Check.sub
+          · exact synth_sound _ _ _ _ hsy (fun ρ hΓ => (h ρ hΓ).1)
+          · exact sub_sound _ _ _ _ hsub (fun ρ hΓ => (h ρ hΓ).2)
+    | .and e₁ e₂ =>
+      unfold check at hck
+      cases hsy : synth Γ (.and e₁ e₂) with
+      | none => rw [hsy] at hck; simp at hck
+      | some p =>
+        rw [hsy] at hck; simp at hck; obtain ⟨c', s⟩ := p
+        cases hsub : sub s t with
+        | none => rw [hsub] at hck; simp at hck
+        | some csub =>
+          rw [hsub] at hck; simp at hck; subst hck; apply Check.sub
+          · exact synth_sound _ _ _ _ hsy (fun ρ hΓ => (h ρ hΓ).1)
+          · exact sub_sound _ _ _ _ hsub (fun ρ hΓ => (h ρ hΓ).2)
+    | .leq e₁ e₂ =>
+      unfold check at hck
+      cases hsy : synth Γ (.leq e₁ e₂) with
+      | none => rw [hsy] at hck; simp at hck
+      | some p =>
+        rw [hsy] at hck; simp at hck; obtain ⟨c', s⟩ := p
+        cases hsub : sub s t with
+        | none => rw [hsub] at hck; simp at hck
+        | some csub =>
+          rw [hsub] at hck; simp at hck; subst hck; apply Check.sub
+          · exact synth_sound _ _ _ _ hsy (fun ρ hΓ => (h ρ hΓ).1)
+          · exact sub_sound _ _ _ _ hsub (fun ρ hΓ => (h ρ hΓ).2)
+
 
   theorem synth_to_hastype {Γ : TEnv} {e : Exp} {t : Ty} :
       Synth Γ e t → Hastype Γ e t := by
@@ -285,6 +397,9 @@ mutual
     | .bool_const    => exact .bool_const
     | .ann hck       => exact .ann (check_to_hastype hck)
     | .app hsy hck   => exact .app (synth_to_hastype hsy) (check_to_hastype hck)
+    | .leq_var       => exact .leq_var
+    | .not_ hsy      => exact .not_ (synth_to_hastype hsy)
+    | .and_ hsy1 hsy2 => exact .and_ (synth_to_hastype hsy1) (synth_to_hastype hsy2)
 
   theorem check_to_hastype {Γ : TEnv} {e : Exp} {t : Ty} :
       Check Γ e t → Hastype Γ e t := by

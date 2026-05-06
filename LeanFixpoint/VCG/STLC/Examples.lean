@@ -47,15 +47,22 @@ example : ∃ k, Check [] (.letin "z" (.iconst 99) (.app (.ann exId (ty_k k)) (.
   make_horn_under_k
   solve_fixpoint
 
+abbrev IntN (n : Int) : Ty := .refine .int ⟨fun _ v => v = n⟩
 abbrev IntR (x : String) (k : Int → Int → Prop) : Ty := .refine .int ⟨fun ρ v => k (ρ.ints x) v⟩
 abbrev ty_xk (x : String) (k : Int → Int → Prop) : Ty := .arrow "x" TT (IntR x k)
 
-example : ∃ k, Check [] (.letin "z" (.iconst 99) (.app (.ann exId (ty_xk "x" k)) (.var "z"))) (.refine .int ⟨fun _ v => v = 99⟩) := by
+example : ∃ k, Check [] (.letin "z" (.iconst 99) (.app (.ann exId (ty_xk "x" k)) (.var "z"))) (IntN 99) := by
   make_horn_under_k
   solve_fixpoint
 
 example : topVC [] ex3Exp ex3Ty := by
   simp [topVC, check, synth, implyBind, ex3Exp, ex3Ty, Pos, prim]
+
+abbrev exGt : Exp := .lam "x" (.lam "y" (.not (.leq (.var "x") (.var "y"))))
+abbrev tyGt : Ty := Ty.arrow "x" TT (Ty.arrow "y" TT (.refine .bool ⟨fun ρ v => v = (ρ.ints "x" > ρ.ints "y")⟩))
+
+example : topVC [] exGt tyGt := by
+  simp [topVC, check]
 
 /-! ## Declarative-side examples
 
