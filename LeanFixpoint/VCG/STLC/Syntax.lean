@@ -2,25 +2,49 @@
 namespace STLC
 
 abbrev EVar := String
-abbrev REnv := EVar → Int
-@[simp]
-def REnv.empty : REnv := fun _ => 0
-@[simp]
-def REnv.update (ρ : REnv) (x : EVar) (v : Int) : REnv :=
-  fun y => if x == y then v else ρ y
-notation ρ "[" x " ↦ " v "]" => REnv.update ρ x v
 
 inductive Const where
   | int : Int → Const
   deriving Repr, DecidableEq
 
 inductive Base where
-  | int : Base
+  | int  : Base
+  | bool : Base
   deriving Repr, DecidableEq
 
 @[simp, reducible]
 def Base.interp : Base → Type
-  | .int => Int
+  | .int  => Int
+  | .bool => Bool
+
+/-- Runtime values: either an integer or a boolean. -/
+inductive Val where
+  | int  : Int  → Val
+  | bool : Bool → Val
+  deriving Repr, DecidableEq
+
+/-- Embed a base-typed value into `Val`. -/
+@[simp, reducible]
+def Val.ofBase : (b : Base) → b.interp → Val
+  | .int,  n => .int n
+  | .bool, b => .bool b
+
+/-- Project a `Val` to a base-typed value; defaults for shape mismatches
+    (only reached in ill-typed environments, never in valid derivations). -/
+@[simp, reducible]
+def Val.asBase : (b : Base) → Val → b.interp
+  | .int,  .int n  => n
+  | .bool, .bool b => b
+  | .int,  .bool _ => 0
+  | .bool, .int _  => false
+
+abbrev REnv := EVar → Val
+@[simp]
+def REnv.empty : REnv := fun _ => .int 0
+@[simp]
+def REnv.update (ρ : REnv) (x : EVar) (v : Val) : REnv :=
+  fun y => if x == y then v else ρ y
+notation ρ "[" x " ↦ " v "]" => REnv.update ρ x v
 
 structure Refinement (b : Base) where
   pred : REnv → b.interp → Prop
@@ -59,7 +83,8 @@ theorem Ty.sizeOf_rename (x y : EVar) (t : Ty) :
     split <;> simp [ihs, iht]
 
 inductive Exp where
-  | const : Int → Exp               -- c
+  | iconst : Int  → Exp               -- integer literal
+  | bconst  : Bool → Exp               -- boolean literal
   | var   : EVar  → Exp             -- x
   | letin : EVar  → Exp → Exp → Exp -- let x = e₁ in e₂
   | lam   : EVar  → Exp → Exp       -- λ x. e

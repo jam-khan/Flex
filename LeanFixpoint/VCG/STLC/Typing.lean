@@ -32,14 +32,21 @@ inductive Subtyp : TEnv → Ty → Ty → Prop where
 -- TO MAKE CHOICE FOR BINDERS (LOCALLY NAMELESS etc later)
 -- WHEN TRYING TO USE BELOW FOR MECHANIZATION
 
--- refinement type for simple constant primitive
+-- refinement type for an integer constant
 @[simp]
 def prim (n : Int) : Ty :=
   .refine .int ⟨fun _ v => v = n⟩
 
+-- refinement type for a boolean constant
+@[simp]
+def primBool (b : Bool) : Ty :=
+  .refine .bool ⟨fun _ v => v = b⟩
+
+/-- `self x t` strengthens `t` with the self-equality `v = Val.asBase b (ρ x)`,
+    relating the synthesized value to the environment binding for `x`. -/
 @[simp]
 def self : EVar → Ty → Ty
-    | x, .refine b p    => .refine b ⟨fun ρ v => p.pred ρ v ∧ v = ρ x⟩
+    | x, .refine b p    => .refine b ⟨fun ρ v => p.pred ρ v ∧ v = Val.asBase b (ρ x)⟩
     | _, .arrow x t1 t2 => .arrow x t1 t2
 
 
@@ -52,8 +59,12 @@ mutual
         Synth Γ (.var x) (self x t)
 
     /-- SYN-CON: integer literal gets its singleton type. -/
-    | const {Γ n} :
-        Synth Γ (.const n) (prim n)
+    | int_const {Γ n} :
+        Synth Γ (.iconst n) (prim n)
+
+    /-- SYN-BOOL: boolean literal gets its singleton type. -/
+    | bool_const {Γ b} :
+        Synth Γ (.bconst b) (primBool b)
 
     /-- SYN-ANN: an annotated term synthesizes the annotation, after checking. -/
     | ann {Γ e t} :

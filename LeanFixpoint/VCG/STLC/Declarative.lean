@@ -15,8 +15,11 @@ inductive Hastype : TEnv → Exp → Ty → Prop where
       Γ.lookup x = some t →
       Hastype Γ (.var x) (self x t)
   -- TCon `integer literal`
-  | const {Γ n} :
-      Hastype Γ (.const n) (prim n)
+  | int_const {Γ n} :
+      Hastype Γ (.iconst n) (prim n)
+  -- TBool `boolean literal`
+  | bool_const {Γ b} :
+      Hastype Γ (.bconst b) (primBool b)
   -- TAbs (same-binder)
   | lam {Γ x e s t} :
       Hastype ((x, s) :: Γ) e t →

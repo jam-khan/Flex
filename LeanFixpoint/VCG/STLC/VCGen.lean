@@ -9,10 +9,11 @@ open STLC
 abbrev Constraint := REnv → Prop
 
 -- Implication-constraint helper from page 17 of the refinement-types tutorial.
+-- Quantifies over `b.interp` and lifts the witness into `Val` via `Val.ofBase`.
 @[simp]
 def implyBind (x : EVar) (t : Ty) (c : Constraint) : Constraint :=
   match t with
-  | .refine b r => fun ρ => ∀ v : b.interp, r.pred ρ v → c (ρ[x ↦ v])
+  | .refine b r => fun ρ => ∀ v : b.interp, r.pred ρ v → c (ρ[x ↦ Val.ofBase b v])
   | .arrow ..   => c
 
 -- Algorithmic subtyping. Returns `none` on shape mismatch.
@@ -20,6 +21,8 @@ def sub (x : Ty) (y : Ty) : Option Constraint :=
   match x, y with
     | .refine .int r₁, .refine .int r₂ =>
         some (fun ρ => ∀ v : Int, r₁.pred ρ v → r₂.pred ρ v)
+    | .refine .bool r₁, .refine .bool r₂ =>
+        some (fun ρ => ∀ v : Bool, r₁.pred ρ v → r₂.pred ρ v)
     | .arrow x₁ s₁ t₁, .arrow x₂ s₂ t₂ =>
         match sub s₂ s₁, sub (t₁.rename x₁ x₂) t₂ with
         | some c₁, some c₂ =>
@@ -35,16 +38,22 @@ decreasing_by
 
 -- One-step unfolding equations (no recursion in RHS) — used in soundness proofs.
 @[simp]
-theorem sub_refine_refine_eq (r₁ r₂ : Refinement .int) :
+theorem sub_refine_int_refine_int_eq (r₁ r₂ : Refinement .int) :
     sub (.refine .int r₁) (.refine .int r₂) =
       some (fun ρ => ∀ v : Int, r₁.pred ρ v → r₂.pred ρ v) := by
+  unfold sub; rfl
+
+@[simp]
+theorem sub_refine_bool_refine_bool_eq (r₁ r₂ : Refinement .bool) :
+    sub (.refine .bool r₁) (.refine .bool r₂) =
+      some (fun ρ => ∀ v : Bool, r₁.pred ρ v → r₂.pred ρ v) := by
   unfold sub; rfl
 
 @[simp]
 theorem sub_refine_arrow_eq (b : Base) (r : Refinement b)
     (x : EVar) (s t : Ty) :
     sub (.refine b r) (.arrow x s t) = none := by
-  unfold sub; rfl
+  unfold sub; cases b <;> rfl
 
 @[simp]
 theorem sub_arrow_refine_eq (x : EVar) (s t : Ty)
@@ -55,7 +64,8 @@ theorem sub_arrow_refine_eq (x : EVar) (s t : Ty)
 mutual
   def synth (Γ : TEnv) : Exp → Option (Constraint × Ty)
     | .var x   => Γ.lookup x |>.map (fun t => ((fun _ => True), self x t))
-    | .const n => some ((fun _ => True), prim n)
+    | .iconst n => some ((fun _ => True), prim n)
+    | .bconst b  => some ((fun _ => True), primBool b)
     | .ann e t =>
         match check Γ e t with
         | some c => some (c, t)

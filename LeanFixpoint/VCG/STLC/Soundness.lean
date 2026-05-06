@@ -48,10 +48,8 @@ theorem Ty.rename_self (x : EVar) (t : Ty) : t.rename x x = t := by
 theorem entail_implyBind_refine
     {Γ : TEnv} {x : EVar} {b : Base} {r : Refinement b}
     {c : Constraint} :
-    Entail Γ (implyBind x (.refine b r) c) → Entail ((x, .refine b r) :: Γ) c := by
-  intro h ρ ⟨hr, hΓ⟩
-  have := h ρ hΓ (ρ x) hr
-  simpa using this
+    Entail Γ (implyBind x (.refine b r) c) → Entail ((x, .refine b r) :: Γ) c :=
+  fun h => Entail.ext (by simpa [implyBind] using h)
 
 theorem entail_implyBind_arrow
     {Γ : TEnv} {x : EVar} {x' : EVar} {s t : Ty} {c : Constraint} :
@@ -66,7 +64,11 @@ theorem sub_sound (Γ : TEnv) (s t : Ty) (c : Constraint) :
   intro hsy h
   match s, t with
   | .refine .int r₁, .refine .int r₂ =>
-    rw [sub_refine_refine_eq] at hsy
+    rw [sub_refine_int_refine_int_eq] at hsy
+    obtain rfl := Option.some.inj hsy
+    exact Subtyp.refine h
+  | .refine .bool r₁, .refine .bool r₂ =>
+    rw [sub_refine_bool_refine_bool_eq] at hsy
     obtain rfl := Option.some.inj hsy
     exact Subtyp.refine h
   | .arrow x₁ s₁ t₁, .arrow x₂ s₂ t₂ =>
@@ -92,6 +94,8 @@ theorem sub_sound (Γ : TEnv) (s t : Ty) (c : Constraint) :
             apply entail_implyBind_arrow
             intro ρ hΓ
             exact (h ρ hΓ).2
+  | .refine .int _, .refine .bool _ | .refine .bool _, .refine .int _ =>
+    simp [sub] at hsy
   | .refine _ _, .arrow _ _ _ =>
     rw [sub_refine_arrow_eq] at hsy
     simp at hsy
@@ -119,12 +123,18 @@ mutual
       have ht : t = self x t' := (Prod.mk.inj hp).2.symm
       subst ht
       exact Synth.var hl
-    | .const n =>
+    | .iconst n =>
       unfold synth at hsynth
       simp at hsynth
       obtain ⟨_, ht_eq⟩ := hsynth
       subst ht_eq
-      exact Synth.const
+      exact Synth.int_const
+    | .bconst b =>
+      unfold synth at hsynth
+      simp at hsynth
+      obtain ⟨_, ht_eq⟩ := hsynth
+      subst ht_eq
+      exact Synth.bool_const
     | .ann e' t' =>
       unfold synth at hsynth
       cases hck : check Γ e' t' with
@@ -167,7 +177,7 @@ mutual
               have := hc ρ hΓ
               rw [← hc_eq] at this
               exact this.2
-    | .app e₁ (.const _) | .app e₁ (.letin _ _ _)
+    | .app e₁ (.iconst _) | .app e₁ (.bconst _) | .app e₁ (.letin _ _ _)
     | .app e₁ (.lam _ _) | .app e₁ (.app _ _) | .app e₁ (.ann _ _)
     | .lam _ _ | .letin _ _ _ =>
       unfold synth at hsynth
@@ -247,9 +257,26 @@ mutual
           apply Check.sub
           · exact synth_sound _ _ _ _ hsy (fun ρ hΓ => (h ρ hΓ).1)
           · exact sub_sound _ _ _ _ hsub (fun ρ hΓ => (h ρ hΓ).2)
-    | .const n =>
+    | .iconst n =>
       unfold check at hck
-      cases hsy : synth Γ (.const n) with
+      cases hsy : synth Γ (.iconst n) with
+      | none => rw [hsy] at hck; simp at hck
+      | some p =>
+        rw [hsy] at hck
+        simp at hck
+        obtain ⟨c', s⟩ := p
+        cases hsub : sub s t with
+        | none => rw [hsub] at hck; simp at hck
+        | some csub =>
+          rw [hsub] at hck
+          simp at hck
+          subst hck
+          apply Check.sub
+          · exact synth_sound _ _ _ _ hsy (fun ρ hΓ => (h ρ hΓ).1)
+          · exact sub_sound _ _ _ _ hsub (fun ρ hΓ => (h ρ hΓ).2)
+    | .bconst b =>
+      unfold check at hck
+      cases hsy : synth Γ (.bconst b) with
       | none => rw [hsy] at hck; simp at hck
       | some p =>
         rw [hsy] at hck
@@ -304,7 +331,8 @@ mutual
     intro h
     match h with
     | .var hl       => exact .var hl
-    | .const        => exact .const
+    | .int_const        => exact .int_const
+    | .bool_const         => exact .bool_const
     | .ann hck      => exact .ann (check_to_hastype hck)
     | .app hsy hck  => exact .app (synth_to_hastype hsy) (check_to_hastype hck)
 
