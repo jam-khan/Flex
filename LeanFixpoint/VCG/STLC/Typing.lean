@@ -74,6 +74,11 @@ mutual
         Synth Γ (.not e)
           (.refine .bool ⟨fun ρ v => ∀ b, r.pred ρ b → v = !b⟩)
 
+    /-- SYN-ADD (ANF): both operands must be int variables. -/
+    | add_var {Γ x y} :
+        Synth Γ (.add (.var x) (.var y))
+          (.refine .int ⟨fun ρ v => v = ρ.ints x + ρ.ints y⟩)
+
     /-- SYN-AND: synthesize both bool expressions, then AND. -/
     | and_ {Γ e₁ e₂ r₁ r₂} :
         Synth Γ e₁ (.refine .bool r₁) →

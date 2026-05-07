@@ -91,6 +91,16 @@ example : ∃ (k1 k2 k3 : Int → Prop), Check [] (
   make_horn_under_k [List.lookup]
   solve_fixpoint
 
+def exAddExp : Exp :=
+  .letin "a" (.iconst 3)
+    (.letin "b" (.iconst 4)
+      (.add (.var "a") (.var "b")))
+
+def exAddTy : Ty := IntN 7
+
+example : topVC [] exAddExp exAddTy := by
+  simp [topVC, check, synth, implyBind, exAddExp, exAddTy, prim]
+
 /-! ## Declarative-side examples
 
   Same programs as above, but stated as derivations of the new declarative

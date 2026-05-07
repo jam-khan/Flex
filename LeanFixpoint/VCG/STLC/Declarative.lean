@@ -43,6 +43,10 @@ inductive Hastype : TEnv → Exp → Ty → Prop where
       Hastype Γ e s →
       Subtyp Γ s t  →
       Hastype Γ e t
+  -- TAdd (ANF)
+  | add_var {Γ x y} :
+      Hastype Γ (.add (.var x) (.var y))
+        (.refine .int ⟨fun ρ v => v = ρ.ints x + ρ.ints y⟩)
   -- TLeq (ANF)
   | leq_var {Γ x y} :
       Hastype Γ (.leq (.var x) (.var y))

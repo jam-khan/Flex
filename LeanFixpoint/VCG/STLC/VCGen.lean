@@ -78,6 +78,8 @@ mutual
         | _ => none
     | .leq (.var x) (.var y) =>
         some ((fun _ => True), .refine .bool ⟨fun ρ v => v = decide (ρ.ints x ≤ ρ.ints y)⟩)
+    | .add (.var x) (.var y) =>
+        some ((fun _ => True), .refine .int ⟨fun ρ v => v = ρ.ints x + ρ.ints y⟩)
     | .not e =>
         match synth Γ e with
         | some (c, .refine .bool r) =>
@@ -94,6 +96,7 @@ mutual
         | _ => none
     | _ => none
   termination_by e => 2 * sizeOf e
+
 
   def check (Γ : TEnv) : Exp → Ty → Option Constraint
     | .lam x e, .arrow x' s t =>
@@ -136,6 +139,12 @@ mutual
 end
 
 -- One-step unfolding equations for the new synth cases — used in examples and soundness proofs.
+@[simp]
+theorem synth_add_var_eq (Γ : TEnv) (x y : EVar) :
+    synth Γ (.add (.var x) (.var y)) =
+      some ((fun _ => True), .refine .int ⟨fun ρ v => v = ρ.ints x + ρ.ints y⟩) := by
+  simp [synth]
+
 @[simp]
 theorem synth_leq_var_eq (Γ : TEnv) (x y : EVar) :
     synth Γ (.leq (.var x) (.var y)) =

@@ -162,6 +162,12 @@ mutual
               intro ρ hΓ; have := hc ρ hΓ; rw [← hc_eq] at this; exact this.1
             · apply check_sound _ _ _ _ hck
               intro ρ hΓ; have := hc ρ hΓ; rw [← hc_eq] at this; exact this.2
+    | .add (.var x) (.var y) =>
+      unfold synth at hsynth
+      simp at hsynth
+      obtain ⟨hc_eq, ht_eq⟩ := hsynth
+      subst ht_eq
+      exact Synth.add_var
     | .leq (.var x) (.var y) =>
       unfold synth at hsynth
       simp at hsynth
@@ -232,16 +238,24 @@ mutual
     | .app e₁ (.iconst _) | .app e₁ (.bconst _) | .app e₁ (.letin _ _ _)
     | .app e₁ (.lam _ _)  | .app e₁ (.app _ _)  | .app e₁ (.ann _ _)
     | .app e₁ (.and _ _)  | .app e₁ (.not _)    | .app e₁ (.leq _ _)
-    | .app e₁ (.ite _ _ _)
+    | .app e₁ (.ite _ _ _) | .app e₁ (.add _ _)
     | .lam _ _ | .letin _ _ _ | .ite _ _ _
     | .leq e₁ (.iconst _) | .leq e₁ (.bconst _) | .leq e₁ (.letin _ _ _)
     | .leq e₁ (.lam _ _)  | .leq e₁ (.leq _ _)  | .leq e₁ (.ann _ _)
     | .leq e₁ (.and _ _)  | .leq e₁ (.not _)    | .leq e₁ (.app _ _)
-    | .leq e₁ (.ite _ _ _)
+    | .leq e₁ (.ite _ _ _) | .leq e₁ (.add _ _)
     | .leq (.iconst _) (.var _) | .leq (.bconst _) (.var _) | .leq (.letin _ _ _) (.var _)
     | .leq (.lam _ _) (.var _) | .leq (.leq _ _) (.var _) | .leq (.ann _ _) (.var _)
     | .leq (.and _ _) (.var _) | .leq (.not _) (.var _) | .leq (.app _ _) (.var _)
-    | .leq (.ite _ _ _) (.var _) =>
+    | .leq (.ite _ _ _) (.var _) | .leq (.add _ _) (.var _)
+    | .add e₁ (.iconst _) | .add e₁ (.bconst _) | .add e₁ (.letin _ _ _)
+    | .add e₁ (.lam _ _)  | .add e₁ (.add _ _)  | .add e₁ (.ann _ _)
+    | .add e₁ (.and _ _)  | .add e₁ (.not _)    | .add e₁ (.app _ _)
+    | .add e₁ (.ite _ _ _) | .add e₁ (.leq _ _)
+    | .add (.iconst _) (.var _) | .add (.bconst _) (.var _) | .add (.letin _ _ _) (.var _)
+    | .add (.lam _ _) (.var _) | .add (.add _ _) (.var _) | .add (.ann _ _) (.var _)
+    | .add (.and _ _) (.var _) | .add (.not _) (.var _) | .add (.app _ _) (.var _)
+    | .add (.ite _ _ _) (.var _) | .add (.leq _ _) (.var _) =>
       unfold synth at hsynth; simp at hsynth
 
 
@@ -389,6 +403,18 @@ mutual
           rw [hsub] at hck; simp at hck; subst hck; apply Check.sub
           · exact synth_sound _ _ _ _ hsy (fun ρ hΓ => (h ρ hΓ).1)
           · exact sub_sound _ _ _ _ hsub (fun ρ hΓ => (h ρ hΓ).2)
+    | .add e₁ e₂ =>
+      unfold check at hck
+      cases hsy : synth Γ (.add e₁ e₂) with
+      | none => rw [hsy] at hck; simp at hck
+      | some p =>
+        rw [hsy] at hck; simp at hck; obtain ⟨c', s⟩ := p
+        cases hsub : sub s t with
+        | none => rw [hsub] at hck; simp at hck
+        | some csub =>
+          rw [hsub] at hck; simp at hck; subst hck; apply Check.sub
+          · exact synth_sound _ _ _ _ hsy (fun ρ hΓ => (h ρ hΓ).1)
+          · exact sub_sound _ _ _ _ hsub (fun ρ hΓ => (h ρ hΓ).2)
     | .ite e₀ e₁ e₂ =>
       unfold check at hck
       cases e₀ with
@@ -417,7 +443,7 @@ mutual
                   · apply check_sound _ _ _ _ hck2
                     exact entail_implyBind_refine (fun ρ hΓ => (h ρ hΓ).2)
       | iconst _ | bconst _ | lam _ _ | letin _ _ _ | ann _ _
-      | app _ _ | not _ | and _ _ | leq _ _ | ite _ _ _ => simp at hck
+      | app _ _ | not _ | and _ _ | leq _ _ | ite _ _ _ | add _ _ => simp at hck
 
 
   theorem synth_to_hastype {Γ : TEnv} {e : Exp} {t : Ty} :
@@ -429,6 +455,7 @@ mutual
     | .bool_const    => exact .bool_const
     | .ann hck       => exact .ann (check_to_hastype hck)
     | .app hsy hck   => exact .app (synth_to_hastype hsy) (check_to_hastype hck)
+    | .add_var       => exact .add_var
     | .leq_var       => exact .leq_var
     | .not_ hsy      => exact .not_ (synth_to_hastype hsy)
     | .and_ hsy1 hsy2 => exact .and_ (synth_to_hastype hsy1) (synth_to_hastype hsy2)

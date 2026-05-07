@@ -96,6 +96,7 @@ inductive Exp where
   | not    : Exp   → Exp             -- ¬ e
   | leq    : Exp   → Exp → Exp       -- e₁ ≤ e₂
   | ite    : Exp   → Exp → Exp → Exp -- if e₀ then e₁ else e₂
+  | add    : Exp   → Exp → Exp       -- e₁ + e₂
 
 @[simp]
 abbrev TEnv := List (EVar × Ty)
