@@ -100,10 +100,11 @@ mutual
         Check ((x, s) :: Γ) e₂ t →
         Check Γ (.letin x e₁ e₂) t
 
-    /-- CHK-ITE: synthesize the condition to bool, check both branches. -/
-    | ite {Γ e₀ e₁ e₂ r t} :
-        Synth Γ e₀ (.refine .bool r) →
-        Check Γ e₁ t →
-        Check Γ e₂ t →
-        Check Γ (.ite e₀ e₁ e₂) t
+    /-- CHK-ITE (ANF, path-sensitive): condition must be a bool variable in scope;
+        branches are checked under the path condition x=true / x=false. -/
+    | ite {Γ x e₁ e₂ r t} :
+        Γ.lookup x = some (.refine .bool r) →
+        Check ((x, .refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = true⟩)  :: Γ) e₁ t →
+        Check ((x, .refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = false⟩) :: Γ) e₂ t →
+        Check Γ (.ite (.var x) e₁ e₂) t
 end

@@ -111,11 +111,18 @@ mutual
             | none    => none
         | none => none
     | .ite e₀ e₁ e₂, t =>
-        match synth Γ e₀ with
-        | some (c₀, .refine .bool _) =>
-            match check Γ e₁ t, check Γ e₂ t with
-            | some c₁, some c₂ => some (fun ρ => c₀ ρ ∧ c₁ ρ ∧ c₂ ρ)
-            | _, _ => none
+        match e₀ with
+        | .var x =>
+            match Γ.lookup x with
+            | some (.refine .bool r) =>
+                match check ((x, .refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = true⟩) :: Γ) e₁ t,
+                      check ((x, .refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = false⟩) :: Γ) e₂ t with
+                | some c₁, some c₂ =>
+                    some (fun ρ =>
+                      implyBind x (.refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = true⟩)  c₁ ρ ∧
+                      implyBind x (.refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = false⟩) c₂ ρ)
+                | _, _ => none
+            | _ => none
         | _ => none
     | e, t =>
         -- Catch-all (Chk-Syn): synthesize, then subtype.

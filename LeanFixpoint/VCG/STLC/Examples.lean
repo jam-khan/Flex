@@ -64,6 +64,33 @@ abbrev tyGt : Ty := Ty.arrow "x" TT (Ty.arrow "y" TT (.refine .bool ⟨fun ρ v 
 example : topVC [] exGt tyGt := by
   simp [topVC, check]
 
+
+abbrev exMax : Exp :=
+  .lam "x"
+    (.lam "y"
+      (.letin "c"
+        (.leq (.var "x") (.var "y"))
+        (.ite
+          (.var "c")
+          (.var "y")
+          (.var "x")
+        )
+      )
+    )
+
+abbrev IntK (k : Int → Prop) : Ty := .refine .int ⟨fun _ v => k v⟩
+
+example : ∃ (k1 k2 k3 : Int → Prop), Check [] (
+  .letin "a"
+    (.iconst 99)
+    (.letin "b"
+      (.iconst 100)
+      (.app (.app (.ann exMax (.arrow "x" (IntK k1) (.arrow "y" (IntK k2) (.refine .int ⟨fun _ v => k3 v⟩)))) (.var "a")) (.var "b"))
+    )
+  ) (.refine .int ⟨fun _ v => v = 100 ∨ v = 99⟩) := by
+  make_horn_under_k [List.lookup]
+  solve_fixpoint
+
 /-! ## Declarative-side examples
 
   Same programs as above, but stated as derivations of the new declarative
