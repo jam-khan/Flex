@@ -3,16 +3,7 @@ import LeanFixpoint.VCG.STLC.Entailment
 
 open STLC
 
-/-! ## Subtyping  Γ ⊢ s <: t
-  Two rules, mirroring the paper:
-  - **`refine`** reduces to an entailment between the two predicates.
-    The paper's alpha-renaming `p₂[v₂ := v₁]` vanishes here because
-    refinement binders are explicit `pred` arguments — there is no name to rename.
-  - **`arrow`** is contravariant in the input, covariant in the output, with
-    the output compared under an env extended with the (shared) parameter.
-    We require both arrows to use the **same binder name**, sidestepping the
-    paper's `t₁[x₁ := x₂]` rename. Generalize later via `Ty.rename` if needed.
--/
+/-! ## Subtyping  Γ ⊢ s <: t -/
 
 inductive Subtyp : TEnv → Ty → Ty → Prop where
   /-- SUB-BASE:  Γ ⊢ ∀v. p₁ ρ v → p₂ ρ v   ⟹   Γ ⊢ {ν:b|p₁} <: {ν:b|p₂} -/
@@ -27,19 +18,21 @@ inductive Subtyp : TEnv → Ty → Ty → Prop where
       Subtyp ((x₂, s₂) :: Γ) (t₁.rename x₁ x₂) t₂ →
       Subtyp Γ (.arrow x₁ s₁ t₁) (.arrow x₂ s₂ t₂)
 
-
--- NOTE: BELOW TYPING IS ADDED BUT WE NEED
--- TO MAKE CHOICE FOR BINDERS (LOCALLY NAMELESS etc later)
--- WHEN TRYING TO USE BELOW FOR MECHANIZATION
-
--- refinement type for simple constant primitive
+-- refinement type for an integer constant
 @[simp]
 def prim (n : Int) : Ty :=
   .refine .int ⟨fun _ v => v = n⟩
 
+-- refinement type for a boolean constant
+@[simp]
+def primBool (b : Bool) : Ty :=
+  .refine .bool ⟨fun _ v => v = b⟩
+
+/-- `self x t` strengthens `t` with `v = REnv.get b ρ x`, tying the synthesized
+    value back to the stored value of `x` in the environment. -/
 @[simp]
 def self : EVar → Ty → Ty
-    | x, .refine b p    => .refine b ⟨fun ρ v => p.pred ρ v ∧ v = ρ x⟩
+    | x, .refine b p    => .refine b ⟨fun ρ v => p.pred ρ v ∧ v = REnv.get b ρ x⟩
     | _, .arrow x t1 t2 => .arrow x t1 t2
 
 
@@ -52,8 +45,12 @@ mutual
         Synth Γ (.var x) (self x t)
 
     /-- SYN-CON: integer literal gets its singleton type. -/
-    | const {Γ n} :
-        Synth Γ (.const n) (prim n)
+    | int_const {Γ n} :
+        Synth Γ (.iconst n) (prim n)
+
+    /-- SYN-BOOL: boolean literal gets its singleton type. -/
+    | bool_const {Γ b} :
+        Synth Γ (.bconst b) (primBool b)
 
     /-- SYN-ANN: an annotated term synthesizes the annotation, after checking. -/
     | ann {Γ e t} :
@@ -65,6 +62,29 @@ mutual
         Synth Γ e₁ (.arrow x s t) →
         Check Γ (.var y) s        →
         Synth Γ (.app e₁ (.var y)) (t.rename x y)
+
+    /-- SYN-LEQ (ANF): both operands must be int variables. -/
+    | leq_var {Γ x y} :
+        Synth Γ (.leq (.var x) (.var y))
+          (.refine .bool ⟨fun ρ v => v = decide (ρ.ints x ≤ ρ.ints y)⟩)
+
+    /-- SYN-NOT: synthesize the inner bool expression, then negate. -/
+    | not_ {Γ e r} :
+        Synth Γ e (.refine .bool r) →
+        Synth Γ (.not e)
+          (.refine .bool ⟨fun ρ v => ∀ b, r.pred ρ b → v = !b⟩)
+
+    /-- SYN-ADD (ANF): both operands must be int variables. -/
+    | add_var {Γ x y} :
+        Synth Γ (.add (.var x) (.var y))
+          (.refine .int ⟨fun ρ v => v = ρ.ints x + ρ.ints y⟩)
+
+    /-- SYN-AND: synthesize both bool expressions, then AND. -/
+    | and_ {Γ e₁ e₂ r₁ r₂} :
+        Synth Γ e₁ (.refine .bool r₁) →
+        Synth Γ e₂ (.refine .bool r₂) →
+        Synth Γ (.and e₁ e₂)
+          (.refine .bool ⟨fun ρ v => ∀ b₁ b₂, r₁.pred ρ b₁ → r₂.pred ρ b₂ → v = b₁ && b₂⟩)
 
   -- Γ ⊢ e ⇐ t : "e checks against type t"
   inductive Check : TEnv → Exp → Ty → Prop where
@@ -84,4 +104,12 @@ mutual
         Synth Γ e₁ s →
         Check ((x, s) :: Γ) e₂ t →
         Check Γ (.letin x e₁ e₂) t
+
+    /-- CHK-ITE (ANF, path-sensitive): condition must be a bool variable in scope;
+        branches are checked under the path condition x=true / x=false. -/
+    | ite {Γ x e₁ e₂ r t} :
+        Γ.lookup x = some (.refine .bool r) →
+        Check ((x, .refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = true⟩)  :: Γ) e₁ t →
+        Check ((x, .refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = false⟩) :: Γ) e₂ t →
+        Check Γ (.ite (.var x) e₁ e₂) t
 end

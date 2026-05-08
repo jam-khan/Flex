@@ -12,22 +12,16 @@ open STLC
 
 /-! ## Helper lemmas about `Ty.rename` -/
 
-private theorem self_redirect (ρ : REnv) (x : EVar) :
-    (fun z : EVar => if z == x then ρ x else ρ z) = ρ := by
-  funext z
-  by_cases h : z = x
-  · subst h; simp
-  · have : (z == x) = false := by simp [h]
-    simp [this]
+private theorem redirect_self (ρ : REnv) (x : EVar) : ρ.redirect x x = ρ := by
+  simp only [REnv.redirect]
+  ext1 <;> funext z <;> by_cases h : z = x <;> simp [h]
 
 theorem Refinement.rename_self {b : Base} (x : EVar) (r : Refinement b) :
     r.rename x x = r := by
   obtain ⟨pred⟩ := r
-  show (⟨fun ρ v => pred (fun z => if z == x then ρ x else ρ z) v⟩ : Refinement b)
-        = ⟨pred⟩
-  congr 1
-  funext ρ v
-  rw [self_redirect ρ x]
+  show (⟨fun ρ v => pred (ρ.redirect x x) v⟩ : Refinement b) = ⟨pred⟩
+  congr 1; funext ρ v
+  rw [redirect_self ρ x]
 
 theorem Ty.rename_self (x : EVar) (t : Ty) : t.rename x x = t := by
   induction t with
@@ -48,10 +42,8 @@ theorem Ty.rename_self (x : EVar) (t : Ty) : t.rename x x = t := by
 theorem entail_implyBind_refine
     {Γ : TEnv} {x : EVar} {b : Base} {r : Refinement b}
     {c : Constraint} :
-    Entail Γ (implyBind x (.refine b r) c) → Entail ((x, .refine b r) :: Γ) c := by
-  intro h ρ ⟨hr, hΓ⟩
-  have := h ρ hΓ (ρ x) hr
-  simpa using this
+    Entail Γ (implyBind x (.refine b r) c) → Entail ((x, .refine b r) :: Γ) c :=
+  fun h => Entail.ext (by simpa [implyBind] using h)
 
 theorem entail_implyBind_arrow
     {Γ : TEnv} {x : EVar} {x' : EVar} {s t : Ty} {c : Constraint} :
@@ -66,7 +58,11 @@ theorem sub_sound (Γ : TEnv) (s t : Ty) (c : Constraint) :
   intro hsy h
   match s, t with
   | .refine .int r₁, .refine .int r₂ =>
-    rw [sub_refine_refine_eq] at hsy
+    rw [sub_refine_int_refine_int_eq] at hsy
+    obtain rfl := Option.some.inj hsy
+    exact Subtyp.refine h
+  | .refine .bool r₁, .refine .bool r₂ =>
+    rw [sub_refine_bool_refine_bool_eq] at hsy
     obtain rfl := Option.some.inj hsy
     exact Subtyp.refine h
   | .arrow x₁ s₁ t₁, .arrow x₂ s₂ t₂ =>
@@ -78,26 +74,26 @@ theorem sub_sound (Γ : TEnv) (s t : Ty) (c : Constraint) :
       | none => rw [hs, ht] at hsy; simp at hsy
       | some c₂ =>
         rw [hs, ht] at hsy
-        simp at hsy
-        subst hsy
+        -- Use symm/subst rather than `simp` here so `implyBind` stays folded in `h`.
+        have h_eq : c = fun ρ => c₁ ρ ∧ implyBind x₂ s₂ c₂ ρ :=
+          (Option.some.inj hsy).symm
+        subst h_eq
         apply Subtyp.arrow
         · exact sub_sound Γ s₂ s₁ c₁ hs (fun ρ hΓ => (h ρ hΓ).1)
         · apply sub_sound _ _ _ _ ht
           match s₂ with
           | .refine b r =>
-            apply entail_implyBind_refine
+            apply Entail.ext
             intro ρ hΓ
             exact (h ρ hΓ).2
           | .arrow x' ss tt =>
-            apply entail_implyBind_arrow
-            intro ρ hΓ
-            exact (h ρ hΓ).2
+            exact entail_implyBind_arrow (fun ρ hΓ => (h ρ hΓ).2)
+  | .refine .int _, .refine .bool _ | .refine .bool _, .refine .int _ =>
+    simp [sub] at hsy
   | .refine _ _, .arrow _ _ _ =>
-    rw [sub_refine_arrow_eq] at hsy
-    simp at hsy
+    rw [sub_refine_arrow_eq] at hsy; simp at hsy
   | .arrow _ _ _, .refine _ _ =>
-    rw [sub_arrow_refine_eq] at hsy
-    simp at hsy
+    rw [sub_arrow_refine_eq] at hsy; simp at hsy
 termination_by sizeOf s + sizeOf t
 decreasing_by
   all_goals simp_wf
@@ -119,12 +115,18 @@ mutual
       have ht : t = self x t' := (Prod.mk.inj hp).2.symm
       subst ht
       exact Synth.var hl
-    | .const n =>
+    | .iconst n =>
       unfold synth at hsynth
       simp at hsynth
       obtain ⟨_, ht_eq⟩ := hsynth
       subst ht_eq
-      exact Synth.const
+      exact Synth.int_const
+    | .bconst b =>
+      unfold synth at hsynth
+      simp at hsynth
+      obtain ⟨_, ht_eq⟩ := hsynth
+      subst ht_eq
+      exact Synth.bool_const
     | .ann e' t' =>
       unfold synth at hsynth
       cases hck : check Γ e' t' with
@@ -136,8 +138,7 @@ mutual
         subst ht_eq
         apply Synth.ann
         apply check_sound _ _ _ _ hck
-        rw [hc_eq]
-        exact hc
+        rw [hc_eq]; exact hc
     | .app e₁ (.var y) =>
       unfold synth at hsynth
       cases hsy : synth Γ e₁ with
@@ -158,20 +159,105 @@ mutual
             subst ht_eq
             apply Synth.app
             · apply synth_sound _ _ _ _ hsy
-              intro ρ hΓ
-              have := hc ρ hΓ
-              rw [← hc_eq] at this
-              exact this.1
+              intro ρ hΓ; have := hc ρ hΓ; rw [← hc_eq] at this; exact this.1
             · apply check_sound _ _ _ _ hck
-              intro ρ hΓ
-              have := hc ρ hΓ
-              rw [← hc_eq] at this
-              exact this.2
-    | .app e₁ (.const _) | .app e₁ (.letin _ _ _)
-    | .app e₁ (.lam _ _) | .app e₁ (.app _ _) | .app e₁ (.ann _ _)
-    | .lam _ _ | .letin _ _ _ =>
+              intro ρ hΓ; have := hc ρ hΓ; rw [← hc_eq] at this; exact this.2
+    | .add (.var x) (.var y) =>
       unfold synth at hsynth
       simp at hsynth
+      obtain ⟨hc_eq, ht_eq⟩ := hsynth
+      subst ht_eq
+      exact Synth.add_var
+    | .leq (.var x) (.var y) =>
+      unfold synth at hsynth
+      simp at hsynth
+      obtain ⟨hc_eq, ht_eq⟩ := hsynth
+      subst ht_eq
+      exact Synth.leq_var
+    | .not e' =>
+      unfold synth at hsynth
+      cases hinner : synth Γ e' with
+      | none => rw [hinner] at hsynth; simp at hsynth
+      | some p =>
+        obtain ⟨c', ty⟩ := p
+        rw [hinner] at hsynth
+        cases ty with
+        | arrow _ _ _ => simp at hsynth
+        | refine b r =>
+          cases b with
+          | int => simp at hsynth
+          | bool =>
+            simp at hsynth
+            obtain ⟨hc_eq, ht_eq⟩ := hsynth
+            subst ht_eq
+            have : (fun ρ v => (r.pred ρ false → v = true) ∧ (r.pred ρ true → v = false)) = fun ρ v => ∀ b, r.pred ρ b → v = !b := by
+              funext ; simp
+            rw [this] ; clear this
+            apply Synth.not_
+            apply synth_sound _ _ _ _ hinner
+            intro ρ hΓ; rw [hc_eq]; exact hc ρ hΓ
+    | .and e₁' e₂' =>
+      unfold synth at hsynth
+      cases hinner1 : synth Γ e₁' with
+      | none => rw [hinner1] at hsynth; simp at hsynth
+      | some p1 =>
+        obtain ⟨c₁, ty₁⟩ := p1
+        rw [hinner1] at hsynth
+        cases ty₁ with
+        | arrow _ _ _ => simp at hsynth
+        | refine b₁ r₁ =>
+          cases b₁ with
+          | int => simp at hsynth
+          | bool =>
+            cases hinner2 : synth Γ e₂' with
+            | none => rw [hinner2] at hsynth; simp at hsynth
+            | some p2 =>
+              obtain ⟨c₂, ty₂⟩ := p2
+              rw [hinner2] at hsynth
+              cases ty₂ with
+              | arrow _ _ _ => simp at hsynth
+              | refine b₂ r₂ =>
+                cases b₂ with
+                | int => simp at hsynth
+                | bool =>
+                  simp at hsynth
+                  obtain ⟨hc_eq, ht_eq⟩ := hsynth
+                  subst ht_eq
+                  have : (fun ρ v => ((r₁.pred ρ false → ¬r₂.pred ρ false) ∧ (r₁.pred ρ false → r₂.pred ρ true → v = false)) ∧ (r₁.pred ρ true → ¬r₂.pred ρ false) ∧ (r₁.pred ρ true → r₂.pred ρ true → v = true)) = (fun ρ v => ∀ b₁ b₂, r₁.pred ρ b₁ → r₂.pred ρ b₂ → v = b₁ && b₂) := by
+                    funext ; simp
+                  rw [this] ; clear this
+                  apply Synth.and_
+                  · apply synth_sound _ _ _ _ hinner1
+                    rw [←hc_eq] at hc ; simp at hc
+                    intro ρ hΓ
+                    exact (hc ρ hΓ).1
+                  · apply synth_sound _ _ _ _ hinner2
+                    rw [←hc_eq] at hc ; simp at hc
+                    intro ρ hΓ
+                    exact (hc ρ hΓ).2
+    | .app e₁ (.iconst _) | .app e₁ (.bconst _) | .app e₁ (.letin _ _ _)
+    | .app e₁ (.lam _ _)  | .app e₁ (.app _ _)  | .app e₁ (.ann _ _)
+    | .app e₁ (.and _ _)  | .app e₁ (.not _)    | .app e₁ (.leq _ _)
+    | .app e₁ (.ite _ _ _) | .app e₁ (.add _ _)
+    | .lam _ _ | .letin _ _ _ | .ite _ _ _
+    | .leq e₁ (.iconst _) | .leq e₁ (.bconst _) | .leq e₁ (.letin _ _ _)
+    | .leq e₁ (.lam _ _)  | .leq e₁ (.leq _ _)  | .leq e₁ (.ann _ _)
+    | .leq e₁ (.and _ _)  | .leq e₁ (.not _)    | .leq e₁ (.app _ _)
+    | .leq e₁ (.ite _ _ _) | .leq e₁ (.add _ _)
+    | .leq (.iconst _) (.var _) | .leq (.bconst _) (.var _) | .leq (.letin _ _ _) (.var _)
+    | .leq (.lam _ _) (.var _) | .leq (.leq _ _) (.var _) | .leq (.ann _ _) (.var _)
+    | .leq (.and _ _) (.var _) | .leq (.not _) (.var _) | .leq (.app _ _) (.var _)
+    | .leq (.ite _ _ _) (.var _) | .leq (.add _ _) (.var _)
+    | .add e₁ (.iconst _) | .add e₁ (.bconst _) | .add e₁ (.letin _ _ _)
+    | .add e₁ (.lam _ _)  | .add e₁ (.add _ _)  | .add e₁ (.ann _ _)
+    | .add e₁ (.and _ _)  | .add e₁ (.not _)    | .add e₁ (.app _ _)
+    | .add e₁ (.ite _ _ _) | .add e₁ (.leq _ _)
+    | .add (.iconst _) (.var _) | .add (.bconst _) (.var _) | .add (.letin _ _ _) (.var _)
+    | .add (.lam _ _) (.var _) | .add (.add _ _) (.var _) | .add (.ann _ _) (.var _)
+    | .add (.and _ _) (.var _) | .add (.not _) (.var _) | .add (.app _ _) (.var _)
+    | .add (.ite _ _ _) (.var _) | .add (.leq _ _) (.var _) =>
+      unfold synth at hsynth; simp at hsynth
+
 
   theorem check_sound (Γ : TEnv) (e : Exp) (t : Ty) (c : Constraint) :
       check Γ e t = some c → Entail Γ c → Check Γ e t := by
@@ -188,80 +274,73 @@ mutual
           | none => rw [hck'] at hck; simp at hck
           | some c' =>
             rw [hck'] at hck
-            simp at hck
-            subst hck
+            obtain rfl := (Option.some.inj hck).symm
             apply Check.lam
             apply check_sound _ _ _ _ hck'
             match s with
-            | .refine b r => exact entail_implyBind_refine h
+            | .refine b r => exact Entail.ext h
             | .arrow x'' ss tt => exact entail_implyBind_arrow h
         · have : (x == x') = false := by simp [hxx]
-          rw [this] at hck
-          simp at hck
+          rw [this] at hck; simp at hck
       | .refine b r =>
-        -- check on .lam against .refine: catch-all → synth(.lam) = none → none
-        unfold check at hck
-        simp [synth] at hck
+        unfold check at hck; simp [synth] at hck
     | .letin x e₁ e₂ =>
       unfold check at hck
       cases hsy : synth Γ e₁ with
       | none => rw [hsy] at hck; simp at hck
       | some p =>
-        rw [hsy] at hck
-        simp at hck
+        rw [hsy] at hck; simp at hck
         obtain ⟨c₁, s⟩ := p
         cases hck' : check ((x, s) :: Γ) e₂ t with
         | none => rw [hck'] at hck; simp at hck
         | some c₂ =>
-          rw [hck'] at hck
-          simp at hck
-          subst hck
+          rw [hck'] at hck; simp at hck; subst hck
           apply Check.letin (s := s)
           · apply synth_sound _ _ _ _ hsy
-            intro ρ hΓ
-            exact (h ρ hΓ).1
+            intro ρ hΓ; exact (h ρ hΓ).1
           · apply check_sound _ _ _ _ hck'
             match s with
             | .refine b r =>
-              apply entail_implyBind_refine
-              intro ρ hΓ
-              exact (h ρ hΓ).2
+              apply Entail.ext; intro ρ hΓ
+              simp [REnv.update] ; exact (h ρ hΓ).2
             | .arrow x' ss tt =>
-              apply entail_implyBind_arrow
-              intro ρ hΓ
-              exact (h ρ hΓ).2
+              apply entail_implyBind_arrow; intro ρ hΓ; exact (h ρ hΓ).2
+    -- Catch-all cases (Chk-Syn): synthesize then subtype.
+    -- Each case names the concrete synth call to avoid variable-substitution issues.
     | .var x =>
       unfold check at hck
       cases hsy : synth Γ (.var x) with
       | none => rw [hsy] at hck; simp at hck
       | some p =>
-        rw [hsy] at hck
-        simp at hck
-        obtain ⟨c', s⟩ := p
+        rw [hsy] at hck; simp at hck; obtain ⟨c', s⟩ := p
         cases hsub : sub s t with
         | none => rw [hsub] at hck; simp at hck
         | some csub =>
-          rw [hsub] at hck
-          simp at hck
-          subst hck
-          apply Check.sub
+          rw [hsub] at hck; simp at hck; subst hck; apply Check.sub
           · exact synth_sound _ _ _ _ hsy (fun ρ hΓ => (h ρ hΓ).1)
           · exact sub_sound _ _ _ _ hsub (fun ρ hΓ => (h ρ hΓ).2)
-    | .const n =>
+    | .iconst n =>
       unfold check at hck
-      cases hsy : synth Γ (.const n) with
+      cases hsy : synth Γ (.iconst n) with
       | none => rw [hsy] at hck; simp at hck
       | some p =>
-        rw [hsy] at hck
-        simp at hck
-        obtain ⟨c', s⟩ := p
+        rw [hsy] at hck; simp at hck; obtain ⟨c', s⟩ := p
         cases hsub : sub s t with
         | none => rw [hsub] at hck; simp at hck
         | some csub =>
-          rw [hsub] at hck
-          simp at hck
-          subst hck
-          apply Check.sub
+          rw [hsub] at hck; simp at hck; subst hck; apply Check.sub
+          · exact synth_sound _ _ _ _ hsy (fun ρ hΓ => (h ρ hΓ).1)
+          · exact sub_sound _ _ _ _ hsub (fun ρ hΓ => (h ρ hΓ).2)
+    | .bconst b =>
+      unfold check at hck
+      cases hsy : synth Γ (.bconst b) with
+      | none => rw [hsy] at hck; simp at hck
+      | some p =>
+        rw [hsy] at hck; simp at hck; obtain ⟨c', s⟩ := p
+        cases hsub : sub s t with
+        | none => rw [hsub] at hck; simp at hck
+        | some csub =>
+          rw [hsub] at hck; simp at hck; subst hck; apply Check.sub
           · exact synth_sound _ _ _ _ hsy (fun ρ hΓ => (h ρ hΓ).1)
           · exact sub_sound _ _ _ _ hsub (fun ρ hΓ => (h ρ hΓ).2)
     | .ann e' t' =>
@@ -269,16 +348,11 @@ mutual
       cases hsy : synth Γ (.ann e' t') with
       | none => rw [hsy] at hck; simp at hck
       | some p =>
-        rw [hsy] at hck
-        simp at hck
-        obtain ⟨c', s⟩ := p
+        rw [hsy] at hck; simp at hck; obtain ⟨c', s⟩ := p
         cases hsub : sub s t with
         | none => rw [hsub] at hck; simp at hck
         | some csub =>
-          rw [hsub] at hck
-          simp at hck
-          subst hck
-          apply Check.sub
+          rw [hsub] at hck; simp at hck; subst hck; apply Check.sub
           · exact synth_sound _ _ _ _ hsy (fun ρ hΓ => (h ρ hΓ).1)
           · exact sub_sound _ _ _ _ hsub (fun ρ hΓ => (h ρ hΓ).2)
     | .app e₁ e₂ =>
@@ -286,36 +360,114 @@ mutual
       cases hsy : synth Γ (.app e₁ e₂) with
       | none => rw [hsy] at hck; simp at hck
       | some p =>
-        rw [hsy] at hck
-        simp at hck
-        obtain ⟨c', s⟩ := p
+        rw [hsy] at hck; simp at hck; obtain ⟨c', s⟩ := p
         cases hsub : sub s t with
         | none => rw [hsub] at hck; simp at hck
         | some csub =>
-          rw [hsub] at hck
-          simp at hck
-          subst hck
-          apply Check.sub
+          rw [hsub] at hck; simp at hck; subst hck; apply Check.sub
           · exact synth_sound _ _ _ _ hsy (fun ρ hΓ => (h ρ hΓ).1)
           · exact sub_sound _ _ _ _ hsub (fun ρ hΓ => (h ρ hΓ).2)
+    | .not e' =>
+      unfold check at hck
+      cases hsy : synth Γ (.not e') with
+      | none => rw [hsy] at hck; simp at hck
+      | some p =>
+        rw [hsy] at hck; simp at hck; obtain ⟨c', s⟩ := p
+        cases hsub : sub s t with
+        | none => rw [hsub] at hck; simp at hck
+        | some csub =>
+          rw [hsub] at hck; simp at hck; subst hck; apply Check.sub
+          · exact synth_sound _ _ _ _ hsy (fun ρ hΓ => (h ρ hΓ).1)
+          · exact sub_sound _ _ _ _ hsub (fun ρ hΓ => (h ρ hΓ).2)
+    | .and e₁ e₂ =>
+      unfold check at hck
+      cases hsy : synth Γ (.and e₁ e₂) with
+      | none => rw [hsy] at hck; simp at hck
+      | some p =>
+        rw [hsy] at hck; simp at hck; obtain ⟨c', s⟩ := p
+        cases hsub : sub s t with
+        | none => rw [hsub] at hck; simp at hck
+        | some csub =>
+          rw [hsub] at hck; simp at hck; subst hck; apply Check.sub
+          · exact synth_sound _ _ _ _ hsy (fun ρ hΓ => (h ρ hΓ).1)
+          · exact sub_sound _ _ _ _ hsub (fun ρ hΓ => (h ρ hΓ).2)
+    | .leq e₁ e₂ =>
+      unfold check at hck
+      cases hsy : synth Γ (.leq e₁ e₂) with
+      | none => rw [hsy] at hck; simp at hck
+      | some p =>
+        rw [hsy] at hck; simp at hck; obtain ⟨c', s⟩ := p
+        cases hsub : sub s t with
+        | none => rw [hsub] at hck; simp at hck
+        | some csub =>
+          rw [hsub] at hck; simp at hck; subst hck; apply Check.sub
+          · exact synth_sound _ _ _ _ hsy (fun ρ hΓ => (h ρ hΓ).1)
+          · exact sub_sound _ _ _ _ hsub (fun ρ hΓ => (h ρ hΓ).2)
+    | .add e₁ e₂ =>
+      unfold check at hck
+      cases hsy : synth Γ (.add e₁ e₂) with
+      | none => rw [hsy] at hck; simp at hck
+      | some p =>
+        rw [hsy] at hck; simp at hck; obtain ⟨c', s⟩ := p
+        cases hsub : sub s t with
+        | none => rw [hsub] at hck; simp at hck
+        | some csub =>
+          rw [hsub] at hck; simp at hck; subst hck; apply Check.sub
+          · exact synth_sound _ _ _ _ hsy (fun ρ hΓ => (h ρ hΓ).1)
+          · exact sub_sound _ _ _ _ hsub (fun ρ hΓ => (h ρ hΓ).2)
+    | .ite e₀ e₁ e₂ =>
+      unfold check at hck
+      cases e₀ with
+      | var x =>
+        cases hlook : Γ.lookup x with
+        | none => simp [hlook] at hck
+        | some ty =>
+          simp only [hlook] at hck
+          cases ty with
+          | arrow _ _ _ => simp at hck
+          | refine b r =>
+            cases b with
+            | int => simp at hck
+            | bool =>
+              cases hck1 : check ((x, .refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = true⟩) :: Γ) e₁ t with
+              | none => simp [hck1] at hck
+              | some c₁ =>
+                cases hck2 : check ((x, .refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = false⟩) :: Γ) e₂ t with
+                | none => simp [hck1, hck2] at hck
+                | some c₂ =>
+                  simp only [hck1, hck2] at hck
+                  obtain rfl := Option.some.inj hck
+                  apply Check.ite hlook
+                  · apply check_sound _ _ _ _ hck1
+                    exact entail_implyBind_refine (fun ρ hΓ => (h ρ hΓ).1)
+                  · apply check_sound _ _ _ _ hck2
+                    exact entail_implyBind_refine (fun ρ hΓ => (h ρ hΓ).2)
+      | iconst _ | bconst _ | lam _ _ | letin _ _ _ | ann _ _
+      | app _ _ | not _ | and _ _ | leq _ _ | ite _ _ _ | add _ _ => simp at hck
+
 
   theorem synth_to_hastype {Γ : TEnv} {e : Exp} {t : Ty} :
       Synth Γ e t → Hastype Γ e t := by
     intro h
     match h with
-    | .var hl       => exact .var hl
-    | .const        => exact .const
-    | .ann hck      => exact .ann (check_to_hastype hck)
-    | .app hsy hck  => exact .app (synth_to_hastype hsy) (check_to_hastype hck)
+    | .var hl        => exact .var hl
+    | .int_const     => exact .int_const
+    | .bool_const    => exact .bool_const
+    | .ann hck       => exact .ann (check_to_hastype hck)
+    | .app hsy hck   => exact .app (synth_to_hastype hsy) (check_to_hastype hck)
+    | .add_var       => exact .add_var
+    | .leq_var       => exact .leq_var
+    | .not_ hsy      => exact .not_ (synth_to_hastype hsy)
+    | .and_ hsy1 hsy2 => exact .and_ (synth_to_hastype hsy1) (synth_to_hastype hsy2)
 
-  /-- Every bidirectional `Check` derivation gives a declarative `Hastype`. -/
   theorem check_to_hastype {Γ : TEnv} {e : Exp} {t : Ty} :
       Check Γ e t → Hastype Γ e t := by
     intro h
     match h with
-    | .sub hsy hsub   => exact .sub (synth_to_hastype hsy) hsub
-    | .lam hck        => exact .lam (check_to_hastype hck)
-    | .letin hsy hck  => exact .letin (synth_to_hastype hsy) (check_to_hastype hck)
+    | .sub hsy hsub       => exact .sub (synth_to_hastype hsy) hsub
+    | .lam hck            => exact .lam (check_to_hastype hck)
+    | .letin hsy hck      => exact .letin (synth_to_hastype hsy) (check_to_hastype hck)
+    | .ite hlook hck1 hck2 => exact .ite hlook (check_to_hastype hck1) (check_to_hastype hck2)
 
 end
 
@@ -327,8 +479,6 @@ theorem check_decl_sound (Γ : TEnv) (e : Exp) (t : Ty) (c : Constraint) :
     check Γ e t = some c → Entail Γ c → Hastype Γ e t :=
   fun h hc => check_to_hastype (check_sound Γ e t c h hc)
 
-/-- End-to-end corollary: a valid top-level VC implies declarative typeability.
-    With `Γ = []`, `Entail [] c` reduces to `∀ ρ, c ρ` (Entail.emp). -/
 theorem topVC_decl_sound (e : Exp) (t : Ty) :
     topVC [] e t → Hastype [] e t := by
   unfold topVC

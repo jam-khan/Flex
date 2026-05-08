@@ -15,8 +15,11 @@ inductive Hastype : TEnv → Exp → Ty → Prop where
       Γ.lookup x = some t →
       Hastype Γ (.var x) (self x t)
   -- TCon `integer literal`
-  | const {Γ n} :
-      Hastype Γ (.const n) (prim n)
+  | int_const {Γ n} :
+      Hastype Γ (.iconst n) (prim n)
+  -- TBool `boolean literal`
+  | bool_const {Γ b} :
+      Hastype Γ (.bconst b) (primBool b)
   -- TAbs (same-binder)
   | lam {Γ x e s t} :
       Hastype ((x, s) :: Γ) e t →
@@ -40,3 +43,28 @@ inductive Hastype : TEnv → Exp → Ty → Prop where
       Hastype Γ e s →
       Subtyp Γ s t  →
       Hastype Γ e t
+  -- TAdd (ANF)
+  | add_var {Γ x y} :
+      Hastype Γ (.add (.var x) (.var y))
+        (.refine .int ⟨fun ρ v => v = ρ.ints x + ρ.ints y⟩)
+  -- TLeq (ANF)
+  | leq_var {Γ x y} :
+      Hastype Γ (.leq (.var x) (.var y))
+        (.refine .bool ⟨fun ρ v => v = decide (ρ.ints x ≤ ρ.ints y)⟩)
+  -- TNot
+  | not_ {Γ e r} :
+      Hastype Γ e (.refine .bool r) →
+      Hastype Γ (.not e)
+        (.refine .bool ⟨fun ρ v => ∀ b, r.pred ρ b → v = !b⟩)
+  -- TAnd
+  | and_ {Γ e₁ e₂ r₁ r₂} :
+      Hastype Γ e₁ (.refine .bool r₁) →
+      Hastype Γ e₂ (.refine .bool r₂) →
+      Hastype Γ (.and e₁ e₂)
+        (.refine .bool ⟨fun ρ v => ∀ b₁ b₂, r₁.pred ρ b₁ → r₂.pred ρ b₂ → v = b₁ && b₂⟩)
+  -- TIte (ANF, path-sensitive)
+  | ite {Γ x e₁ e₂ r t} :
+      Γ.lookup x = some (.refine .bool r) →
+      Hastype ((x, .refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = true⟩)  :: Γ) e₁ t →
+      Hastype ((x, .refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = false⟩) :: Γ) e₂ t →
+      Hastype Γ (.ite (.var x) e₁ e₂) t

@@ -13,12 +13,12 @@ def NatR : Ty := .refine .int ⟨fun _ ν => 0 ≤ ν⟩    -- was Nat
 
 /-! ## Example 1: 5 ⇐ {ν : ν > 0} -/
 
-def ex1Exp : Exp := .const 5
+def ex1Exp : Exp := .iconst 5
 def ex1Ty  : Ty  := Pos
 
 example : topVC [] ex1Exp ex1Ty := by
   simp only [topVC, check, synth, sub, ex1Exp, ex1Ty, Pos, prim]
-  solve_fusion
+  solve_fixpoint
 
 /-! ## Example 2: identity (λx. x) ⇐ x:Pos → Pos -/
 
@@ -27,10 +27,11 @@ def ex2Ty  : Ty  := .arrow "x" Pos Pos
 
 example : topVC [] ex2Exp ex2Ty := by
   simp [topVC, check, synth, implyBind, ex2Exp, ex2Ty, Pos]
+  solve_fixpoint
 
 /-! ## Example 3: let z = 5 in z ⇐ Pos -/
 
-def ex3Exp : Exp := .letin "z" (.const 5) (.var "z")
+def ex3Exp : Exp := .letin "z" (.iconst 5) (.var "z")
 def ex3Ty  : Ty  := Pos
 
 abbrev int_k (k : Int → Prop)  : Ty := .refine .int ⟨fun _ ν => k ν⟩
@@ -42,19 +43,63 @@ abbrev ty_k (k1 : Int → Prop) : Ty := Ty.arrow "x" (int_k k1) (int_k k1)
 def Gt0 (v : Int) : Prop :=
   v > 0
 
-example : ∃ k, Check [] (.letin "z" (.const 99) (.app (.ann exId (ty_k k)) (.var "z"))) Pos := by
+example : ∃ k, Check [] (.letin "z" (.iconst 99) (.app (.ann exId (ty_k k)) (.var "z"))) Pos := by
   make_horn_under_k
   solve_fixpoint
 
-abbrev IntR (x : String) (k : Int → Int → Prop) : Ty := .refine .int ⟨fun ρ v => k (ρ x) v⟩
+abbrev IntN (n : Int) : Ty := .refine .int ⟨fun _ v => v = n⟩
+abbrev IntR (x : String) (k : Int → Int → Prop) : Ty := .refine .int ⟨fun ρ v => k (ρ.ints x) v⟩
 abbrev ty_xk (x : String) (k : Int → Int → Prop) : Ty := .arrow "x" TT (IntR x k)
 
-example : ∃ k, Check [] (.letin "z" (.const 99) (.app (.ann exId (ty_xk "x" k)) (.var "z"))) (.refine .int ⟨fun _ v => v = 99⟩) := by
+example : ∃ k, Check [] (.letin "z" (.iconst 99) (.app (.ann exId (ty_xk "x" k)) (.var "z"))) (IntN 99) := by
   make_horn_under_k
   solve_fixpoint
 
 example : topVC [] ex3Exp ex3Ty := by
   simp [topVC, check, synth, implyBind, ex3Exp, ex3Ty, Pos, prim]
+
+abbrev exGt : Exp := .lam "x" (.lam "y" (.not (.leq (.var "x") (.var "y"))))
+abbrev tyGt : Ty := Ty.arrow "x" TT (Ty.arrow "y" TT (.refine .bool ⟨fun ρ v => v = (ρ.ints "x" > ρ.ints "y")⟩))
+
+example : topVC [] exGt tyGt := by
+  simp [topVC, check]
+
+
+abbrev exMax : Exp :=
+  .lam "x"
+    (.lam "y"
+      (.letin "c"
+        (.leq (.var "x") (.var "y"))
+        (.ite
+          (.var "c")
+          (.var "y")
+          (.var "x")
+        )
+      )
+    )
+
+abbrev IntK (k : Int → Prop) : Ty := .refine .int ⟨fun _ v => k v⟩
+
+example : ∃ (k1 k2 k3 : Int → Prop), Check [] (
+  .letin "a"
+    (.iconst 99)
+    (.letin "b"
+      (.iconst 100)
+      (.app (.app (.ann exMax (.arrow "x" (IntK k1) (.arrow "y" (IntK k2) (.refine .int ⟨fun _ v => k3 v⟩)))) (.var "a")) (.var "b"))
+    )
+  ) (.refine .int ⟨fun _ v => v = 100 ∨ v = 99⟩) := by
+  make_horn_under_k [List.lookup]
+  solve_fixpoint
+
+def exAddExp : Exp :=
+  .letin "a" (.iconst 3)
+    (.letin "b" (.iconst 4)
+      (.add (.var "a") (.var "b")))
+
+def exAddTy : Ty := IntN 7
+
+example : topVC [] exAddExp exAddTy := by
+  simp [topVC, check, synth, implyBind, exAddExp, exAddTy, prim]
 
 /-! ## Declarative-side examples
 
