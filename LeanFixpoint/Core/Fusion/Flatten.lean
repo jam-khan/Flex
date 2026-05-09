@@ -36,8 +36,13 @@ partial def exprFlat (e : Expr) : KM (List Expr) := do
 def runEmpty (act : KM α) : MetaM α :=
   act.run { kvars := {} }
 
+
+
+-------------------------------------------------------
 -- Testing
-/-- Unfold a named `def` to its body `Expr`. -/
+-------------------------------------------------------
+
+-- Unfold a named `def` to its body `Expr`.
 private def unfoldDef (n : Name) : MetaM Expr := do
   let some ci := (← getEnv).find? n | throwError "unknown constant {n}"
   match ci with

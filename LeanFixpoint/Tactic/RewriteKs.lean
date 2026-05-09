@@ -170,9 +170,16 @@ elab "rewriteKs" : tactic => withMainContext do
     let newType ← mkExistsChain newBinders body
 
     -- Iff.mpr term-assignment + perm_exists discharge (Zap-style)
-    let iffType  ← mkAppM ``Iff #[goalType, newType]
-    let iffMVar  ← mkFreshExprMVar (some iffType) (kind := .syntheticOpaque)
-    let newGoalM ← mkFreshExprMVar (some newType) (kind := .syntheticOpaque)
+    -- NOTE: it is important to create the new-goal mvars in the Original goal's lctx
+    -- not the extended one introduced using `withPeeledExists`'s `withLocalD`.
+    -- Otherwise named fvars k0, k1, .... get captured the newGoal's localcontext
+    -- and appear in the context after rewrite as leftovers.
+    let (iffMVar, newGoalM) ← goal.withContext do
+      let iffType  ← mkAppM ``Iff #[goalType, newType]
+      let iffMVar'  ← mkFreshExprMVar (some iffType) (kind := .syntheticOpaque)
+      let newGoalM' ← mkFreshExprMVar (some newType) (kind := .syntheticOpaque)
+      pure (iffMVar', newGoalM')
+
     goal.assign (← mkAppM ``Iff.mpr #[iffMVar, newGoalM])
     setGoals [iffMVar.mvarId!, newGoalM.mvarId!]
     evalTactic (← `(tactic| perm_exists))

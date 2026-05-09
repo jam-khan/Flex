@@ -193,9 +193,11 @@ def classifyKVars (allKs : List KVar) (deps : List (KVar × KVar)) :
   let acyclicSorted := topoSortAcyclic acyclic acyclicDeps
   (acyclicSorted, khat)
 
+-------------------------------------------------------
 -- Testing
+-------------------------------------------------------
 
-/-- Check deps match expected edges given as (srcIndex, tgtIndex) into kvars array. -/
+-- Check deps match expected edges given as (srcIndex, tgtIndex) into kvars array.
 private def checkDeps (name : String) (kvars : Array KVar)
     (deps : List (KVar × KVar)) (expected : List (Nat × Nat)) : MetaM Unit := do
   let expectedEdges := expected.map fun (i, j) => (kvars[i]!.mvarId, kvars[j]!.mvarId)
