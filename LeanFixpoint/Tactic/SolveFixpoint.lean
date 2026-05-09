@@ -33,55 +33,60 @@ private def tryClosers : TacticM Bool := do
   match b with
   | Bool.true => logInfo m!"[solve_fixpoint] closed by: omega"; pure Bool.true
   | Bool.false =>
+  let b ← attemptTactic (evalTactic (← `(tactic| bv_decide)))
+  match b with
+  | Bool.true => logInfo m!"[solve_fixpoint] closed by: bv_decide"; pure Bool.true
+  | Bool.false =>
   let b ← attemptTactic (evalTactic (← `(tactic| (constructor <;> grind))))
   match b with
   | Bool.true => logInfo m!"[solve_fixpoint] closed by: constructor+grind"; pure Bool.true
-  | Bool.false =>
-  let b ← attemptTactic (evalTactic (← `(tactic| (simp_all; grind))))
-  match b with
-  | Bool.true => logInfo m!"[solve_fixpoint] closed by: simp_all+grind"; pure Bool.true
   | Bool.false => pure Bool.false
+  -- `simp_all`'s `maxRecDepth` escapes `attemptTactic`'s catch (logged via
+  -- diagnostics rather than thrown), so the rung is dropped here.
 
 private partial def closeLoop : TacticM Unit := do
   let goals ← getGoals
   match goals with
   | [] => pure ()
   | g :: restGoals =>
-    let ty ← whnfR (← g.getType)
-    if ty.isForall then
-      evalTactic (← `(tactic| intro _))
-      closeLoop
-    else if ty.isAppOfArity ``And 2 then
-      evalTactic (← `(tactic| and_intros))
-      closeLoop
-    else
-      let closed ← tryClosers
-      if closed then
+    -- Use `g.withContext` so `whnfR`/`tryClosers`/`unfoldDefinition` operate
+    -- in `g`'s actual LCtx, not whatever stale `withMainContext` snapshot the
+    -- caller set. Without this, `intro _` mutates the main goal but the
+    -- surrounding LCtx stays stale, causing `unknown free variable` errors.
+    g.withContext do
+      let ty ← whnfR (← g.getType)
+      if ty.isForall then
+        evalTactic (← `(tactic| intro _))
+        closeLoop
+      else if ty.isAppOfArity ``And 2 then
+        evalTactic (← `(tactic| and_intros))
         closeLoop
       else
-        -- Try unfolding if required
-        let didUnfold ← attemptTactic do
-          let newGoal ← g.withContext do
-            let target ← g.getType
-            let u ← unfoldDefinition target
-            g.replaceTargetDefEq u
-          replaceMainGoal (newGoal :: restGoals)
-        if didUnfold then
+        let closed ← tryClosers
+        if closed then
           closeLoop
         else
-          setGoals restGoals
-          closeLoop
-          let remaining ← getGoals
-          setGoals (g :: remaining)
+          -- Try unfolding if required
+          let didUnfold ← attemptTactic do
+            let newGoal ← g.withContext do
+              let target ← g.getType
+              let u ← unfoldDefinition target
+              g.replaceTargetDefEq u
+            replaceMainGoal (newGoal :: restGoals)
+          if didUnfold then
+            closeLoop
+          else
+            setGoals restGoals
+            closeLoop
+            let remaining ← getGoals
+            setGoals (g :: remaining)
 
 private def closeResidualGoals : TacticM Unit := do
   let goals ← getGoals
   if goals.isEmpty then pure ()
   else
-    let _ ← attemptTactic (evalTactic (← `(tactic| simp_all)))
-    let goals ← getGoals
-    if goals.isEmpty then pure ()
-    else closeLoop
+    -- `simp_all` removed: its `maxRecDepth` escapes `attemptTactic`'s catch.
+    closeLoop
 
 
 /-!
@@ -112,8 +117,11 @@ private def solveFixpointImpl : TacticM Unit := withMainContext do
 
   let kctx : KContext := { kvars := kvarMap }
 
-  let _ ← tryCatch
-    (do
+  -- `withMainContext` here refreshes the LCtx after `peelExistentialsAndIntro`
+  -- (and any prior tactic) mutated the main goal — without this, downstream
+  -- code (`exprPartitionKVars`, `withLocalDeclD`) sees a stale LCtx that may
+  -- be missing fvars present in the new main goal's context.
+  let _ ← tryCatch (withMainContext do
       let bodyGoal ← getMainGoal
       let body     ← bodyGoal.getType
       let body     ← reduce body
@@ -169,7 +177,9 @@ private def solveFixpointImpl : TacticM Unit := withMainContext do
     else return some κ.mvarId
 
   if unfilled.isEmpty then
-    closeResidualGoals
+    -- Refresh LCtx — fusion's mvar assignments / earlier tactics may have
+    -- mutated the main goal beyond the surrounding `withMainContext` snapshot.
+    withMainContext closeResidualGoals
   else
     let residual ← getMainGoal
     -- κs first so the user fills them before tackling the residual,

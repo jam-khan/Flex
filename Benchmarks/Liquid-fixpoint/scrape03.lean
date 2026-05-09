@@ -38,6 +38,5 @@ def scrape03 : Prop :=
             ∧ extractBit (computeV a1) 5 = false)
 
 theorem scrape03_proof : scrape03 := by
-  solve_fusion
-  try solve_fixpoint
+  solve_fixpoint
   -- all_goals bv_decide

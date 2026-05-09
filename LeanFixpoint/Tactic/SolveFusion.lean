@@ -24,9 +24,11 @@ private def closeResidualGoals : TacticM Unit := do
     let goals ← getGoals
     if goals.isEmpty then pure ()
     else
-      -- Phase 2: split all ∨/∧/∃ in hypotheses, then simp_all + grind
+      -- Phase 2: split all ∨/∧/∃ in hypotheses, then grind.
+      -- `simp_all` removed: its `maxRecDepth` is logged via diagnostics,
+      -- not thrown, so `attemptTactic` can't swallow it.
       let _ ← attemptTactic (evalTactic (←
-        `(tactic| all_goals (split_hyps; all_goals simp_all; all_goals grind))))
+        `(tactic| all_goals (split_hyps; all_goals grind))))
       let goals ← getGoals
       if goals.isEmpty then pure ()
       else closeLoop

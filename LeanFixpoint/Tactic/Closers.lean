@@ -20,7 +20,9 @@ macro_rules
         | grind                   -- general decision procedure
         | native_decide
         | bv_decide
-        | (simp_all; grind)       -- normalize first, then grind
+        -- `simp_all`'s `maxRecDepth` is logged via diagnostics, not thrown,
+        -- so `attemptTactic`/`first`'s catch can't swallow it. Re-add only
+        -- behind `try` (e.g. `(try simp_all; grind)`) once verified per case.
         | (constructor <;> grind) -- commit to constructor (∃, ∨, structs)
         | aesop                   -- last resort: best-first search
       )
