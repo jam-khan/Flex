@@ -1,5 +1,4 @@
 import Lean
-import Aesop
 
 import LeanFixpoint.Core.Types
 import LeanFixpoint.Core.Fusion
@@ -25,19 +24,34 @@ private def closeResidualGoals : TacticM Unit := do
     let goals ← getGoals
     if goals.isEmpty then pure ()
     else
-      -- Phase 2: split all ∨/∧/∃ in hypotheses, then simp_all + grind
+      -- Phase 2: split all ∨/∧/∃ in hypotheses, then grind.
+      -- `simp_all` removed: its `maxRecDepth` is logged via diagnostics,
+      -- not thrown, so `attemptTactic` can't swallow it.
       let _ ← attemptTactic (evalTactic (←
-        `(tactic| all_goals (split_hyps; all_goals simp_all; all_goals grind))))
+        `(tactic| all_goals (split_hyps; all_goals grind))))
       let goals ← getGoals
       if goals.isEmpty then pure ()
       else closeLoop
 
 /-!
-  ## `solve_fusion` tactic
+  ## `solve_fusion` tactic (mvar-based)
 
-  Handles acyclic κ-variables via fusion (sol1 + elim1).
-  No predicate abstraction, no qualifiers.
-  Sufficient for Demo/Basic.lean acyclic examples.
+  Handles acyclic κ-vars via fusion (sol1 + elim1). No predicate abstraction.
+  Cyclic κ-vars are left unassigned and exposed as user goals so the user
+  can supply a witness manually (`exact (fun z0 z1 ... => ...)`).
+
+  Flow:
+    1. Unfold def at the head so ∃s are visible.
+    2. `peelExistentialsAndIntro` discharges each ∃ with a fresh
+       syntheticOpaque κ-mvar; the residual proof goal becomes main.
+    3. Partition κs into acyclic / cyclic.
+    4. Fusion: for each acyclic κ, compute sol → closed lambda → assign.
+       Sols may freely reference other κ-mvars; instantiateMVars resolves
+       the chain when the proof is finalised.
+    5. Any unassigned κ (all cyclic ones, plus any acyclic that errored)
+       is exposed as a user goal.
+    6. If everything is assigned, `closeResidualGoals` discharges the
+       residual proof obligation.
 -/
 private def solveFusionImpl : TacticM Unit := withMainContext do
   let _ ← attemptTactic (evalTactic (← `(tactic| intros)))
@@ -50,123 +64,54 @@ private def solveFusionImpl : TacticM Unit := withMainContext do
           goal.replaceTargetDefEq unfolded
         replaceMainGoal [newGoal])
 
+  -- 2. Peel ∃ into κ-mvars via Exists.intro
   let goal ← getMainGoal
+  let (kvarMap, kvarsInOrder, bodyGoal) ← peelExistentialsAndIntro goal
+  replaceMainGoal [bodyGoal]
+
+  let kctx : KContext := { kvars := kvarMap }
+
   let _ ← tryCatch
     (do
-      let goalType ← goal.getType
-      let reduced  ← reduce goalType
+      let bodyGoal ← getMainGoal
+      let body     ← bodyGoal.getType
+      let body     ← reduce body
 
-      -- Phase 1-4: Run inside peelExistentials CPS (MetaM) to keep fvars alive.
-      -- Compute solutions and witness Exprs, return them for Phase 5.
-      let emptyKvars : Std.HashMap FVarId KVar := {}
-      let witnesses : List Expr ← peelExistentials reduced emptyKvars [] fun kvarMap kvarsInOrder body => do
-        let kctx : KContext := { kvars := kvarMap }
+      let (acyclic, cyclic) ← (exprPartitionKVars body).run kctx
+      IO.println s!"[solve_fusion] Acyclic κ: {acyclic.map (·.name)}"
+      IO.println s!"[solve_fusion] Cyclic κ: {cyclic.map (·.name)} (left to user)"
 
-        -- Phase 2: Partition acyclic / cyclic (body Expr IS the constraint)
-        let (acyclic, _cyclic) ← (exprPartitionKVars body).run kctx
+      -- Fusion for acyclic κs.
+      let mut curr := body
+      for κ in acyclic do
+        IO.println s!"[solve_fusion] --- Fusion: {κ.name} ---"
+        let (sol, curr') ← (exprElim1 κ curr).run kctx
+        IO.println s!"[solve_fusion]  sol1({κ.name}) = {← ppExpr sol}"
+        let lam ← solToWitnessExpr sol κ.params κ.paramTypes
+        IO.println s!"[solve_fusion]  assign {κ.name} := {← ppExpr lam}"
+        κ.mvarId.assign lam
+        curr := curr'
 
-        -- Phase 3: Fusion — eliminate acyclic κ-vars via sol1 + elim1
-        IO.println s!"[solve_fusion] Acyclic κ-vars: {acyclic.map (fun (k : KVar) => k.name)}"
-        IO.println s!"[solve_fusion] Cyclic κ-vars:  {_cyclic.map (fun (k : KVar) => k.name)}"
-
-        let mut solutions : List (KVar × Expr) := []
-        let mut curr := body
-        for κ in acyclic do
-          IO.println s!"[solve_fusion] --- Eliminating κ = {κ.name} (params: {κ.params}) ---"
-
-          let (sol, scopeNames) ← (computeSol κ curr (simplify := true)).run kctx
-          IO.println s!"[solve_fusion]   scopeNames = {scopeNames}"
-
-          let solFmt ← ppExpr sol
-          IO.println s!"[solve_fusion]   sol1({κ.name}) = {solFmt}"
-
-          -- Cleanliness filter: only keep sols with NO κ-references.
-          -- A sol that references another κ (cyclic OR not-yet-eliminated acyclic)
-          -- can't be used as a closed witness Expr after CPS exit — using it
-          -- triggers `unknown free variable`. Skip such sols; that κ falls
-          -- through Phase 5's break logic and stays as a residual ∃-goal.
-          let solKVars ← (KM.exprKVars sol).run kctx
-          if solKVars.isEmpty then
-            solutions := solutions ++ [(κ, sol)]
-            curr ← (exprElim1 κ curr).run kctx
-            IO.println s!"[solve_fusion]   elim1 done, constraint updated"
-          else
-            IO.println s!"[solve_fusion]   {κ.name}: sol references {solKVars.map (·.name)} — skipping (would yield free-var)"
-
-        IO.println s!"[solve_fusion] --- All solutions ---"
-        for (κ, sol) in solutions do
-          let solFmt ← ppExpr sol
-          IO.println s!"[solve_fusion]   {κ.name}({κ.params}) = {solFmt}"
-
-        -- Build witness Exprs inside CPS (fvars alive for solToWitnessExpr).
-        -- Walk kvarsInOrder; on first κ without a fusion solution (i.e. cyclic),
-        -- stop — Phase 5 will leave the remaining ∃-binders as a residual goal.
-        -- Convention: cyclic κ's must appear last in the source ∃-order.
-        let mut witnessExprs : List Expr := []
-        for κ in kvarsInOrder do
-          match solutions.find? (fun (k, _) => k.fvarId == κ.fvarId) with
-          | some (κSolved, sol) =>
-            let witness ← solToWitnessExpr sol κSolved.params κSolved.paramTypes
-            let witFmt ← ppExpr witness
-            IO.println s!"[solve_fusion]   witness for {κSolved.name}: {witFmt}"
-            witnessExprs := witnessExprs ++ [witness]
-          | none =>
-            IO.println s!"[solve_fusion]   {κ.name} has no fusion solution — leaving residual ∃-goal"
-            break
-        return witnessExprs
-
-      -- Phase 5: Apply witnesses directly as Exprs
-      for witness in (witnesses : List Expr) do
-        let goal ← getMainGoal
-        let goalType ← goal.getType
-        let goalType ← whnf goalType
-
-        -- Debug: print goal type and witness type
-        let goalFmt ← ppExpr goalType
-        IO.println s!"[solve_fusion] Phase 5: goal type = {goalFmt}"
-
-        let witTy ← inferType witness
-        let witTyFmt ← ppExpr witTy
-        IO.println s!"[solve_fusion] Phase 5: witness type = {witTyFmt}"
-
-        -- Extract α and p from @Exists α p
-        let α := goalType.getArg! 0
-        let p := goalType.getArg! 1
-        let αFmt ← ppExpr α
-        let pFmt ← ppExpr p
-        IO.println s!"[solve_fusion] Phase 5: α = {αFmt}"
-        IO.println s!"[solve_fusion] Phase 5: p = {pFmt}"
-
-        let αTy ← inferType α
-        let αTyFmt ← ppExpr αTy
-        IO.println s!"[solve_fusion] Phase 5: type of α = {αTyFmt}"
-
-        -- Check: does witness typecheck against α?
-        let isDefEq ← isDefEq witTy α
-        IO.println s!"[solve_fusion] Phase 5: witTy =?= α: {isDefEq}"
-
-        -- Try to build and apply
-        try
-          let obligation ← mkAppM' p #[witness]
-          let oblFmt ← ppExpr obligation
-          IO.println s!"[solve_fusion] Phase 5: obligation = {oblFmt}"
-          let mvar ← mkFreshExprMVar (some obligation)
-          let lvl := if α.isProp then levelZero else levelOne
-          IO.println s!"[solve_fusion] Phase 5: using level = {lvl}"
-          let proof := mkApp4 (mkConst ``Exists.intro [lvl]) α p witness mvar
-          goal.assign proof
-          replaceMainGoal [mvar.mvarId!]
-          IO.println s!"[solve_fusion] Phase 5: assign OK"
-        catch e =>
-          IO.println s!"[solve_fusion] Phase 5: FAILED: {← e.toMessageData.toString}"
-          throw e
     )
     (fun e => do
-      logInfo m!"[solve_fusion] ✗ Solver failed: {e.toMessageData}"
-      logInfo m!"[solve_fusion] → falling back to closeResidualGoals"
-    )
+      logInfo m!"[solve_fusion] ✗ Fusion failed: {e.toMessageData}"
+      logInfo m!"[solve_fusion] → leaving any unfilled κs as user goals")
 
-  -- closeResidualGoals 
+  -- 4. Expose unfilled κ-mvars as user goals. This includes:
+  --    · all cyclic κs (fusion can't solve them on its own)
+  --    · any acyclic κ that fusion errored on before assignment
+  let unfilled ← kvarsInOrder.filterMapM fun κ => do
+    if (← κ.mvarId.isAssigned) then return none
+    else return some κ.mvarId
+
+  if unfilled.isEmpty then
+    closeResidualGoals
+  else
+    let residual ← getMainGoal
+    -- κs first so the user fills them before tackling the residual.
+    setGoals (unfilled ++ [residual])
+    logInfo m!"[solve_fusion] {unfilled.length} κ(s) left as user goal(s) — \
+                 fill each with `exact (fun z0 z1 ... => ...)`."
 
 syntax "solve_fusion" : tactic
 elab_rules : tactic

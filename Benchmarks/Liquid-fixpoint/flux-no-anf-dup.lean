@@ -44,7 +44,5 @@ def fluxNoAnfDup : Prop :=
             k1 a9 s a9
           ∧ (∀ a10 : Set Adt0, k1 a10 s a9 → a10 = s))
 
--- to be fixed, some issue
-set_option maxHeartbeats 1600000 in
 theorem fluxNoAnfDup_proof : fluxNoAnfDup := by
-  solve_fusion; dsimp only; elimT
+  solve_fixpoint

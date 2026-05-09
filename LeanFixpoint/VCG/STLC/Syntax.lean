@@ -52,7 +52,7 @@ structure Refinement (b : Base) where
   pred : REnv → b.interp → Prop
 
 inductive Ty where
-  | refine : (b : Base) → Refinement b → Ty   -- {ν : b | p ρ ν}
+  | refine : (b : Base) → Refinement b → Ty   -- {ν : b | p (ρ ν)}
   | arrow  : EVar → Ty → Ty → Ty              -- x:s → t
 
 -- NOTE: BELOW IS A HACK TO AVOID NAME ISSUES

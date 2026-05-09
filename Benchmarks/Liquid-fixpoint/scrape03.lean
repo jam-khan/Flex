@@ -1,25 +1,4 @@
 import LeanFixpoint
-/-
-;; test that `--scrape` works with ADTs and bit-vectors
-(fixpoint "--scrape=both")
-
-(datatype (Adt0 0) ((mkadt0$0 ()) (mkadt0$1 ())))
-
-(var $k0 (bool)) ;; orig: $k0
-
-(constraint
- (forall ((a0 bool) (true))
-  (and
-   ($k0 a0)
-   (forall ((_$ int) ($k0 a0))
-    (forall ((a1 (BitVec Size32)) (true))
-     (forall ((a2 (BitVec Size32)) (true))
-      (forall ((a3 (BitVec Size32)) (true))
-       (and
-        (tag ... "0")   -- bit 0 extraction = true (mkadt0$1)
-        (tag ... "1")   -- bit 1 extraction = true (mkadt0$1)
-        (tag ... "2"))))))))) -- bit 5 extraction = false (mkadt0$0)
--/
 
 -- Adt0 maps to Bool: mkadt0$0 = false, mkadt0$1 = true
 -- κ0 : Bool → Prop
@@ -59,5 +38,5 @@ def scrape03 : Prop :=
             ∧ extractBit (computeV a1) 5 = false)
 
 theorem scrape03_proof : scrape03 := by
-  solve_fusion
-  elimT; all_goals bv_decide
+  solve_fixpoint
+  -- all_goals bv_decide

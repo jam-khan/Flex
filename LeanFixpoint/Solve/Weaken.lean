@@ -41,7 +41,7 @@ partial def specializeClauseForHead
   else
     -- Leaf: is it the head κ-app?
     let fn := e.getAppFn
-    if fn.isFVar && fn.fvarId! == headKVar.fvarId then
+    if fn.isMVar && fn.mvarId! == headKVar.mvarId then
       -- Head position: β-apply q to the head args projected by qSlots.
       -- `e.getAppArgs` contains the actual κ-args at this call site
       -- (in the lctx established by outer `withLocalDeclD`s);

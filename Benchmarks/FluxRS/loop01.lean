@@ -1,8 +1,8 @@
 import LeanFixpoint
 
-def loopQualifiers : List Qualifier := [
-  q{ GeZero(v : int) | v ≥ 0 }
-]
+
+@[qualif]
+def Bar (v : Int) := v ≥ 0
 
 def Test := ∃ k0 : (a0 : Int) → (a1 : Int) → Prop,
   (∀ a₀ : Int, a₀ = 0 → ∀ a₁ : Int, a₁ = 0 → k0 a₀ a₁) ∧
@@ -16,4 +16,4 @@ def Test := ∃ k0 : (a0 : Int) → (a1 : Int) → Prop,
       k0 res₁ i₁))
 
 theorem testProof : Test := by
-  solve_fixpoint with loopQualifiers
+  solve_fixpoint
