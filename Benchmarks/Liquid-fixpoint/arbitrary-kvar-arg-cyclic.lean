@@ -7,6 +7,7 @@ import LeanFixpoint
   for the ADT projections.
 -/
 
+@[grind]
 structure Adt0 where
   fld00 : Int
   fld01 : Int

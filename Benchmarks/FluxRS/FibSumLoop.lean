@@ -1,4 +1,6 @@
+import LeanFixpoint
 
+@[grind]
 def fib_spec_sum (n : Int) : Int :=
   if n <= 0 then 0 else  n + fib_spec_sum ( n - 1)
   termination_by n.toNat
@@ -17,22 +19,17 @@ def FibSumLoop := ∃ k0 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> Prop,
       )
 
 
-@[simp]
-def k0 (i : Int) (total : Int) (n : Int) : Prop :=
-  0 <= i /\ i <= n /\ total = fib_spec_sum i
+@[qualif] def q1  (a b : Int) : Prop := a = b
+@[qualif] def q2  (a b : Int) : Prop := a ≥ b
+@[qualif] def q3  (a b : Int) : Prop := a > b
+@[qualif] def q4  (a b : Int) : Prop := a ≤ b
+@[qualif] def q5  (a b : Int) : Prop := a != b
+@[qualif] def q6  (t i : Int) : Prop := t = fib_spec_sum i
+-- )
+-- @[simp]
+-- def k0 (i : Int) (total : Int) (n : Int) : Prop :=
+--   0 <= i /\ i <= n /\ total = fib_spec_sum i
 
 def FibSumLoop_proof : FibSumLoop := by
-  unfold FibSumLoop
-  exists k0
-  simp
-  intros
-  and_intros
-  . grind
-  . unfold fib_spec_sum; grind
-  . intros <;> and_intros
-    . intros; grind
-    . intros <;> and_intros
-      . grind
-      . grind
-      . unfold fib_spec_sum; grind
-
+  try solve_fixpoint
+  sorry

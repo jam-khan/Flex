@@ -27,7 +27,7 @@ def KM.getKVarList : KM (List KVar) := do
 -- checks if expr is κ application
 -- returning κ and args
 def KM.isKApp (e : Expr) : KM (Option (KVar × Array Expr)) := do
-  let e ← instantiateMVars e
+  -- let e ← instantiateMVars e
   let fn := e.getAppFn
   if fn.isMVar then
     if let some κ ← KM.getKVar? fn.mvarId! then
@@ -45,7 +45,7 @@ def Lean.Expr.containsMVar (e : Expr) (mvarId : MVarId) : Bool :=
 -- Strategy: check each known κ's mvarId against the expression
 def KM.exprKVars (e : Expr) : KM (List KVar) := do
   let kvars ← KM.getKVarList
-  let e ← instantiateMVars e
+  -- let e ← instantiateMVars e
   return kvars.filter fun κ => e.containsMVar κ.mvarId
 
 -- walk outer `∀`-binders of a flat clause to reach the leaf head.

@@ -39,6 +39,10 @@ def comment_vc : Prop :=
                   ∀ a13 : Int, k3 a13 a0 a1 →
                     0 ≤ a11 - a0))
 
+
+theorem test : comment_vc := by
+  solve_fixpoint
+
 -- Reordered: ∃ k0 k4 k5 k1 k2 k3, body  (cut-first)
 def comment_vc_reordered : Prop :=
   ∃ k0 : Int → Int → Int → Prop,
@@ -70,29 +74,3 @@ def comment_vc_reordered : Prop :=
                 ∀ a12 : Int, k2 a12 a0 a1 →
                   ∀ a13 : Int, k3 a13 a0 a1 →
                     0 ≤ a11 - a0))
-
-theorem test : comment_vc := by
-  unfold comment_vc
-  rewriteKs
-  solve_fixpoint
-
--- Equivalence proof: just destructure and reconstruct in the new order.
-theorem comment_vc_iff : comment_vc ↔ comment_vc_reordered := by
-  unfold comment_vc comment_vc_reordered
-  perm_exists
-
-theorem baz :
-    ∃ k2 : Int -> Prop,
-    ∃ k1 : Int -> Prop,
-    ∀x,
-      (k1 x -> k2 x)
-     ∧ (k2 x -> x > 0) := by
-  rewriteKs
-  sorry
-  -- apply Exists.imp (p := fun k1 => ∀x, k1 x -> x > 0)
-  -- · intro k1 x
-  --   exists (fun x => k1 x)
-  --   grind
-  -- · exists (fun x => x > 0)
-  --   intros
-  --   assumption

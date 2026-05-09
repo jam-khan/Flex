@@ -15,8 +15,8 @@ def checkExprVC (prop : Expr) : TermElabM Bool := do
          first
            | omega
            | grind
-           | (simp_all; grind)
-           -- | aesop
+          --  | (simp_all; grind)
+          -- | aesop
            | (constructor <;> grind))))
     return goals.isEmpty
   catch _ =>

@@ -1,10 +1,13 @@
 import LeanFixpoint
 
-def stressQualifiers : List Qualifier := [
-  q{ Le(a : int, b : int) | a ≤ b },
-  q{ GeZero(v : int) | v ≥ 0 },
-  q{ Diff(a : int, b : int, c : int) | a == b - c }
-]
+@[qualif]
+def q1 (a : Int) (b : Int) := a ≤ b
+
+@[qualif]
+def q2 (v : Int) := v ≥ 0
+
+@[qualif]
+def q3 (a : Int) (b : Int) (c : Int) := a = b - c
 
 -- Single 6-param cyclic κ, same ANF pattern as MkPairsSimple
 def StressTest :=
@@ -30,4 +33,4 @@ def StressTest :=
           k ip ap cp lo₁ hi₁ n₁))
 
 theorem stressProof : StressTest := by
-  solve_fixpoint with stressQualifiers
+  solve_fixpoint

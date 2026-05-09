@@ -30,26 +30,26 @@ def substKVarInExpr (κ : KVar) (sol : Expr) (e : Expr) : Expr :=
 
 /-- `scope(κ, e)` — extract the sub-expression relevant to κ (Fig. 9). -/
 partial def exprScope (κ : KVar) (e : Expr) : KM Expr := do
-  let e ← whnf e
-  -- -- scope(κ, cₗ ∧ cᵣ)
-  -- if let some (cₗ, cᵣ) := e.and? then
-  --   let inL := (← KM.exprKVars cₗ ).contains κ
-  --   let inR := (← KM.exprKVars cᵣ).contains κ
-  --   -- κ ∈ Cₗ, κ ∉ Cᵣ
-  --   if inL && !inR
-  --     then exprScope κ cₗ
-  --   -- κ ∉ Cₗ, κ ∈ Cᵣ
-  --   else if !inL && inR
-  --     then exprScope κ cᵣ
-  --   -- fallback: scope(κ, c) = c
-  --   else return e
+  -- let e ← whnf e
+  -- scope(κ, cₗ ∧ cᵣ)
+  if let some (cₗ, cᵣ) := e.and? then
+    let inL := (← KM.exprKVars cₗ ).contains κ
+    let inR := (← KM.exprKVars cᵣ).contains κ
+    -- κ ∈ Cₗ, κ ∉ Cᵣ
+    if inL && !inR
+      then exprScope κ cₗ
+    -- κ ∉ Cₗ, κ ∈ Cᵣ
+    else if !inL && inR
+      then exprScope κ cᵣ
+    -- fallback: scope(κ, c) = c
+    else return e
     -- scope(κ, cₗ ∧ cᵣ) — preserve full And-structure (no stripping).
   -- Stripping breaks zapk's path-duality (path counts inLs/inRs based on c's
   -- And-tree, sol's Or-tree must mirror it exactly). Semantic equivalence
   -- is preserved: non-κ branches reduce to ⊥-leaves via sol1's catch-all,
   -- and downstream simplifyExpr collapses `∨ ⊥` for tactics that use it.
-  if e.and?.isSome then
-    return e
+  -- if e.and?.isSome then
+  --   return e
 
   -- scope(κ, ∀ x : τ. body)
   -- Handles one forall at a time. The paper's `∀x:b. p ⇒ c'` pattern
@@ -76,7 +76,7 @@ sol1(κ, p)              ≡ false
 /-- `sol1(κ, e)` — strongest solution (Section 5.2).
     Maps: `And → Or`, `∀(Prop) → And`, `∀(non-Prop) → ∃`, leaf κ-app → equality. -/
 partial def exprSol1 (κ : KVar) (e : Expr) : KM Expr := do
-  let e ← whnf e
+  -- let e ← whnf e
   let e ← exprScope κ e
   -- c₁ ∧ c₂
   if let some (l, r) := e.and? then
@@ -133,7 +133,7 @@ partial def exprSol1 (κ : KVar) (e : Expr) : KM Expr := do
 /-- `elim*(κ, sol, e)` — substitute κ with its solution throughout `e` (Fig. 11).
     Head-position κ-apps become `True`; hypothesis-position κ-apps get `substKVarInExpr`. -/
 partial def exprElimStar (κ : KVar) (sol : Expr) (e : Expr) : KM Expr := do
-  let e ← whnf e
+  -- let e ← whnf e
   if let some (l, r) := e.and? then
     let l' ← exprElimStar κ sol l
     let r' ← exprElimStar κ sol r
@@ -157,7 +157,7 @@ partial def exprElimStar (κ : KVar) (sol : Expr) (e : Expr) : KM Expr := do
     (like `0 ≤ x →`) are skipped but not counted, matching the original
     `Constraint.imp` behavior where each imp bundled a type binder with its guard. -/
 partial def countScopeVars (κ : KVar) (e : Expr) : KM Nat := do
-  let e ← whnf e
+  -- let e ← whnf e
   if e.isForall then
     let dom := e.bindingDomain!
     if !(← KM.exprKVars dom).contains κ then
