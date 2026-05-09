@@ -243,3 +243,70 @@ open Lean Meta Elab Tactic in
   propGoals.getLast!.assign conjProof
   -- Re-expose the new wrapped goal plus any non-Prop synthesis goals
   setGoals (newGoalMVar.mvarId! :: otherGoals)
+
+-- `under_exists1 => tacs`
+-- Runs `tacs` with the top-level existential witness replaced by a fresh metavar.
+-- If all subgoals are solved, the witness is determined and we're done.
+-- If subgoals remain, they are combined with ∧, abstracted over the
+-- undetermined witness, and re-wrapped as a single ∃ goal.
+syntax (name := underExists1) "under_exists1" "=>" tacticSeq : tactic
+
+open Lean Meta Elab Tactic in
+@[tactic underExists1] def evalUnderExists1 : Tactic := fun stx => do
+  let tacs := stx[2]
+  let g ← getMainGoal
+  -- Peel the top-level ∃ binder
+  let mut target ← whnfR (← g.getType)
+  if !target.isAppOfArity ``Exists 2 then
+    throwError "under_exists1: goal must be an existential (∃ ...)"
+  let α := target.appFn!.appArg!
+  let p := target.appArg!
+  let witMVar ← mkFreshExprMVar α (kind := .natural) (userName := p.bindingName!)
+  let αs   : Array Expr := #[α]
+  let ps   : Array Expr := #[p]  -- predicate lambda for the ∃
+  let wits : Array Expr := #[witMVar]  -- fresh witness MVar
+  target ← whnfR (p.beta #[witMVar])
+  -- Create body metavar and close the original goal via Exists.intro
+  let bodyMVar ← mkFreshExprMVar target (kind := .natural)
+  let proof ← mkAppOptM ``Exists.intro #[α, p, witMVar, bodyMVar]
+  g.assign proof
+  -- Run user tactics on the fully-instantiated body
+  setGoals [bodyMVar.mvarId!]
+  evalTactic tacs
+  let remaining ← getGoals
+  if remaining.isEmpty then return
+  -- Check if the witness is still undetermined
+  let witExpr ← instantiateMVars witMVar
+  if !witExpr.isMVar then
+    setGoals remaining
+    return
+  -- Separate Prop goals (to wrap) from non-Prop goals (synthesis mvars from
+  -- tactics like `rw` that create type-valued goals we must not put in ∧)
+  let (propGoals, otherGoals) ← remaining.partitionM fun goal => do
+    isProp (← instantiateMVars (← goal.getType))
+  -- Build conjunction of Prop goal types
+  let types ← propGoals.mapM fun goal => do instantiateMVars (← goal.getType)
+  let conjType ← match types with
+    | []  => throwError "under_exists1: impossible empty remaining"
+    | [t] => pure t
+    | _   => types.dropLast.foldrM (fun t acc => mkAppM ``And #[t, acc]) types.getLast!
+  -- Re-wrap with ∃ for the undetermined witness
+  let predBody ← kabstract conjType witExpr (occs := .all)
+  let pred := mkLambda p.bindingName! .default α predBody
+  let newTarget ← mkAppM ``Exists #[pred]
+  -- Create the new wrapped goal in the context of the first Prop goal
+  let decl ← propGoals.head!.getDecl
+  let newGoalMVar ← mkFreshExprMVarAt decl.lctx decl.localInstances newTarget
+  -- Extract witness via Classical.choose
+  let chosen     ← mkAppOptM ``Classical.choose      #[α, none, newGoalMVar]
+  let chosenSpec ← mkAppOptM ``Classical.choose_spec #[α, none, newGoalMVar]
+  witMVar.mvarId!.assign chosen
+  let specProof := chosenSpec
+  -- Distribute the conjunction proof back into the individual Prop goals
+  let mut conjProof := specProof
+  for i in [: propGoals.length - 1] do
+    propGoals[i]!.assign (← mkAppM ``And.left #[conjProof])
+    conjProof ← mkAppM ``And.right #[conjProof]
+  propGoals.getLast!.assign conjProof
+  -- Re-expose the new wrapped goal plus any non-Prop synthesis goals
+  setGoals (newGoalMVar.mvarId! :: otherGoals)

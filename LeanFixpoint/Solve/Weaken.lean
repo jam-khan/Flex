@@ -108,7 +108,11 @@ partial def weakenOnce
       -- specialize clause with that κ and current solutions
       -- note: below performs κ specialization for all the clauses
       let vc ← (specializeClauseForHead headKVar q slots currentSols fc).run kctx
+      let vcFmt ← ppExpr vc
+      let qFmt ← ppExpr q
+      IO.println s!"[weakenOnce] head={headKVar.name} slots={slots} q={qFmt} vc={vcFmt}"
       if ← checkExprVC vc then
+        IO.println s!"[weakenOnce] KEEPING IT"
         kept := kept.concat (q, slots)
     out := out.map fun (κ, qs) =>
       if κ == headKVar then (κ, kept) else (κ, qs)
