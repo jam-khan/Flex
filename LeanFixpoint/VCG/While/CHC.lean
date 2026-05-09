@@ -6,24 +6,28 @@ import LeanFixpoint.Tactic.SolveFixpoint
 
 /-! # Constrained Horn Clause Generation
 
-  `whileCHC vars pre c post` produces a Lean Prop that is a system of
-  Constrained Horn Clauses.  `vars` is a fixed list of program variables
-  (assignment targets plus any read-only variables such as loop bounds).
-  Every existential — both `seq` midpoints and `cwhile` invariants — has
-  type `NaryProp vars.length`, i.e. `Int → ... → Prop` with one argument
-  per variable in `vars`.  The result is directly solvable by `solve_fixpoint`.
+  `whileCHC readOnlyVars inScope pre c post` produces a Lean Prop that is a system of
+  Constrained Horn Clauses.  `readOnlyVars` are fixed variables available throughout (e.g.,
+  loop bounds, input parameters).  `inScope` tracks currently available variables,
+  expanding dynamically as new variables are assigned within the command.
+
+  Every existential — both `seq` midpoints and `cwhile` invariants — has type
+  `NaryProp inScope.length` (or a derived scope), yielding one argument per variable
+  currently in scope.  The result is directly solvable by `solve_fixpoint`.
 
   Soundness: if the CHC system is satisfiable, then `ValidHoareTriple pre c post`.
 -/
 
-/-- Generate CHCs for a command.  `vars` fixes the shared arity for all
-    existentials: every `seq` midpoint and every `cwhile` invariant has type
-    `NaryProp vars.length`.  Use `(readOnlyVars ++ c.assignedVars).eraseDups`
-    as a convenient default for `vars`.
-
-    The output is a Lean `Prop` whose only existentials are `∃ κ : NaryProp vars.length`. -/
+/-- Generate CHCs for a command with dynamic variable scoping.
+    `readOnlyVars` are always-available variables (e.g., loop bounds).
+    `inScope` is the current scope (readOnlyVars + any assigned variables so far).
+    As the command executes:
+    - `.seq c₁ c₂`: scope expands after c₁ (c₂ sees c₁'s assignments)
+    - `.ite`: branches stay isolated (no escape of assigned variables)
+    - `.cwhile`: loop body can assign locally; invariant stays at pre-loop scope -/
 @[simp]
-def whileCHC (vars : List CVar) (pre : Assertion) (c : Cmd) (post : Assertion) : Prop :=
+def whileCHC (readOnlyVars : List CVar) (inScope : List CVar)
+    (pre : Assertion) (c : Cmd) (post : Assertion) : Prop :=
   match c with
   | .skip =>
     ∀ s, pre s → post s
@@ -32,25 +36,28 @@ def whileCHC (vars : List CVar) (pre : Assertion) (c : Cmd) (post : Assertion) :
     ∀ s, pre s → post (s[x ↦ f s])
 
   | .seq c₁ c₂ =>
-    ∃ κ : NaryProp vars.length,
-      whileCHC vars pre c₁ (applyNary vars κ) ∧
-      whileCHC vars (applyNary vars κ) c₂ post
+    let midScope := (inScope ++ c₁.assignedVars).eraseDups
+    ∃ κ : NaryProp midScope.length,
+      whileCHC readOnlyVars inScope pre c₁ (applyNary midScope κ) ∧
+      whileCHC readOnlyVars midScope (applyNary midScope κ) c₂ post
 
   | .ite g c₁ c₂ =>
-    whileCHC vars (fun s => pre s ∧ g s = true) c₁ post
-    ∧ whileCHC vars (fun s => pre s ∧ g s = false) c₂ post
+    whileCHC readOnlyVars inScope (fun s => pre s ∧ g s = true) c₁ post
+    ∧ whileCHC readOnlyVars inScope (fun s => pre s ∧ g s = false) c₂ post
 
   | .cwhile g body =>
-    ∃ κ : NaryProp vars.length,
-      (∀ s, pre s → applyNary vars κ s)                                                   -- init
-    ∧ whileCHC vars (fun s => applyNary vars κ s ∧ g s = true) body (applyNary vars κ)    -- preserve
-    ∧ (∀ s, applyNary vars κ s ∧ g s = false → post s)                                    -- exit
+    let bodyScope := (inScope ++ body.assignedVars).eraseDups
+    ∃ κ : NaryProp inScope.length,
+      (∀ s, pre s → applyNary inScope κ s)                                                   -- init
+    ∧ whileCHC readOnlyVars bodyScope (fun s => applyNary inScope κ s ∧ g s = true) body (applyNary inScope κ)    -- preserve
+    ∧ (∀ s, applyNary inScope κ s ∧ g s = false → post s)                                    -- exit
 
 /-- Soundness: if the CHC system is satisfiable, the Hoare triple holds. -/
 @[simp]
-theorem whileCHC_sound (vars : List CVar) (pre : Assertion) (c : Cmd) (post : Assertion) :
-    whileCHC vars pre c post → ValidHoareTriple pre c post := by
-  induction c generalizing pre post with
+theorem whileCHC_sound (readOnlyVars : List CVar) (inScope : List CVar)
+    (pre : Assertion) (c : Cmd) (post : Assertion) :
+    whileCHC readOnlyVars inScope pre c post → ValidHoareTriple pre c post := by
+  induction c generalizing readOnlyVars inScope pre post with
   | skip =>
     intro h s₁ s₂ heval hpre
     cases heval; exact h _ hpre
@@ -59,13 +66,15 @@ theorem whileCHC_sound (vars : List CVar) (pre : Assertion) (c : Cmd) (post : As
     cases heval; exact h _ hpre
   | seq c₁ c₂ ih₁ ih₂ =>
     intro ⟨κ, h₁, h₂⟩
-    exact hoare_seq (ih₁ _ _ h₁) (ih₂ _ _ h₂)
+    let midScope := (inScope ++ c₁.assignedVars).eraseDups
+    exact hoare_seq (ih₁ readOnlyVars inScope _ _ h₁) (ih₂ readOnlyVars midScope _ _ h₂)
   | ite g c₁ c₂ ih₁ ih₂ =>
     intro ⟨h₁, h₂⟩
-    exact hoare_if (ih₁ _ _ h₁) (ih₂ _ _ h₂)
+    exact hoare_if (ih₁ readOnlyVars inScope _ _ h₁) (ih₂ readOnlyVars inScope _ _ h₂)
   | cwhile g body ih =>
     intro ⟨κ, hinit, hpres, hpost⟩
-    exact hoare_while hinit (ih _ _ hpres) hpost
+    let bodyScope := (inScope ++ body.assignedVars).eraseDups
+    exact hoare_while hinit (ih readOnlyVars bodyScope _ _ hpres) hpost
 
 /-! # Examples -/
 
@@ -94,11 +103,12 @@ theorem flip_local : (∃ (κ κ_1 : Int → Int → Prop),
   intro ⟨k1, k, _⟩
   exists k, k1
 
--- vars=["n","x"]: every ∃ has type Int → Int → Prop  (args: s "n", s "x")
+-- vars=["n","x"]: inScope expands from ["n"] to ["n","x"] after first assignment
 example : ValidHoareTriple (fun s => 0 ≤ s "n") countToN (fun s => s "x" = s "n") := by
-  apply whileCHC_sound ["n", "x"]
-  dsimp [whileCHC, countToN, State.update, applyNary]
-  simp
+  apply whileCHC_sound ["n"] ["n"]
+  have : ["n", "x"].eraseDups = ["n", "x"] := by decide
+  dsimp [whileCHC, countToN, State.update, applyNary, Cmd.assignedVars]
+  rw [this] ; simp
   hoist_exists
   rw [flip_local]
   under_exists1 =>
@@ -113,10 +123,10 @@ def reduceToZero : Cmd :=
           (.assign "x" (fun s => s "x" - 1))
 
 set_option maxHeartbeats 1600000 in
--- vars=["x"]: κ : Int → Prop  (argument: s "x")
+-- x is pre-existing variable (in readOnlyVars); inScope stays ["x"]
 theorem reduceToZero_correct :
     ValidHoareTriple (fun _ => True) reduceToZero (fun s => s "x" = 0) := by
-  apply whileCHC_sound ["x"]
+  apply whileCHC_sound ["x"] ["x"]
   simp [whileCHC]
   solve_fixpoint
 
@@ -143,20 +153,20 @@ def slowAssign : Cmd :=
           (.assign "y" (fun s => s "y" + 1)))))
 
 theorem flip_local_2 :
-  (∃ (κ κ_1 κ_2 κ_3 : Int → Int → Int → Prop),
-  (∀ (s : State), 0 ≤ s "n" → κ (s "n") (s "n") (s "y")) ∧
-    (∀ (s : State), κ (s "n") (s "x") (s "y") → κ_1 (s "n") (s "x") 0) ∧
+  (∃ (κ : Int → Int → Prop) (κ_1 κ_2 κ_3 : Int → Int → Int → Prop),
+  (∀ (s : State), 0 ≤ s "n" → κ (s "n") (s "n")) ∧
+    (∀ (s : State), κ (s "n") (s "x") → κ_1 (s "n") (s "x") 0) ∧
       (∀ (s : State), κ_1 (s "n") (s "x") (s "y") → κ_2 (s "n") (s "x") (s "y")) ∧
-        (∀ (s : State), κ_2 (s "n") (s "x") (s "y") ∧ (s "x" != 0) = true → κ_3 (s "n") (s "x" - 1) (s "y")) ∧
+        (∀ (s : State), κ_2 (s "n") (s "x") (s "y") → ¬s "x" = 0 → κ_3 (s "n") (s "x" - 1) (s "y")) ∧
           (∀ (s : State), κ_3 (s "n") (s "x") (s "y") → κ_2 (s "n") (s "x") (s "y" + 1)) ∧
-            ∀ (s : State), κ_2 (s "n") (s "x") (s "y") ∧ (s "x" != 0) = false → s "y" = s "n") =
-  (∃ κ_3 κ_2 κ κ_1 : Int → Int → Int → Prop,
-  (∀ (s : State), 0 ≤ s "n" → κ (s "n") (s "n") (s "y")) ∧
-    (∀ (s : State), κ (s "n") (s "x") (s "y") → κ_1 (s "n") (s "x") 0) ∧
+            ∀ (s : State), κ_2 (s "n") (s "x") (s "y") → s "x" = 0 → s "y" = s "n") =
+  (∃ (κ_3 κ_2 : Int → Int → Int → Prop) (κ : Int → Int → Prop) (κ_1 : Int → Int → Int → Prop),
+  (∀ (s : State), 0 ≤ s "n" → κ (s "n") (s "n")) ∧
+    (∀ (s : State), κ (s "n") (s "x") → κ_1 (s "n") (s "x") 0) ∧
       (∀ (s : State), κ_1 (s "n") (s "x") (s "y") → κ_2 (s "n") (s "x") (s "y")) ∧
-        (∀ (s : State), κ_2 (s "n") (s "x") (s "y") ∧ (s "x" != 0) = true → κ_3 (s "n") (s "x" - 1) (s "y")) ∧
+        (∀ (s : State), κ_2 (s "n") (s "x") (s "y") → ¬s "x" = 0 → κ_3 (s "n") (s "x" - 1) (s "y")) ∧
           (∀ (s : State), κ_3 (s "n") (s "x") (s "y") → κ_2 (s "n") (s "x") (s "y" + 1)) ∧
-            ∀ (s : State), κ_2 (s "n") (s "x") (s "y") ∧ (s "x" != 0) = false → s "y" = s "n") :=
+            ∀ (s : State), κ_2 (s "n") (s "x") (s "y") → s "x" = 0 → s "y" = s "n") :=
   by
   apply propext
   apply Iff.intro
@@ -167,34 +177,30 @@ theorem flip_local_2 :
 
 theorem solve_head :
   (∃ (x x_1 : Int → Int → Int → Prop),
-  (∀ (s : State), ∃ (y : 0 ≤ s "n" → State), ∀ (x : 0 ≤ s "n"), 0 ≤ y x "n" ∧ s "n" = y x "n" ∧ s "y" = y x "y") ∧
+  (∀ (s : State), ∃ (y : 0 ≤ s "n" → State), ∀ (x : 0 ≤ s "n"), 0 ≤ y x "n" ∧ s "n" = y x "n") ∧
     (∀ (s x : State),
-        ∃ (y y_1 : 0 ≤ x "n" → s "n" = x "n" → s "x" = x "n" → s "y" = x "y" → State),
-          ∀ (x_2 : 0 ≤ x "n") (x_3 : s "n" = x "n") (x_4 : s "x" = x "n") (x : s "y" = x "y"),
-            0 ≤ y_1 x_2 x_3 x_4 x "n" ∧
-              y x_2 x_3 x_4 x "n" = y_1 x_2 x_3 x_4 x "n" ∧
-                y x_2 x_3 x_4 x "x" = y_1 x_2 x_3 x_4 x "n" ∧
-                  y x_2 x_3 x_4 x "y" = y_1 x_2 x_3 x_4 x "y" ∧
-                    s "n" = y x_2 x_3 x_4 x "n" ∧ s "x" = y x_2 x_3 x_4 x "x") ∧
+        ∃ (y y_1 : 0 ≤ x "n" → s "n" = x "n" → s "x" = x "n" → State),
+          ∀ (x_2 : 0 ≤ x "n") (x_3 : s "n" = x "n") (x : s "x" = x "n"),
+            0 ≤ y_1 x_2 x_3 x "n" ∧
+              y x_2 x_3 x "n" = y_1 x_2 x_3 x "n" ∧
+                y x_2 x_3 x "x" = y_1 x_2 x_3 x "n" ∧ s "n" = y x_2 x_3 x "n" ∧ s "x" = y x_2 x_3 x "x") ∧
       (∀ (s x x_2 : State),
           0 ≤ x_2 "n" →
             x "n" = x_2 "n" →
-              x "x" = x_2 "n" →
-                x "y" = x_2 "y" → s "n" = x "n" → s "x" = x "x" → s "y" = 0 → x_1 (s "n") (s "x") (s "y")) ∧
+              x "x" = x_2 "n" → s "n" = x "n" → s "x" = x "x" → s "y" = 0 → x_1 (s "n") (s "x") (s "y")) ∧
         (∀ (s : State), x_1 (s "n") (s "x") (s "y") → ¬s "x" = 0 → x (s "n") (s "x" - 1) (s "y")) ∧
           (∀ (s : State), x (s "n") (s "x") (s "y") → x_1 (s "n") (s "x") (s "y" + 1)) ∧
             ∀ (s : State), x_1 (s "n") (s "x") (s "y") → s "x" = 0 → s "y" = s "n") =
-  ∃ (x x_1 : Int → Int → Int → Prop),
+  (∃ (x x_1 : Int → Int → Int → Prop),
   (∀ (s : State), True) ∧
     (∀ (s x : State), True) ∧
       (∀ (s x x_2 : State),
           0 ≤ x_2 "n" →
             x "n" = x_2 "n" →
-              x "x" = x_2 "n" →
-                x "y" = x_2 "y" → s "n" = x "n" → s "x" = x "x" → s "y" = 0 → x_1 (s "n") (s "x") (s "y")) ∧
+              x "x" = x_2 "n" → s "n" = x "n" → s "x" = x "x" → s "y" = 0 → x_1 (s "n") (s "x") (s "y")) ∧
         (∀ (s : State), x_1 (s "n") (s "x") (s "y") → ¬s "x" = 0 → x (s "n") (s "x" - 1) (s "y")) ∧
           (∀ (s : State), x (s "n") (s "x") (s "y") → x_1 (s "n") (s "x") (s "y" + 1)) ∧
-            ∀ (s : State), x_1 (s "n") (s "x") (s "y") → s "x" = 0 → s "y" = s "n" := by
+            ∀ (s : State), x_1 (s "n") (s "x") (s "y") → s "x" = 0 → s "y" = s "n") := by
   apply propext ; apply Iff.intro
   · intro ⟨x, x1, ⟨h1, h2, h3, h4, h5, h6⟩⟩
     exists x, x1
@@ -211,8 +217,8 @@ theorem solve_head :
     · intro s ; exists fun _ => s
       simp
     · intro s x
-      exists fun _ _ _ _ => s
-      exists fun _ _ _ _ => s
+      exists fun _ _ _ => s
+      exists fun _ _ _ => s
       simp_all
     · assumption
     · assumption
@@ -223,8 +229,14 @@ theorem solve_head :
 -- κ = fun nv xv yv => xv + yv = nv ∧ 0 ≤ xv
 theorem slowAssign_correct :
     ValidHoareTriple (fun s => 0 ≤ s "n") slowAssign (fun s => s "y" = s "n") := by
-  apply whileCHC_sound ["n", "x", "y"]
-  dsimp [whileCHC, slowAssign, State.update, applyNary]
+  apply whileCHC_sound ["n"] ["n"]
+  dsimp [whileCHC, slowAssign, State.update, applyNary, Cmd.assignedVars]
+  have : ["n", "x"].eraseDups = ["n", "x"] := by decide
+  rw [this] ; simp ; clear this
+  have : ["n", "x", "y"].eraseDups = ["n", "x", "y"] := by decide
+  rw [this] ; simp ; clear this
+  have : (("n" :: "x" :: "y" :: ["x", "y"].eraseDups).eraseDups ++ ["x"]).eraseDups = ["n", "x", "y"] := by decide
+  rw [this] ; simp ; clear this
   hoist_exists
   rw [flip_local_2]
   under_exists1 =>
