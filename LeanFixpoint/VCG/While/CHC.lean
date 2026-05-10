@@ -1,4 +1,5 @@
 import LeanFixpoint.VCG.While.Hoare
+import LeanFixpoint.VCG.While.Tactics
 import LeanFixpoint.Tactic.Zap
 import LeanFixpoint.Tactic.Hoist
 import LeanFixpoint.Tactic.SolveFusion
@@ -106,9 +107,8 @@ theorem flip_local : (∃ (κ κ_1 : Int → Int → Prop),
 -- vars=["n","x"]: inScope expands from ["n"] to ["n","x"] after first assignment
 example : ValidHoareTriple (fun s => 0 ≤ s "n") countToN (fun s => s "x" = s "n") := by
   apply whileCHC_sound ["n"] ["n"]
-  have : ["n", "x"].eraseDups = ["n", "x"] := by decide
   dsimp [whileCHC, countToN, State.update, applyNary, Cmd.assignedVars]
-  rw [this] ; simp
+  simp_scopes ; simp
   hoist_exists
   rw [flip_local]
   under_exists1 =>
@@ -231,12 +231,7 @@ theorem slowAssign_correct :
     ValidHoareTriple (fun s => 0 ≤ s "n") slowAssign (fun s => s "y" = s "n") := by
   apply whileCHC_sound ["n"] ["n"]
   dsimp [whileCHC, slowAssign, State.update, applyNary, Cmd.assignedVars]
-  have : ["n", "x"].eraseDups = ["n", "x"] := by decide
-  rw [this] ; simp ; clear this
-  have : ["n", "x", "y"].eraseDups = ["n", "x", "y"] := by decide
-  rw [this] ; simp ; clear this
-  have : (("n" :: "x" :: "y" :: ["x", "y"].eraseDups).eraseDups ++ ["x"]).eraseDups = ["n", "x", "y"] := by decide
-  rw [this] ; simp ; clear this
+  simp_scopes ; simp
   hoist_exists
   rw [flip_local_2]
   under_exists1 =>
