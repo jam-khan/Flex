@@ -57,8 +57,4 @@ def CounterLoop : Prop :=
                 k0 (res₀ + 1) (i₀ - 1) n₀))
 
 theorem CounterLoop_proof : CounterLoop := by
-  try solve_fixpoint
-
-example : (z0+z1=z2 ∧ z1≥0 ∧ z0≥0) ∧ (z1+z0=z2 ∧ z0≥0 ∧ z1≥0) ∧ z2≥z0 ∧ z2≥z1 ∧ z0≤z2 ∧ z1≤z2 ∧ z0≥0 ∧ z1≥0 ∧ z2≥0 := by
-  simp
-  grind
+  solve_fixpoint
