@@ -25,11 +25,11 @@ def FibSumLoop := ∃ k0 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> Prop,
 @[qualif] def q4  (a b : Int) : Prop := a ≤ b
 @[qualif] def q5  (a b : Int) : Prop := a != b
 @[qualif] def q6  (t i : Int) : Prop := t = fib_spec_sum i
--- )
+@[qualif] def q7  (i : Int) : Prop := i ≥ 0
+
 -- @[simp]
 -- def k0 (i : Int) (total : Int) (n : Int) : Prop :=
 --   0 <= i /\ i <= n /\ total = fib_spec_sum i
 
 def FibSumLoop_proof : FibSumLoop := by
-  try solve_fixpoint
-  sorry
+  solve_fixpoint
