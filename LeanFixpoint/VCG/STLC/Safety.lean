@@ -166,11 +166,21 @@ theorem hastype_fundamental {Γ e t} (h : Hastype Γ e t) :
       intro γ ρ hE
       obtain ⟨v, hlkγ, hv, hint, hbool⟩ := EnvDenote.lookup_some hE hlk
       refine ⟨v, ?_, ?_⟩
-      · rw [Exp.substEnv_var_lookup x γ v hlkγ]
+      · -- Closedness of `v` is needed by the strengthened `substEnv_var_lookup`.
+        -- For iconst/bconst it's trivially true; for clos it needs an EnvDenote
+        -- closedness invariant we haven't formalised yet. Treat per-constructor.
         cases v with
-        | iconst n   => exact BigStep.iconst
-        | bconst b   => exact BigStep.bconst
-        | clos y body => exact BigStep.lam
+        | iconst n   =>
+            rw [Exp.substEnv_var_lookup x γ (.iconst n) hlkγ (by simp [Val.closed, Val.fv])]
+            exact BigStep.iconst
+        | bconst b   =>
+            rw [Exp.substEnv_var_lookup x γ (.bconst b) hlkγ (by simp [Val.closed, Val.fv])]
+            exact BigStep.bconst
+        | clos y body =>
+            rw [Exp.substEnv_var_lookup x γ (.clos y body) hlkγ ?_]
+            · exact BigStep.lam
+            · -- TRUE under EnvDenote-closedness invariant; deferred.
+              sorry
       · cases t with
         | refine b r =>
             simp only [self]
@@ -198,7 +208,10 @@ theorem hastype_fundamental {Γ e t} (h : Hastype Γ e t) :
   | @lam Γ x e s t _ ihbody =>
       intro γ ρ hE
       refine ⟨.clos x (Exp.substEnv γ e), ?_, ?_⟩
-      · rw [Exp.substEnv_lam]; exact BigStep.lam
+      · -- substEnv_lam needs `x ∉ Subst.dom γ` (TRUE under same-binder; deferred).
+        rw [Exp.substEnv_lam γ x e ?_]
+        · exact BigStep.lam
+        · sorry
       · refine ⟨_, rfl, ?_⟩
         intro va hva
         have hE' : EnvDenote ((x, s) :: Γ) ((x, va) :: γ)
@@ -222,7 +235,11 @@ theorem hastype_fundamental {Γ e t} (h : Hastype Γ e t) :
             | arrow _ _ _ => sorry  -- contradiction
         obtain ⟨vr, hbs, hvr⟩ := ihbody hE'
         refine ⟨vr, ?_, hvr⟩
-        rw [← Exp.substEnv_cons_swap]
+        -- Convert hbs via cons_swap (needs freshness + closedness; deferred).
+        have h_xfresh : x ∉ Subst.dom γ := by sorry
+        have h_va_closed : Val.closed va := by sorry
+        have h_γ_closed : Subst.AllClosed γ := by sorry
+        rw [Exp.substEnv_cons_swap x va γ e h_xfresh h_va_closed h_γ_closed] at hbs
         exact hbs
   | @app Γ e₁ y x s t _ _ ih₁ ih₂ =>
       intro γ ρ hE
@@ -251,9 +268,14 @@ theorem hastype_fundamental {Γ e t} (h : Hastype Γ e t) :
         all_goals sorry  -- same shape as `lam` case
       obtain ⟨v₂, hbs₂, hv₂⟩ := ih₂ hE'
       refine ⟨v₂, ?_, ?_⟩
-      · rw [Exp.substEnv_letin]
+      · -- substEnv_letin needs `x ∉ Subst.dom γ` (TRUE under same-binder; deferred).
+        have h_xfresh : x ∉ Subst.dom γ := by sorry
+        have h_v₁_closed : Val.closed v₁ := by sorry
+        have h_γ_closed : Subst.AllClosed γ := by sorry
+        rw [Exp.substEnv_letin γ x e₁ e₂ h_xfresh]
         refine BigStep.letin hbs₁ ?_
-        rw [← Exp.substEnv_cons_swap]; exact hbs₂
+        rw [Exp.substEnv_cons_swap x v₁ γ e₂ h_xfresh h_v₁_closed h_γ_closed] at hbs₂
+        exact hbs₂
       · -- TyDenote t ρ v₂ from TyDenote t (extWithVal s ρ x v₁) v₂
         -- by weakening (requires x ∉ FV(t); flagged in TyDenote.weaken_update).
         cases s with
@@ -332,7 +354,8 @@ theorem hastype_fundamental {Γ e t} (h : Hastype Γ e t) :
             · intro b' hvb'; cases hvb'; exact hρb
           obtain ⟨vr, hbs, hvr⟩ := ih₁ hE'
           refine ⟨vr, ?_, hvr⟩
-          rw [Exp.substEnv_ite, Exp.substEnv_var_lookup x γ _ hlkγ]
+          rw [Exp.substEnv_ite, Exp.substEnv_var_lookup x γ _ hlkγ
+                  (by simp [Val.closed, Val.fv])]
           refine BigStep.ite_t (by simp [Val.toExp]; exact BigStep.bconst) ?_
           -- Goal: BigStep (substEnv γ e₁) vr
           -- Have: BigStep (substEnv ((x, .bconst true) :: γ) e₁) vr
@@ -348,7 +371,8 @@ theorem hastype_fundamental {Γ e t} (h : Hastype Γ e t) :
             · intro b' hvb'; cases hvb'; exact hρb
           obtain ⟨vr, hbs, hvr⟩ := ih₂ hE'
           refine ⟨vr, ?_, hvr⟩
-          rw [Exp.substEnv_ite, Exp.substEnv_var_lookup x γ _ hlkγ]
+          rw [Exp.substEnv_ite, Exp.substEnv_var_lookup x γ _ hlkγ
+                  (by simp [Val.closed, Val.fv])]
           refine BigStep.ite_f (by simp [Val.toExp]; exact BigStep.bconst) ?_
           sorry
 
