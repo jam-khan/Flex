@@ -14,103 +14,114 @@ def conjoinExprs : List Expr → Expr
   | [e] => e
   | e :: es => es.foldl (fun acc x => mkApp2 (mkConst ``And) acc x) e
 
-partial def specializeClauseForHead
+/-- Generic clause specializer.
+    Walks the ∀-chain, substitutes hypothesis κ-apps via `assignment`, and
+    at the head leaf calls `headRepl` with the κ-app's args to produce the
+    replacement. Used by both candidate-VC build and sat-VC build. -/
+partial def specializeClauseWithHead
     (headKVar   : KVar)
-    (q          : Expr)            -- qualifier lambda (unapplied, e.g. `q_le`)
-    (qSlots     : List Nat)        -- slot mapping: qualifier-param i → κ-slot qSlots[i]
+    (headRepl   : Array Expr → KM Expr)
     (assignment : List (KVar × Expr))
     (e          : Expr) : KM Expr := do
   let e ← whnf e
   if e.isForall then
-    -- elim* hypothesis substitution: walk κ's and substitute in bindingDomain
-    let mut dom := e.bindingDomain! -- body of forall (∀)
+    let mut dom := e.bindingDomain!
     for (κ, sol) in assignment do
       dom := substKVarInExpr κ sol dom
     withLocalDeclD e.bindingName! dom fun fvar => do
       let body  := e.bindingBody!.instantiate1 fvar
-      let body' ← specializeClauseForHead headKVar q qSlots assignment body
+      let body' ← specializeClauseWithHead headKVar headRepl assignment body
       let abstr := body'.abstract #[fvar]
-      -- once all substitutions are done with κ-vars
-      -- then, we create a new `∀` and return it
       pure (Expr.forallE e.bindingName! dom abstr e.bindingInfo!)
   else if let some (l, r) := e.and? then
-    -- if there is `∧`
-    let l' ← specializeClauseForHead headKVar q qSlots assignment l
-    let r' ← specializeClauseForHead headKVar q qSlots assignment r
+    let l' ← specializeClauseWithHead headKVar headRepl assignment l
+    let r' ← specializeClauseWithHead headKVar headRepl assignment r
     return mkApp2 (mkConst ``And) l' r'
   else
-    -- Leaf: is it the head κ-app?
     let fn := e.getAppFn
     if fn.isMVar && fn.mvarId! == headKVar.mvarId then
-      -- Head position: β-apply q to the head args projected by qSlots.
-      -- `e.getAppArgs` contains the actual κ-args at this call site
-      -- (in the lctx established by outer `withLocalDeclD`s);
-      -- `qSlots` picks out which of those go to which qualifier param.
-      let args   := e.getAppArgs
-      let chosen := (qSlots.map fun i => args[i]!).toArray
-      liftM (Expr.instQualifier q chosen)
+      headRepl e.getAppArgs
     else
-      -- Non-κ leaf: hypothesis-position substitution for any embedded κ-app
       let mut acc := e
       for (κ, sol) in assignment do
         acc := substKVarInExpr κ sol acc
       return acc
 
+/-- Specialize for a candidate qualifier (existing behavior). -/
+def specializeClauseForHead
+    (headKVar   : KVar)
+    (q          : Expr)            -- qualifier lambda (unapplied, e.g. `q_le`)
+    (qSlots     : List Nat)        -- slot mapping: qualifier-param i → κ-slot qSlots[i]
+    (assignment : List (KVar × Expr))
+    (e          : Expr) : KM Expr :=
+  specializeClauseWithHead headKVar
+    (fun args => liftM (Expr.instQualifier q ((qSlots.map fun i => args[i]!).toArray)))
+    assignment e
+
+/-- Specialize but write `False` at the head κ-leaf — used by the sat-guard
+    to test whether the clause's hypothesis is itself unsatisfiable. -/
+def specializeClauseAsNeg
+    (headKVar   : KVar)
+    (assignment : List (KVar × Expr))
+    (e          : Expr) : KM Expr :=
+  specializeClauseWithHead headKVar (fun _ => pure (mkConst ``False)) assignment e
+
+/-- Build a per-κ "current solution" map: each κ's surviving candidate
+    qualifier-instances β-applied at canonical-param fvars, then conjoined.
+    `substKVarInExpr` later re-substitutes those placeholders with actual
+    κ-app args at each hypothesis site. -/
+private def buildCurrentSols
+    (assignment : List (KVar × List (Expr × List Nat)))
+    : MetaM (List (KVar × Expr)) :=
+  assignment.mapM fun (κ, cands) => do
+    let paramFvars : Array Expr :=
+      (κ.params.map fun n => Expr.fvar (FVarId.mk n)).toArray
+    let bodies ← cands.mapM fun (q, slots) => do
+      let chosen : Array Expr := (slots.map fun i => paramFvars[i]!).toArray
+      Expr.instQualifier q chosen
+    return (κ, conjoinExprs bodies)
+
 /-- One iteration of Houdini weakening.
 
     For each flat clause whose conclusion is a κ-application:
     · Identify the head κ.
-    · For each candidate `(q, qSlots)` currently assigned to that κ,
-      specialize the clause — substitute hypothesis κ-apps by their current
-      conjunctive solution, and replace the head leaf with `q` β-applied at
-      the head-args projected by `qSlots`.
-    · Check the resulting VC via `checkExprVC`. Keep candidate iff it passes.
+    · Sat-guard (A1): if hypothesis (with current sols substituted) is
+      inconsistent, every candidate would pass via vacuous truth — SKIP
+      this clause this iter (don't drop candidates; dropping would be
+      unsound). Other clauses processed in this iter usually shrink `out`
+      enough that the inconsistency disappears next pass.
+    · Otherwise, for each candidate `(q, qSlots)`, specialize and check
+      via `checkExprVC`. Keep candidate iff it passes.
 
-    Returns the updated assignment (with failed candidates dropped). Monotone:
-    `kept ⊆ original` for every κ. -/
+    A2: `currentSols` is rebuilt INSIDE the per-clause loop so each clause
+    sees the latest `out` (post earlier-clause refinements within this iter). -/
 partial def weakenOnce
     (kctx       : KContext)
     (flatCs     : List Expr)
     (assignment : List (KVar × List (Expr × List Nat)))
     : TermElabM (List (KVar × List (Expr × List Nat))) := do
-  -- Pre-materialize one `currentSol` Expr per κ for hypothesis-position
-  -- substitution. Each candidate is β-applied at κ.params' canonical-fvar
-  -- placeholders, then conjoined. `substKVarInExpr` later re-substitutes
-  -- those placeholders with actual κ-app args at each hypothesis site.
-  let currentSols : List (KVar × Expr) ← assignment.mapM fun (κ, cands) => do
-    -- create fvars for the parameters of the `κ`
-    let paramFvars : Array Expr :=
-      (κ.params.map fun n => Expr.fvar (FVarId.mk n)).toArray
-    -- here, we map through each candidate qualifier
-    -- for each `q`, we take the qualifier `q`
-    -- and create a β-reduced `Expr` body by applying combination of args
-    -- why? let's say qualifier has two params but 4 args are being passed
-    -- then, naturally some goes to waste and some need combination.
-    let bodies ← cands.mapM fun (q, slots) => do
-      let chosen : Array Expr := (slots.map fun i => paramFvars[i]!).toArray
-      Expr.instQualifier q chosen
-    -- after getting all β-reduced kappas we return the conjoined expression
-    -- overall the bodies
-    return (κ, conjoinExprs bodies)
-  -- Iterate flat clauses, weakening the head κ's candidate list
-  -- this is initial assignment of κ ↦ solutions
-  -- that gets mutated as the algorithm runs and performing weakening
+  -- A2: `currentSols` is rebuilt INSIDE the per-clause loop so each clause
+  -- sees the latest `out` (post earlier-clause refinements within this iter).
+  -- Matches liquid-fixpoint's worklist behavior more closely.
   let mut out := assignment
-  -- take one flat clause
   for fc in flatCs do
-    -- return head κ if found inside the head of `∀`-chain inside `fc`
     let some headKVar ← (findHeadKVar fc).run kctx | continue
-    -- find if there is an assignment for `headKVar` in the `assignment`
     let some (_, candidates) := out.find? (·.1 == headKVar) | continue
-    -- now, iterate through the `κ` qualifiers from the candidates
-    let mut kept : List (Expr × List Nat) := []
-    for (q, slots) in candidates do
-      -- specialize clause with that κ and current solutions
-      -- note: below performs κ specialization for all the clauses
-      let vc ← (specializeClauseForHead headKVar q slots currentSols fc).run kctx
-      if ← checkExprVC vc then
-        kept := kept.concat (q, slots)
-    out := out.map fun (κ, qs) =>
-      if κ == headKVar then (κ, kept) else (κ, qs)
-
+    let currentSols ← buildCurrentSols out
+    -- A1: sat-guard. If hypothesis is unsat (with current sols substituted),
+    -- every candidate would pass via vacuous truth. SKIP this clause —
+    -- don't touch `out`. Other clauses processed in this iter shrink `out`,
+    -- usually breaking the inconsistency on the next pass.
+    let negVC ← (specializeClauseAsNeg headKVar currentSols fc).run kctx
+    let vacuous ← checkExprUnsat negVC
+    match vacuous with
+    | true  => pure ()
+    | false =>
+      let mut kept : List (Expr × List Nat) := []
+      for (q, slots) in candidates do
+        let vc ← (specializeClauseForHead headKVar q slots currentSols fc).run kctx
+        if ← checkExprVC vc then
+          kept := kept.concat (q, slots)
+      out := out.map fun (κ, qs) =>
+        if κ == headKVar then (κ, kept) else (κ, qs)
   return out

@@ -21,24 +21,26 @@ private def runSpec
     (assignment : List (KVar × Expr) := [])
     : TermElabM Unit := do
   IO.println s!"\n===== {desc} ====="
-  peelExistentials (m := TermElabM) stmt {} [] fun kvarMap _kvarsRev body => do
-    let kctx : KContext := { kvars := kvarMap }
-    let kvars : List KVar := kvarMap.values
-    match kvars with
-    | [headKVar] =>
-      IO.println s!"  κ = {headKVar.name}, arity = {headKVar.params.length}"
-      let clauses ← (exprFlat body).run kctx
-      let mut i := 0
-      for fc in clauses do
-        IO.println s!"  clause {i}: {← ppExpr fc}"
-        try
-          let res ← (specializeClauseForHead headKVar q qSlots assignment fc).run kctx
-          IO.println s!"          → {← ppExpr res}"
-        catch e =>
-          IO.println s!"          ! error: {← e.toMessageData.toString}"
-        i := i + 1
-    | _ =>
-      IO.println s!"  (expected exactly one κ, got {kvars.length})"
+  let goalMVar ← mkFreshExprMVar (some stmt)
+  let (kvarMap, _kvarsRev, bodyGoalId) ← peelExistentialsAndIntro goalMVar.mvarId!
+  let body ← bodyGoalId.getType
+  let kctx : KContext := { kvars := kvarMap }
+  let kvars : List KVar := kvarMap.values
+  match kvars with
+  | [headKVar] =>
+    IO.println s!"  κ = {headKVar.name}, arity = {headKVar.params.length}"
+    let clauses ← (exprFlat body).run kctx
+    let mut i := 0
+    for fc in clauses do
+      IO.println s!"  clause {i}: {← ppExpr fc}"
+      try
+        let res ← (specializeClauseForHead headKVar q qSlots assignment fc).run kctx
+        IO.println s!"          → {← ppExpr res}"
+      catch e =>
+        IO.println s!"          ! error: {← e.toMessageData.toString}"
+      i := i + 1
+  | _ =>
+    IO.println s!"  (expected exactly one κ, got {kvars.length})"
 
 run_cmd Lean.Elab.Command.liftTermElabM do
   let qGt ← mkConstWithLevelParams ``_wt_gt_one
@@ -106,18 +108,20 @@ run_cmd Lean.Elab.Command.liftTermElabM do
   -- checkExprVC rejects → weakenOnce drops the candidate → survivors: 0
   ----------------------------------------------------------------------
   let stmt1 ← elabTerm (← `(∃ κ : Int → Prop, ∀ x : Int, 0 ≤ x → κ x)) none
-  peelExistentials (m := TermElabM) stmt1 {} [] fun kvarMap _kvarsRev body => do
-    let kctx : KContext := { kvars := kvarMap }
-    match kvarMap.values with
-    | [κ] =>
-      let initial : List (KVar × List (Expr × List Nat)) := [(κ, [(qGt, [0])])]
-      let flat ← (exprFlat body).run kctx
-      IO.println s!"\nWeaken-A (should DROP):"
-      IO.println s!"  input:     1 candidate"
-      let after ← weakenOnce kctx flat initial
-      for (_, cands) in after do
-        IO.println s!"  survivors: {cands.length}   (expect 0)"
-    | _ => IO.println "unexpected κ count"
+  let goalMVar1 ← mkFreshExprMVar (some stmt1)
+  let (kvarMap, _kvarsRev, bodyGoalId) ← peelExistentialsAndIntro goalMVar1.mvarId!
+  let body ← bodyGoalId.getType
+  let kctx : KContext := { kvars := kvarMap }
+  match kvarMap.values with
+  | [κ] =>
+    let initial : List (KVar × List (Expr × List Nat)) := [(κ, [(qGt, [0])])]
+    let flat ← (exprFlat body).run kctx
+    IO.println s!"\nWeaken-A (should DROP):"
+    IO.println s!"  input:     1 candidate"
+    let after ← weakenOnce kctx flat initial
+    for (_, cands) in after do
+      IO.println s!"  survivors: {cands.length}   (expect 0)"
+  | _ => IO.println "unexpected κ count"
 
   ----------------------------------------------------------------------
   -- Weaken-B: candidate SHOULD be kept.
@@ -128,18 +132,20 @@ run_cmd Lean.Elab.Command.liftTermElabM do
   -- checkExprVC accepts → weakenOnce keeps the candidate → survivors: 1
   ----------------------------------------------------------------------
   let stmt2 ← elabTerm (← `(∃ κ : Int → Prop, ∀ x : Int, x = 2 → κ x)) none
-  peelExistentials (m := TermElabM) stmt2 {} [] fun kvarMap _kvarsRev body => do
-    let kctx : KContext := { kvars := kvarMap }
-    match kvarMap.values with
-    | [κ] =>
-      let initial : List (KVar × List (Expr × List Nat)) := [(κ, [(qGt, [0])])]
-      let flat ← (exprFlat body).run kctx
-      IO.println s!"\nWeaken-B (should KEEP):"
-      IO.println s!"  input:     1 candidate"
-      let after ← weakenOnce kctx flat initial
-      for (_, cands) in after do
-        IO.println s!"  survivors: {cands.length}   (expect 1)"
-    | _ => IO.println "unexpected κ count"
+  let goalMVar2 ← mkFreshExprMVar (some stmt2)
+  let (kvarMap, _kvarsRev, bodyGoalId) ← peelExistentialsAndIntro goalMVar2.mvarId!
+  let body ← bodyGoalId.getType
+  let kctx : KContext := { kvars := kvarMap }
+  match kvarMap.values with
+  | [κ] =>
+    let initial : List (KVar × List (Expr × List Nat)) := [(κ, [(qGt, [0])])]
+    let flat ← (exprFlat body).run kctx
+    IO.println s!"\nWeaken-B (should KEEP):"
+    IO.println s!"  input:     1 candidate"
+    let after ← weakenOnce kctx flat initial
+    for (_, cands) in after do
+      IO.println s!"  survivors: {cands.length}   (expect 1)"
+  | _ => IO.println "unexpected κ count"
 
   ----------------------------------------------------------------------
   -- Weaken-C: mixed starting set, exactly one survives.
@@ -150,33 +156,37 @@ run_cmd Lean.Elab.Command.liftTermElabM do
   --   (q_lt_zero, [0])  – expect DROP  (x = 2 does NOT ⇒ x < 0)
   ----------------------------------------------------------------------
   let qLt ← mkConstWithLevelParams ``_wt_lt_zero
-  peelExistentials (m := TermElabM) stmt2 {} [] fun kvarMap _kvarsRev body => do
-    let kctx : KContext := { kvars := kvarMap }
-    match kvarMap.values with
-    | [κ] =>
-      let initial : List (KVar × List (Expr × List Nat)) :=
-        [(κ, [(qGt, [0]), (qLt, [0])])]
-      let flat ← (exprFlat body).run kctx
-      IO.println s!"\nWeaken-C (mixed, should keep exactly 1):"
-      IO.println s!"  input:     2 candidates  (q_gt_one, q_lt_zero)"
-      let after ← weakenOnce kctx flat initial
-      for (_, cands) in after do
-        IO.println s!"  survivors: {cands.length}   (expect 1 — only q_gt_one)"
-    | _ => IO.println "unexpected κ count"
+  let goalMVar3 ← mkFreshExprMVar (some stmt2)
+  let (kvarMap, _kvarsRev, bodyGoalId) ← peelExistentialsAndIntro goalMVar3.mvarId!
+  let body ← bodyGoalId.getType
+  let kctx : KContext := { kvars := kvarMap }
+  match kvarMap.values with
+  | [κ] =>
+    let initial : List (KVar × List (Expr × List Nat)) :=
+      [(κ, [(qGt, [0]), (qLt, [0])])]
+    let flat ← (exprFlat body).run kctx
+    IO.println s!"\nWeaken-C (mixed, should keep exactly 1):"
+    IO.println s!"  input:     2 candidates  (q_gt_one, q_lt_zero)"
+    let after ← weakenOnce kctx flat initial
+    for (_, cands) in after do
+      IO.println s!"  survivors: {cands.length}   (expect 1 — only q_gt_one)"
+  | _ => IO.println "unexpected κ count"
 
 run_cmd Lean.Elab.Command.liftTermElabM do
   -- Same minimal example as Weaken-B: κ x is seeded by x = 2, never mutated.
   -- Expected: after PA, κ's solution is a conjunction of the (few) qualifiers
   -- that hold for `x = 2`. Notably includes `x > 1`; excludes `x < 0`.
   let stmt ← elabTerm (← `(∃ κ : Int → Prop, ∀ x : Int, x = 2 → κ x)) none
-  peelExistentials (m := TermElabM) stmt {} [] fun kvarMap _kvarsRev body => do
-    let kctx : KContext := { kvars := kvarMap }
-    match kvarMap.values with
-    | [κ] =>
-      let flat ← (exprFlat body).run kctx
-      IO.println s!"\nPA-1:"
-      let sols ← predicateAbstraction kctx [κ] flat
-      for (κ', solExpr) in sols do
-        IO.println s!"  κ = {κ'.name}"
-        IO.println s!"  sol = {← ppExpr solExpr}"
-    | _ => IO.println "unexpected κ count"
+  let goalMVar ← mkFreshExprMVar (some stmt)
+  let (kvarMap, _kvarsRev, bodyGoalId) ← peelExistentialsAndIntro goalMVar.mvarId!
+  let body ← bodyGoalId.getType
+  let kctx : KContext := { kvars := kvarMap }
+  match kvarMap.values with
+  | [κ] =>
+    let flat ← (exprFlat body).run kctx
+    IO.println s!"\nPA-1:"
+    let sols ← predicateAbstraction kctx [κ] flat
+    for (κ', solExpr) in sols do
+      IO.println s!"  κ = {κ'.name}"
+      IO.println s!"  sol = {← ppExpr solExpr}"
+  | _ => IO.println "unexpected κ count"
