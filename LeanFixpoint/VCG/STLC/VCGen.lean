@@ -1,4 +1,5 @@
 import LeanFixpoint.VCG.STLC.Syntax
+import LeanFixpoint.VCG.STLC.Substitution
 import LeanFixpoint.VCG.STLC.Typing
 
 open STLC
