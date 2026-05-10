@@ -1,11 +1,14 @@
 
 import LeanFixpoint
 
-def testQualifiers : List Qualifier := [
-  q{ Diff(a : int, b : int, c : int) | a == b - c },
-  q{ Le(a : int, b : int) | a ≤ b },
-  q{ GeZero(v : int) | v ≥ 0 }
-]
+@[qualif]
+def q1 (a : Int) (b : Int) (c : Int) := a = b - c
+
+@[qualif]
+def q2 (a : Int) (b : Int) := a ≤ b
+
+@[qualif]
+def q3 (v : Int) := v ≥ 0
 
 def TestEx := ∃ k0 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> Prop,
  ∀ (lo₀ : Int),
@@ -27,4 +30,4 @@ def TestEx := ∃ k0 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> P
          )
 
 theorem testProof : TestEx := by
-  solve_fixpoint with testQualifiers
+  solve_fixpoint

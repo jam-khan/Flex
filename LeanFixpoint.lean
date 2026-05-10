@@ -5,6 +5,9 @@
 import LeanFixpoint.Core.Types
 import LeanFixpoint.Core.Pretty
 import LeanFixpoint.Core.Fusion
+import LeanFixpoint.Core.Utils
+import LeanFixpoint.Core.Fusion.Flatten
+import LeanFixpoint.Core.Fusion.Graph
 
 /-
   Elaboration helpers for peeling existentials
@@ -26,6 +29,9 @@ import LeanFixpoint.Tactic.Internal.Utils
 import LeanFixpoint.Tactic.SolveFusion
 import LeanFixpoint.Tactic.Closers
 import LeanFixpoint.Tactic.SplitHyps
+import LeanFixpoint.Tactic.RewriteKs
+import LeanFixpoint.Tactic.ZapK.Step
+import LeanFixpoint.Tactic.ZapK.SolveHead
 
 /-
   Predicate Abstraction related code,

@@ -1,10 +1,13 @@
 import LeanFixpoint
 
-def pairQualifiers : List Qualifier := [
-  q{ Le(a : int, b : int) | a ≤ b },
-  q{ GeZero(v : int) | v ≥ 0 },
-  q{ SumBound(a : int, b : int, c : int) | a + b ≤ c + 10 }
-]
+@[qualif]
+def q1 (a : Int) (b : Int) := a ≤ b
+
+@[qualif]
+def q2 (v : Int) := v ≥ 0
+
+@[qualif]
+def sumBound (a : Int) (b : Int) (c : Int) := a + b ≤ c + 10
 
 -- Merged k0/k1/k2 into single 5-param κ tracking (i, res, px, py, a₀)
 def MkPairsSimple :=
@@ -31,5 +34,4 @@ def MkPairsSimple :=
           k0 i₁ res₁ px₁ py₁ a₀))
 
 theorem mkPairsProof : MkPairsSimple := by
-  solve_fixpoint with pairQualifiers
-
+  solve_fixpoint

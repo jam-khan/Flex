@@ -31,6 +31,5 @@ def lhListAppendSet : Prop :=
             ∧ (∀ a2 : Set Int, k1 a2 xs1 xs2 a0 a1 → k0 ({a0} ∪ a2) xs1 xs2))
       ∧ (∀ a3 : Set Int, k0 a3 xs1 xs2 → a3 = xs1 ∪ xs2)
 
-set_option maxHeartbeats 1600000 in
 theorem lhListAppendSetProof : lhListAppendSet := by
   solve_fixpoint
