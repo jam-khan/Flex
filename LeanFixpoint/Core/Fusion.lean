@@ -67,6 +67,33 @@ partial def exprScope (κ : KVar) (e : Expr) : KM Expr := do
   else
     return e
 
+/-- `scope(κ, e)` — extract the sub-expression relevant to κ (Fig. 9). -/
+partial def exprScopeZapK (κ : KVar) (e : Expr) : KM Expr := do
+  -- let e ← whnf e
+  -- scope(κ, cₗ ∧ cᵣ)
+  -- scope(κ, cₗ ∧ cᵣ) — preserve full And-structure (no stripping).
+  -- Stripping would break zapk's path-mirror (the path's inL/inR sequence
+  -- must match sol's Or-tree exactly). Sol1's And-handling recurses into
+  -- both sides; non-κ branches reduce to False leaves via sol1's catch-all.
+  if e.and?.isSome then
+    return e
+
+  -- scope(κ, ∀ x : τ. body)
+  -- Handles one forall at a time. The paper's `∀x:b. p ⇒ c'` pattern
+  -- is two nested foralls, so this branch fires twice (once with dom = b,
+  -- once with dom = p) — together that enforces κ ∉ p.
+  else if e.isForall then
+    let dom := e.bindingDomain!
+    if !(← KM.exprKVars dom).contains κ then
+      withLocalDeclD e.bindingName! e.bindingDomain! fun fvar => do
+        let sc ← exprScope κ (e.bindingBody!.instantiate1 fvar)
+        let abstr := sc.abstract #[fvar]
+        pure (Expr.forallE e.bindingName! dom abstr e.bindingInfo!)
+    else
+      return mkConst ``False
+  else
+    return e
+
 /-
 sol1(κ, c₁ ∧ c₂)        ≡ sol1(κ, c₁) ∨ sol1(κ, c₂)
 sol1(κ, ∀ x:b. p ⇒ c)   ≡ ∃x:b. p ∧ sol1(κ, c)
