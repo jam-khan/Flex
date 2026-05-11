@@ -8,34 +8,11 @@ open STLC
   Algorithmic VC generation is sound w.r.t. the declarative typing rules.
   Each `*_sound` theorem takes `algorithm = some c` as a precondition; mismatch
   cases close by contradiction. No satisfiability assumption needed.
+
+  Substitution / renaming algebraic lemmas (`REnv.redirect_self`,
+  `Refinement.rename_self`, `Ty.rename_self`) live in [Substitution.lean] and
+  are imported transitively via `VCGen → Substitution → Syntax`.
 -/
-
-/-! ## Helper lemmas about `Ty.rename` -/
-
-private theorem redirect_self (ρ : REnv) (x : EVar) : ρ.redirect x x = ρ := by
-  simp only [REnv.redirect]
-  ext1 <;> funext z <;> by_cases h : z = x <;> simp [h]
-
-theorem Refinement.rename_self {b : Base} (x : EVar) (r : Refinement b) :
-    r.rename x x = r := by
-  obtain ⟨pred⟩ := r
-  show (⟨fun ρ v => pred (ρ.redirect x x) v⟩ : Refinement b) = ⟨pred⟩
-  congr 1; funext ρ v
-  rw [redirect_self ρ x]
-
-theorem Ty.rename_self (x : EVar) (t : Ty) : t.rename x x = t := by
-  induction t with
-  | refine b r =>
-    show Ty.refine b (r.rename x x) = Ty.refine b r
-    rw [Refinement.rename_self]
-  | arrow z s body ihs ihb =>
-    show Ty.arrow z (s.rename x x) (if z == x then body else body.rename x x)
-          = Ty.arrow z s body
-    rw [ihs]
-    by_cases h : z = x
-    · subst h; simp
-    · have : (z == x) = false := by simp [h]
-      simp [this, ihb]
 
 /-! ## Helper lemmas relating `implyBind` and `Entail` -/
 
