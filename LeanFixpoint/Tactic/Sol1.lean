@@ -89,6 +89,7 @@ private def solK1Impl (κName? : Option (TSyntax `ident)) : TacticM Unit :=
         | some _ => pure ()
         | none =>
           let (sol, _) ← (exprElim1 cand bodyWithMvars).run kctx
+          let sol := simplifyExpr sol
           let witnessLam ← solToWitnessExpr sol cand.params cand.paramTypes
           let hasScratch := kvars.any fun κ =>
             witnessLam.containsMVar κ.mvarId
@@ -215,10 +216,12 @@ example : solK1_ex4 := by
     κ2 has a self-loop (`κ2 y → κ2 (y+1)`) and is left cyclic. `solK1`
     binds κ1 and leaves the ∃ κ2 untouched for `solve_fixpoint`. -/
 def solK1_ex5 : Prop :=
+  ∃ κ3 : Int → Prop,
   ∃ κ1 : Int → Prop, ∃ κ2 : Int → Prop,
       (∀ x : Int, x = 0 → κ1 x)
     ∧ (∀ y : Int, κ2 y → κ2 (y + 1))
     ∧ (∀ ν : Int, ν = 0 → κ2 ν)
+    ∧ (∀ ν : Int, ν = 0 → κ3 ν)
 
 example : solK1_ex5 := by
   unfold solK1_ex5
@@ -227,3 +230,21 @@ example : solK1_ex5 := by
   -- κ1 : Int → Prop := …
   -- ⊢ ∃ κ2, … (κ2 left as an existential — cyclic, needs solve_fixpoint)
   sorry
+
+
+/-
+  zapK
+
+
+  apply zapK
+
+  ∃ κ1, P'(κ1)
+
+
+  ------
+  κ1 is cyclic
+  κ2 is acyclic
+
+  ∃ κ1 κ2, P(κ1, κ2)
+  ∃ κ2, κ1, P(κ1, κ2)
+-/
