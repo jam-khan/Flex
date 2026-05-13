@@ -44,27 +44,32 @@ theorem sub_sound (Γ : TEnv) (s t : Ty) (c : Constraint) :
     exact Subtyp.refine h
   | .arrow x₁ s₁ t₁, .arrow x₂ s₂ t₂ =>
     unfold sub at hsy
-    cases hs : sub s₂ s₁ with
-    | none => rw [hs] at hsy; simp at hsy
-    | some c₁ =>
-      cases ht : sub (t₁.rename x₁ x₂) t₂ with
-      | none => rw [hs, ht] at hsy; simp at hsy
-      | some c₂ =>
-        rw [hs, ht] at hsy
-        -- Use symm/subst rather than `simp` here so `implyBind` stays folded in `h`.
-        have h_eq : c = fun ρ => c₁ ρ ∧ implyBind x₂ s₂ c₂ ρ :=
-          (Option.some.inj hsy).symm
-        subst h_eq
-        apply Subtyp.arrow
-        · exact sub_sound Γ s₂ s₁ c₁ hs (fun ρ hΓ => (h ρ hΓ).1)
-        · apply sub_sound _ _ _ _ ht
-          match s₂ with
-          | .refine b r =>
-            apply Entail.ext
-            intro ρ hΓ
-            exact (h ρ hΓ).2
-          | .arrow x' ss tt =>
-            exact entail_implyBind_arrow (fun ρ hΓ => (h ρ hΓ).2)
+    by_cases hxx : x₁ = x₂
+    · subst hxx
+      simp only [beq_self_eq_true, if_true] at hsy
+      cases hs : sub s₂ s₁ with
+      | none => rw [hs] at hsy; simp at hsy
+      | some c₁ =>
+        cases ht : sub t₁ t₂ with
+        | none => rw [hs, ht] at hsy; simp at hsy
+        | some c₂ =>
+          rw [hs, ht] at hsy
+          -- Use symm/subst rather than `simp` here so `implyBind` stays folded in `h`.
+          have h_eq : c = fun ρ => c₁ ρ ∧ implyBind x₁ s₂ c₂ ρ :=
+            (Option.some.inj hsy).symm
+          subst h_eq
+          apply Subtyp.arrow
+          · exact sub_sound Γ s₂ s₁ c₁ hs (fun ρ hΓ => (h ρ hΓ).1)
+          · apply sub_sound _ _ _ _ ht
+            match s₂ with
+            | .refine b r =>
+              apply Entail.ext
+              intro ρ hΓ
+              exact (h ρ hΓ).2
+            | .arrow x' ss tt =>
+              exact entail_implyBind_arrow (fun ρ hΓ => (h ρ hΓ).2)
+    · have hb : (x₁ == x₂) = false := by simp [hxx]
+      rw [hb] at hsy; simp at hsy
   | .refine .int _, .refine .bool _ | .refine .bool _, .refine .int _ =>
     simp [sub] at hsy
   | .refine _ _, .arrow _ _ _ =>
@@ -72,11 +77,6 @@ theorem sub_sound (Γ : TEnv) (s t : Ty) (c : Constraint) :
   | .arrow _ _ _, .refine _ _ =>
     rw [sub_arrow_refine_eq] at hsy; simp at hsy
 termination_by sizeOf s + sizeOf t
-decreasing_by
-  all_goals simp_wf
-  all_goals first
-    | omega
-    | (have := Ty.sizeOf_rename x₁ x₂ t₁; omega)
 
 /-! ## Synth / Check soundness (mutual) -/
 
@@ -141,16 +141,54 @@ mutual
               intro ρ hΓ; have := hc ρ hΓ; rw [← hc_eq] at this; exact this.2
     | .add (.var x) (.var y) =>
       unfold synth at hsynth
-      simp at hsynth
-      obtain ⟨hc_eq, ht_eq⟩ := hsynth
-      subst ht_eq
-      exact Synth.add_var
+      cases hxlk : Γ.lookup x with
+      | none => rw [hxlk] at hsynth; simp at hsynth
+      | some tx =>
+        cases tx with
+        | arrow _ _ _ => rw [hxlk] at hsynth; simp at hsynth
+        | refine bx rx =>
+          cases bx with
+          | bool => rw [hxlk] at hsynth; simp at hsynth
+          | int =>
+            cases hylk : Γ.lookup y with
+            | none => rw [hxlk, hylk] at hsynth; simp at hsynth
+            | some ty =>
+              cases ty with
+              | arrow _ _ _ => rw [hxlk, hylk] at hsynth; simp at hsynth
+              | refine by_ ry =>
+                cases by_ with
+                | bool => rw [hxlk, hylk] at hsynth; simp at hsynth
+                | int =>
+                  rw [hxlk, hylk] at hsynth
+                  simp at hsynth
+                  obtain ⟨_, ht_eq⟩ := hsynth
+                  subst ht_eq
+                  exact Synth.add_var hxlk hylk
     | .leq (.var x) (.var y) =>
       unfold synth at hsynth
-      simp at hsynth
-      obtain ⟨hc_eq, ht_eq⟩ := hsynth
-      subst ht_eq
-      exact Synth.leq_var
+      cases hxlk : Γ.lookup x with
+      | none => rw [hxlk] at hsynth; simp at hsynth
+      | some tx =>
+        cases tx with
+        | arrow _ _ _ => rw [hxlk] at hsynth; simp at hsynth
+        | refine bx rx =>
+          cases bx with
+          | bool => rw [hxlk] at hsynth; simp at hsynth
+          | int =>
+            cases hylk : Γ.lookup y with
+            | none => rw [hxlk, hylk] at hsynth; simp at hsynth
+            | some ty =>
+              cases ty with
+              | arrow _ _ _ => rw [hxlk, hylk] at hsynth; simp at hsynth
+              | refine by_ ry =>
+                cases by_ with
+                | bool => rw [hxlk, hylk] at hsynth; simp at hsynth
+                | int =>
+                  rw [hxlk, hylk] at hsynth
+                  simp at hsynth
+                  obtain ⟨_, ht_eq⟩ := hsynth
+                  subst ht_eq
+                  exact Synth.leq_var hxlk hylk
     | .not e' =>
       unfold synth at hsynth
       cases hinner : synth Γ e' with
@@ -164,12 +202,9 @@ mutual
           cases b with
           | int => simp at hsynth
           | bool =>
-            simp at hsynth
+            simp only [Option.some.injEq, Prod.mk.injEq] at hsynth
             obtain ⟨hc_eq, ht_eq⟩ := hsynth
             subst ht_eq
-            have : (fun ρ v => (r.pred ρ false → v = true) ∧ (r.pred ρ true → v = false)) = fun ρ v => ∀ b, r.pred ρ b → v = !b := by
-              funext ; simp
-            rw [this] ; clear this
             apply Synth.not_
             apply synth_sound _ _ _ _ hinner
             intro ρ hΓ; rw [hc_eq]; exact hc ρ hΓ
@@ -197,21 +232,16 @@ mutual
                 cases b₂ with
                 | int => simp at hsynth
                 | bool =>
-                  simp at hsynth
+                  simp only [Option.some.injEq, Prod.mk.injEq] at hsynth
                   obtain ⟨hc_eq, ht_eq⟩ := hsynth
                   subst ht_eq
-                  have : (fun ρ v => ((r₁.pred ρ false → ¬r₂.pred ρ false) ∧ (r₁.pred ρ false → r₂.pred ρ true → v = false)) ∧ (r₁.pred ρ true → ¬r₂.pred ρ false) ∧ (r₁.pred ρ true → r₂.pred ρ true → v = true)) = (fun ρ v => ∀ b₁ b₂, r₁.pred ρ b₁ → r₂.pred ρ b₂ → v = b₁ && b₂) := by
-                    funext ; simp
-                  rw [this] ; clear this
                   apply Synth.and_
                   · apply synth_sound _ _ _ _ hinner1
-                    rw [←hc_eq] at hc ; simp at hc
                     intro ρ hΓ
-                    exact (hc ρ hΓ).1
+                    have := hc ρ hΓ; rw [← hc_eq] at this; exact this.1
                   · apply synth_sound _ _ _ _ hinner2
-                    rw [←hc_eq] at hc ; simp at hc
                     intro ρ hΓ
-                    exact (hc ρ hΓ).2
+                    have := hc ρ hΓ; rw [← hc_eq] at this; exact this.2
     | .app e₁ (.iconst _) | .app e₁ (.bconst _) | .app e₁ (.letin _ _ _)
     | .app e₁ (.lam _ _)  | .app e₁ (.app _ _)  | .app e₁ (.ann _ _)
     | .app e₁ (.and _ _)  | .app e₁ (.not _)    | .app e₁ (.leq _ _)
@@ -247,41 +277,49 @@ mutual
         by_cases hxx : x = x'
         · subst hxx
           simp only [beq_self_eq_true, if_true] at hck
-          cases hck' : check ((x, s) :: Γ) e' body with
-          | none => rw [hck'] at hck; simp at hck
-          | some c' =>
-            rw [hck'] at hck
-            obtain rfl := (Option.some.inj hck).symm
-            apply Check.lam
-            apply check_sound _ _ _ _ hck'
-            match s with
-            | .refine b r => exact Entail.ext h
-            | .arrow x'' ss tt => exact entail_implyBind_arrow h
+          cases hlk : Γ.lookup x with
+          | some _ => rw [hlk] at hck; simp at hck
+          | none =>
+            rw [hlk] at hck
+            cases hck' : check ((x, s) :: Γ) e' body with
+            | none => rw [hck'] at hck; simp at hck
+            | some c' =>
+              rw [hck'] at hck
+              obtain rfl := (Option.some.inj hck).symm
+              apply Check.lam hlk
+              apply check_sound _ _ _ _ hck'
+              match s with
+              | .refine b r => exact Entail.ext h
+              | .arrow x'' ss tt => exact entail_implyBind_arrow h
         · have : (x == x') = false := by simp [hxx]
           rw [this] at hck; simp at hck
       | .refine b r =>
         unfold check at hck; simp [synth] at hck
     | .letin x e₁ e₂ =>
       unfold check at hck
-      cases hsy : synth Γ e₁ with
-      | none => rw [hsy] at hck; simp at hck
-      | some p =>
-        rw [hsy] at hck; simp at hck
-        obtain ⟨c₁, s⟩ := p
-        cases hck' : check ((x, s) :: Γ) e₂ t with
-        | none => rw [hck'] at hck; simp at hck
-        | some c₂ =>
-          rw [hck'] at hck; simp at hck; subst hck
-          apply Check.letin (s := s)
-          · apply synth_sound _ _ _ _ hsy
-            intro ρ hΓ; exact (h ρ hΓ).1
-          · apply check_sound _ _ _ _ hck'
-            match s with
-            | .refine b r =>
-              apply Entail.ext; intro ρ hΓ
-              simp [REnv.update] ; exact (h ρ hΓ).2
-            | .arrow x' ss tt =>
-              apply entail_implyBind_arrow; intro ρ hΓ; exact (h ρ hΓ).2
+      cases hlk : Γ.lookup x with
+      | some _ => rw [hlk] at hck; simp at hck
+      | none =>
+        rw [hlk] at hck
+        cases hsy : synth Γ e₁ with
+        | none => rw [hsy] at hck; simp at hck
+        | some p =>
+          rw [hsy] at hck; simp at hck
+          obtain ⟨c₁, s⟩ := p
+          cases hck' : check ((x, s) :: Γ) e₂ t with
+          | none => rw [hck'] at hck; simp at hck
+          | some c₂ =>
+            rw [hck'] at hck; simp at hck; subst hck
+            apply Check.letin hlk (s := s)
+            · apply synth_sound _ _ _ _ hsy
+              intro ρ hΓ; exact (h ρ hΓ).1
+            · apply check_sound _ _ _ _ hck'
+              match s with
+              | .refine b r =>
+                apply Entail.ext; intro ρ hΓ
+                simp [REnv.update] ; exact (h ρ hΓ).2
+              | .arrow x' ss tt =>
+                apply entail_implyBind_arrow; intro ρ hΓ; exact (h ρ hΓ).2
     -- Catch-all cases (Chk-Syn): synthesize then subtype.
     -- Each case names the concrete synth call to avoid variable-substitution issues.
     | .var x =>
@@ -432,8 +470,8 @@ mutual
     | .bool_const    => exact .bool_const
     | .ann hck       => exact .ann (check_to_hastype hck)
     | .app hsy hck   => exact .app (synth_to_hastype hsy) (check_to_hastype hck)
-    | .add_var       => exact .add_var
-    | .leq_var       => exact .leq_var
+    | .add_var hx hy => exact .add_var hx hy
+    | .leq_var hx hy => exact .leq_var hx hy
     | .not_ hsy      => exact .not_ (synth_to_hastype hsy)
     | .and_ hsy1 hsy2 => exact .and_ (synth_to_hastype hsy1) (synth_to_hastype hsy2)
 
@@ -441,10 +479,10 @@ mutual
       Check Γ e t → Hastype Γ e t := by
     intro h
     match h with
-    | .sub hsy hsub       => exact .sub (synth_to_hastype hsy) hsub
-    | .lam hck            => exact .lam (check_to_hastype hck)
-    | .letin hsy hck      => exact .letin (synth_to_hastype hsy) (check_to_hastype hck)
-    | .ite hlook hck1 hck2 => exact .ite hlook (check_to_hastype hck1) (check_to_hastype hck2)
+    | .sub hsy hsub             => exact .sub (synth_to_hastype hsy) hsub
+    | .lam hfr hck              => exact .lam hfr (check_to_hastype hck)
+    | .letin hfr hsy hck        => exact .letin hfr (synth_to_hastype hsy) (check_to_hastype hck)
+    | .ite hlook hck1 hck2      => exact .ite hlook (check_to_hastype hck1) (check_to_hastype hck2)
 
 end
 

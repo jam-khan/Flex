@@ -458,6 +458,139 @@ theorem Exp.subst_remove_var (x : EVar) (v : Val) (e : Exp) (hv : x ∉ Val.fv v
     simp only [Exp.fv, List.mem_append, not_or]
     exact ⟨ih₁, ih₂⟩
 
+/-- Substituting a closed value can only *remove* free variables from `e`;
+    the result's FV is a subset of `e`'s FV. -/
+theorem Exp.subst_fv_subset (x : EVar) (v : Val) (hv : Val.closed v) (e : Exp) :
+    ∀ z ∈ Exp.fv (e.subst x v), z ∈ Exp.fv e := by
+  have hvfv : Val.fv v = [] := hv
+  induction e with
+  | iconst _ => intro z hz; simp at hz
+  | bconst _ => intro z hz; simp at hz
+  | var y =>
+    intro z hz
+    by_cases hxy : x = y
+    · subst hxy
+      have heq : (Exp.var x).subst x v = v.toExp := by simp [Exp.subst]
+      rw [heq, Val.fv_toExp, hvfv] at hz
+      cases hz
+    · have hb : (x == y) = false := beq_false_of_ne hxy
+      have heq : (Exp.var y).subst x v = .var y := by simp [Exp.subst, hb]
+      rw [heq] at hz
+      exact hz
+  | lam y body ih =>
+    intro z hz
+    by_cases hxy : x = y
+    · subst hxy
+      have heq : (Exp.lam x body).subst x v = .lam x body := by simp [Exp.subst]
+      rw [heq] at hz; exact hz
+    · have hb : (x == y) = false := beq_false_of_ne hxy
+      have heq : (Exp.lam y body).subst x v = .lam y (body.subst x v) := by
+        simp [Exp.subst, hb]
+      rw [heq] at hz
+      simp [Exp.fv, List.mem_filter] at hz ⊢
+      exact ⟨ih z hz.1, hz.2⟩
+  | letin y e₁ e₂ ih₁ ih₂ =>
+    intro z hz
+    by_cases hxy : x = y
+    · subst hxy
+      have heq : (Exp.letin x e₁ e₂).subst x v = .letin x (e₁.subst x v) e₂ := by
+        simp [Exp.subst]
+      rw [heq] at hz
+      simp [Exp.fv, List.mem_append, List.mem_filter] at hz ⊢
+      rcases hz with h | h
+      · exact Or.inl (ih₁ z h)
+      · exact Or.inr h
+    · have hb : (x == y) = false := beq_false_of_ne hxy
+      have heq : (Exp.letin y e₁ e₂).subst x v
+               = .letin y (e₁.subst x v) (e₂.subst x v) := by simp [Exp.subst, hb]
+      rw [heq] at hz
+      simp [Exp.fv, List.mem_append, List.mem_filter] at hz ⊢
+      rcases hz with h | ⟨h, hzy⟩
+      · exact Or.inl (ih₁ z h)
+      · exact Or.inr ⟨ih₂ z h, hzy⟩
+  | app e₁ e₂ ih₁ ih₂ =>
+    intro z hz
+    have heq : (Exp.app e₁ e₂).subst x v = .app (e₁.subst x v) (e₂.subst x v) := rfl
+    rw [heq] at hz
+    simp [Exp.fv, List.mem_append] at hz ⊢
+    rcases hz with h | h
+    · exact Or.inl (ih₁ z h)
+    · exact Or.inr (ih₂ z h)
+  | ann e t ih =>
+    intro z hz
+    have heq : (Exp.ann e t).subst x v = .ann (e.subst x v) t := rfl
+    rw [heq] at hz
+    simp [Exp.fv] at hz ⊢
+    exact ih z hz
+  | and e₁ e₂ ih₁ ih₂ =>
+    intro z hz
+    have heq : (Exp.and e₁ e₂).subst x v = .and (e₁.subst x v) (e₂.subst x v) := rfl
+    rw [heq] at hz
+    simp [Exp.fv, List.mem_append] at hz ⊢
+    rcases hz with h | h
+    · exact Or.inl (ih₁ z h)
+    · exact Or.inr (ih₂ z h)
+  | not e ih =>
+    intro z hz
+    have heq : (Exp.not e).subst x v = .not (e.subst x v) := rfl
+    rw [heq] at hz
+    simp [Exp.fv] at hz ⊢
+    exact ih z hz
+  | leq e₁ e₂ ih₁ ih₂ =>
+    intro z hz
+    have heq : (Exp.leq e₁ e₂).subst x v = .leq (e₁.subst x v) (e₂.subst x v) := rfl
+    rw [heq] at hz
+    simp [Exp.fv, List.mem_append] at hz ⊢
+    rcases hz with h | h
+    · exact Or.inl (ih₁ z h)
+    · exact Or.inr (ih₂ z h)
+  | ite e₀ e₁ e₂ ih₀ ih₁ ih₂ =>
+    intro z hz
+    have heq : (Exp.ite e₀ e₁ e₂).subst x v
+             = .ite (e₀.subst x v) (e₁.subst x v) (e₂.subst x v) := rfl
+    rw [heq] at hz
+    simp [Exp.fv, List.mem_append] at hz ⊢
+    rcases hz with h | h | h
+    · exact Or.inl (ih₀ z h)
+    · exact Or.inr (Or.inl (ih₁ z h))
+    · exact Or.inr (Or.inr (ih₂ z h))
+  | add e₁ e₂ ih₁ ih₂ =>
+    intro z hz
+    have heq : (Exp.add e₁ e₂).subst x v = .add (e₁.subst x v) (e₂.subst x v) := rfl
+    rw [heq] at hz
+    simp [Exp.fv, List.mem_append] at hz ⊢
+    rcases hz with h | h
+    · exact Or.inl (ih₁ z h)
+    · exact Or.inr (ih₂ z h)
+
+/-- Iterated version: substituting a closed `γ` can only remove FVs, and removes
+    exactly the names in `Subst.dom γ`. -/
+theorem Exp.substEnv_fv_subset (γ : List (EVar × Val)) (e : Exp)
+    (hγ : Subst.AllClosed γ) :
+    ∀ z ∈ Exp.fv (Exp.substEnv γ e), z ∈ Exp.fv e ∧ z ∉ Subst.dom γ := by
+  induction γ generalizing e with
+  | nil =>
+    intro z hz
+    refine ⟨hz, ?_⟩
+    simp [Subst.dom]
+  | cons head tail ih =>
+    obtain ⟨y, v⟩ := head
+    obtain ⟨hv, hγ'⟩ := hγ
+    intro z hz
+    -- substEnv ((y, v) :: tail) e = substEnv tail (e.subst y v)
+    have hz_eq : Exp.substEnv ((y, v) :: tail) e = Exp.substEnv tail (e.subst y v) := rfl
+    rw [hz_eq] at hz
+    obtain ⟨hz_sub_fv, hz_tail⟩ := ih (e.subst y v) hγ' z hz
+    refine ⟨Exp.subst_fv_subset y v hv e z hz_sub_fv, ?_⟩
+    -- Need: z ∉ y :: Subst.dom tail
+    have hzy : z ≠ y := by
+      intro heq; subst heq
+      have hv_fv : z ∉ Val.fv v := by
+        rw [show Val.fv v = [] from hv]; intro h; cases h
+      exact (Exp.subst_remove_var z v e hv_fv) hz_sub_fv
+    simp [Subst.dom]
+    exact ⟨hzy, hz_tail⟩
+
 /-- Substituting twice with the same variable is idempotent **provided `v` is
     closed at `x`** (no new free `x` is introduced by the first substitution). -/
 theorem Exp.subst_subst_eq (x : EVar) (v w : Val) (e : Exp)
@@ -585,6 +718,26 @@ theorem Exp.substEnv_and (γ : List (EVar × Val)) (e₁ e₂ : Exp) :
       = Exp.and (Exp.substEnv γ (e₁.subst y w)) (Exp.substEnv γ (e₂.subst y w))
     show Exp.substEnv γ (.and (e₁.subst y w) (e₂.subst y w))
       = Exp.and (Exp.substEnv γ (e₁.subst y w)) (Exp.substEnv γ (e₂.subst y w))
+    exact ih (e₁.subst y w) (e₂.subst y w)
+
+theorem Exp.substEnv_add (γ : List (EVar × Val)) (e₁ e₂ : Exp) :
+    Exp.substEnv γ (.add e₁ e₂) = .add (Exp.substEnv γ e₁) (Exp.substEnv γ e₂) := by
+  induction γ generalizing e₁ e₂ with
+  | nil => rfl
+  | cons p γ ih =>
+    obtain ⟨y, w⟩ := p
+    show Exp.substEnv γ (.add (e₁.subst y w) (e₂.subst y w))
+      = Exp.add (Exp.substEnv γ (e₁.subst y w)) (Exp.substEnv γ (e₂.subst y w))
+    exact ih (e₁.subst y w) (e₂.subst y w)
+
+theorem Exp.substEnv_leq (γ : List (EVar × Val)) (e₁ e₂ : Exp) :
+    Exp.substEnv γ (.leq e₁ e₂) = .leq (Exp.substEnv γ e₁) (Exp.substEnv γ e₂) := by
+  induction γ generalizing e₁ e₂ with
+  | nil => rfl
+  | cons p γ ih =>
+    obtain ⟨y, w⟩ := p
+    show Exp.substEnv γ (.leq (e₁.subst y w) (e₂.subst y w))
+      = Exp.leq (Exp.substEnv γ (e₁.subst y w)) (Exp.substEnv γ (e₂.subst y w))
     exact ih (e₁.subst y w) (e₂.subst y w)
 
 theorem Exp.substEnv_ite (γ : List (EVar × Val)) (e₀ e₁ e₂ : Exp) :

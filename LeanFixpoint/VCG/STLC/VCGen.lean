@@ -24,17 +24,15 @@ def sub (x : Ty) (y : Ty) : Option Constraint :=
     | .refine .bool r₁, .refine .bool r₂ =>
         some (fun ρ => ∀ v : Bool, r₁.pred ρ v → r₂.pred ρ v)
     | .arrow x₁ s₁ t₁, .arrow x₂ s₂ t₂ =>
-        match sub s₂ s₁, sub (t₁.rename x₁ x₂) t₂ with
-        | some c₁, some c₂ =>
-            some (fun ρ => c₁ ρ ∧ implyBind x₂ s₂ c₂ ρ)
-        | _, _ => none
+        if x₁ == x₂ then
+          match sub s₂ s₁, sub t₁ t₂ with
+          | some c₁, some c₂ =>
+              some (fun ρ => c₁ ρ ∧ implyBind x₁ s₂ c₂ ρ)
+          | _, _ => none
+        else none
     | _, _ => none
 termination_by sizeOf x + sizeOf y
-decreasing_by
-  all_goals simp_wf
-  all_goals first
-    | omega
-    | (have h := Ty.sizeOf_rename x₁ x₂ t₁; omega)
+decreasing_by all_goals simp_wf; omega
 
 -- One-step unfolding equations (no recursion in RHS) — used in soundness proofs.
 @[simp]
@@ -78,13 +76,21 @@ mutual
             | none    => none
         | _ => none
     | .leq (.var x) (.var y) =>
-        some ((fun _ => True), .refine .bool ⟨fun ρ v => v = decide (ρ.ints x ≤ ρ.ints y)⟩)
+        match Γ.lookup x, Γ.lookup y with
+        | some (.refine .int _), some (.refine .int _) =>
+            some ((fun _ => True),
+              .refine .bool ⟨fun ρ v => v = decide (ρ.ints x ≤ ρ.ints y)⟩)
+        | _, _ => none
     | .add (.var x) (.var y) =>
-        some ((fun _ => True), .refine .int ⟨fun ρ v => v = ρ.ints x + ρ.ints y⟩)
+        match Γ.lookup x, Γ.lookup y with
+        | some (.refine .int _), some (.refine .int _) =>
+            some ((fun _ => True),
+              .refine .int ⟨fun ρ v => v = ρ.ints x + ρ.ints y⟩)
+        | _, _ => none
     | .not e =>
         match synth Γ e with
         | some (c, .refine .bool r) =>
-            some (c, .refine .bool ⟨fun ρ v => ∀ b, r.pred ρ b → v = !b⟩)
+            some (c, .refine .bool ⟨fun ρ v => ∃ b, r.pred ρ b ∧ v = !b⟩)
         | _ => none
     | .and e₁ e₂ =>
         match synth Γ e₁ with
@@ -92,7 +98,9 @@ mutual
             match synth Γ e₂ with
             | some (c₂, .refine .bool r₂) =>
                 some (fun ρ => c₁ ρ ∧ c₂ ρ,
-                      .refine .bool ⟨fun ρ v => ∀ b₁ b₂, r₁.pred ρ b₁ → r₂.pred ρ b₂ → v = b₁ && b₂⟩)
+                      .refine .bool
+                        ⟨fun ρ v =>
+                          ∃ b₁ b₂, r₁.pred ρ b₁ ∧ r₂.pred ρ b₂ ∧ v = (b₁ && b₂)⟩)
             | _ => none
         | _ => none
     | _ => none
@@ -102,18 +110,25 @@ mutual
   def check (Γ : TEnv) : Exp → Ty → Option Constraint
     | .lam x e, .arrow x' s t =>
         -- Same-binder convention: alpha-renaming is the user's responsibility.
+        -- Also reject shadowing: the binder must be fresh in Γ.
         if x == x' then
-          match check ((x, s) :: Γ) e t with
-          | some c => some (implyBind x s c)
-          | none   => none
+          match Γ.lookup x with
+          | none =>
+              match check ((x, s) :: Γ) e t with
+              | some c => some (implyBind x s c)
+              | none   => none
+          | some _ => none
         else none
     | .letin x e₁ e₂, t =>
-        match synth Γ e₁ with
-        | some (c₁, s) =>
-            match check ((x, s) :: Γ) e₂ t with
-            | some c₂ => some (fun ρ => c₁ ρ ∧ implyBind x s c₂ ρ)
-            | none    => none
-        | none => none
+        match Γ.lookup x with
+        | none =>
+            match synth Γ e₁ with
+            | some (c₁, s) =>
+                match check ((x, s) :: Γ) e₂ t with
+                | some c₂ => some (fun ρ => c₁ ρ ∧ implyBind x s c₂ ρ)
+                | none    => none
+            | none => none
+        | some _ => none
     | .ite e₀ e₁ e₂, t =>
         match e₀ with
         | .var x =>
@@ -139,24 +154,29 @@ mutual
   termination_by e _ => 2 * sizeOf e + 1
 end
 
--- One-step unfolding equations for the new synth cases — used in examples and soundness proofs.
-@[simp]
-theorem synth_add_var_eq (Γ : TEnv) (x y : EVar) :
+-- One-step unfolding equations for synth cases — used in examples and soundness proofs.
+-- `add_var` and `leq_var` are now conditional on operand lookups producing
+-- int-refined types, so they take the lookup hypotheses explicitly.
+theorem synth_add_var_eq (Γ : TEnv) (x y : EVar) {r₁ r₂ : Refinement .int}
+    (hx : Γ.lookup x = some (.refine .int r₁))
+    (hy : Γ.lookup y = some (.refine .int r₂)) :
     synth Γ (.add (.var x) (.var y)) =
       some ((fun _ => True), .refine .int ⟨fun ρ v => v = ρ.ints x + ρ.ints y⟩) := by
-  simp [synth]
+  simp [synth, hx, hy]
 
-@[simp]
-theorem synth_leq_var_eq (Γ : TEnv) (x y : EVar) :
+theorem synth_leq_var_eq (Γ : TEnv) (x y : EVar) {r₁ r₂ : Refinement .int}
+    (hx : Γ.lookup x = some (.refine .int r₁))
+    (hy : Γ.lookup y = some (.refine .int r₂)) :
     synth Γ (.leq (.var x) (.var y)) =
       some ((fun _ => True), .refine .bool ⟨fun ρ v => v = decide (ρ.ints x ≤ ρ.ints y)⟩) := by
-  simp [synth]
+  simp [synth, hx, hy]
 
 @[simp]
 theorem synth_not_eq (Γ : TEnv) (e : Exp) :
     synth Γ (.not e) =
       match synth Γ e with
-      | some (c, .refine .bool r) => some (c, .refine .bool ⟨fun ρ v => ∀ b, r.pred ρ b → v = !b⟩)
+      | some (c, .refine .bool r) =>
+          some (c, .refine .bool ⟨fun ρ v => ∃ b, r.pred ρ b ∧ v = !b⟩)
       | _ => none := by
   simp [synth]
 
@@ -168,7 +188,9 @@ theorem synth_and_eq (Γ : TEnv) (e₁ e₂ : Exp) :
           match synth Γ e₂ with
           | some (c₂, .refine .bool r₂) =>
               some (fun ρ => c₁ ρ ∧ c₂ ρ,
-                    .refine .bool ⟨fun ρ v => ∀ b₁ b₂, r₁.pred ρ b₁ → r₂.pred ρ b₂ → v = b₁ && b₂⟩)
+                    .refine .bool
+                      ⟨fun ρ v =>
+                        ∃ b₁ b₂, r₁.pred ρ b₁ ∧ r₂.pred ρ b₂ ∧ v = (b₁ && b₂)⟩)
           | _ => none
       | _ => none := by
   simp [synth]
