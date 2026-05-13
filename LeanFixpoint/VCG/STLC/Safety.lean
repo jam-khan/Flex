@@ -517,7 +517,7 @@ theorem hastype_fundamental {Γ e t} (h : Hastype Γ e t) :
       cases b with
       | true =>
           have hE' : EnvDenote
-              ((x, .refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = true⟩) :: Γ)
+              ((x, .refine .bool r.ite_true) :: Γ)
               ((x, .bconst true) :: γ) ρ := by
             refine ⟨rfl, hE, ⟨true, rfl, hp, rfl⟩, ?_, ?_⟩
             · intro n hvn; cases hvn

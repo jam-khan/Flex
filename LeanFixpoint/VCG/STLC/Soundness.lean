@@ -444,10 +444,10 @@ mutual
             cases b with
             | int => simp at hck
             | bool =>
-              cases hck1 : check ((x, .refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = true⟩) :: Γ) e₁ t with
+              cases hck1 : check ((x, .refine .bool r.ite_true) :: Γ) e₁ t with
               | none => simp [hck1] at hck
               | some c₁ =>
-                cases hck2 : check ((x, .refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = false⟩) :: Γ) e₂ t with
+                cases hck2 : check ((x, .refine .bool r.ite_false) :: Γ) e₂ t with
                 | none => simp [hck1, hck2] at hck
                 | some c₂ =>
                   simp only [hck1, hck2] at hck

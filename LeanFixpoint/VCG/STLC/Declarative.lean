@@ -50,30 +50,52 @@ inductive Hastype : TEnv → Exp → Ty → Prop where
       Γ.lookup x = some (.refine .int r₁) →
       Γ.lookup y = some (.refine .int r₂) →
       Hastype Γ (.add (.var x) (.var y))
-        (.refine .int ⟨fun ρ v => v = ρ.ints x + ρ.ints y⟩)
+        (.refine .int ⟨[x, y], fun ρ v => v = ρ.ints x + ρ.ints y,
+          by intro ρ₁ ρ₂ v h
+             have hx : ρ₁.ints x = ρ₂.ints x := (h x (by simp)).1
+             have hy : ρ₁.ints y = ρ₂.ints y := (h y (by simp)).1
+             simp [hx, hy]⟩)
   -- TLeq (ANF): both operands must be int-bound in Γ.
   | leq_var {Γ x y r₁ r₂} :
       Γ.lookup x = some (.refine .int r₁) →
       Γ.lookup y = some (.refine .int r₂) →
       Hastype Γ (.leq (.var x) (.var y))
-        (.refine .bool ⟨fun ρ v => v = decide (ρ.ints x ≤ ρ.ints y)⟩)
+        (.refine .bool ⟨[x, y], fun ρ v => v = decide (ρ.ints x ≤ ρ.ints y),
+          by intro ρ₁ ρ₂ v h
+             have hx : ρ₁.ints x = ρ₂.ints x := (h x (by simp)).1
+             have hy : ρ₁.ints y = ρ₂.ints y := (h y (by simp)).1
+             simp [hx, hy]⟩)
   -- TNot: existential refinement — sound regardless of `r`'s functionality.
   | not_ {Γ e r} :
       Hastype Γ e (.refine .bool r) →
       Hastype Γ (.not e)
-        (.refine .bool ⟨fun ρ v => ∃ b, r.pred ρ b ∧ v = !b⟩)
+        (.refine .bool ⟨r.fv, fun ρ v => ∃ b, r.pred ρ b ∧ v = !b,
+          by intro ρ₁ ρ₂ v h
+             constructor
+             · rintro ⟨bv, hb, hv⟩; exact ⟨bv, (r.ext h).mp hb, hv⟩
+             · rintro ⟨bv, hb, hv⟩; exact ⟨bv, (r.ext h).mpr hb, hv⟩⟩)
   -- TAnd: same existential trick as `not_`.
   | and_ {Γ e₁ e₂ r₁ r₂} :
       Hastype Γ e₁ (.refine .bool r₁) →
       Hastype Γ e₂ (.refine .bool r₂) →
       Hastype Γ (.and e₁ e₂)
         (.refine .bool
-          ⟨fun ρ v => ∃ b₁ b₂, r₁.pred ρ b₁ ∧ r₂.pred ρ b₂ ∧ v = (b₁ && b₂)⟩)
+          ⟨r₁.fv ++ r₂.fv, fun ρ v => ∃ b₁ b₂, r₁.pred ρ b₁ ∧ r₂.pred ρ b₂ ∧ v = (b₁ && b₂),
+            by intro ρ₁ ρ₂ v h
+               have h₁ : ∀ y ∈ r₁.fv, ρ₁.ints y = ρ₂.ints y ∧ ρ₁.bools y = ρ₂.bools y :=
+                 fun y hy => h y (List.mem_append_left _ hy)
+               have h₂ : ∀ y ∈ r₂.fv, ρ₁.ints y = ρ₂.ints y ∧ ρ₁.bools y = ρ₂.bools y :=
+                 fun y hy => h y (List.mem_append_right _ hy)
+               constructor
+               · rintro ⟨b₁, b₂, hb₁, hb₂, hv⟩
+                 exact ⟨b₁, b₂, (r₁.ext h₁).mp hb₁, (r₂.ext h₂).mp hb₂, hv⟩
+               · rintro ⟨b₁, b₂, hb₁, hb₂, hv⟩
+                 exact ⟨b₁, b₂, (r₁.ext h₁).mpr hb₁, (r₂.ext h₂).mpr hb₂, hv⟩⟩)
   -- TIte (ANF, path-sensitive)
   | ite {Γ x e₁ e₂ r t} :
       Γ.lookup x = some (.refine .bool r) →
-      Hastype ((x, .refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = true⟩)  :: Γ) e₁ t →
-      Hastype ((x, .refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = false⟩) :: Γ) e₂ t →
+      Hastype ((x, .refine .bool (r.ite_true))  :: Γ) e₁ t →
+      Hastype ((x, .refine .bool (r.ite_false)) :: Γ) e₂ t →
       Hastype Γ (.ite (.var x) e₁ e₂) t
 
 /-- A well-typed expression's free variables are bound by the typing context.

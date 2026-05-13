@@ -79,18 +79,28 @@ mutual
         match Γ.lookup x, Γ.lookup y with
         | some (.refine .int _), some (.refine .int _) =>
             some ((fun _ => True),
-              .refine .bool ⟨fun ρ v => v = decide (ρ.ints x ≤ ρ.ints y)⟩)
+              .refine .bool ⟨[x, y], fun ρ v => v = decide (ρ.ints x ≤ ρ.ints y),
+                by intro ρ₁ ρ₂ v h
+                   have hx : ρ₁.ints x = ρ₂.ints x := (h x (by simp)).1
+                   have hy : ρ₁.ints y = ρ₂.ints y := (h y (by simp)).1
+                   simp [hx, hy]⟩)
         | _, _ => none
     | .add (.var x) (.var y) =>
         match Γ.lookup x, Γ.lookup y with
         | some (.refine .int _), some (.refine .int _) =>
             some ((fun _ => True),
-              .refine .int ⟨fun ρ v => v = ρ.ints x + ρ.ints y⟩)
+              .refine .int ⟨[x, y], fun ρ v => v = ρ.ints x + ρ.ints y,
+                by intro ρ₁ ρ₂ v h
+                   have hx : ρ₁.ints x = ρ₂.ints x := (h x (by simp)).1
+                   have hy : ρ₁.ints y = ρ₂.ints y := (h y (by simp)).1
+                   simp [hx, hy]⟩)
         | _, _ => none
     | .not e =>
         match synth Γ e with
         | some (c, .refine .bool r) =>
-            some (c, .refine .bool ⟨fun ρ v => ∃ b, r.pred ρ b ∧ v = !b⟩)
+            some (c, .refine .bool ⟨r.fv, fun ρ v => ∃ b, r.pred ρ b ∧ v = !b,
+              fun h => ⟨fun ⟨bv, hb, hv⟩ => ⟨bv, (r.ext h).mp hb, hv⟩,
+                        fun ⟨bv, hb, hv⟩ => ⟨bv, (r.ext h).mpr hb, hv⟩⟩⟩)
         | _ => none
     | .and e₁ e₂ =>
         match synth Γ e₁ with
@@ -99,8 +109,15 @@ mutual
             | some (c₂, .refine .bool r₂) =>
                 some (fun ρ => c₁ ρ ∧ c₂ ρ,
                       .refine .bool
-                        ⟨fun ρ v =>
-                          ∃ b₁ b₂, r₁.pred ρ b₁ ∧ r₂.pred ρ b₂ ∧ v = (b₁ && b₂)⟩)
+                        ⟨r₁.fv ++ r₂.fv,
+                         fun ρ v => ∃ b₁ b₂, r₁.pred ρ b₁ ∧ r₂.pred ρ b₂ ∧ v = (b₁ && b₂),
+                         fun h =>
+                           have h₁ := fun y hy => h y (List.mem_append_left _ hy)
+                           have h₂ := fun y hy => h y (List.mem_append_right _ hy)
+                           ⟨fun ⟨b₁, b₂, hb₁, hb₂, hv⟩ =>
+                              ⟨b₁, b₂, (r₁.ext h₁).mp hb₁, (r₂.ext h₂).mp hb₂, hv⟩,
+                            fun ⟨b₁, b₂, hb₁, hb₂, hv⟩ =>
+                              ⟨b₁, b₂, (r₁.ext h₁).mpr hb₁, (r₂.ext h₂).mpr hb₂, hv⟩⟩⟩)
             | _ => none
         | _ => none
     | _ => none
@@ -134,12 +151,12 @@ mutual
         | .var x =>
             match Γ.lookup x with
             | some (.refine .bool r) =>
-                match check ((x, .refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = true⟩) :: Γ) e₁ t,
-                      check ((x, .refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = false⟩) :: Γ) e₂ t with
+                match check ((x, .refine .bool r.ite_true)  :: Γ) e₁ t,
+                      check ((x, .refine .bool r.ite_false) :: Γ) e₂ t with
                 | some c₁, some c₂ =>
                     some (fun ρ =>
-                      implyBind x (.refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = true⟩)  c₁ ρ ∧
-                      implyBind x (.refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = false⟩) c₂ ρ)
+                      implyBind x (.refine .bool r.ite_true)  c₁ ρ ∧
+                      implyBind x (.refine .bool r.ite_false) c₂ ρ)
                 | _, _ => none
             | _ => none
         | _ => none
@@ -161,14 +178,22 @@ theorem synth_add_var_eq (Γ : TEnv) (x y : EVar) {r₁ r₂ : Refinement .int}
     (hx : Γ.lookup x = some (.refine .int r₁))
     (hy : Γ.lookup y = some (.refine .int r₂)) :
     synth Γ (.add (.var x) (.var y)) =
-      some ((fun _ => True), .refine .int ⟨fun ρ v => v = ρ.ints x + ρ.ints y⟩) := by
+      some ((fun _ => True), .refine .int ⟨[x, y], fun ρ v => v = ρ.ints x + ρ.ints y,
+        by intro ρ₁ ρ₂ v h
+           have hxi : ρ₁.ints x = ρ₂.ints x := (h x (by simp)).1
+           have hyi : ρ₁.ints y = ρ₂.ints y := (h y (by simp)).1
+           simp [hxi, hyi]⟩) := by
   simp [synth, hx, hy]
 
 theorem synth_leq_var_eq (Γ : TEnv) (x y : EVar) {r₁ r₂ : Refinement .int}
     (hx : Γ.lookup x = some (.refine .int r₁))
     (hy : Γ.lookup y = some (.refine .int r₂)) :
     synth Γ (.leq (.var x) (.var y)) =
-      some ((fun _ => True), .refine .bool ⟨fun ρ v => v = decide (ρ.ints x ≤ ρ.ints y)⟩) := by
+      some ((fun _ => True), .refine .bool ⟨[x, y], fun ρ v => v = decide (ρ.ints x ≤ ρ.ints y),
+        by intro ρ₁ ρ₂ v h
+           have hxi : ρ₁.ints x = ρ₂.ints x := (h x (by simp)).1
+           have hyi : ρ₁.ints y = ρ₂.ints y := (h y (by simp)).1
+           simp [hxi, hyi]⟩) := by
   simp [synth, hx, hy]
 
 @[simp]
@@ -176,7 +201,9 @@ theorem synth_not_eq (Γ : TEnv) (e : Exp) :
     synth Γ (.not e) =
       match synth Γ e with
       | some (c, .refine .bool r) =>
-          some (c, .refine .bool ⟨fun ρ v => ∃ b, r.pred ρ b ∧ v = !b⟩)
+          some (c, .refine .bool ⟨r.fv, fun ρ v => ∃ b, r.pred ρ b ∧ v = !b,
+            fun h => ⟨fun ⟨bv, hb, hv⟩ => ⟨bv, (r.ext h).mp hb, hv⟩,
+                      fun ⟨bv, hb, hv⟩ => ⟨bv, (r.ext h).mpr hb, hv⟩⟩⟩)
       | _ => none := by
   simp [synth]
 
@@ -189,8 +216,15 @@ theorem synth_and_eq (Γ : TEnv) (e₁ e₂ : Exp) :
           | some (c₂, .refine .bool r₂) =>
               some (fun ρ => c₁ ρ ∧ c₂ ρ,
                     .refine .bool
-                      ⟨fun ρ v =>
-                        ∃ b₁ b₂, r₁.pred ρ b₁ ∧ r₂.pred ρ b₂ ∧ v = (b₁ && b₂)⟩)
+                      ⟨r₁.fv ++ r₂.fv,
+                       fun ρ v => ∃ b₁ b₂, r₁.pred ρ b₁ ∧ r₂.pred ρ b₂ ∧ v = (b₁ && b₂),
+                       fun h =>
+                         have h₁ := fun y hy => h y (List.mem_append_left _ hy)
+                         have h₂ := fun y hy => h y (List.mem_append_right _ hy)
+                         ⟨fun ⟨b₁, b₂, hb₁, hb₂, hv⟩ =>
+                            ⟨b₁, b₂, (r₁.ext h₁).mp hb₁, (r₂.ext h₂).mp hb₂, hv⟩,
+                          fun ⟨b₁, b₂, hb₁, hb₂, hv⟩ =>
+                            ⟨b₁, b₂, (r₁.ext h₁).mpr hb₁, (r₂.ext h₂).mpr hb₂, hv⟩⟩⟩)
           | _ => none
       | _ => none := by
   simp [synth]

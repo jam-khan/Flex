@@ -42,7 +42,11 @@ def REnv.update (b : Base) (ρ : REnv) (x : EVar) (v : b.interp) : REnv :=
   | .bool => { ρ with bools := fun y => if x == y then v else ρ.bools y }
 
 structure Refinement (b : Base) where
+  fv   : List EVar
   pred : REnv → b.interp → Prop
+  ext  : ∀ {ρ₁ ρ₂ : REnv} {v : b.interp},
+           (∀ y ∈ fv, ρ₁.ints y = ρ₂.ints y ∧ ρ₁.bools y = ρ₂.bools y) →
+           (pred ρ₁ v ↔ pred ρ₂ v)
 
 inductive Ty where
   | refine : (b : Base) → Refinement b → Ty   -- {ν : b | p (ρ ν)}

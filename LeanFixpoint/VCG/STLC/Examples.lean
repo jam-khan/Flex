@@ -7,9 +7,9 @@ open STLC
 
 /-! ## Refinement helpers -/
 
-abbrev TT   : Ty := .refine .int ⟨fun _ _ => True⟩
-abbrev Pos  : Ty := .refine .int ⟨fun _ ν => ν > 0⟩
-def NatR : Ty := .refine .int ⟨fun _ ν => 0 ≤ ν⟩    -- was Nat
+abbrev TT   : Ty := .refine .int ⟨[], fun _ _ => True, fun _ => Iff.rfl⟩
+abbrev Pos  : Ty := .refine .int ⟨[], fun _ ν => ν > 0, fun _ => Iff.rfl⟩
+def NatR : Ty := .refine .int ⟨[], fun _ ν => 0 ≤ ν, fun _ => Iff.rfl⟩
 
 /-! ## Example 1: 5 ⇐ {ν : ν > 0} -/
 
@@ -34,7 +34,7 @@ example : topVC [] ex2Exp ex2Ty := by
 def ex3Exp : Exp := .letin "z" (.iconst 5) (.var "z")
 def ex3Ty  : Ty  := Pos
 
-abbrev int_k (k : Int → Prop)  : Ty := .refine .int ⟨fun _ ν => k ν⟩
+abbrev int_k (k : Int → Prop)  : Ty := .refine .int ⟨[], fun _ ν => k ν, fun _ => Iff.rfl⟩
 
 abbrev exId : Exp := .lam "x" (.var "x")
 abbrev ty_k (k1 : Int → Prop) : Ty := Ty.arrow "x" (int_k k1) (int_k k1)
@@ -47,8 +47,9 @@ example : ∃ k, Check [] (.letin "z" (.iconst 99) (.app (.ann exId (ty_k k)) (.
   make_horn_under_k [List.lookup]
   solve_fixpoint
 
-abbrev IntN (n : Int) : Ty := .refine .int ⟨fun _ v => v = n⟩
-abbrev IntR (x : String) (k : Int → Int → Prop) : Ty := .refine .int ⟨fun ρ v => k (ρ.ints x) v⟩
+abbrev IntN (n : Int) : Ty := .refine .int ⟨[], fun _ v => v = n, fun _ => Iff.rfl⟩
+abbrev IntR (x : String) (k : Int → Int → Prop) : Ty := .refine .int ⟨[x], fun ρ v => k (ρ.ints x) v,
+  fun h => by simp [(h x (by simp)).1]⟩
 abbrev ty_xk (x : String) (k : Int → Int → Prop) : Ty := .arrow "x" TT (IntR x k)
 
 example : ∃ k, Check [] (.letin "z" (.iconst 99) (.app (.ann exId (ty_xk "x" k)) (.var "z"))) (IntN 99) := by
@@ -59,7 +60,11 @@ example : topVC [] ex3Exp ex3Ty := by
   simp [topVC, check, synth, implyBind, ex3Exp, ex3Ty, Pos, prim]
 
 abbrev exGt : Exp := .lam "x" (.lam "y" (.not (.leq (.var "x") (.var "y"))))
-abbrev tyGt : Ty := Ty.arrow "x" TT (Ty.arrow "y" TT (.refine .bool ⟨fun ρ v => v = (ρ.ints "x" > ρ.ints "y")⟩))
+abbrev tyGt : Ty := Ty.arrow "x" TT (Ty.arrow "y" TT (.refine .bool ⟨["x", "y"], fun ρ v => v = (ρ.ints "x" > ρ.ints "y"),
+  by intro ρ₁ ρ₂ v h
+     have hx : ρ₁.ints "x" = ρ₂.ints "x" := (h "x" (by simp)).1
+     have hy : ρ₁.ints "y" = ρ₂.ints "y" := (h "y" (by simp)).1
+     simp [hx, hy]⟩))
 
 example : topVC [] exGt tyGt := by
   simp [topVC, check, synth, List.lookup]
@@ -78,16 +83,16 @@ abbrev exMax : Exp :=
       )
     )
 
-abbrev IntK (k : Int → Prop) : Ty := .refine .int ⟨fun _ v => k v⟩
+abbrev IntK (k : Int → Prop) : Ty := .refine .int ⟨[], fun _ v => k v, fun _ => Iff.rfl⟩
 
 example : ∃ (k1 k2 k3 : Int → Prop), Check [] (
   .letin "a"
     (.iconst 99)
     (.letin "b"
       (.iconst 100)
-      (.app (.app (.ann exMax (.arrow "x" (IntK k1) (.arrow "y" (IntK k2) (.refine .int ⟨fun _ v => k3 v⟩)))) (.var "a")) (.var "b"))
+      (.app (.app (.ann exMax (.arrow "x" (IntK k1) (.arrow "y" (IntK k2) (.refine .int ⟨[], fun _ v => k3 v, fun _ => Iff.rfl⟩)))) (.var "a")) (.var "b"))
     )
-  ) (.refine .int ⟨fun _ v => v = 100 ∨ v = 99⟩) := by
+  ) (.refine .int ⟨[], fun _ v => v = 100 ∨ v = 99, fun _ => Iff.rfl⟩) := by
   make_horn_under_k [List.lookup]
   solve_fixpoint
 
