@@ -38,13 +38,14 @@ def TyDenote : Ty → REnv → Val → Prop
 
 /-- Closing value substitution: `γ` provides a value for every binding in `Γ`,
     each in the corresponding type's denotation, with `ρ` reflecting `γ` on
-    base slots. The `x ∉ Subst.dom γ` invariant captures that names in `γ` are
-    distinct (a structural form of the same-binder convention). -/
+    base slots. We deliberately *don't* require `γ`'s keys be distinct: the
+    `ite` case adds a refining head entry that shadows an existing binding
+    for the scrutinee, so the same name appears twice in `γ` with consistent
+    values. List-lookup semantics (first-match) keeps this sound. -/
 def EnvDenote : TEnv → List (EVar × Val) → REnv → Prop
   | [],            [],            _ => True
   | (x, t) :: Γ,   (y, v) :: γ,   ρ =>
         x = y ∧
-        x ∉ Subst.dom γ ∧
         EnvDenote Γ γ ρ ∧
         TyDenote t ρ v ∧
         (∀ n, v = .iconst n → ρ.ints  x = n) ∧
@@ -69,7 +70,8 @@ theorem TyDenote.closed {t : Ty} {ρ : REnv} {v : Val} (h : TyDenote t ρ v) :
 
   Pure substitution lemmas live in [Substitution.lean]. The lemmas here all
   reference `TyDenote` or `EnvDenote` and so are intrinsically logical-
-  relation-flavoured. Several remain `sorry` under the same-binder convention.
+  relation-flavoured.
+  Several remain `srry` under the same-binder convention.
 -/
 
 /-- `EnvDenote` projects to `ModelsEnv`. -/
@@ -77,7 +79,7 @@ theorem EnvDenote.toModelsEnv :
     ∀ {Γ γ ρ}, EnvDenote Γ γ ρ → ModelsEnv ρ Γ
   | [], [], _, _ => by simp [ModelsEnv]
   | (x, .refine b r) :: Γ, (_, v) :: γ, ρ, h => by
-      obtain ⟨_, _, hΓ, hv, hint, hbool⟩ := h
+      obtain ⟨_, hΓ, hv, hint, hbool⟩ := h
       refine ⟨?_, EnvDenote.toModelsEnv hΓ⟩
       cases b with
       | int =>
@@ -89,7 +91,7 @@ theorem EnvDenote.toModelsEnv :
         have hρ : ρ.bools x = bv := hbool bv hvb
         simp [REnv.get, hρ]; exact hp
   | (_, .arrow _ _ _) :: Γ, (_, _) :: γ, ρ, h => by
-      obtain ⟨_, _, hΓ, _, _, _⟩ := h
+      obtain ⟨_, hΓ, _, _, _⟩ := h
       simp [ModelsEnv]; exact EnvDenote.toModelsEnv hΓ
   | [], _ :: _, _, h => by cases h
   | _ :: _, [], _, h => by cases h
@@ -99,18 +101,46 @@ theorem EnvDenote.allClosed :
     ∀ {Γ γ ρ}, EnvDenote Γ γ ρ → Subst.AllClosed γ
   | [], [], _, _ => True.intro
   | (_, _) :: _, (_, v) :: γ, _, h => by
-      obtain ⟨_, _, hΓ, hv, _, _⟩ := h
+      obtain ⟨_, hΓ, hv, _, _⟩ := h
       exact ⟨TyDenote.closed hv, EnvDenote.allClosed hΓ⟩
   | [], _ :: _, _, h => by cases h
   | _ :: _, [], _, h => by cases h
 
-/-- The freshness invariant from the head of EnvDenote. -/
-theorem EnvDenote.head_fresh
-    {x : EVar} {t : Ty} {Γ : TEnv} {v : Val} {γ : List (EVar × Val)} {ρ : REnv}
-    (h : EnvDenote ((x, t) :: Γ) ((x, v) :: γ) ρ) :
-    x ∉ Subst.dom γ := by
-  obtain ⟨_, hfresh, _, _, _, _⟩ := h
-  exact hfresh
+/-- Under `EnvDenote Γ γ ρ`, every key appearing in `Γ` appears in `γ`. Used
+    by the `lam` Val.closed proof to discharge free-variable obligations. -/
+theorem EnvDenote.mem_dom :
+    ∀ {Γ γ ρ}, EnvDenote Γ γ ρ → ∀ {z t'}, (z, t') ∈ Γ → z ∈ Subst.dom γ
+  | [], [], _, _, _, _, hm => by simp at hm
+  | (y, _) :: Γ', (_, _) :: γ', ρ, h, z, t', hm => by
+      obtain ⟨hxy, hΓ, _, _, _⟩ := h
+      subst hxy
+      simp at hm
+      rcases hm with ⟨rfl, _⟩ | rest
+      · simp [Subst.dom]
+      · simp [Subst.dom]; exact Or.inr (EnvDenote.mem_dom hΓ rest)
+  | [], _ :: _, _, h, _, _, _ => by cases h
+  | _ :: _, [], _, h, _, _, _ => by cases h
+
+/-- Under `EnvDenote Γ γ ρ`, if `x` is fresh in `Γ` then it's fresh in `γ`.
+    Since `γ`'s domain may now contain duplicates (head-shadowing in `ite`),
+    we prove this by induction; the precondition's `Γ.lookup x = none`
+    forces every `γ` entry's key to differ from `x`. -/
+theorem EnvDenote.lookup_none_dom :
+    ∀ {Γ γ ρ}, EnvDenote Γ γ ρ → ∀ {x}, Γ.lookup x = none → x ∉ Subst.dom γ
+  | [], [], _, _, _, _ => by simp [Subst.dom]
+  | (y, _) :: Γ, (_, _) :: γ, ρ, h, x, hl => by
+      obtain ⟨hxy, hΓ, _, _, _⟩ := h
+      subst hxy
+      simp only [List.lookup] at hl
+      by_cases hxy' : x = y
+      · subst hxy'; simp at hl
+      · have hxy_b : (x == y) = false := by simp [hxy']
+        rw [hxy_b] at hl
+        simp [Subst.dom]
+        refine ⟨hxy', ?_⟩
+        exact EnvDenote.lookup_none_dom hΓ hl
+  | [], _ :: _, _, h, _, _ => by cases h
+  | _ :: _, [], _, h, _, _ => by cases h
 
 /-- From `EnvDenote`, every variable in `Γ` has a corresponding value in `γ`
     matching its type. Also returns the matching ρ-slot witness and the value's
@@ -123,7 +153,7 @@ theorem EnvDenote.lookup_some :
          (∀ b, v = .bconst b → ρ.bools x = b)
   | [], [], _, _, _, _, hl => by simp [List.lookup] at hl
   | (y, ty) :: Γ, (_, v) :: γ, ρ, h, x, t, hl => by
-      obtain ⟨hxy, _, hΓ, hv, hint, hbool⟩ := h
+      obtain ⟨hxy, hΓ, hv, hint, hbool⟩ := h
       subst hxy
       simp [List.lookup] at hl
       by_cases hxy : x == y
@@ -169,6 +199,44 @@ theorem TyDenote.weaken_extWithVal
     (h : TyDenote t ρ v) :
     TyDenote t (REnv.extWithVal s ρ x va) v := by sorry
 
+/-- `ModelsEnv` is stable under extending ρ at a fresh name. **TRUE** under
+    shallow-refinement weakening; deferred (same blocker as the other
+    `weaken_*` helpers). -/
+theorem ModelsEnv.weaken_extWithVal
+    (Γ : TEnv) (ρ : REnv) (s : Ty) (x : EVar) (va : Val)
+    (h : ModelsEnv ρ Γ) :
+    ModelsEnv (REnv.extWithVal s ρ x va) Γ := by sorry
+
+/-- If `x` is already bound in `γ` to a closed value `v` (and `γ` itself is
+    closed pointwise), then prepending another `(x, v)` to `γ` doesn't change
+    the result of `substEnv`. Used in the `ite` case where the scrutinee
+    variable is already in the value substitution. -/
+private theorem Exp.substEnv_cons_lookup
+    {x : EVar} {v : Val} (γ : List (EVar × Val))
+    (hlk : Subst.lookup x γ = some v) (hv : Val.closed v) (hγ : Subst.AllClosed γ)
+    (e : Exp) :
+    Exp.substEnv ((x, v) :: γ) e = Exp.substEnv γ e := by
+  induction γ generalizing e with
+  | nil => simp [Subst.lookup] at hlk
+  | cons head tail ih =>
+    obtain ⟨y, w⟩ := head
+    obtain ⟨hw, hγ'⟩ := hγ
+    have hvfv : Val.fv v = [] := hv
+    have hwfv : Val.fv w = [] := hw
+    show Exp.substEnv tail ((e.subst x v).subst y w) = Exp.substEnv tail (e.subst y w)
+    by_cases hxy : x = y
+    · subst hxy
+      simp only [Subst.lookup, beq_self_eq_true, if_true, Option.some.injEq] at hlk
+      -- hlk : w = v; rewrite goal to use w
+      rw [← hlk]
+      rw [Exp.subst_subst_eq x w w e (by rw [hwfv]; simp)]
+    · have hxy_b : (x == y) = false := by simp [hxy]
+      simp only [Subst.lookup, hxy_b] at hlk
+      rw [Exp.subst_subst_swap x y v w e hxy
+            (by rw [hvfv]; simp)
+            (by rw [hwfv]; simp)]
+      exact ih hlk hγ' _
+
 /-! ## T1 — Subtyping is semantic inclusion -/
 
 theorem subtyp_sound {Γ s t} (hsub : Subtyp Γ s t) :
@@ -183,19 +251,46 @@ theorem subtyp_sound {Γ s t} (hsub : Subtyp Γ s t) :
       | bool =>
         obtain ⟨bv, hvb, hp₁⟩ := hs
         exact ⟨bv, hvb, hent ρ hΓ bv hp₁⟩
-  | @arrow Γ x₁ s₁ t₁ x₂ s₂ t₂ _hin _hout _ihin _ihout =>
-      -- BLOCKED on alpha-equivalence at the value level.
-      -- v : ⟦arrow x₁ s₁ t₁⟧ unpacks as `∃ body, v = .clos x₁ body ∧ …`,
-      -- but to inhabit `⟦arrow x₂ s₂ t₂⟧` we must produce `.clos x₂ body'` —
-      -- different binder. The current `Val` representation does not encode
-      -- alpha-equivalence; resolving this requires either:
-      --   (a) renaming the closure body, or
-      --   (b) restricting Subtyp.arrow to x₁ = x₂ (same-binder).
-      -- The structural reasoning (contravariance via ihin, covariance via
-      -- ihout + TyDenote.rename_compat) is sketched in the prior version of
-      -- this case; see the v-prefixed sorries in the git history if needed.
-      intro ρ _hΓ v _hs
-      sorry
+  | @arrow Γ x s₁ t₁ s₂ t₂ hin _hout ihin ihout =>
+      intro ρ hΓ v hv
+      obtain ⟨body, hbody, hcl, hfun⟩ := hv; subst hbody
+      refine ⟨body, rfl, hcl, ?_⟩
+      intro va hva
+      have hva_s₁ : TyDenote s₁ ρ va := ihin hΓ hva
+      obtain ⟨vr, hbsr, hvr⟩ := hfun va hva_s₁
+      refine ⟨vr, hbsr, ?_⟩
+      -- extWithVal only inspects the outer shape (refine/arrow) and base; the
+      -- refinement predicate is ignored. Subtyp Γ s₂ s₁ forces matching shape,
+      -- so the two ext-envs agree.
+      have hExt : REnv.extWithVal s₁ ρ x va = REnv.extWithVal s₂ ρ x va := by
+        cases hin with
+        | @refine _ b _ _ _ => cases b <;> cases va <;> rfl
+        | arrow _ _ => rfl
+      rw [hExt] at hvr
+      have hΓ' : ModelsEnv (REnv.extWithVal s₂ ρ x va) ((x, s₂) :: Γ) := by
+        have hva' : TyDenote s₂ (REnv.extWithVal s₂ ρ x va) va :=
+          TyDenote.weaken_extWithVal s₂ ρ x va s₂ va hva
+        have htail : ModelsEnv (REnv.extWithVal s₂ ρ x va) Γ :=
+          ModelsEnv.weaken_extWithVal Γ ρ s₂ x va hΓ
+        cases s₂ with
+        | refine b _ =>
+          cases b with
+          | int =>
+            obtain ⟨n, hvn, hp⟩ := hva'
+            subst hvn
+            simp only [REnv.extWithVal] at hp
+            refine ⟨?_, htail⟩
+            simpa [REnv.get, REnv.extWithVal, REnv.update] using hp
+          | bool =>
+            obtain ⟨bv, hvb, hp⟩ := hva'
+            subst hvb
+            simp only [REnv.extWithVal] at hp
+            refine ⟨?_, htail⟩
+            simpa [REnv.get, REnv.extWithVal, REnv.update] using hp
+        | arrow _ _ _ =>
+          simp only [ModelsEnv]
+          exact htail
+      exact ihout hΓ' hvr
 
 /-! ## T2 — Fundamental Lemma -/
 
@@ -236,26 +331,32 @@ theorem hastype_fundamental {Γ e t} (h : Hastype Γ e t) :
       refine ⟨.bconst b, ?_, ?_⟩
       · rw [Exp.substEnv_bconst]; exact BigStep.bconst
       · exact ⟨b, rfl, by rfl⟩
-  | @lam Γ x e s t _ ihbody =>
+  | @lam Γ x e s t hfresh hbody ihbody =>
       intro γ ρ hE
-      -- Same-binder freshness: x ∉ Γ.dom is the user-level invariant; we
-      -- abstract it as a single sorry below and reuse it through the case.
-      have h_xfresh : x ∉ Subst.dom γ := by sorry
+      -- Freshness now provided by `Hastype.lam`'s `Γ.lookup x = none` premise.
+      have h_xfresh : x ∉ Subst.dom γ := EnvDenote.lookup_none_dom hE hfresh
       have h_γ_closed : Subst.AllClosed γ := EnvDenote.allClosed hE
       refine ⟨.clos x (Exp.substEnv γ e), ?_, ?_⟩
       · rw [Exp.substEnv_lam γ x e h_xfresh]
         exact BigStep.lam
       · -- TyDenote (.arrow x s t) ρ (.clos x (substEnv γ e))
         refine ⟨_, rfl, ?_, ?_⟩
-        · -- Val.closed of the constructed closure: well-scopedness obligation.
-          -- TRUE because Hastype ((x,s)::Γ) e t implies e.fv ⊆ {x} ∪ Γ.dom and γ
-          -- closes Γ.dom. Needs a `Hastype.scope` lemma; deferred.
-          sorry
+        · -- Val.closed: every free var of (substEnv γ e) equals the binder x.
+          show Val.fv (.clos x (Exp.substEnv γ e)) = []
+          simp only [Val.fv]
+          apply List.filter_eq_nil_iff.mpr
+          intro z hz
+          obtain ⟨hz_e, hz_dom⟩ := Exp.substEnv_fv_subset γ e h_γ_closed z hz
+          obtain ⟨t', ht'⟩ := hbody.fv_subset z hz_e
+          simp at ht'
+          rcases ht' with ⟨rfl, _⟩ | hin
+          · simp
+          · exact absurd (EnvDenote.mem_dom hE hin) hz_dom
         · intro va hva
           have h_va_closed : Val.closed va := TyDenote.closed hva
           have hE' : EnvDenote ((x, s) :: Γ) ((x, va) :: γ)
                                 (REnv.extWithVal s ρ x va) := by
-            refine ⟨rfl, h_xfresh, ?_, ?_, ?_, ?_⟩
+            refine ⟨rfl, ?_, ?_, ?_, ?_⟩
             · exact EnvDenote.weaken_extWithVal Γ γ ρ s x va hE
             · exact TyDenote.weaken_extWithVal s ρ x va s va hva
             · intro n hvn
@@ -300,17 +401,17 @@ theorem hastype_fundamental {Γ e t} (h : Hastype Γ e t) :
         -- TyDenote t (extWithVal s ρ x va) vr.
         -- ρ.redirect x y looks up y where x is asked; extWithVal s ρ x va sets
         -- ρ.x := va_base. These agree iff va_base = ρ.get y. From ih₂ on the
-        -- variable y, that follows by the var case's logic. Deferred sorry.
+        -- variable y, that follows by the var case's logic.
         sorry
-  | @letin Γ x e₁ e₂ s t _ _ ih₁ ih₂ =>
+  | @letin Γ x e₁ e₂ s t hfresh _ _ ih₁ ih₂ =>
       intro γ ρ hE
       obtain ⟨v₁, hbs₁, hd₁⟩ := ih₁ hE
-      have h_xfresh : x ∉ Subst.dom γ := by sorry  -- same-binder freshness
+      have h_xfresh : x ∉ Subst.dom γ := EnvDenote.lookup_none_dom hE hfresh
       have h_v₁_closed : Val.closed v₁ := TyDenote.closed hd₁
       have h_γ_closed : Subst.AllClosed γ := EnvDenote.allClosed hE
       have hE' : EnvDenote ((x, s) :: Γ) ((x, v₁) :: γ)
                             (REnv.extWithVal s ρ x v₁) := by
-        refine ⟨rfl, h_xfresh, ?_, ?_, ?_, ?_⟩
+        refine ⟨rfl, ?_, ?_, ?_, ?_⟩
         · exact EnvDenote.weaken_extWithVal Γ γ ρ s x v₁ hE
         · exact TyDenote.weaken_extWithVal s ρ x v₁ s v₁ hd₁
         · intro n hvn
@@ -347,19 +448,15 @@ theorem hastype_fundamental {Γ e t} (h : Hastype Γ e t) :
         | refine b _ =>
             cases b with
             | int =>
-                cases v₁ with
-                | iconst n =>
-                    simp only [REnv.extWithVal] at hv₂
-                    rw [TyDenote.weaken_update] at hv₂
-                    exact hv₂
-                | _ => sorry
+                obtain ⟨n, hvn, _⟩ := hd₁; subst hvn
+                simp only [REnv.extWithVal] at hv₂
+                rw [TyDenote.weaken_update] at hv₂
+                exact hv₂
             | bool =>
-                cases v₁ with
-                | bconst bv =>
-                    simp only [REnv.extWithVal] at hv₂
-                    rw [TyDenote.weaken_update] at hv₂
-                    exact hv₂
-                | _ => sorry
+                obtain ⟨bv, hvb, _⟩ := hd₁; subst hvb
+                simp only [REnv.extWithVal] at hv₂
+                rw [TyDenote.weaken_update] at hv₂
+                exact hv₂
         | arrow _ _ _ => simp [REnv.extWithVal] at hv₂; exact hv₂
   | @ann Γ e t _ ih =>
       intro γ ρ hE
@@ -370,29 +467,39 @@ theorem hastype_fundamental {Γ e t} (h : Hastype Γ e t) :
       intro γ ρ hE
       obtain ⟨v, hbs, hv⟩ := ih hE
       exact ⟨v, hbs, subtyp_sound hsub (EnvDenote.toModelsEnv hE) hv⟩
-  | @add_var Γ x y =>
-      -- BLOCKED: Hastype.add_var lacks `Γ.lookup x = some (.refine .int _)`
-      -- precondition (Declarative.lean:47-49). Without it, the rule is unsound:
-      -- `add (var x) (var y)` may try to add a non-int value. To prove safety
-      -- the typing rule needs to demand both operands be int-bound.
-      intro γ ρ _
-      sorry
-  | @leq_var Γ x y =>
-      -- BLOCKED: same as add_var. See Declarative.lean:51-53.
-      intro γ ρ _
-      sorry
+  | @add_var Γ x y r₁ r₂ hxlk hylk =>
+      intro γ ρ hE
+      obtain ⟨vx, hlkx, hvx, hvx_cl, hintx, _⟩ := EnvDenote.lookup_some hE hxlk
+      obtain ⟨vy, hlky, hvy, hvy_cl, hinty, _⟩ := EnvDenote.lookup_some hE hylk
+      obtain ⟨nx, hvxn, _⟩ := hvx; subst hvxn
+      obtain ⟨ny, hvyn, _⟩ := hvy; subst hvyn
+      refine ⟨.iconst (nx + ny), ?_, ?_⟩
+      · rw [Exp.substEnv_add]
+        refine BigStep.add ?_ ?_
+        · rw [Exp.substEnv_var_lookup x γ _ hlkx hvx_cl]; exact BigStep.iconst
+        · rw [Exp.substEnv_var_lookup y γ _ hlky hvy_cl]; exact BigStep.iconst
+      · refine ⟨nx + ny, rfl, ?_⟩
+        simp [hintx nx rfl, hinty ny rfl]
+  | @leq_var Γ x y r₁ r₂ hxlk hylk =>
+      intro γ ρ hE
+      obtain ⟨vx, hlkx, hvx, hvx_cl, hintx, _⟩ := EnvDenote.lookup_some hE hxlk
+      obtain ⟨vy, hlky, hvy, hvy_cl, hinty, _⟩ := EnvDenote.lookup_some hE hylk
+      obtain ⟨nx, hvxn, _⟩ := hvx; subst hvxn
+      obtain ⟨ny, hvyn, _⟩ := hvy; subst hvyn
+      refine ⟨.bconst (decide (nx ≤ ny)), ?_, ?_⟩
+      · rw [Exp.substEnv_leq]
+        refine BigStep.leq ?_ ?_
+        · rw [Exp.substEnv_var_lookup x γ _ hlkx hvx_cl]; exact BigStep.iconst
+        · rw [Exp.substEnv_var_lookup y γ _ hlky hvy_cl]; exact BigStep.iconst
+      · refine ⟨decide (nx ≤ ny), rfl, ?_⟩
+        simp [hintx nx rfl, hinty ny rfl]
   | @not_ Γ e r _ ih =>
       intro γ ρ hE
       obtain ⟨v, hbs, hv⟩ := ih hE
       obtain ⟨b, hvb, hp⟩ := hv; subst hvb
       refine ⟨.bconst (!b), ?_, ?_⟩
       · rw [Exp.substEnv_not]; exact BigStep.not_ hbs
-      · refine ⟨!b, rfl, ?_⟩
-        intro b' hp'
-        -- The synthesized refinement reads `∀ b'. r.pred ρ b' → v = !b'`. This is
-        -- only sound if `r` is functional (singleton refinement). The Hastype.not_
-        -- rule does not enforce functionality; flag.
-        sorry
+      · exact ⟨!b, rfl, b, hp, rfl⟩
   | @and_ Γ e₁ e₂ r₁ r₂ _ _ ih₁ ih₂ =>
       intro γ ρ hE
       obtain ⟨v₁, hbs₁, hv₁⟩ := ih₁ hE
@@ -401,21 +508,18 @@ theorem hastype_fundamental {Γ e t} (h : Hastype Γ e t) :
       obtain ⟨b₂, hvb₂, hp₂⟩ := hv₂; subst hvb₂
       refine ⟨.bconst (b₁ && b₂), ?_, ?_⟩
       · rw [Exp.substEnv_and]; exact BigStep.and_ hbs₁ hbs₂
-      · refine ⟨b₁ && b₂, rfl, ?_⟩
-        intro b₁' b₂' hp₁' hp₂'
-        sorry  -- same singleton-refinement issue as `not_`
+      · exact ⟨b₁ && b₂, rfl, b₁, b₂, hp₁, hp₂, rfl⟩
   | @ite Γ x e₁ e₂ r t hlk _ _ ih₁ ih₂ =>
       intro γ ρ hE
       obtain ⟨v, hlkγ, hv, _hcl, hint, hbool⟩ := EnvDenote.lookup_some hE hlk
       obtain ⟨b, hvb, hp⟩ := hv; subst hvb
       have hρb : ρ.bools x = b := hbool b rfl
-      have h_xfresh : x ∉ Subst.dom γ := by sorry  -- same-binder freshness
       cases b with
       | true =>
           have hE' : EnvDenote
               ((x, .refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = true⟩) :: Γ)
               ((x, .bconst true) :: γ) ρ := by
-            refine ⟨rfl, h_xfresh, hE, ⟨true, rfl, hp, rfl⟩, ?_, ?_⟩
+            refine ⟨rfl, hE, ⟨true, rfl, hp, rfl⟩, ?_, ?_⟩
             · intro n hvn; cases hvn
             · intro b' hvb'; cases hvb'; exact hρb
           obtain ⟨vr, hbs, hvr⟩ := ih₁ hE'
@@ -423,16 +527,14 @@ theorem hastype_fundamental {Γ e t} (h : Hastype Γ e t) :
           rw [Exp.substEnv_ite, Exp.substEnv_var_lookup x γ _ hlkγ
                   (by simp [Val.closed, Val.fv])]
           refine BigStep.ite_t (by simp [Val.toExp]; exact BigStep.bconst) ?_
-          -- Goal: BigStep (substEnv γ e₁) vr
-          -- Have: BigStep (substEnv ((x, .bconst true) :: γ) e₁) vr
-          -- Equal because x already maps to .bconst true in γ (hlkγ); the extra
-          -- head substitution is redundant. TRUE; routine but defer.
-          sorry
+          rw [Exp.substEnv_cons_lookup γ hlkγ (by simp [Val.closed, Val.fv])
+                (EnvDenote.allClosed hE)] at hbs
+          exact hbs
       | false =>
           have hE' : EnvDenote
               ((x, .refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = false⟩) :: Γ)
               ((x, .bconst false) :: γ) ρ := by
-            refine ⟨rfl, h_xfresh, hE, ⟨false, rfl, hp, rfl⟩, ?_, ?_⟩
+            refine ⟨rfl, hE, ⟨false, rfl, hp, rfl⟩, ?_, ?_⟩
             · intro n hvn; cases hvn
             · intro b' hvb'; cases hvb'; exact hρb
           obtain ⟨vr, hbs, hvr⟩ := ih₂ hE'
@@ -440,7 +542,9 @@ theorem hastype_fundamental {Γ e t} (h : Hastype Γ e t) :
           rw [Exp.substEnv_ite, Exp.substEnv_var_lookup x γ _ hlkγ
                   (by simp [Val.closed, Val.fv])]
           refine BigStep.ite_f (by simp [Val.toExp]; exact BigStep.bconst) ?_
-          sorry
+          rw [Exp.substEnv_cons_lookup γ hlkγ (by simp [Val.closed, Val.fv])
+                (EnvDenote.allClosed hE)] at hbs
+          exact hbs
 
 /-! ## T3 — Closed-term type safety -/
 

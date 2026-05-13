@@ -44,7 +44,7 @@ def Gt0 (v : Int) : Prop :=
   v > 0
 
 example : ∃ k, Check [] (.letin "z" (.iconst 99) (.app (.ann exId (ty_k k)) (.var "z"))) Pos := by
-  make_horn_under_k
+  make_horn_under_k [List.lookup]
   solve_fixpoint
 
 abbrev IntN (n : Int) : Ty := .refine .int ⟨fun _ v => v = n⟩
@@ -52,7 +52,7 @@ abbrev IntR (x : String) (k : Int → Int → Prop) : Ty := .refine .int ⟨fun 
 abbrev ty_xk (x : String) (k : Int → Int → Prop) : Ty := .arrow "x" TT (IntR x k)
 
 example : ∃ k, Check [] (.letin "z" (.iconst 99) (.app (.ann exId (ty_xk "x" k)) (.var "z"))) (IntN 99) := by
-  make_horn_under_k
+  make_horn_under_k [List.lookup]
   solve_fixpoint
 
 example : topVC [] ex3Exp ex3Ty := by
@@ -62,7 +62,7 @@ abbrev exGt : Exp := .lam "x" (.lam "y" (.not (.leq (.var "x") (.var "y"))))
 abbrev tyGt : Ty := Ty.arrow "x" TT (Ty.arrow "y" TT (.refine .bool ⟨fun ρ v => v = (ρ.ints "x" > ρ.ints "y")⟩))
 
 example : topVC [] exGt tyGt := by
-  simp [topVC, check]
+  simp [topVC, check, synth, List.lookup]
 
 
 abbrev exMax : Exp :=
@@ -99,7 +99,7 @@ def exAddExp : Exp :=
 def exAddTy : Ty := IntN 7
 
 example : topVC [] exAddExp exAddTy := by
-  simp [topVC, check, synth, implyBind, exAddExp, exAddTy, prim]
+  simp [topVC, check, synth, implyBind, exAddExp, exAddTy, prim, List.lookup]
 
 /-! ## Declarative-side examples
 

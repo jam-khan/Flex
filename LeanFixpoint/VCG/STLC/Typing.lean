@@ -14,10 +14,10 @@ inductive Subtyp : TEnv → Ty → Ty → Prop where
 
   /-- SUB-FUN (same-binder form):
       contravariant input, covariant output under the shared binder. -/
-  | arrow {Γ x₁ s₁ t₁ x₂ s₂ t₂} :
+  | arrow {Γ x s₁ t₁ s₂ t₂} :
       Subtyp Γ s₂ s₁ →
-      Subtyp ((x₂, s₂) :: Γ) (t₁.rename x₁ x₂) t₂ →
-      Subtyp Γ (.arrow x₁ s₁ t₁) (.arrow x₂ s₂ t₂)
+      Subtyp ((x, s₂) :: Γ) t₁ t₂ →
+      Subtyp Γ (.arrow x s₁ t₁) (.arrow x s₂ t₂)
 
 -- refinement type for an integer constant
 @[simp]
@@ -64,28 +64,35 @@ mutual
         Check Γ (.var y) s        →
         Synth Γ (.app e₁ (.var y)) (t.rename x y)
 
-    /-- SYN-LEQ (ANF): both operands must be int variables. -/
-    | leq_var {Γ x y} :
+    /-- SYN-LEQ (ANF): both operands must be int-bound variables. -/
+    | leq_var {Γ x y r₁ r₂} :
+        Γ.lookup x = some (.refine .int r₁) →
+        Γ.lookup y = some (.refine .int r₂) →
         Synth Γ (.leq (.var x) (.var y))
           (.refine .bool ⟨fun ρ v => v = decide (ρ.ints x ≤ ρ.ints y)⟩)
 
-    /-- SYN-NOT: synthesize the inner bool expression, then negate. -/
+    /-- SYN-NOT: synthesize the inner bool expression, then negate
+        (existential refinement, sound for arbitrary inner refinements). -/
     | not_ {Γ e r} :
         Synth Γ e (.refine .bool r) →
         Synth Γ (.not e)
-          (.refine .bool ⟨fun ρ v => ∀ b, r.pred ρ b → v = !b⟩)
+          (.refine .bool ⟨fun ρ v => ∃ b, r.pred ρ b ∧ v = !b⟩)
 
-    /-- SYN-ADD (ANF): both operands must be int variables. -/
-    | add_var {Γ x y} :
+    /-- SYN-ADD (ANF): both operands must be int-bound variables. -/
+    | add_var {Γ x y r₁ r₂} :
+        Γ.lookup x = some (.refine .int r₁) →
+        Γ.lookup y = some (.refine .int r₂) →
         Synth Γ (.add (.var x) (.var y))
           (.refine .int ⟨fun ρ v => v = ρ.ints x + ρ.ints y⟩)
 
-    /-- SYN-AND: synthesize both bool expressions, then AND. -/
+    /-- SYN-AND: synthesize both bool expressions, then AND
+        (existential refinement). -/
     | and_ {Γ e₁ e₂ r₁ r₂} :
         Synth Γ e₁ (.refine .bool r₁) →
         Synth Γ e₂ (.refine .bool r₂) →
         Synth Γ (.and e₁ e₂)
-          (.refine .bool ⟨fun ρ v => ∀ b₁ b₂, r₁.pred ρ b₁ → r₂.pred ρ b₂ → v = b₁ && b₂⟩)
+          (.refine .bool
+            ⟨fun ρ v => ∃ b₁ b₂, r₁.pred ρ b₁ ∧ r₂.pred ρ b₂ ∧ v = (b₁ && b₂)⟩)
 
   -- Γ ⊢ e ⇐ t : "e checks against type t"
   inductive Check : TEnv → Exp → Ty → Prop where
@@ -95,13 +102,17 @@ mutual
         Subtyp Γ s t →
         Check Γ e t
 
-    /-- CHK-LAM: check body against codomain in extended env. Requires same binder. -/
+    /-- CHK-LAM: check body against codomain in extended env. Requires same
+        binder and no shadowing. -/
     | lam {Γ x e s₁ s₂} :
+        Γ.lookup x = none →
         Check ((x, s₁) :: Γ) e s₂ →
         Check Γ (.lam x e) (.arrow x s₁ s₂)
 
-    /-- CHK-LET: synthesize the binding, push the obligation into the body. -/
+    /-- CHK-LET: synthesize the binding, push the obligation into the body.
+        Requires no shadowing. -/
     | letin {Γ x e₁ e₂ s t}:
+        Γ.lookup x = none →
         Synth Γ e₁ s →
         Check ((x, s) :: Γ) e₂ t →
         Check Γ (.letin x e₁ e₂) t
