@@ -9,6 +9,12 @@ open STLC
   restricted to current STLC fragment.
 -/
 
+/-- `WfCtx Γ x` means `x` does not appear in the `int_fv` or `bool_fv` of any
+    type in the context. Required for weakening lemmas when `x` is a fresh binder. -/
+def WfCtx (Γ : TEnv) (x : EVar) : Prop :=
+  ∀ (z : EVar) (t : Ty), (z, t) ∈ Γ →
+    (∀ b (r : Refinement b), t = .refine b r → x ∉ r.int_fv ∧ x ∉ r.bool_fv)
+
 inductive Hastype : TEnv → Exp → Ty → Prop where
   -- TVar `Γ(x) = t ⇒ Γ ⊢ x : t`
   | var {Γ x t} :
@@ -23,6 +29,7 @@ inductive Hastype : TEnv → Exp → Ty → Prop where
   -- TAbs (same-binder, no shadowing)
   | lam {Γ x e s t} :
       Γ.lookup x = none →
+      WfCtx Γ x →
       Hastype ((x, s) :: Γ) e t →
       Hastype Γ (.lam x e) (.arrow x s t)
   -- TApp (ANF) `e x`
@@ -33,6 +40,7 @@ inductive Hastype : TEnv → Exp → Ty → Prop where
   -- TLet — synthesize binding, push obligation into body. No shadowing.
   | letin {Γ x e₁ e₂ s t} :
       Γ.lookup x = none →
+      WfCtx Γ x →
       Hastype Γ e₁ s →
       Hastype ((x, s) :: Γ) e₂ t →
       Hastype Γ (.letin x e₁ e₂) t
@@ -50,47 +58,52 @@ inductive Hastype : TEnv → Exp → Ty → Prop where
       Γ.lookup x = some (.refine .int r₁) →
       Γ.lookup y = some (.refine .int r₂) →
       Hastype Γ (.add (.var x) (.var y))
-        (.refine .int ⟨[x, y], fun ρ v => v = ρ.ints x + ρ.ints y,
-          by intro ρ₁ ρ₂ v h
-             have hx : ρ₁.ints x = ρ₂.ints x := (h x (by simp)).1
-             have hy : ρ₁.ints y = ρ₂.ints y := (h y (by simp)).1
-             simp [hx, hy]⟩)
+        (.refine .int {
+          int_fv := [x, y], bool_fv := [], pred := fun ρ v => v = ρ.ints x + ρ.ints y,
+          ext := by intro ρ₁ ρ₂ v h_int _h_bool
+                    have hx := h_int x (by simp)
+                    have hy := h_int y (by simp)
+                    simp [hx, hy] })
   -- TLeq (ANF): both operands must be int-bound in Γ.
   | leq_var {Γ x y r₁ r₂} :
       Γ.lookup x = some (.refine .int r₁) →
       Γ.lookup y = some (.refine .int r₂) →
       Hastype Γ (.leq (.var x) (.var y))
-        (.refine .bool ⟨[x, y], fun ρ v => v = decide (ρ.ints x ≤ ρ.ints y),
-          by intro ρ₁ ρ₂ v h
-             have hx : ρ₁.ints x = ρ₂.ints x := (h x (by simp)).1
-             have hy : ρ₁.ints y = ρ₂.ints y := (h y (by simp)).1
-             simp [hx, hy]⟩)
+        (.refine .bool {
+          int_fv := [x, y], bool_fv := [], pred := fun ρ v => v = decide (ρ.ints x ≤ ρ.ints y),
+          ext := by intro ρ₁ ρ₂ v h_int _h_bool
+                    have hx := h_int x (by simp)
+                    have hy := h_int y (by simp)
+                    simp [hx, hy] })
   -- TNot: existential refinement — sound regardless of `r`'s functionality.
   | not_ {Γ e r} :
       Hastype Γ e (.refine .bool r) →
       Hastype Γ (.not e)
-        (.refine .bool ⟨r.fv, fun ρ v => ∃ b, r.pred ρ b ∧ v = !b,
-          by intro ρ₁ ρ₂ v h
-             constructor
-             · rintro ⟨bv, hb, hv⟩; exact ⟨bv, (r.ext h).mp hb, hv⟩
-             · rintro ⟨bv, hb, hv⟩; exact ⟨bv, (r.ext h).mpr hb, hv⟩⟩)
+        (.refine .bool {
+          int_fv := r.int_fv, bool_fv := r.bool_fv,
+          pred := fun ρ v => ∃ b, r.pred ρ b ∧ v = !b,
+          ext := by intro ρ₁ ρ₂ v h_int h_bool
+                    constructor
+                    · rintro ⟨bv, hb, hv⟩; exact ⟨bv, (r.ext h_int h_bool).mp hb, hv⟩
+                    · rintro ⟨bv, hb, hv⟩; exact ⟨bv, (r.ext h_int h_bool).mpr hb, hv⟩ })
   -- TAnd: same existential trick as `not_`.
   | and_ {Γ e₁ e₂ r₁ r₂} :
       Hastype Γ e₁ (.refine .bool r₁) →
       Hastype Γ e₂ (.refine .bool r₂) →
       Hastype Γ (.and e₁ e₂)
         (.refine .bool
-          ⟨r₁.fv ++ r₂.fv, fun ρ v => ∃ b₁ b₂, r₁.pred ρ b₁ ∧ r₂.pred ρ b₂ ∧ v = (b₁ && b₂),
-            by intro ρ₁ ρ₂ v h
-               have h₁ : ∀ y ∈ r₁.fv, ρ₁.ints y = ρ₂.ints y ∧ ρ₁.bools y = ρ₂.bools y :=
-                 fun y hy => h y (List.mem_append_left _ hy)
-               have h₂ : ∀ y ∈ r₂.fv, ρ₁.ints y = ρ₂.ints y ∧ ρ₁.bools y = ρ₂.bools y :=
-                 fun y hy => h y (List.mem_append_right _ hy)
-               constructor
-               · rintro ⟨b₁, b₂, hb₁, hb₂, hv⟩
-                 exact ⟨b₁, b₂, (r₁.ext h₁).mp hb₁, (r₂.ext h₂).mp hb₂, hv⟩
-               · rintro ⟨b₁, b₂, hb₁, hb₂, hv⟩
-                 exact ⟨b₁, b₂, (r₁.ext h₁).mpr hb₁, (r₂.ext h₂).mpr hb₂, hv⟩⟩)
+          { int_fv := r₁.int_fv ++ r₂.int_fv, bool_fv := r₁.bool_fv ++ r₂.bool_fv,
+            pred := fun ρ v => ∃ b₁ b₂, r₁.pred ρ b₁ ∧ r₂.pred ρ b₂ ∧ v = (b₁ && b₂),
+            ext := by intro ρ₁ ρ₂ v h_int h_bool
+                      have h₁_int := fun y hy => h_int y (List.mem_append_left _ hy)
+                      have h₂_int := fun y hy => h_int y (List.mem_append_right _ hy)
+                      have h₁_bool := fun y hy => h_bool y (List.mem_append_left _ hy)
+                      have h₂_bool := fun y hy => h_bool y (List.mem_append_right _ hy)
+                      constructor
+                      · rintro ⟨b₁, b₂, hb₁, hb₂, hv⟩
+                        exact ⟨b₁, b₂, (r₁.ext h₁_int h₁_bool).mp hb₁, (r₂.ext h₂_int h₂_bool).mp hb₂, hv⟩
+                      · rintro ⟨b₁, b₂, hb₁, hb₂, hv⟩
+                        exact ⟨b₁, b₂, (r₁.ext h₁_int h₁_bool).mpr hb₁, (r₂.ext h₂_int h₂_bool).mpr hb₂, hv⟩ })
   -- TIte (ANF, path-sensitive)
   | ite {Γ x e₁ e₂ r t} :
       Γ.lookup x = some (.refine .bool r) →
@@ -123,7 +136,7 @@ theorem Hastype.fv_subset {Γ e t} (h : Hastype Γ e t) :
       exact lookup_mem hl
   | int_const => intro z hz; simp [Exp.fv] at hz
   | bool_const => intro z hz; simp [Exp.fv] at hz
-  | lam _ _ ih =>
+  | lam _ _ _ ih =>
       intro z hz
       simp [Exp.fv] at hz
       obtain ⟨hz_fv, hzx⟩ := hz
@@ -139,7 +152,7 @@ theorem Hastype.fv_subset {Γ e t} (h : Hastype Γ e t) :
       · exact ih₁ z hz_e₁
       · have hzy : z = y := hz_var
         rw [hzy]; exact ih₂ y (by simp [Exp.fv])
-  | letin _ _ _ ih₁ ih₂ =>
+  | letin _ _ _ _ ih₁ ih₂ =>
       intro z hz
       simp [Exp.fv] at hz
       rcases hz with hz_e₁ | ⟨hz_e₂, hzx⟩

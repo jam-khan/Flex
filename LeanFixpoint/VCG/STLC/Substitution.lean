@@ -46,19 +46,23 @@ def REnv.redirect (ρ : REnv) (x y : EVar) : REnv :=
     This gives `rename x x = id` (self-rename is identity on fv). -/
 @[simp]
 def Refinement.rename {b : Base} (x y : EVar) (r : Refinement b) : Refinement b :=
-  ⟨r.fv.map (fun z => if z == x then y else z),
-   fun ρ v => r.pred (ρ.redirect x y) v,
-   fun {ρ₁ ρ₂ v} h =>
-     r.ext fun z hz =>
-       have hw : (if z == x then y else z) ∈ r.fv.map (fun z => if z == x then y else z) :=
-         List.mem_map.mpr ⟨z, hz, rfl⟩
-       let hagree := h _ hw
-       ⟨show (ρ₁.redirect x y).ints z = (ρ₂.redirect x y).ints z by
-          simp only [REnv.redirect]
-          cases hzx : (z == x) <;> simp only [hzx, ite_true] at hagree ⊢ <;> exact hagree.1,
-        show (ρ₁.redirect x y).bools z = (ρ₂.redirect x y).bools z by
-          simp only [REnv.redirect]
-          cases hzx : (z == x) <;> simp only [hzx, ite_true] at hagree ⊢ <;> exact hagree.2⟩⟩
+  { int_fv  := r.int_fv.map (fun z => if z == x then y else z),
+    bool_fv := r.bool_fv.map (fun z => if z == x then y else z),
+    pred    := fun ρ v => r.pred (ρ.redirect x y) v,
+    ext     := fun {ρ₁ ρ₂ v} h_int h_bool =>
+      r.ext
+        (fun z hz => by
+          show (if z == x then ρ₁.ints y else ρ₁.ints z) =
+               (if z == x then ρ₂.ints y else ρ₂.ints z)
+          cases h : z == x
+          · simp [h]; exact h_int z (List.mem_map.mpr ⟨z, hz, by simp [h]⟩)
+          · simp [h]; exact h_int y (List.mem_map.mpr ⟨z, hz, by simp [h]⟩))
+        (fun z hz => by
+          show (if z == x then ρ₁.bools y else ρ₁.bools z) =
+               (if z == x then ρ₂.bools y else ρ₂.bools z)
+          cases h : z == x
+          · simp [h]; exact h_bool z (List.mem_map.mpr ⟨z, hz, by simp [h]⟩)
+          · simp [h]; exact h_bool y (List.mem_map.mpr ⟨z, hz, by simp [h]⟩)) }
 
 /-- Rename free occurrences of `x` to `y` in a type, respecting binder shadowing. -/
 @[simp]
@@ -155,8 +159,12 @@ def Subst.dom : List (EVar × Val) → List EVar
     for function-typed bindings ρ is unchanged (mirrors `ModelsEnv` /
     refinements live only on base types). -/
 @[simp] def REnv.extWithVal : Ty → REnv → EVar → Val → REnv
-  | .refine .int  _, ρ, x, .iconst n => ρ.update .int  x n
-  | .refine .bool _, ρ, x, .bconst b => ρ.update .bool x b
+  | .refine .int  _, ρ, x, .iconst n =>
+      { ints  := fun z => if x == z then n     else ρ.ints z
+      , bools := fun z => if x == z then false  else ρ.bools z }
+  | .refine .bool _, ρ, x, .bconst b =>
+      { ints  := fun z => if x == z then 0     else ρ.ints z
+      , bools := fun z => if x == z then b     else ρ.bools z }
   | _,               ρ, _, _         => ρ
 
 /-! ### Free variables (for stating capture-avoidance preconditions) -/

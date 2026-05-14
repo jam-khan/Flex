@@ -179,13 +179,6 @@ theorem TyDenote.rename_compat
     (x y : EVar) (t : Ty) (ρ : REnv) (v : Val) :
     TyDenote (t.rename x y) ρ v ↔ TyDenote t (ρ.redirect x y) v := by sorry
 
-/-- Weakening of `TyDenote` under update at a name fresh in `t`. **TRUE** under
-    freshness; the freshness side condition is missing from Hastype.letin
-    (Declarative.lean:33-36); deferred. -/
-theorem TyDenote.weaken_update
-    (b : Base) (ρ : REnv) (x : EVar) (w : b.interp) (t : Ty) (v : Val) :
-    TyDenote t (ρ.update b x w) v ↔ TyDenote t ρ v := by sorry
-
 /-- `EnvDenote` is stable under extending ρ at a fresh name. **TRUE** under
     same-binder convention. -/
 theorem EnvDenote.weaken_extWithVal
@@ -195,9 +188,8 @@ theorem EnvDenote.weaken_extWithVal
 
 /-- TyDenote is stable under extending ρ at a fresh name. **TRUE** under same-binder. -/
 theorem TyDenote.weaken_extWithVal
-    (s : Ty) (ρ : REnv) (x : EVar) (va : Val) (t : Ty) (v : Val)
-    (h : TyDenote t ρ v) :
-    TyDenote t (REnv.extWithVal s ρ x va) v := by sorry
+    (s : Ty) (ρ : REnv) (x : EVar) (va : Val) (t : Ty) (v : Val) :
+    TyDenote t (REnv.extWithVal s ρ x va) v ↔ TyDenote t ρ v := by sorry
 
 /-- `ModelsEnv` is stable under extending ρ at a fresh name. **TRUE** under
     shallow-refinement weakening; deferred (same blocker as the other
@@ -269,7 +261,7 @@ theorem subtyp_sound {Γ s t} (hsub : Subtyp Γ s t) :
       rw [hExt] at hvr
       have hΓ' : ModelsEnv (REnv.extWithVal s₂ ρ x va) ((x, s₂) :: Γ) := by
         have hva' : TyDenote s₂ (REnv.extWithVal s₂ ρ x va) va :=
-          TyDenote.weaken_extWithVal s₂ ρ x va s₂ va hva
+          (TyDenote.weaken_extWithVal s₂ ρ x va s₂ va).mpr hva
         have htail : ModelsEnv (REnv.extWithVal s₂ ρ x va) Γ :=
           ModelsEnv.weaken_extWithVal Γ ρ s₂ x va hΓ
         cases s₂ with
@@ -331,7 +323,7 @@ theorem hastype_fundamental {Γ e t} (h : Hastype Γ e t) :
       refine ⟨.bconst b, ?_, ?_⟩
       · rw [Exp.substEnv_bconst]; exact BigStep.bconst
       · exact ⟨b, rfl, by rfl⟩
-  | @lam Γ x e s t hfresh hbody ihbody =>
+  | @lam Γ x e s t hfresh _ hbody ihbody =>
       intro γ ρ hE
       -- Freshness now provided by `Hastype.lam`'s `Γ.lookup x = none` premise.
       have h_xfresh : x ∉ Subst.dom γ := EnvDenote.lookup_none_dom hE hfresh
@@ -358,7 +350,7 @@ theorem hastype_fundamental {Γ e t} (h : Hastype Γ e t) :
                                 (REnv.extWithVal s ρ x va) := by
             refine ⟨rfl, ?_, ?_, ?_, ?_⟩
             · exact EnvDenote.weaken_extWithVal Γ γ ρ s x va hE
-            · exact TyDenote.weaken_extWithVal s ρ x va s va hva
+            · exact (TyDenote.weaken_extWithVal s ρ x va s va).mpr hva
             · intro n hvn
               cases s with
               | refine b _ =>
@@ -403,7 +395,7 @@ theorem hastype_fundamental {Γ e t} (h : Hastype Γ e t) :
         -- ρ.x := va_base. These agree iff va_base = ρ.get y. From ih₂ on the
         -- variable y, that follows by the var case's logic.
         sorry
-  | @letin Γ x e₁ e₂ s t hfresh _ _ ih₁ ih₂ =>
+  | @letin Γ x e₁ e₂ s t hfresh _ _ _ ih₁ ih₂ =>
       intro γ ρ hE
       obtain ⟨v₁, hbs₁, hd₁⟩ := ih₁ hE
       have h_xfresh : x ∉ Subst.dom γ := EnvDenote.lookup_none_dom hE hfresh
@@ -413,7 +405,7 @@ theorem hastype_fundamental {Γ e t} (h : Hastype Γ e t) :
                             (REnv.extWithVal s ρ x v₁) := by
         refine ⟨rfl, ?_, ?_, ?_, ?_⟩
         · exact EnvDenote.weaken_extWithVal Γ γ ρ s x v₁ hE
-        · exact TyDenote.weaken_extWithVal s ρ x v₁ s v₁ hd₁
+        · exact (TyDenote.weaken_extWithVal s ρ x v₁ s v₁).mpr hd₁
         · intro n hvn
           cases s with
           | refine b _ =>
@@ -442,22 +434,7 @@ theorem hastype_fundamental {Γ e t} (h : Hastype Γ e t) :
         refine BigStep.letin hbs₁ ?_
         rw [Exp.substEnv_cons_swap x v₁ γ e₂ h_xfresh h_v₁_closed h_γ_closed] at hbs₂
         exact hbs₂
-      · -- TyDenote t ρ v₂ from TyDenote t (extWithVal s ρ x v₁) v₂
-        -- by weakening (requires x ∉ FV(t); flagged in TyDenote.weaken_update).
-        cases s with
-        | refine b _ =>
-            cases b with
-            | int =>
-                obtain ⟨n, hvn, _⟩ := hd₁; subst hvn
-                simp only [REnv.extWithVal] at hv₂
-                rw [TyDenote.weaken_update] at hv₂
-                exact hv₂
-            | bool =>
-                obtain ⟨bv, hvb, _⟩ := hd₁; subst hvb
-                simp only [REnv.extWithVal] at hv₂
-                rw [TyDenote.weaken_update] at hv₂
-                exact hv₂
-        | arrow _ _ _ => simp [REnv.extWithVal] at hv₂; exact hv₂
+      · exact (TyDenote.weaken_extWithVal s ρ x v₁ t v₂).mp hv₂
   | @ann Γ e t _ ih =>
       intro γ ρ hE
       obtain ⟨v, hbs, hv⟩ := ih hE
@@ -532,7 +509,7 @@ theorem hastype_fundamental {Γ e t} (h : Hastype Γ e t) :
           exact hbs
       | false =>
           have hE' : EnvDenote
-              ((x, .refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = false⟩) :: Γ)
+              ((x, .refine .bool r.ite_false) :: Γ)
               ((x, .bconst false) :: γ) ρ := by
             refine ⟨rfl, hE, ⟨false, rfl, hp, rfl⟩, ?_, ?_⟩
             · intro n hvn; cases hvn

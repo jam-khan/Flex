@@ -22,44 +22,58 @@ inductive Subtyp : TEnv → Ty → Ty → Prop where
 -- refinement type for an integer constant
 @[simp]
 def prim (n : Int) : Ty :=
-  .refine .int ⟨[], fun _ v => v = n, fun _ => Iff.rfl⟩
+  .refine .int { int_fv := [], bool_fv := [], pred := fun _ v => v = n, ext := fun _ _ => Iff.rfl }
 
 -- refinement type for a boolean constant
 @[simp]
 def primBool (b : Bool) : Ty :=
-  .refine .bool ⟨[], fun _ v => v = b, fun _ => Iff.rfl⟩
+  .refine .bool { int_fv := [], bool_fv := [], pred := fun _ v => v = b, ext := fun _ _ => Iff.rfl }
 
 /-- `self x t` strengthens `t` with `v = REnv.get b ρ x`, tying the synthesized
     value back to the stored value of `x` in the environment. -/
 @[simp]
 def self : EVar → Ty → Ty
-    | x, .refine b p    => .refine b ⟨p.fv ++ [x], fun ρ v => p.pred ρ v ∧ v = REnv.get b ρ x,
-        by intro ρ₁ ρ₂ v h
-           have hfv : ∀ y ∈ p.fv, ρ₁.ints y = ρ₂.ints y ∧ ρ₁.bools y = ρ₂.bools y :=
-             fun y hy => h y (List.mem_append_left _ hy)
-           have hx := h x (List.mem_append_right _ (List.mem_singleton.mpr rfl))
-           constructor
-           · rintro ⟨hp, hv⟩
-             exact ⟨(p.ext hfv).mp hp, by cases b <;> simp [REnv.get, hx.1, hx.2] at * <;> exact hv⟩
-           · rintro ⟨hp, hv⟩
-             exact ⟨(p.ext hfv).mpr hp, by cases b <;> simp [REnv.get, hx.1, hx.2] at * <;> exact hv⟩⟩
-    | _, .arrow x t1 t2 => .arrow x t1 t2
+  | x, .refine .int  p =>
+      .refine .int {
+        int_fv := p.int_fv ++ [x], bool_fv := p.bool_fv,
+        pred := fun ρ v => p.pred ρ v ∧ v = ρ.ints x,
+        ext  := fun {ρ₁ ρ₂ v} h_int h_bool =>
+          have hfv_int : ∀ y ∈ p.int_fv, ρ₁.ints y = ρ₂.ints y :=
+            fun y hy => h_int y (List.mem_append_left _ hy)
+          have hx : ρ₁.ints x = ρ₂.ints x :=
+            h_int x (List.mem_append_right _ (List.mem_singleton.mpr rfl))
+          ⟨fun ⟨hp, hv⟩ => ⟨(p.ext hfv_int h_bool).mp hp, hx ▸ hv⟩,
+           fun ⟨hp, hv⟩ => ⟨(p.ext hfv_int h_bool).mpr hp, hx.symm ▸ hv⟩⟩ }
+  | x, .refine .bool p =>
+      .refine .bool {
+        int_fv := p.int_fv, bool_fv := p.bool_fv ++ [x],
+        pred := fun ρ v => p.pred ρ v ∧ v = ρ.bools x,
+        ext  := fun {ρ₁ ρ₂ v} h_int h_bool =>
+          have hfv_bool : ∀ y ∈ p.bool_fv, ρ₁.bools y = ρ₂.bools y :=
+            fun y hy => h_bool y (List.mem_append_left _ hy)
+          have hx : ρ₁.bools x = ρ₂.bools x :=
+            h_bool x (List.mem_append_right _ (List.mem_singleton.mpr rfl))
+          ⟨fun ⟨hp, hv⟩ => ⟨(p.ext h_int hfv_bool).mp hp, hx ▸ hv⟩,
+           fun ⟨hp, hv⟩ => ⟨(p.ext h_int hfv_bool).mpr hp, hx.symm ▸ hv⟩⟩ }
+  | _, .arrow x t1 t2 => .arrow x t1 t2
 
 namespace STLC
 
 /-- The narrowed refinement used for the true-branch of an ite. -/
 @[reducible]
 def Refinement.ite_true (r : Refinement .bool) : Refinement .bool :=
-  ⟨r.fv, fun ρ v => r.pred ρ v ∧ v = true,
-   fun h => ⟨fun ⟨hr, hv⟩ => ⟨(r.ext h).mp hr, hv⟩,
-              fun ⟨hr, hv⟩ => ⟨(r.ext h).mpr hr, hv⟩⟩⟩
+  { int_fv := r.int_fv, bool_fv := r.bool_fv, pred := fun ρ v => r.pred ρ v ∧ v = true,
+    ext := fun h_int h_bool =>
+      ⟨fun ⟨hr, hv⟩ => ⟨(r.ext h_int h_bool).mp hr, hv⟩,
+       fun ⟨hr, hv⟩ => ⟨(r.ext h_int h_bool).mpr hr, hv⟩⟩ }
 
 /-- The narrowed refinement used for the false-branch of an ite. -/
 @[reducible]
 def Refinement.ite_false (r : Refinement .bool) : Refinement .bool :=
-  ⟨r.fv, fun ρ v => r.pred ρ v ∧ v = false,
-   fun h => ⟨fun ⟨hr, hv⟩ => ⟨(r.ext h).mp hr, hv⟩,
-              fun ⟨hr, hv⟩ => ⟨(r.ext h).mpr hr, hv⟩⟩⟩
+  { int_fv := r.int_fv, bool_fv := r.bool_fv, pred := fun ρ v => r.pred ρ v ∧ v = false,
+    ext := fun h_int h_bool =>
+      ⟨fun ⟨hr, hv⟩ => ⟨(r.ext h_int h_bool).mp hr, hv⟩,
+       fun ⟨hr, hv⟩ => ⟨(r.ext h_int h_bool).mpr hr, hv⟩⟩ }
 
 end STLC
 
@@ -95,33 +109,37 @@ mutual
         Γ.lookup x = some (.refine .int r₁) →
         Γ.lookup y = some (.refine .int r₂) →
         Synth Γ (.leq (.var x) (.var y))
-          (.refine .bool ⟨[x, y], fun ρ v => v = decide (ρ.ints x ≤ ρ.ints y),
-            by intro ρ₁ ρ₂ v h
-               have hx : ρ₁.ints x = ρ₂.ints x := (h x (by simp)).1
-               have hy : ρ₁.ints y = ρ₂.ints y := (h y (by simp)).1
-               simp [hx, hy]⟩)
+          (.refine .bool {
+            int_fv := [x, y], bool_fv := [], pred := fun ρ v => v = decide (ρ.ints x ≤ ρ.ints y),
+            ext := by intro ρ₁ ρ₂ v h_int _h_bool
+                      have hx := h_int x (by simp)
+                      have hy := h_int y (by simp)
+                      simp [hx, hy] })
 
     /-- SYN-NOT: synthesize the inner bool expression, then negate
         (existential refinement, sound for arbitrary inner refinements). -/
     | not_ {Γ e r} :
         Synth Γ e (.refine .bool r) →
         Synth Γ (.not e)
-          (.refine .bool ⟨r.fv, fun ρ v => ∃ b, r.pred ρ b ∧ v = !b,
-            by intro ρ₁ ρ₂ v h
-               constructor
-               · rintro ⟨bv, hb, hv⟩; exact ⟨bv, (r.ext h).mp hb, hv⟩
-               · rintro ⟨bv, hb, hv⟩; exact ⟨bv, (r.ext h).mpr hb, hv⟩⟩)
+          (.refine .bool {
+            int_fv := r.int_fv, bool_fv := r.bool_fv,
+            pred := fun ρ v => ∃ b, r.pred ρ b ∧ v = !b,
+            ext := by intro ρ₁ ρ₂ v h_int h_bool
+                      constructor
+                      · rintro ⟨bv, hb, hv⟩; exact ⟨bv, (r.ext h_int h_bool).mp hb, hv⟩
+                      · rintro ⟨bv, hb, hv⟩; exact ⟨bv, (r.ext h_int h_bool).mpr hb, hv⟩ })
 
     /-- SYN-ADD (ANF): both operands must be int-bound variables. -/
     | add_var {Γ x y r₁ r₂} :
         Γ.lookup x = some (.refine .int r₁) →
         Γ.lookup y = some (.refine .int r₂) →
         Synth Γ (.add (.var x) (.var y))
-          (.refine .int ⟨[x, y], fun ρ v => v = ρ.ints x + ρ.ints y,
-            by intro ρ₁ ρ₂ v h
-               have hx : ρ₁.ints x = ρ₂.ints x := (h x (by simp)).1
-               have hy : ρ₁.ints y = ρ₂.ints y := (h y (by simp)).1
-               simp [hx, hy]⟩)
+          (.refine .int {
+            int_fv := [x, y], bool_fv := [], pred := fun ρ v => v = ρ.ints x + ρ.ints y,
+            ext := by intro ρ₁ ρ₂ v h_int _h_bool
+                      have hx := h_int x (by simp)
+                      have hy := h_int y (by simp)
+                      simp [hx, hy] })
 
     /-- SYN-AND: synthesize both bool expressions, then AND
         (existential refinement). -/
@@ -130,17 +148,18 @@ mutual
         Synth Γ e₂ (.refine .bool r₂) →
         Synth Γ (.and e₁ e₂)
           (.refine .bool
-            ⟨r₁.fv ++ r₂.fv, fun ρ v => ∃ b₁ b₂, r₁.pred ρ b₁ ∧ r₂.pred ρ b₂ ∧ v = (b₁ && b₂),
-              by intro ρ₁ ρ₂ v h
-                 have h₁ : ∀ y ∈ r₁.fv, ρ₁.ints y = ρ₂.ints y ∧ ρ₁.bools y = ρ₂.bools y :=
-                   fun y hy => h y (List.mem_append_left _ hy)
-                 have h₂ : ∀ y ∈ r₂.fv, ρ₁.ints y = ρ₂.ints y ∧ ρ₁.bools y = ρ₂.bools y :=
-                   fun y hy => h y (List.mem_append_right _ hy)
-                 constructor
-                 · rintro ⟨b₁, b₂, hb₁, hb₂, hv⟩
-                   exact ⟨b₁, b₂, (r₁.ext h₁).mp hb₁, (r₂.ext h₂).mp hb₂, hv⟩
-                 · rintro ⟨b₁, b₂, hb₁, hb₂, hv⟩
-                   exact ⟨b₁, b₂, (r₁.ext h₁).mpr hb₁, (r₂.ext h₂).mpr hb₂, hv⟩⟩)
+            { int_fv := r₁.int_fv ++ r₂.int_fv, bool_fv := r₁.bool_fv ++ r₂.bool_fv,
+              pred := fun ρ v => ∃ b₁ b₂, r₁.pred ρ b₁ ∧ r₂.pred ρ b₂ ∧ v = (b₁ && b₂),
+              ext := by intro ρ₁ ρ₂ v h_int h_bool
+                        have h₁_int := fun y hy => h_int y (List.mem_append_left _ hy)
+                        have h₂_int := fun y hy => h_int y (List.mem_append_right _ hy)
+                        have h₁_bool := fun y hy => h_bool y (List.mem_append_left _ hy)
+                        have h₂_bool := fun y hy => h_bool y (List.mem_append_right _ hy)
+                        constructor
+                        · rintro ⟨b₁, b₂, hb₁, hb₂, hv⟩
+                          exact ⟨b₁, b₂, (r₁.ext h₁_int h₁_bool).mp hb₁, (r₂.ext h₂_int h₂_bool).mp hb₂, hv⟩
+                        · rintro ⟨b₁, b₂, hb₁, hb₂, hv⟩
+                          exact ⟨b₁, b₂, (r₁.ext h₁_int h₁_bool).mpr hb₁, (r₂.ext h₂_int h₂_bool).mpr hb₂, hv⟩ })
 
   -- Γ ⊢ e ⇐ t : "e checks against type t"
   inductive Check : TEnv → Exp → Ty → Prop where

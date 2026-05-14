@@ -480,8 +480,8 @@ mutual
     intro h
     match h with
     | .sub hsy hsub             => exact .sub (synth_to_hastype hsy) hsub
-    | .lam hfr hck              => exact .lam hfr (check_to_hastype hck)
-    | .letin hfr hsy hck        => exact .letin hfr (synth_to_hastype hsy) (check_to_hastype hck)
+    | .lam hfr hck              => exact .lam hfr (by sorry) (check_to_hastype hck)
+    | .letin hfr hsy hck        => exact .letin hfr (by sorry) (synth_to_hastype hsy) (check_to_hastype hck)
     | .ite hlook hck1 hck2      => exact .ite hlook (check_to_hastype hck1) (check_to_hastype hck2)
 
 end
