@@ -668,3 +668,11 @@ example : ∃ κ1 : Int → Prop, ∃ κ2 : Int → Prop,
     ∧ (∀ z : Int, κ2 z → 0 ≤ z) := by
   fusion
   exact ⟨fun y => 0 ≤ y, by grind⟩
+
+example : ∃ k1 : Int → Prop, ∃ k2 : Int → Prop,
+      (∀ ν : Int, ν = 10 → k1 ν)
+    ∧ (∀ v : Int, k1 v → ∀ ν : Int, ν = v + 1 → k1 ν)
+    ∧ (∀ v : Int, k1 v → ∀ ν : Int, ν = v → k2 ν)
+    ∧ (∀ v : Int, k2 v → v > 0) := by
+  fusion
+  exact ⟨fun y => 0 < y, by grind⟩
