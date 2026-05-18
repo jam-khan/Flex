@@ -30,8 +30,8 @@ import LeanFixpoint.Tactic.SolveFusion
 import LeanFixpoint.Tactic.Closers
 import LeanFixpoint.Tactic.SplitHyps
 import LeanFixpoint.Tactic.RewriteKs
-import LeanFixpoint.Tactic.ZapK.Step
-import LeanFixpoint.Tactic.ZapK.SolveHead
+import LeanFixpoint.Tactic.ZapK.ZapK
+import LeanFixpoint.Tactic.Sol1
 
 /-
   Predicate Abstraction related code,

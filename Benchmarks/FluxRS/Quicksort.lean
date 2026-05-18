@@ -11,7 +11,7 @@ structure VectorsAVec (t0 : Type) [Inhabited t0] where
     elems : (Arr t0)
     len : Int
 
-@[simp]
+@[simp, reducible]
 def sort_is_sorted_between (a: Arr Int) (lo hi: Int) : Prop :=
   forall i j, (lo <= i /\ i < j /\ j < hi) -> (a i <= a j)
 
@@ -91,10 +91,87 @@ def SortQuicksortRange := ∃ k0 : (a0 : Int) -> (a1 : Int) -> (a2 : (VectorsAVe
                  )
                )
 
+theorem bigger_perm :
+  sort_is_bigger a lo p p -> sort_is_perm a a' lo (p-1) -> sort_is_bigger a' lo p p
+  := by
+  intros; simp_all [sort_is_bigger, sort_is_perm, is_perm, is_frame]; grind
+
+theorem sort_is_perm_trans :
+  sort_is_perm old new lo hi -> sort_is_perm new new' lo hi -> sort_is_perm old new' lo hi
+  := by
+  intros; simp_all [sort_is_perm, is_perm, is_frame]; grind
+
+theorem sort_is_perm_id : sort_is_perm arr arr lo hi := by
+  intros; simp_all [sort_is_perm, is_perm, is_frame]; intros i _ _; exists i
+
+theorem is_perm_trans :
+  is_perm old new lo hi -> is_perm new new' lo hi -> is_perm old new' lo hi
+  := by
+  intros; simp_all [is_perm]; grind
+
+theorem is_perm_id : is_perm arr arr lo hi := by
+  intros; simp_all [is_perm]; intros i _ _; exists i
+
+theorem is_smaller_perm' :
+  sort_is_smaller a p hi p -> sort_is_perm a a' lo (p - 1) -> sort_is_smaller a' p hi p
+  := by
+  intros; simp_all [sort_is_smaller, sort_is_perm, is_perm, is_frame]; grind
+
+theorem is_smaller_perm :
+  sort_is_smaller a1 p (hi + 1) p -> sort_is_perm a1 a2 (p + 1) hi -> sort_is_smaller a2 p (hi + 1) p
+  := by
+  intros; simp_all [sort_is_smaller, sort_is_perm, is_perm, is_frame]; grind
+
+@[simp]
+theorem is_sorted_using_pivot :
+  sort_is_sorted_between a lo p ->
+  sort_is_sorted_between a (p + 1) (hi + 1) ->
+  sort_is_bigger a lo p p ->
+  sort_is_smaller a p (hi + 1) p ->
+  sort_is_sorted_between a lo (hi + 1)
+  := by
+  simp_all [sort_is_smaller, sort_is_bigger, sort_is_sorted_between]; grind
+
 set_option maxHeartbeats 1600000 in
 theorem SortQuicksortRange_proof : SortQuicksortRange := by
-  -- try solve_fusion
-  sorry
-  -- dsimp only
-  -- sorry
-  -- elimT
+  unfold SortQuicksortRange
+  zapK
+  all_goals (
+    split_hyps
+    -- Collapse False branches that just got exposed by β-reducing
+    -- the κ-witness lambdas into the new hypothesis types.
+    all_goals (try simp only
+      [or_false, false_or, and_false] at *)
+    all_goals (try grind)
+    -- all_goals (try aesop)
+  )
+  case _ => refine ⟨fun i _ => ⟨i, ?_, ?_, rfl⟩, fun _ _ => rfl, fun _ _ => rfl⟩
+            <;> simp_all
+  -- Residual 2 + 3 — the actual quicksort math.
+  --
+  -- Both require taking the κ-hypotheses (named hyp1 and hyp2 below) and
+  -- destructuring them through their outer ∃-binders (p₀_1, v₀_1, a'₃_1
+  -- and the re-intro'd old₀, lo₀, hi₀, p₀, v₀) before reaching the
+  -- (no-rec ∨ rec) disjunction that carries the recursive-call witness.
+  -- The old proof against a hand-defined k0/k1 used `rw [k0] at hyp1;
+  -- split_hyp_ors`, which exposed the Or at the surface; the current
+  -- zapK-generated k0/k1 have the outer ∀-binders of the SortQuicksortRange
+  -- definition baked into ∃-binders, so the Or is nested ~6 binders deep.
+  --
+  -- Once destructured (use `obtain ⟨_, _, _, _, _, _, p_w, v_w, ⟨_, _, _,
+  -- _, _⟩, _, _, a3_w, ⟨_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _,
+  -- ⟨...⟩⟩, hor⟩ := hyp1`), the proof chain is:
+  --
+  --   * Residual 2: apply `is_sorted_using_pivot` after extracting
+  --     a'₃ sorted on [lo, p] and a'₅ sorted on [p+1, hi+1] from the
+  --     two κ-hypotheses, plus `bigger_perm` / `is_smaller_perm` /
+  --     `is_smaller_perm'` to lift the partition's pivot bounds through
+  --     the perm chain v₀ → a'₃ → a'₅.
+  --
+  --   * Residual 3: chain three `is_perm_trans` applications:
+  --     old₀ → v₀ (from outer hyp0)
+  --     v₀  → a'₃ (from κ0's left-rec)
+  --     a'₃ → a'₅ (from κ1's right-rec)
+  --     plus the frame conjuncts from `sort_is_perm`'s `is_frame`.
+  case _ => sorry
+  case _ => sorry

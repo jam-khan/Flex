@@ -11,6 +11,11 @@ def ex1 : Prop :=
 theorem ex1Proof : ex1 := by
   solve_fixpoint
 
+theorem ex1Proof2 : ex1 := by
+  unfold ex1
+  zapK
+  all_goals grind
+
 def ex2 : Prop :=
     ∃ κx : Int → Int → Int → Int → Prop, ∃ κy : Int → Int → Int → Int → Prop,
     ∀ x : Int,
@@ -29,6 +34,11 @@ def ex2 : Prop :=
 theorem ex2Proof : ex2 := by
   solve_fixpoint
 
+theorem ex2Proof2 : ex2 := by
+  unfold ex2
+  zapK
+  all_goals grind
+
 
 def ex3 : Prop :=
   ∃ κa : Int → Prop, ∃ κb : Int → Prop, ∃ κc : Int → Prop,
@@ -39,6 +49,11 @@ def ex3 : Prop :=
 
 theorem ex3Proof : ex3 := by
   solve_fixpoint
+
+theorem ex3Proof2 : ex3 := by
+  unfold ex3
+  zapK
+  all_goals grind
 
 
 -- ex4: Three-step chain: inc → dec → inc
@@ -57,6 +72,11 @@ def ex4 : Prop :=
 theorem ex4Proof : ex4 := by
   solve_fixpoint-- solve_fusion
 
+theorem ex4Proof2 : ex4 := by
+  unfold ex4
+  zapK
+  all_goals grind
+
 -- ex5: Three-step chain: dec → inc → inc
 -- ex5 x = inc (inc (dec x))  =  x+1 ≥ 0
 -- κ1 = almost-nat (0 ≤ ν+1), κ2 = nat
@@ -73,6 +93,11 @@ def ex5 : Prop :=
 theorem ex5Proof : ex5 := by
   solve_fixpoint-- solve_fusion
 
+theorem ex5Proof2 : ex5 := by
+  unfold ex5
+  zapK
+  all_goals grind
+
 -- ex6: Two independent paths, each checked separately
 -- ex6 x = (inc x, inc (dec x))  both outputs ≥ 0
 -- κ1 for the `inc x` branch (trivially nat), κ2 = almost-nat for `dec x`
@@ -88,6 +113,11 @@ def ex6 : Prop :=
 
 theorem ex6Proof : ex6 := by
   solve_fixpoint-- solve_fusion
+
+theorem ex6Proof2 : ex6 := by
+  unfold ex6
+  zapK
+  all_goals grind
 
 -- ex7: Diamond — two sources flow into one κ, then one consumer
 -- ex7 x = let ys = [inc x, dec x] in inc (last ys)  ≥ 0
@@ -135,6 +165,12 @@ theorem prove_ex7_exact : ex7 := by
       unfold k at h_kappa
 
       grind
+
+theorem ex7Proof2 : ex7 := by
+  unfold ex7
+  zapK
+  all_goals grind
+
 -- ex8: Two Nat inputs, one intermediate binder
 -- ex8 (x y : Nat) = let a = dec x in a + 1 + y  ≥ 0
 -- κ = almost-nat; consumer uses both κ a and 0 ≤ y
@@ -152,6 +188,11 @@ theorem ex8Proof : ex8 := by
   try solve_fixpoint
   -- try solve_fusion
   --sorry
+
+theorem ex8Proof2 : ex8 := by
+  unfold ex8
+  zapK
+  all_goals grind
 
 -- ex9: Four-step chain: inc → dec → inc → dec
 -- ex9 x = dec (inc (dec (inc x)))  =  x  ≥ 0
@@ -173,6 +214,11 @@ theorem ex9Proof : ex9 := by
 
   -- solve_fixpoint
 
+theorem ex9Proof2 : ex9 := by
+  unfold ex9
+  zapK
+  all_goals grind
+
 -- ex10: Three-way merge into one κ, stronger consumer (needs inc inc)
 -- ex10 x = let ys = [dec x, x, inc x] in inc (inc (last ys))  ≥ 0
 -- κ = almost-nat: weakest common refinement is 0 ≤ ν+1 (from dec x)
@@ -190,6 +236,11 @@ def ex10 : Prop :=
 theorem ex10Proof : ex10 := by
   try solve_fixpoint -- try solve_fusion
   --sorry
+
+theorem ex10Proof2 : ex10 := by
+  unfold ex10
+  zapK
+  all_goals grind
 
 
 -- ex11: Three-κ chain with multi-producer merge at κ2
@@ -210,6 +261,11 @@ def ex11 : Prop :=
 
 theorem ex11Proof : ex11 := by
   solve_fixpoint
+
+theorem ex11Proof2 : ex11 := by
+  unfold ex11
+  zapK
+  all_goals grind
 
 
 -- ex12: Four-κ diamond — two independent processing paths rejoin at κ3
@@ -240,6 +296,11 @@ def ex12 : Prop :=
 theorem ex12Proof : ex12 := by
   try solve_fixpoint
 
+theorem ex12Proof2 : ex12 := by
+  unfold ex12
+  zapK
+  all_goals grind
+
 
 -- ex13: 3-κ chain with nested binders and cross-flow
 -- Given 0 ≤ x, let a = x-1, b = x+1:
@@ -266,6 +327,12 @@ def ex13 : Prop :=
 set_option maxHeartbeats 1600000 in
 theorem ex13Proof : ex13 := by
   solve_fixpoint
+
+set_option maxHeartbeats 1600000 in
+theorem ex13Proof2 : ex13 := by
+  unfold ex13
+  zapK
+  all_goals grind
 
 
 -- ex14: 4-κ chain with nested binders, cross-flow, and merge
@@ -304,6 +371,12 @@ set_option maxHeartbeats 1600000 in
 theorem ex14Proof : ex14 := by
   solve_fixpoint
 
+set_option maxHeartbeats 1600000 in
+theorem ex14Proof2 : ex14 := by
+  unfold ex14
+  zapK
+  all_goals grind
+
 
 
 -- Nat refinement: predecessor is less than input
@@ -317,6 +390,11 @@ def ex_nat : Prop :=
 theorem ex_natProof : ex_nat := by
   solve_fixpoint
 
+theorem ex_natProof2 : ex_nat := by
+  unfold ex_nat
+  zapK
+  all_goals grind
+
 
 -- Bool-sorted κ: tracking a boolean property
 def ex_bool : Prop :=
@@ -328,6 +406,11 @@ def ex_bool : Prop :=
 
 theorem ex_boolProof : ex_bool := by
   solve_fixpoint
+
+theorem ex_boolProof2 : ex_bool := by
+  unfold ex_bool
+  zapK
+  all_goals grind
 
 @[grind]
 structure Point where
@@ -346,6 +429,11 @@ def ex_pair : Prop :=
 theorem ex_pairProof : ex_pair := by
   solve_fixpoint
 
+theorem ex_pairProof2 : ex_pair := by
+  unfold ex_pair
+  zapK
+  all_goals grind
+
 def ex_prod : Prop :=
   ∃ κ : (Int × Int) → Prop,
     ∀ a : Int,
@@ -357,6 +445,11 @@ def ex_prod : Prop :=
 
 theorem ex_prodProof : ex_prod := by
   solve_fixpoint
+
+theorem ex_prodProof2 : ex_prod := by
+  unfold ex_prod
+  zapK
+  all_goals grind
 
 -- User-defined function in refinement
 @[simp]
@@ -371,6 +464,11 @@ def ex_userfn : Prop :=
 
 theorem ex_userfnProof : ex_userfn := by
   solve_fixpoint
+
+theorem ex_userfnProof2 : ex_userfn := by
+  unfold ex_userfn
+  zapK
+  all_goals (simp_all [double]; grind)
 
 
 -- ex_stress: 5-κ extreme test — chain + diamond + 3-way merge + cross-flow + nested binders
@@ -440,4 +538,82 @@ set_option maxHeartbeats 1600000 in
 theorem ex_stressProof : ex_stress := by
   unfold ex_stress
   rewriteKs
-  sorry
+  solK1
+  solK1
+  solK1
+  solK1
+  solK1
+  intro x hx a ha b hb
+  constructor
+  · lazy_unfold κ1
+    simp
+    aesop
+  · constructor
+    · lazy_unfold κ1
+      simp
+      aesop
+    · constructor
+      · lazy_unfold κ1
+        intro v hkv v' hv'
+        lazy_unfold κ2
+        grind
+      · constructor
+        · lazy_unfold κ2
+          intro w hw v hv
+          lazy_unfold κ3
+          simp_all
+          aesop
+        · constructor
+          · lazy_unfold κ1
+            intro v hkv
+            lazy_unfold κ3
+            simp_all
+            aesop
+          · constructor
+            · lazy_unfold κ3
+              intro v hv
+              aesop
+            · constructor
+              · lazy_unfold κ3
+                lazy_unfold κ4
+                intro u hk3 v hvu
+                simp
+                lazy_unfold κ3
+                simp
+                exists x
+                constructor
+                · assumption
+                · exists u
+                  constructor
+                  · aesop
+                  · grind
+              · constructor
+                · lazy_unfold κ4
+                  intro t hkt
+                  lazy_unfold κ5
+                  simp
+                  exists x
+                  constructor
+                  · assumption
+                  · left
+                    exists t
+                    constructor
+                    · subst ha hb; exact hkt
+                    · grind
+                · constructor
+                  · -- κ3 → κ5 (via +2) producer
+                    intro u hku v hv
+                    lazy_unfold κ5
+                    subst ha hb hv
+                    exact ⟨x, hx, x - 1, rfl, x + 2, rfl,
+                           Or.inr (Or.inl ⟨u, hku, u + 2, rfl, ⟨⟨rfl, rfl⟩, rfl⟩, rfl⟩)⟩
+                  · -- κ5(s) → 0 ≤ s consumer
+                    intro s hk5
+                    lazy_unfold κ5 κ4 κ3 κ2 κ1
+                    grind
+
+-- Same theorem via the fused `zapK`
+theorem ex_stressProof2 : ex_stress := by
+  unfold ex_stress
+  zapK
+  all_goals grind

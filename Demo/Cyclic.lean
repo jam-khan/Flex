@@ -168,3 +168,20 @@ def pa7 : Prop :=
 
 theorem pa7_proof : pa7 := by
   solve_fixpoint
+
+/-
+  fusion
+  - reorder: cyclic first, then topo sort acyclic
+  - eliminates acylic kvars
+  - leaving cyclic as meta-vars to provide
+  - prop intact, not flattened, head κ gone
+
+  flatten
+  - if any existential, leaves as meta-vars
+  - flattens a prop
+
+  fixpoint
+  - predicate abstraction
+  - assumes kappa as meta-vars
+  - existentials handle too
+-/

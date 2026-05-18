@@ -97,6 +97,9 @@ elab_rules : tactic
         goal ← goal.change newGoalType
       replaceMainGoal [goal]
 
+
+namespace Examples
+
 def ex6 : Prop :=
   ∃ κ1 : Int → Int → Prop,
   ∃ κ2 : Int → Int → Prop,
@@ -115,3 +118,5 @@ theorem ex6Proof : ex6 := by
   lazy_unfold κ1
   lazy_unfold κ2
   sorry
+
+end Examples

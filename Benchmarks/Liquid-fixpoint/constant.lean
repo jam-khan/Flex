@@ -10,3 +10,10 @@ def constantProp : Prop :=
 
 theorem constantProof : constantProp := by
   solve_fixpoint
+
+theorem constantProof1 : constantProp := by
+  unfold constantProp
+  hoist_exists
+  solK1
+  lazy_unfold κ0
+  grind
