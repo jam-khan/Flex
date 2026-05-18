@@ -1,45 +1,39 @@
 import LeanFixpoint.VCG.STLC.Syntax
+import LeanFixpoint.VCG.STLC.Substitution
 
 open STLC
 
-/-! ## Entailment Γ ⊢ c
+/-! ## Entailment
 
-  Captures the paper's judgment `Γ ⊢ p` ("under context Γ, constraint p is valid").
-  In our shallow setup `c` is a Lean predicate over a value-environment ρ; entailment
-  is "for every ρ that models Γ's refinements, c ρ holds."
+  Refinements / formulas / models are all parameterized by a κ-assignment
+  `κ : KEnv` (the interpretation of uninterpreted predicate symbols). The
+  user typically writes `∃ κ : KEnv, Entail κ ...` and lets the solver pick.
 
-  Design choices:
-
-  1. **`REnv` is a structure** with separate `ints : EVar → Int` and
-     `bools : EVar → Bool` fields. Refinement predicates always receive a
-     concrete `Int` or `Bool` from `REnv.get`, with no `Val` wrapper.
-
-  2. **`ModelsEnv` is a recursive `Prop`**, using `REnv.get b ρ x` to extract
-     the `b`-typed value for each refined binding. This is unconditionally
-     well-typed: `REnv.get b ρ x : b.interp` always.
-
-  3. **`Entail.ext`** instantiates the universal with `REnv.get b ρ x` and
-     closes by `REnv.update_self`, which holds without any well-typedness
-     side condition.
-
-  4. **Function-typed bindings are skipped** (first-order refinements only).
-
-  5. **`REnv` is total** (`0`/`false` for out-of-scope lookups); such lookups
-     are never observed in valid derivations.
+  Two forms:
+  - `Entail κ Γ c` : `c : REnv → Prop` — VCGen-produced `Constraint`s.
+  - `EntailF κ Γ φ` : `φ : Formula` — used by `Subtyp.refine` (constraint has
+    a syntactic form, with a universal over ν via `Formula.allI` / `allB`).
 -/
 
-/-- A model for Γ: an env ρ such that every refined binding `x : {ν:b|r}`
-    has `r.pred ρ (REnv.get b ρ x)` (the stored value satisfies the predicate). -/
+/-- A model for Γ under κ-assignment: every refined binding is satisfied at
+    the stored ρ-value. -/
 @[simp]
-def ModelsEnv : REnv → TEnv → Prop
-  | _, []                     => True
-  | ρ, (x, .refine b r) :: Γ => r.pred ρ (REnv.get b ρ x) ∧ ModelsEnv ρ Γ
-  | ρ, (_, .arrow ..)   :: Γ => ModelsEnv ρ Γ
+def ModelsEnv (κ : KEnv) : REnv → TEnv → Prop
+  | _, []                    => True
+  | ρ, (x, .refine b r) :: Γ => Refinement.interp κ r ρ (REnv.get b ρ x)
+                                 ∧ ModelsEnv κ ρ Γ
+  | ρ, (_, .arrow _ _)  :: Γ => ModelsEnv κ ρ Γ
 
-/-- `Γ ⊢ c`: c holds in every env that models Γ. -/
+/-- `κ; Γ ⊢ c`: `c` (as a Lean predicate over `REnv`) holds in every model of
+    Γ under κ. VCGen-produced constraints use this. -/
 @[simp]
-def Entail (Γ : TEnv) (c : REnv → Prop) : Prop :=
-  ∀ ρ, ModelsEnv ρ Γ → c ρ
+def Entail (κ : KEnv) (Γ : TEnv) (c : REnv → Prop) : Prop :=
+  ∀ ρ, ModelsEnv κ ρ Γ → c ρ
+
+/-- Formula-form entailment. -/
+@[simp]
+def EntailF (κ : KEnv) (Γ : TEnv) (φ : Formula) : Prop :=
+  Entail κ Γ (fun ρ => Formula.interp κ ρ φ)
 
 /-- Updating slot `x` with its current value is the identity. -/
 @[simp]
@@ -48,20 +42,21 @@ theorem REnv.update_self (b : Base) (ρ : REnv) (x : EVar) :
   cases b <;> simp only [REnv.update, REnv.get] <;> ext1 <;> funext y <;>
     by_cases hxy : x = y <;> simp [hxy]
 
-/-- ENT-EMP: `smtvalid c ⟹ ∅ ⊢ c`. -/
+/-- ENT-EMP: `∀ ρ, c ρ ⟹ κ; ∅ ⊢ c`. -/
 @[simp]
-theorem Entail.emp {c : REnv → Prop} (h : ∀ ρ, c ρ) : Entail [] c := by
+theorem Entail.emp {κ : KEnv} {c : REnv → Prop} (h : ∀ ρ, c ρ) :
+    Entail κ [] c := by
   intro ρ _; exact h ρ
 
-/-- ENT-EXT: `Γ ⊢ ∀x:b. r x → c[x↦v]  ⟹  Γ, x:{ν:b|r} ⊢ c`.
-
+/-- ENT-EXT (predicate form): `κ; Γ ⊢ ∀v:b. r v → c[x↦v]  ⟹  κ; Γ, x:{ν:b|r} ⊢ c`.
     Instantiate with `REnv.get b ρ x`, then close by `REnv.update_self`. -/
 @[simp]
-theorem Entail.ext {Γ : TEnv} {x : EVar} {b : Base} {r : Refinement b}
+theorem Entail.ext {κ : KEnv} {Γ : TEnv} {x : EVar} {b : Base} {r : Refinement b}
     {c : REnv → Prop}
-    (h : Entail Γ (fun ρ => ∀ v : b.interp, r.pred ρ v → c (REnv.update b ρ x v))) :
-    Entail ((x, .refine b r) :: Γ) c := by
+    (h : Entail κ Γ (fun ρ => ∀ v : b.interp,
+              Refinement.interp κ r ρ v → c (REnv.update b ρ x v))) :
+    Entail κ ((x, .refine b r) :: Γ) c := by
   intro ρ ⟨hr, hΓ⟩
   have key := h ρ hΓ (REnv.get b ρ x) hr
-  rw [REnv.update_self] at *
-  assumption
+  rw [REnv.update_self] at key
+  exact key
