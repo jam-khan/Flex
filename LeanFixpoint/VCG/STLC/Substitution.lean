@@ -513,7 +513,7 @@ def Exp.substEnv : List (EVar × Val) → Exp → Exp
   `EVar.fresh L` returns a name not in `L`, by producing a string longer than
   any element of `L`. The freshness proof lives in Stage 2b. -/
 
-private def EVar.maxLen : List EVar → Nat
+def EVar.maxLen : List EVar → Nat
   | []      => 0
   | x :: xs => Nat.max x.length (EVar.maxLen xs)
 

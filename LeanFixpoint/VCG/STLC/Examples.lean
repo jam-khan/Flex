@@ -41,8 +41,8 @@ abbrev IntK (k : STLC.KVar) : Ty :=
   .refine .int ⟨.kapp k [⟨.int, .fvar .int nuName⟩]⟩
 
 /-- κ-refinement on int referencing both an outer variable and ν: `{ν | k(x, ν)}`. -/
-abbrev IntR (x : EVar) (k : STLC.KVar) : Ty :=
-  .refine .int ⟨.kapp k [⟨.int, .fvar .int x⟩, ⟨.int, .fvar .int nuName⟩]⟩
+abbrev IntR (k : STLC.KVar) : Ty :=
+  .refine .int ⟨.kapp k [⟨.int, .bvar .int 0⟩, ⟨.int, .fvar .int nuName⟩]⟩
 
 /-- Identity function under LN. -/
 abbrev exId : Exp := .lam (.bvar 0)
@@ -51,7 +51,7 @@ abbrev exId : Exp := .lam (.bvar 0)
 abbrev ty_k (k : STLC.KVar) : Ty := .arrow (IntK k) (IntK k)
 
 /-- Function type for `TT → IntR x k`. -/
-abbrev ty_xk (x : EVar) (k : STLC.KVar) : Ty := .arrow TT (IntR x k)
+abbrev ty_xk (k : STLC.KVar) : Ty := .arrow TT (IntR k)
 
 /-! ## Example 1: `5 ⇐ Pos` -/
 
@@ -91,12 +91,25 @@ example (κ : KEnv) : topVC κ [] ex3Exp ex3Ty := by
   Original used `make_horn_under_k [List.lookup]; solve_fixpoint`.
   Here the macro is sorry-tainted via `check_sound` (Stage 13). -/
 
+attribute [simp] check synth sub EVar.fresh implyBind prim self Refinement.interp Formula.interp TEnv.dom
+attribute [simp] Term.interp REnv.get Exp.openVar Ty.openVar Exp.fv Refinement.fv Formula.fv Term.fv Ty.fv
+attribute [simp] Refinement.openBVar Formula.openBVar Term.openBVar nuName String.length EVar.maxLen
+attribute [simp] List.lookup
+
+@[qualif]
+def Ge1 (i : Int) : Prop := 1 ≤ i
+
 example :
     ∃ κ : KEnv,
       Check κ []
         (.letin (.iconst 99) (.app (.ann exId (ty_k "k")) (.bvar 0)))
         Pos := by
-  make_horn_under_k [List.lookup]
+  under_exists =>
+    apply check_sound
+    simp ; rfl
+    simp
+  intro_kenv
+  simp [mkKEnv, liftK1]
   solve_fixpoint
 
 /-! ## κ-example with `ty_xk`: same shape, output type `IntN 99` -/
@@ -104,17 +117,20 @@ example :
 example :
     ∃ κ : KEnv,
       Check κ []
-        (.letin (.iconst 99) (.app (.ann exId (ty_xk "x" "k")) (.bvar 0)))
+        (.letin (.iconst 99) (.app (.ann exId (ty_xk "k")) (.bvar 0)))
         (IntN 99) := by
-  make_horn_under_k [List.lookup]
-  solve_fixpoint
+    under_exists =>
+      apply check_sound
+      simp ; rfl
+      simp
+    intro_kenv
+    simp [mkKEnv, List.lookup, liftK2]
+    solve_fixpoint
 
-/-! ## Example 3 again: prove `topVC` without solver -/
+-- /-! ## Example 3 again: prove `topVC` without solver -/
 
 example (κ : KEnv) : topVC κ [] ex3Exp ex3Ty := by
-  simp [topVC, check, synth, sub, implyBind, ex3Exp, ex3Ty, Pos, prim, self,
-        Refinement.interp, Formula.interp, Term.interp, REnv.get,
-        Exp.openVar]
+  simp [topVC, ex3Exp, ex3Ty]
 
 /-! ## `exGt`: `λx. λy. ¬(x ≤ y) ⇐ TT → TT → {ν | ν ↔ x > y}`
 
@@ -157,7 +173,12 @@ example :
         (.refine .int ⟨.or
           (.eqI (.fvar .int nuName) (.const .int 100))
           (.eqI (.fvar .int nuName) (.const .int  99))⟩) := by
-  make_horn_under_k [List.lookup]
+  under_exists =>
+    apply check_sound
+    simp ; rfl
+    simp
+  intro_kenv
+  simp [mkKEnv, liftK1]
   solve_fixpoint
 
 /-! ## Arithmetic: `let a = 3 in let b = 4 in a + b ⇐ IntN 7` -/
@@ -169,19 +190,14 @@ def exAddExp : Exp :=
 def exAddTy : Ty := IntN 7
 
 example (κ : KEnv) : topVC κ [] exAddExp exAddTy := by
-  simp [topVC, check, synth, implyBind, exAddExp, exAddTy, IntN, prim, self,
-        Refinement.interp, Formula.interp, Term.interp, REnv.get,
-        Exp.openVar, List.lookup]
+  simp [topVC, exAddExp, exAddTy]
 
 /-! ## Declarative-side examples (via `topVC_decl_sound`) -/
 
 -- Identity (λx. x) is declaratively typeable at Pos → Pos.
 example (κ : KEnv) : Hastype κ [] ex2Exp ex2Ty := by
   apply topVC_decl_sound
-  simp [topVC, check, synth, implyBind, ex2Exp, exId, ex2Ty, Pos, self,
-        Refinement.interp, Formula.interp, Term.interp, REnv.get,
-        Exp.openVar, Ty.openVar, Refinement.openBVar, Formula.openBVar,
-        Term.openBVar]
+  simp [topVC, ex2Exp, exId, ex2Ty, Pos]
   intros; assumption
 
 -- let z = 5 in z is declaratively typeable at Pos.
