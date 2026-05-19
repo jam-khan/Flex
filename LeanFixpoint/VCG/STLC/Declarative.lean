@@ -47,6 +47,15 @@ inductive Hastype : KEnv → TEnv → Exp → Ty → Prop where
                 (.leqI (.fvar .int x) (.fvar .int y)))
           (.imp (.leqI (.fvar .int x) (.fvar .int y))
                 (.eqB (.fvar .bool nuName) (.const .bool true)))⟩)
+  | not_var {κ Γ x r} :
+      Γ.lookup x = some (.refine .bool r) →
+      Hastype κ Γ (.not (.fvar x))
+        (.refine .bool ⟨.eqB (.fvar .bool nuName) (.not (.fvar .bool x))⟩)
+  | and_var {κ Γ x y rx ry} :
+      Γ.lookup x = some (.refine .bool rx) →
+      Γ.lookup y = some (.refine .bool ry) →
+      Hastype κ Γ (.and (.fvar x) (.fvar y))
+        (.refine .bool ⟨.eqB (.fvar .bool nuName) (.and (.fvar .bool x) (.fvar .bool y))⟩)
   | ite {κ Γ x e₁ e₂ r t} :
       Γ.lookup x = some (.refine .bool r) →
       Hastype κ ((x, .refine .bool ⟨.and r.fmla

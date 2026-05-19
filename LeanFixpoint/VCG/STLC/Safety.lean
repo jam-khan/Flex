@@ -277,6 +277,10 @@ theorem hastype_fundamental {κ Γ e t} (h : Hastype κ Γ e t) :
   | leq_var _ _ =>
       -- Same side-condition gap as `add_var`.
       sorry
+  | not_var _ =>
+      sorry
+  | and_var _ _ =>
+      sorry
   | lam L _ _ =>
       -- Cofinite λ-case: requires `Exp.subst_intro` and `TyDenote.rename`.
       sorry

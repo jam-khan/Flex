@@ -132,20 +132,52 @@ example :
 example (κ : KEnv) : topVC κ [] ex3Exp ex3Ty := by
   simp [topVC, ex3Exp, ex3Ty]
 
-/-! ## `exGt`: `λx. λy. ¬(x ≤ y) ⇐ TT → TT → {ν | ν ↔ x > y}`
+/-! ## `exGt`: `λ x. λ y. let c = x ≤ y in ¬c  ⇐  TT → TT → {ν | ν = true ↔ x > y}`
 
-  ⛔ Uses `Synth.not_` which is deferred. Skipped pending the
-  existential-refinement helper. Original:
+  Uses `not_var`: the letin names the leq result as a fvar, then `.not (.bvar 0)` opens
+  to `.not (.fvar c)` which matches the `not_var` rule. -/
 
-  ```
-  abbrev exGt : Exp := .lam "x" (.lam "y" (.not (.leq (.var "x") (.var "y"))))
-  abbrev tyGt : Ty := Ty.arrow "x" TT
-    (Ty.arrow "y" TT (.refine .bool ⟨fun ρ v => v = (ρ.ints "x" > ρ.ints "y")⟩))
+abbrev exGt : Exp :=
+  .lam (.lam (.letin (.leq (.bvar 1) (.bvar 0)) (.not (.bvar 0))))
 
-  example : topVC [] exGt tyGt := by
-    simp [topVC, check, synth, List.lookup]
-  ```
--/
+/-- `ν = true ↔ ¬(x ≤ y)`, using bvars for the two arrow-bound ints. -/
+abbrev tyGt : Ty :=
+  .arrow TT (.arrow TT
+    (.refine .bool ⟨.and
+      (.imp (.eqB (.fvar .bool nuName) (.const .bool true))
+            (.not (.leqI (.bvar .int 1) (.bvar .int 0))))
+      (.imp (.not (.leqI (.bvar .int 1) (.bvar .int 0)))
+            (.eqB (.fvar .bool nuName) (.const .bool true)))⟩))
+
+example (κ : KEnv) : topVC κ [] exGt tyGt := by
+  simp [topVC, exGt, tyGt]
+
+/-! ## `exEq`: `λ x. λ y. let u = x ≤ y in let v = y ≤ x in u ∧ v`
+                                             `⇐  TT → TT → {ν | ν = true ↔ x = y}`
+
+  Uses `and_var`: both letin-bound booleans become fvars, then `.and (.bvar 1) (.bvar 0)`
+  opens to `.and (.fvar u) (.fvar v)` which matches the `and_var` rule. -/
+
+abbrev exEq : Exp :=
+  .lam (.lam
+    (.letin (.leq (.bvar 1) (.bvar 0))       -- let u = x ≤ y
+      (.letin (.leq (.bvar 1) (.bvar 2))     -- let v = y ≤ x
+        (.and (.bvar 1) (.bvar 0)))))         -- u ∧ v
+
+/-- `ν = true ↔ (x ≤ y ∧ y ≤ x)`, i.e. x = y. -/
+abbrev tyEq : Ty :=
+  .arrow TT (.arrow TT
+    (.refine .bool ⟨.and
+      (.imp (.eqB (.fvar .bool nuName) (.const .bool true))
+            (.and (.leqI (.bvar .int 1) (.bvar .int 0))
+                  (.leqI (.bvar .int 0) (.bvar .int 1))))
+      (.imp (.and (.leqI (.bvar .int 1) (.bvar .int 0))
+                  (.leqI (.bvar .int 0) (.bvar .int 1)))
+            (.eqB (.fvar .bool nuName) (.const .bool true)))⟩))
+
+example (κ : KEnv) : topVC κ [] exEq tyEq := by
+  simp [topVC, exEq, tyEq]
+  solve_fixpoint
 
 /-! ## `exMax`: `λx. λy. let c = x ≤ y in if c then y else x`
 

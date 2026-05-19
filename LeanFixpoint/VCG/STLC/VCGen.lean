@@ -10,7 +10,6 @@ open STLC
   `Constraint : KEnv → REnv → Prop`. The user existentially quantifies the
   `KEnv` parameter to invoke the solver (`solve_fixpoint`).
 
-  `not_` and `and_` synthesis cases return `none` for now (deferred).
 -/
 
 @[simp]
@@ -83,7 +82,18 @@ mutual
               .refine .int ⟨.eqI (.fvar .int nuName)
                                  (.add (.fvar .int x) (.fvar .int y))⟩)
         | _, _ => none
-    -- `.not` and `.and`: deferred (need existential refinement helper).
+    | .not (.fvar x) =>
+        match Γ.lookup x with
+        | some (.refine .bool _) =>
+            some ((fun _ _ => True),
+              .refine .bool ⟨.eqB (.fvar .bool nuName) (.not (.fvar .bool x))⟩)
+        | _ => none
+    | .and (.fvar x) (.fvar y) =>
+        match Γ.lookup x, Γ.lookup y with
+        | some (.refine .bool _), some (.refine .bool _) =>
+            some ((fun _ _ => True),
+              .refine .bool ⟨.eqB (.fvar .bool nuName) (.and (.fvar .bool x) (.fvar .bool y))⟩)
+        | _, _ => none
     | _ => none
   termination_by e => 2 * e.skel
   decreasing_by all_goals

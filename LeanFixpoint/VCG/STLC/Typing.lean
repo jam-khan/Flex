@@ -16,8 +16,6 @@ open STLC
   Refinements are deeply-embedded `Formula`s; `Subtyp.refine`'s constraint is
   expressed via `Refinement.subImp` (a `Formula.allI`/`allB` over `ν`).
 
-  `Synth.not_` and `Synth.and_` are deferred (need an existential-refinement
-  helper).
 -/
 
 /-! ## Subtyping  κ; Γ ⊢ s <: t -/
@@ -74,6 +72,17 @@ mutual
         Synth κ Γ (.add (.fvar x) (.fvar y))
           (.refine .int ⟨.eqI (.fvar .int nuName)
                               (.add (.fvar .int x) (.fvar .int y))⟩)
+
+    | not_var {κ Γ x r} :
+        Γ.lookup x = some (.refine .bool r) →
+        Synth κ Γ (.not (.fvar x))
+          (.refine .bool ⟨.eqB (.fvar .bool nuName) (.not (.fvar .bool x))⟩)
+
+    | and_var {κ Γ x y rx ry} :
+        Γ.lookup x = some (.refine .bool rx) →
+        Γ.lookup y = some (.refine .bool ry) →
+        Synth κ Γ (.and (.fvar x) (.fvar y))
+          (.refine .bool ⟨.eqB (.fvar .bool nuName) (.and (.fvar .bool x) (.fvar .bool y))⟩)
 
   -- κ; Γ ⊢ e ⇐ t : "e checks against type t under κ"
   inductive Check : KEnv → TEnv → Exp → Ty → Prop where

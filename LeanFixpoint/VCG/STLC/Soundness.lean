@@ -110,7 +110,17 @@ mutual
       simp_all [synth]
       rw [←hsynth.2]
       constructor
-    | .lam e | .letin e1 e2 | .and e1 e2 | .not e | .ite _ _ _  =>
+    | .not (.fvar x) =>
+      simp_all [synth]
+      obtain ⟨r, hr⟩ : ∃ r, List.lookup x Γ = some (.refine .bool r) := by grind
+      simp_all ; rw [←hsynth.2] ; constructor ; assumption
+    | .and (.fvar x) (.fvar y) =>
+      simp_all [synth]
+      obtain ⟨rx, ry, hrx, hry⟩ : ∃ rx ry,
+          List.lookup x Γ = some (.refine .bool rx) ∧
+          List.lookup y Γ = some (.refine .bool ry) := by grind
+      simp_all ; rw [←hsynth.2] ; constructor <;> assumption
+    | .lam e | .letin e1 e2 | .ite _ _ _  =>
       simp_all [synth]
     | .app e1 (.fvar y) =>
       simp_all [synth]
@@ -134,6 +144,16 @@ mutual
       simp_all
       rw [←hsynth.2]
       constructor <;> assumption
+    | (.not (.add _ _)) | (.not (.ite _ _ _)) | (.not (.leq _ _)) | (.not (.not _))
+    | (.not (.and _ _)) | (.not (.ann _ _)) | (.not (.app _ _)) | (.not (.letin _ _))
+    | (.not (.lam _)) | (.not (.bconst _)) | (.not (.iconst _)) | (.not (.bvar _))
+    | (.and (.add _ _) _) | (.and (.ite _ _ _) _) | (.and (.leq _ _) _) | (.and (.not _) _)
+    | (.and (.and _ _) _) | (.and (.ann _ _) _) | (.and (.app _ _) _) | (.and (.letin _ _) _)
+    | (.and (.lam _) _) | (.and (.bconst _) _) | (.and (.iconst _) _) | (.and (.bvar _) _)
+    | (.and (.fvar _) (.add _ _)) | (.and (.fvar _) (.ite _ _ _)) | (.and (.fvar _) (.leq _ _))
+    | (.and (.fvar _) (.not _)) | (.and (.fvar _) (.and _ _)) | (.and (.fvar _) (.ann _ _))
+    | (.and (.fvar _) (.app _ _)) | (.and (.fvar _) (.letin _ _)) | (.and (.fvar _) (.lam _))
+    | (.and (.fvar _) (.bconst _)) | (.and (.fvar _) (.iconst _)) | (.and (.fvar _) (.bvar _))
     | (.add (.add _ _) _) | (.add (.leq _ _) _) | (.add (.and _ _) _) | (.add (.ann _ _) _) | (.add (.app _ _) _)
     | (.add (.ite _ _ _) _) | (.add (.not _) _) | (.add (.letin _ _) _) | (.add (.lam _) _) | (.add (.bconst _) _)
     | (.add (.iconst _) _) | (.add (.fvar _) (.add _ _)) | (.add (.fvar _) (.ite _ _ _)) | (.add (.fvar _) (.leq _ _))
@@ -324,10 +344,34 @@ mutual
       simp_all ; rw [←hcheck] at hent
       exact Check.sub (synth_sound _ _ _ _ _ hc₁ fun ρ hm => (hent ρ hm).1)
                       (sub_sound _ _ _ _ _ hc₂ fun ρ hm => (hent ρ hm).2)
+    | .not (.fvar x) =>
+      simp_all [check]
+      obtain ⟨c₁, s', hc₁⟩ : ∃ c₁ s, synth Γ (.not (.fvar x)) = some (c₁, s) := by grind
+      obtain ⟨c₂, hc₂⟩ : ∃ c₂, sub s' t = some c₂ := by grind
+      simp_all ; rw [←hcheck] at hent
+      exact Check.sub (synth_sound _ _ _ _ _ hc₁ fun ρ hm => (hent ρ hm).1)
+                      (sub_sound _ _ _ _ _ hc₂ fun ρ hm => (hent ρ hm).2)
+    | .and (.fvar x) (.fvar y) =>
+      simp_all [check]
+      obtain ⟨c₁, s', hc₁⟩ : ∃ c₁ s, synth Γ (.and (.fvar x) (.fvar y)) = some (c₁, s) := by grind
+      obtain ⟨c₂, hc₂⟩ : ∃ c₂, sub s' t = some c₂ := by grind
+      simp_all ; rw [←hcheck] at hent
+      exact Check.sub (synth_sound _ _ _ _ _ hc₁ fun ρ hm => (hent ρ hm).1)
+                      (sub_sound _ _ _ _ _ hc₂ fun ρ hm => (hent ρ hm).2)
     | (.ite (.add _ _) _ _) | (.ite (.ite _ _ _) _ _) | (.ite (.leq _ _) _ _) | (.ite (.not _) _ _)
     | (.ite (.and _ _) _ _) | (.ite (.ann _ _) _ _) | (.ite (.app _ _) _ _) | (.ite (.letin _ _) _ _)
     | (.ite (.lam _) _ _) | (.ite (.bconst true) _ _) | (.ite (.bconst false) _ _)
-    | (.ite (.iconst _) _ _) | (.ite (.bvar _) _ _) | (.not _) | (.and _ _)
+    | (.ite (.iconst _) _ _) | (.ite (.bvar _) _ _)
+    | (.not (.bvar _)) | (.not (.iconst _)) | (.not (.bconst _)) | (.not (.lam _))
+    | (.not (.letin _ _)) | (.not (.app _ _)) | (.not (.ann _ _)) | (.not (.and _ _))
+    | (.not (.add _ _)) | (.not (.leq _ _)) | (.not (.ite _ _ _)) | (.not (.not _))
+    | (.and (.fvar _) (.bvar _)) | (.and (.fvar _) (.iconst _)) | (.and (.fvar _) (.bconst _))
+    | (.and (.fvar _) (.lam _)) | (.and (.fvar _) (.letin _ _)) | (.and (.fvar _) (.app _ _))
+    | (.and (.fvar _) (.ann _ _)) | (.and (.fvar _) (.and _ _)) | (.and (.fvar _) (.add _ _))
+    | (.and (.fvar _) (.leq _ _)) | (.and (.fvar _) (.ite _ _ _)) | (.and (.fvar _) (.not _))
+    | (.and (.bvar _) _) | (.and (.iconst _) _) | (.and (.bconst _) _) | (.and (.lam _) _)
+    | (.and (.letin _ _) _) | (.and (.app _ _) _) | (.and (.ann _ _) _)
+    | (.and (.add _ _) _) | (.and (.leq _ _) _) | (.and (.ite _ _ _) _) | (.and (.not _) _) | (.and (.and _ _) _)
     | (.leq (.add _ _) _) | (.leq (.ite _ _ _) _) | (.leq (.leq _ _) _) | (.leq (.not _) _)
     | (.leq (.and _ _) _) | (.leq (.ann _ _) _) | (.leq (.app _ _) _) | (.leq (.letin _ _) _)
     | (.leq (.lam _) _) | (.leq (.bconst _) _) | (.leq (.iconst _) _) | (.leq (.fvar _) (.add _ _))
@@ -354,6 +398,8 @@ mutual
     | .app hsy hck    => exact .app (synth_to_hastype hsy) (check_to_hastype hck)
     | .add_var hx hy  => exact .add_var hx hy
     | .leq_var hx hy  => exact .leq_var hx hy
+    | .not_var hx     => exact .not_var hx
+    | .and_var hx hy  => exact .and_var hx hy
 
   theorem check_to_hastype {κ Γ e t} : Check κ Γ e t → Hastype κ Γ e t := by
     intro h
