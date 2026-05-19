@@ -855,7 +855,7 @@ theorem Formula.interp_substI_const (κ : KEnv) (φ : Formula)
   | kapp kname args =>
     show Formula.interp κ ρ (.kapp kname _) ↔
          Formula.interp κ (ρ.update .int x n) (.kapp kname args)
-    simp only [Formula.substI, Formula.interp, List.map_map]
+    simp only [Formula.interp, List.map_map]
     apply iff_of_eq
     congr 1
     apply List.map_congr_left
@@ -929,7 +929,7 @@ theorem Formula.interp_substB_const (κ : KEnv) (φ : Formula)
   | kapp kname args =>
     show Formula.interp κ ρ (.kapp kname _) ↔
          Formula.interp κ (ρ.update .bool x bv) (.kapp kname args)
-    simp only [Formula.substB, Formula.interp, List.map_map]
+    simp only [Formula.interp, List.map_map]
     apply iff_of_eq
     congr 1
     apply List.map_congr_left
@@ -1138,7 +1138,7 @@ def Subst.AllVClosed : List (EVar × Val) → Prop
     of `γ` into `.fvar x` returns `v.toExp`. -/
 theorem Exp.substEnv_var_lookup
     (x : EVar) (γ : List (EVar × Val)) (v : Val)
-    (hlk : Subst.lookup x γ = some v) (hcl : Val.closed v)
+    (hlk : Subst.lookup x γ = some v) (_ : Val.closed v)
     (hγ : Subst.AllVClosed γ) :
     Exp.substEnv γ (.fvar x) = v.toExp := by
   induction γ with

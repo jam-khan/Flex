@@ -16,11 +16,6 @@ open STLC
 @[simp]
 abbrev Constraint := KEnv → REnv → Prop
 
-/-- Get all free names declared in a typing context. -/
-def TEnv.dom : TEnv → List EVar
-  | []          => []
-  | (x, _) :: Γ => x :: TEnv.dom Γ
-
 /-- Implication-constraint helper: bind `x` to a value satisfying refinement
     `r` (under `κ`), then assert `c` holds. For function-typed bindings, no
     quantification. -/

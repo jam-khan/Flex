@@ -173,6 +173,11 @@ inductive Exp where
 @[simp]
 abbrev TEnv := List (EVar × Ty)
 
+/-- Get all free names declared in a typing context. -/
+def TEnv.dom : TEnv → List EVar
+  | []          => []
+  | (x, _) :: Γ => x :: TEnv.dom Γ
+
 /-! ## Runtime values
 
   Locally nameless closures: `clos body` carries an `Exp` body whose `BVar 0`

@@ -12,16 +12,18 @@ inductive Hastype : KEnv → TEnv → Exp → Ty → Prop where
       Hastype κ Γ (.iconst n) (prim n)
   | bool_const {κ Γ b} :
       Hastype κ Γ (.bconst b) (primBool b)
-  | lam {κ Γ e s₁ s₂} (L : List EVar) :
-      (∀ x ∉ L, Hastype κ ((x, s₁) :: Γ) (e.openVar 0 x) (s₂.openVar 0 x)) →
+  | lam {κ Γ e s₁ s₂ x}:
+      x ∉ (TEnv.dom Γ ++ (e.fv ++ s₂.fv)) →
+      Hastype κ ((x, s₁) :: Γ) (e.openVar 0 x) (s₂.openVar 0 x) →
       Hastype κ Γ (.lam e) (.arrow s₁ s₂)
   | app {κ Γ e₁ y s t} :
       Hastype κ Γ e₁ (.arrow s t) →
       Hastype κ Γ (.fvar y) s →
       Hastype κ Γ (.app e₁ (.fvar y)) (t.openVar 0 y)
-  | letin {κ Γ e₁ e₂ s t} (L : List EVar) :
+  | letin {κ Γ e₁ e₂ s t x }:
       Hastype κ Γ e₁ s →
-      (∀ x ∉ L, Hastype κ ((x, s) :: Γ) (e₂.openVar 0 x) t) →
+      x ∉ TEnv.dom Γ ++ e₂.fv ++ t.fv →
+      Hastype κ ((x, s) :: Γ) (e₂.openVar 0 x) t →
       Hastype κ Γ (.letin e₁ e₂) t
   | ann {κ Γ e t} :
       Hastype κ Γ e t →
