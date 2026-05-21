@@ -138,4 +138,24 @@ theorem Hastype.fv_subset {κ Γ e t} (_h : Hastype κ Γ e t) :
 /-- Well-typed expressions are locally closed (lc_at 0). Proved by induction on
     the typing derivation using the cofinite lam case. Deferred (Stage 12). -/
 theorem Hastype.lc_at {κ Γ e t} (_h : Hastype κ Γ e t) : Exp.lc_at 0 e := by
-    sorry
+  induction _h with
+  | var => simp [Exp.lc_at]
+  | int_const => simp [Exp.lc_at]
+  | bool_const => simp [Exp.lc_at]
+  | lam L _ ih =>
+    simp only [Exp.lc_at]
+    obtain ⟨x, hxL⟩ := EVar.freshWith L
+    exact Exp.lc_at_of_openVar _ 0 x (ih x hxL)
+  | app _ _ _ ih₁ ih₂ =>
+    simp only [Exp.lc_at]; exact ⟨ih₁, ih₂⟩
+  | letin L _ _ ih₁ ih₂ =>
+    simp only [Exp.lc_at]
+    obtain ⟨x, hxL⟩ := EVar.freshWith L
+    exact ⟨ih₁, Exp.lc_at_of_openVar _ 0 x (ih₂ x hxL)⟩
+  | ann _ _ ih => simp only [Exp.lc_at]; exact ih
+  | sub _ _ ih => exact ih
+  | add_var => simp [Exp.lc_at]
+  | leq_var => simp [Exp.lc_at]
+  | not_var => simp [Exp.lc_at]
+  | and_var => simp [Exp.lc_at]
+  | ite _ _ _ _ ih₁ ih₂ => simp only [Exp.lc_at]; exact ⟨trivial, ih₁, ih₂⟩

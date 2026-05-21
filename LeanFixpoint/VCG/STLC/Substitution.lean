@@ -436,7 +436,7 @@ def Exp.lc_at : Nat → Exp → Prop
   | k, .lam body      => body.lc_at (k+1)
   | k, .letin e₁ e₂   => e₁.lc_at k ∧ e₂.lc_at (k+1)
   | k, .app e₁ e₂     => e₁.lc_at k ∧ e₂.lc_at k
-  | k, .ann e t       => e.lc_at k ∧ t.lc_at k
+  | k, .ann e _       => e.lc_at k
   | k, .and e₁ e₂     => e₁.lc_at k ∧ e₂.lc_at k
   | k, .not e         => e.lc_at k
   | k, .leq e₁ e₂     => e₁.lc_at k ∧ e₂.lc_at k
@@ -1416,7 +1416,7 @@ theorem Exp.openVar_of_lc_at (e : Exp) (k : Nat) (y : EVar) (h : Exp.lc_at k e) 
     simp only [Exp.openVar]; congr 1; exact ih₁ k h.1; exact ih₂ k h.2
   | ann e t ih =>
     simp only [Exp.lc_at] at h
-    simp only [Exp.openVar]; congr 1; exact ih k h.1
+    simp only [Exp.openVar]; congr 1; exact ih k h
   | and e₁ e₂ ih₁ ih₂ =>
     simp only [Exp.lc_at] at h
     simp only [Exp.openVar]; congr 1; exact ih₁ k h.1; exact ih₂ k h.2
@@ -1433,6 +1433,48 @@ theorem Exp.openVar_of_lc_at (e : Exp) (k : Nat) (y : EVar) (h : Exp.lc_at k e) 
   | add e₁ e₂ ih₁ ih₂ =>
     simp only [Exp.lc_at] at h
     simp only [Exp.openVar]; congr 1; exact ih₁ k h.1; exact ih₂ k h.2
+
+/-- Converse of openVar_of_lc_at: if opening e at depth k with any name gives lc_at k,
+    then e itself is lc_at (k+1). This is the standard LN "body is lc" lemma. -/
+theorem Exp.lc_at_of_openVar (e : Exp) (k : Nat) (x : EVar)
+    (h : (e.openVar k x).lc_at k) : e.lc_at (k + 1) := by
+  induction e generalizing k with
+  | bvar j =>
+    simp only [Exp.openVar] at h
+    simp only [Exp.lc_at]
+    by_cases hjk : j = k
+    · subst hjk; omega
+    · simp only [hjk, ↓reduceIte, Exp.lc_at] at h; omega
+  | fvar _ => trivial
+  | iconst _ => trivial
+  | bconst _ => trivial
+  | lam body ih =>
+    simp only [Exp.openVar, Exp.lc_at] at h ⊢
+    exact ih (k + 1) h
+  | letin e₁ e₂ ih₁ ih₂ =>
+    simp only [Exp.openVar, Exp.lc_at] at h ⊢
+    exact ⟨ih₁ k h.1, ih₂ (k + 1) h.2⟩
+  | app e₁ e₂ ih₁ ih₂ =>
+    simp only [Exp.openVar, Exp.lc_at] at h ⊢
+    exact ⟨ih₁ k h.1, ih₂ k h.2⟩
+  | ann e t ih =>
+    simp only [Exp.openVar, Exp.lc_at] at h ⊢
+    exact ih k h
+  | and e₁ e₂ ih₁ ih₂ =>
+    simp only [Exp.openVar, Exp.lc_at] at h ⊢
+    exact ⟨ih₁ k h.1, ih₂ k h.2⟩
+  | not e ih =>
+    simp only [Exp.openVar, Exp.lc_at] at h ⊢
+    exact ih k h
+  | leq e₁ e₂ ih₁ ih₂ =>
+    simp only [Exp.openVar, Exp.lc_at] at h ⊢
+    exact ⟨ih₁ k h.1, ih₂ k h.2⟩
+  | ite e₀ e₁ e₂ ih₀ ih₁ ih₂ =>
+    simp only [Exp.openVar, Exp.lc_at] at h ⊢
+    exact ⟨ih₀ k h.1, ih₁ k h.2.1, ih₂ k h.2.2⟩
+  | add e₁ e₂ ih₁ ih₂ =>
+    simp only [Exp.openVar, Exp.lc_at] at h ⊢
+    exact ⟨ih₁ k h.1, ih₂ k h.2⟩
 
 /-- openExp with any u is identity when e has lc_at k (no BVar k inside). -/
 theorem Exp.openExp_of_lc_at (e : Exp) (k : Nat) (u : Exp) (h : Exp.lc_at k e) :
@@ -1453,7 +1495,7 @@ theorem Exp.openExp_of_lc_at (e : Exp) (k : Nat) (u : Exp) (h : Exp.lc_at k e) :
     simp only [Exp.lc_at] at h; simp only [Exp.openExp]; congr 1
     exact ih₁ k h.1; exact ih₂ k h.2
   | ann e t ih =>
-    simp only [Exp.lc_at] at h; simp only [Exp.openExp]; congr 1; exact ih k h.1
+    simp only [Exp.lc_at] at h; simp only [Exp.openExp]; congr 1; exact ih k h
   | and e₁ e₂ ih₁ ih₂ =>
     simp only [Exp.lc_at] at h; simp only [Exp.openExp]; congr 1
     exact ih₁ k h.1; exact ih₂ k h.2
@@ -1538,7 +1580,7 @@ theorem Exp.lc_at_mono (e : Exp) {j k : Nat} (hjk : j ≤ k) (h : Exp.lc_at j e)
     exact ⟨ih₁ hjk h.1, ih₂ hjk h.2⟩
   | ann e t ih =>
     simp only [Exp.lc_at] at *
-    grind [Ty.lc_at_mono]
+    exact ih hjk h
   | and e₁ e₂ ih₁ ih₂ =>
     simp only [Exp.lc_at] at *
     exact ⟨ih₁ hjk h.1, ih₂ hjk h.2⟩
