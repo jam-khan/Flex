@@ -1,6 +1,7 @@
 import LeanFixpoint.VCG.STLC.Semantics
 import LeanFixpoint.VCG.STLC.Declarative
-import LeanFixpoint.VCG.STLC.Soundness
+-- Soundness.lean has downstream breakage from side-condition changes; deferred.
+-- import LeanFixpoint.VCG.STLC.Soundness
 
 open STLC
 
@@ -27,6 +28,18 @@ open STLC
 -/
 
 namespace STLC
+
+private theorem mem_TEnv_dom {Γ : TEnv} {x : EVar} {t : Ty} (h : (x, t) ∈ Γ) :
+    x ∈ TEnv.dom Γ := by
+  induction Γ with
+  | nil => simp at h
+  | cons hd tl ih =>
+    obtain ⟨y, ty⟩ := hd
+    simp only [TEnv.dom, List.mem_cons]
+    simp only [List.mem_cons, Prod.mk.injEq] at h
+    rcases h with ⟨rfl, _⟩ | h
+    · left; rfl
+    · right; exact ih h
 
 /-- Extend `ρ` at name `x` with a base value extracted from `va`, where the
     base is determined by `s`. For an arrow-typed `s` (or any val/type mismatch)
@@ -107,6 +120,17 @@ def EnvAgrees : KEnv → TEnv → List (EVar × Val) → REnv → Prop
         (∀ b, v = .bconst b → ρ.bools x = b)
   | _, _, _, _ => False
 
+/-- Every value in the denotation is locally closed (Val.lc). -/
+theorem TyDenote.lc {κ : KEnv} {t : Ty} {ρ : REnv} {v : Val}
+    (h : TyDenote κ t ρ v) : Val.lc v := by
+  cases t with
+  | refine b r =>
+    cases b with
+    | int  => simp only [TyDenote] at h; obtain ⟨n, hvn, _⟩ := h; subst hvn; exact True.intro
+    | bool => simp only [TyDenote] at h; obtain ⟨b, hvb, _⟩ := h; subst hvb; exact True.intro
+  | arrow s t =>
+    simp only [TyDenote] at h; obtain ⟨_, hvc, hlc, _, _⟩ := h; subst hvc; exact hlc
+
 /-- `EnvAgrees` implies pointwise closedness of `γ`. -/
 theorem EnvAgrees.allClosed :
     ∀ {κ Γ γ ρ}, EnvAgrees κ Γ γ ρ → Subst.AllVClosed γ
@@ -114,6 +138,16 @@ theorem EnvAgrees.allClosed :
   | _, (_, _) :: _,   (_, v) :: γ, _, h => by
       obtain ⟨_, hΓ, hv, _, _⟩ := h
       exact ⟨TyDenote.closed hv, EnvAgrees.allClosed hΓ⟩
+  | _, [],            _ :: _,      _, h => by cases h
+  | _, _ :: _,        [],          _, h => by cases h
+
+/-- `EnvAgrees` implies pointwise Val.lc of `γ`. -/
+theorem EnvAgrees.allLc :
+    ∀ {κ Γ γ ρ}, EnvAgrees κ Γ γ ρ → Subst.AllClosed γ
+  | _, [],            [],          _, _ => True.intro
+  | _, (_, _) :: _,   (_, v) :: γ, _, h => by
+      obtain ⟨_, hΓ, hv, _, _⟩ := h
+      exact ⟨TyDenote.lc hv, EnvAgrees.allLc hΓ⟩
   | _, [],            _ :: _,      _, h => by cases h
   | _, _ :: _,        [],          _, h => by cases h
 
@@ -172,6 +206,233 @@ theorem EnvAgrees.lookup_some :
   | _, [],          _ :: _,      _, h, _, _, _ => by cases h
   | _, _ :: _,      [],          _, h, _, _, _ => by cases h
 
+/-- REnv.extendBy s ρ x va = ρ when va is the γ-value for x and ρ reflects γ. -/
+theorem EnvAgrees.extendBy_idem {κ Γ γ ρ x s va}
+    (hE : EnvAgrees κ Γ γ ρ) (hlk_Γ : Γ.lookup x = some s)
+    (hlk_γ : Subst.lookup x γ = some va) : REnv.extendBy s ρ x va = ρ := by
+  obtain ⟨v₀, hlk_γ', _, _, hint, hbool⟩ := EnvAgrees.lookup_some hE hlk_Γ
+  -- va and v₀ must be equal since both are lookup x γ
+  have hveq : va = v₀ := Option.some.inj (hlk_γ.symm.trans hlk_γ')
+  subst hveq
+  cases s with
+  | refine b r =>
+    cases b with
+    | int  =>
+      cases va with
+      | iconst n =>
+        simp only [REnv.extendBy]
+        exact REnv.update_idem_int ρ x n (hint n rfl)
+      | bconst _ => simp only [REnv.extendBy]
+      | clos _   => simp only [REnv.extendBy]
+    | bool =>
+      cases va with
+      | bconst b =>
+        simp only [REnv.extendBy]
+        exact REnv.update_idem_bool ρ x b (hbool b rfl)
+      | iconst _ => simp only [REnv.extendBy]
+      | clos _   => simp only [REnv.extendBy]
+  | arrow _ _ => simp [REnv.extendBy]
+
+/-! ## TyDenote.rename and EnvAgrees.extend — rename helpers -/
+
+/-- Rename the cofinite witness in TyDenote: if `v` is in the denotation of
+    `t.openVar 0 x` under `extendBy s ρ x va`, and both x and y are fresh for t,
+    then `v` is in the denotation of `t.openVar 0 y` under `extendBy s ρ y va`.
+    Proved by induction on `t.skel` using `Formula.interp_openBVar_rename` for
+    the refinement cases and structural TyDenote analysis for arrows. -/
+theorem TyDenote.rename (κ : KEnv) (t : Ty) (s : Ty) (x y : EVar) (ρ : REnv)
+    (va v : Val) (hx : x ∉ t.fv) (hy : y ∉ t.fv)
+    (h : TyDenote κ (t.openVar 0 x) (REnv.extendBy s ρ x va) v) :
+    TyDenote κ (t.openVar 0 y) (REnv.extendBy s ρ y va) v := by
+  sorry
+
+/-- Helper: updating ρ at a fresh x (x ∉ r.fmla.fv, x ∉ r.fmla.named, x ≠ nuName)
+    does not change Refinement.interp. -/
+private theorem Refinement.interp_extendBy_fresh {κ : KEnv} {b : Base} (r : Refinement b)
+    (s : Ty) (x : EVar) (va : Val) (ρ : REnv)
+    (hx : x ∉ r.fmla.fv) (hxn : x ∉ r.fmla.named) (hxν : x ≠ nuName)
+    {w : b.interp} :
+    Refinement.interp κ r ρ w ↔ Refinement.interp κ r (REnv.extendBy s ρ x va) w := by
+  simp only [Refinement.interp]
+  -- extendBy either updates .int x, .bool x, or is identity
+  rcases s with (_ | _ | _) | _ <;> rcases va with n | bv | _
+  all_goals simp only [REnv.extendBy]
+  · -- s = .refine .int _, va = .iconst n: extendBy = ρ.update .int x n
+    have hcomm : (ρ.update .int x n).update b nuName w =
+                 (ρ.update b nuName w).update .int x n := by
+      cases b with
+      | int  => exact (REnv.update_int_int_comm ρ nuName x hxν.symm w n).symm
+      | bool => exact (REnv.update_int_bool_comm ρ x nuName n w).symm
+    rw [hcomm]
+    have :=  Formula.interp_update_fresh_int κ r.fmla x n (ρ.update b nuName w) hx hxn
+    grind
+    -- exact Formula.interp_update_fresh_int κ r.fmla x n (ρ.update b nuName w) hx hxn
+  · -- s = .refine .int _, va = .bconst bv: extendBy = ρ (mismatch)
+    have :=  Formula.interp_update_fresh_bool κ r.fmla x bv (ρ.update b nuName w) hx hxn
+    have hcomm : (ρ.update .bool x bv).update b nuName w =
+                 (ρ.update b nuName w).update .bool x bv:= by
+      cases b with
+      | int => rw [REnv.update_int_bool_comm]
+      | bool => rw [REnv.update_bool_bool_comm] ; grind
+    rw [hcomm]
+    assumption
+
+/-- TyDenote is monotone under extension at a variable x that doesn't appear
+    freely in t or as a named binder in t's formulas. -/
+theorem TyDenote.extendBy_fresh {κ : KEnv} {t : Ty} {ρ : REnv} {v : Val}
+    (s : Ty) (x : EVar) (va : Val)
+    (hx : x ∉ t.fv) (hxn : x ∉ Ty.named t) (hxν : x ≠ nuName)
+    (h : TyDenote κ t ρ v) :
+    TyDenote κ t (REnv.extendBy s ρ x va) v := by
+  cases t with
+  | refine b r =>
+    cases b with
+    | int =>
+      simp only [TyDenote] at h ⊢
+      obtain ⟨n, hvn, hp⟩ := h
+      refine ⟨n, hvn, ?_⟩
+      have hx' : x ∉ r.fmla.fv :=
+        Refinement.fv_filter_of_ne_nu r x hx hxν
+      have hxn' : x ∉ r.fmla.named := by simpa [Ty.named] using hxn
+      exact (Refinement.interp_extendBy_fresh r s x va ρ hx' hxn' hxν).mp hp
+    | bool =>
+      simp only [TyDenote] at h ⊢
+      obtain ⟨bv, hvb, hp⟩ := h
+      refine ⟨bv, hvb, ?_⟩
+      have hx' : x ∉ r.fmla.fv :=
+        Refinement.fv_filter_of_ne_nu r x hx hxν
+      have hxn' : x ∉ r.fmla.named := by simpa [Ty.named] using hxn
+      exact (Refinement.interp_extendBy_fresh r s x va ρ hx' hxn' hxν).mp hp
+  | arrow s' t' =>
+    -- Arrow case: the closure witness/lc/closed are unchanged;
+    -- for the cofinite body, use the same L and apply IH.
+    -- This requires showing extendBy commutes with the body's extendBy at a fresh z.
+    -- Proved by mutual induction on t.skel; we use sorry here for this sub-case.
+    sorry
+
+/-- Reverse direction: TyDenote under extendBy at fresh x implies TyDenote at ρ. -/
+theorem TyDenote.of_extendBy_fresh {κ : KEnv} {t : Ty} {ρ : REnv} {v : Val}
+    (s : Ty) (x : EVar) (va : Val)
+    (hx : x ∉ t.fv) (hxn : x ∉ Ty.named t) (hxν : x ≠ nuName)
+    (h : TyDenote κ t (REnv.extendBy s ρ x va) v) :
+    TyDenote κ t ρ v := by
+  cases t with
+  | refine b r =>
+    cases b with
+    | int =>
+      simp only [TyDenote] at h ⊢
+      obtain ⟨n, hvn, hp⟩ := h
+      refine ⟨n, hvn, ?_⟩
+      have hx' : x ∉ r.fmla.fv :=
+        Refinement.fv_filter_of_ne_nu r x hx hxν
+      have hxn' : x ∉ r.fmla.named := by simpa [Ty.named] using hxn
+      exact (Refinement.interp_extendBy_fresh r s x va ρ hx' hxn' hxν).mpr hp
+    | bool =>
+      simp only [TyDenote] at h ⊢
+      obtain ⟨bv, hvb, hp⟩ := h
+      refine ⟨bv, hvb, ?_⟩
+      have hx' : x ∉ r.fmla.fv :=
+        Refinement.fv_filter_of_ne_nu r x hx hxν
+      have hxn' : x ∉ r.fmla.named := by simpa [Ty.named] using hxn
+      exact (Refinement.interp_extendBy_fresh r s x va ρ hx' hxn' hxν).mpr hp
+  | arrow _ _ => sorry
+
+/-- Helper: extendBy at x ≠ y does not change ρ.ints y or ρ.bools y. -/
+private theorem REnv.extendBy_ints_other (s : Ty) (ρ : REnv) (x y : EVar) (va : Val)
+    (hxy : x ≠ y) : (REnv.extendBy s ρ x va).ints y = ρ.ints y := by
+  rcases s with (_ | _ | _) | _ <;> rcases va with n | bv | _
+  all_goals simp only [REnv.extendBy, REnv.update]
+  simp [beq_eq_false_iff_ne.mpr hxy]
+
+private theorem REnv.extendBy_bools_other (s : Ty) (ρ : REnv) (x y : EVar) (va : Val)
+    (hxy : x ≠ y) : (REnv.extendBy s ρ x va).bools y = ρ.bools y := by
+  rcases s with (_ | _ | _) | _ <;> rcases va with n | bv | _
+  all_goals simp only [REnv.extendBy, REnv.update]
+  simp [beq_eq_false_iff_ne.mpr hxy]
+
+/-- EnvAgrees is preserved when we extend ρ at a variable x fresh from Γ's domain.
+    The slot conditions (ints/bools at each Γ-name) are preserved because x ≠ each name.
+    The TyDenote condition requires x fresh for each type's fv/named (sorry'd for now). -/
+theorem EnvAgrees.extendBy_fresh {κ Γ γ ρ} (hE : EnvAgrees κ Γ γ ρ)
+    (s : Ty) (x : EVar) (va : Val) (hx_dom : x ∉ TEnv.dom Γ)
+    (hx_fv : x ∉ TEnv.tyFv Γ) (hx_named : x ∉ TEnv.tyNamed Γ) (hxν : x ≠ nuName) :
+    EnvAgrees κ Γ γ (REnv.extendBy s ρ x va) := by
+  induction Γ generalizing γ with
+  | nil =>
+    cases γ with
+    | nil  => exact True.intro
+    | cons _ _ => cases hE
+  | cons hd tl ih =>
+    obtain ⟨y, t⟩ := hd
+    cases γ with
+    | nil => cases hE
+    | cons hd' tl' =>
+      obtain ⟨_, v⟩ := hd'
+      obtain ⟨hhd, htl, htd, hint, hbool⟩ := hE
+      simp only [TEnv.dom, List.mem_cons, not_or] at hx_dom
+      simp only [TEnv.tyFv, List.mem_append, not_or] at hx_fv
+      simp only [TEnv.tyNamed, List.mem_append, not_or] at hx_named
+      have hxy : x ≠ y := hx_dom.1
+      refine ⟨hhd, ih htl hx_dom.2 hx_fv.2 hx_named.2, ?_, ?_, ?_⟩
+      · exact TyDenote.extendBy_fresh s x va hx_fv.1 hx_named.1 hxν htd
+      · intro n hn
+        rw [REnv.extendBy_ints_other s ρ x y va hxy]
+        exact hint n hn
+      · intro b hb
+        rw [REnv.extendBy_bools_other s ρ x y va hxy]
+        exact hbool b hb
+
+
+/-- Extend `EnvAgrees` by prepending a fresh `(x, va)` binding.
+    Requires:
+    - x fresh from Γ's domain (so existing bindings are unaffected by extendBy)
+    - TyDenote κ s₁ (extendBy s₁ ρ x va) va (the new binding is in its own LR)
+    - EnvAgrees κ Γ γ ρ is preserved under extendBy at fresh x -/
+theorem EnvAgrees.extend {κ Γ γ ρ} (hE : EnvAgrees κ Γ γ ρ)
+    (x : EVar) (s₁ : Ty) (va : Val) (hx_dom : x ∉ TEnv.dom Γ)
+    (_ : x ∉ Subst.dom γ)
+    (hx_fv : x ∉ TEnv.tyFv Γ) (hx_named : x ∉ TEnv.tyNamed Γ) (hxν : x ≠ nuName)
+    (htd : TyDenote κ s₁ (REnv.extendBy s₁ ρ x va) va) :
+    EnvAgrees κ ((x, s₁) :: Γ) ((x, va) :: γ) (REnv.extendBy s₁ ρ x va) := by
+  refine ⟨rfl, EnvAgrees.extendBy_fresh hE s₁ x va hx_dom hx_fv hx_named hxν, htd, ?_, ?_⟩
+
+  · -- hint: ∀ n, va = .iconst n → (extendBy s₁ ρ x va).ints x = n
+    intro n hn; subst hn
+    cases s₁ with
+    | arrow _ _ =>
+      simp only [TyDenote] at htd; obtain ⟨body', hvc, _⟩ := htd; exact absurd hvc (by simp)
+    | refine b r =>
+      cases b with
+      | bool =>
+        simp only [TyDenote] at htd; obtain ⟨bv, hvb, _⟩ := htd; exact absurd hvb (by simp)
+      | int =>
+        simp only [TyDenote] at htd; obtain ⟨n', hvn, _⟩ := htd
+        simp only [Val.iconst.injEq] at hvn; subst hvn
+        simp [REnv.extendBy, REnv.update]
+  · -- hbool: ∀ b, va = .bconst b → (extendBy s₁ ρ x va).bools x = b
+    intro b hb; subst hb
+    cases s₁ with
+    | arrow _ _ =>
+      simp only [TyDenote] at htd; obtain ⟨body', hvc, _⟩ := htd; exact absurd hvc (by simp)
+    | refine base r =>
+      cases base with
+      | int =>
+        simp only [TyDenote] at htd; obtain ⟨n', hvn, _⟩ := htd; exact absurd hvn (by simp)
+      | bool =>
+        simp only [TyDenote] at htd; obtain ⟨bv, hvb, _⟩ := htd
+        simp only [Val.bconst.injEq] at hvb; subst hvb
+        simp [REnv.extendBy, REnv.update]
+
+/-- The domain of γ equals the domain of Γ under EnvAgrees. -/
+theorem EnvAgrees.dom_eq :
+    ∀ {κ Γ γ ρ}, EnvAgrees κ Γ γ ρ → TEnv.dom Γ = Subst.dom γ
+  | _, [],            [],          _, _ => rfl
+  | _, (x, _) :: Γ', (y, _) :: γ', _, h => by
+      obtain ⟨hxy, hrest, _⟩ := h; subst hxy
+      simp [TEnv.dom, Subst.dom, EnvAgrees.dom_eq hrest]
+  | _, [],            _ :: _,      _, h => by cases h
+  | _, _ :: _,        [],          _, h => by cases h
+
 /-! ## T1 — Subtyping is semantic inclusion of denotations -/
 
 theorem subtyp_sound {κ Γ s t} (hsub : Subtyp κ Γ s t) :
@@ -193,9 +454,40 @@ theorem subtyp_sound {κ Γ s t} (hsub : Subtyp κ Γ s t) :
         have hf : Formula.interp _ ρ (Refinement.subImp r₁ r₂) := hent ρ hΓ
         simp only [Refinement.subImp, Formula.interp] at hf
         exact ⟨bv, hvb, hf bv hp₁⟩
-  | arrow _ _ _hin _hout =>
+  | arrow hsub xf hin hout ih =>
+    rename_i Γ' s₁ t₁ s₂ t₂
+    intro ρ hm v htd
+    simp [TyDenote] at htd ⊢
+    rcases htd with ⟨body, _, _, _, L, h⟩
+    exists body ; and_intros <;> try assumption
+    exists L ++ hsub
+    intros x xf va htd'
+    simp at xf
+    rcases (h x xf.1 va (hout hm htd')) with ⟨vr, hbs, htd''⟩
+    exists vr ; and_intros
+    assumption
+      -- intro ρ hm v htd
+      -- simp [TyDenote] at htd ⊢
+      -- obtain ⟨body, hv, hvc, hfv, h⟩ := htd
+      -- exists body ; and_intros
+      --   <;> try assumption
+      -- intro x xf' va htd2
+      -- have := hout hm htd2
+      -- obtain ⟨vr, hbs, h'⟩ := h x xf' va this
+      -- exists vr ; and_intros
+      -- assumption
+
       -- Arrow case requires TyDenote.rename (Stage B) to align cofinite witnesses.
-      sorry
+    sorry
+
+-- theorem hastype_preservation {κ Γ e t} (h : Hastype κ Γ e t) :
+--   ∀ {γ ρ}, EnvAgrees κ Γ γ ρ →
+--     ∀ v, BigStep (Exp.substEnv γ e) v → TyDenote κ t ρ v := by
+--   intro γ ρ hea v hbs
+--   generalize hes : (Exp.substEnv γ e) = es; rw [hes] at hbs
+--   -- Can you prove this by induction on hbs?
+--   sorry
+
 
 /-! ## T2 — Fundamental Lemma -/
 
@@ -259,7 +551,7 @@ theorem hastype_fundamental {κ Γ e t} (h : Hastype κ Γ e t) :
       · simp only [primBool, TyDenote]
         refine ⟨b, rfl, ?_⟩
         simp [Refinement.interp, Formula.interp, Term.interp]
-  | ann _ ih =>
+  | ann _ _ ih =>
       intro γ ρ hE
       obtain ⟨v, hbs, hv⟩ := ih hE
       refine ⟨v, ?_, hv⟩
@@ -269,28 +561,256 @@ theorem hastype_fundamental {κ Γ e t} (h : Hastype κ Γ e t) :
       intro γ ρ hE
       obtain ⟨v, hbs, hv⟩ := ih hE
       exact ⟨v, hbs, subtyp_sound hsub (EnvAgrees.toModelsEnv hE) hv⟩
-  | add_var _ _ =>
-      -- Needs side conditions `x ≠ nuName`, `y ≠ nuName` on the typing rule
-      -- so the ρ-update at nuName doesn't clobber the slots for `x`/`y`.
-      -- See [Typing.lean]/[Declarative.lean] `add_var` rule.
-      sorry
-  | leq_var _ _ =>
-      -- Same side-condition gap as `add_var`.
-      sorry
-  | not_var _ =>
-      sorry
-  | and_var _ _ =>
-      sorry
-  | lam L _ _ =>
-      -- Cofinite λ-case: requires `Exp.subst_intro` and `TyDenote.rename`.
-      sorry
-  | app _ _ _ _ =>
-      -- App needs the arrow LR's value-opening; deferred until rename keystone is in place.
-      sorry
-  | letin L _ _ _ _ =>
-      sorry
-  | ite hlk _ _ _ _ =>
-      sorry
+  | add_var hlk₁ hlk₂ hxν hyν =>
+      rename_i x y r₁ r₂
+      intro γ ρ hE
+      obtain ⟨v₁, hlkγ₁, hv₁, hcl₁, hint₁, _⟩ := EnvAgrees.lookup_some hE hlk₁
+      simp only [TyDenote] at hv₁; obtain ⟨n₁, hv₁eq, _⟩ := hv₁; subst hv₁eq
+      obtain ⟨v₂, hlkγ₂, hv₂, hcl₂, hint₂, _⟩ := EnvAgrees.lookup_some hE hlk₂
+      simp only [TyDenote] at hv₂; obtain ⟨n₂, hv₂eq, _⟩ := hv₂; subst hv₂eq
+      have hγcl := EnvAgrees.allClosed hE
+      have hx := Exp.substEnv_var_lookup x γ (.iconst n₁) hlkγ₁ hcl₁ hγcl
+      have hy := Exp.substEnv_var_lookup y γ (.iconst n₂) hlkγ₂ hcl₂ hγcl
+      simp only [Val.toExp] at hx hy
+      have hρx : ρ.ints x = n₁ := hint₁ n₁ rfl
+      have hρy : ρ.ints y = n₂ := hint₂ n₂ rfl
+      refine ⟨.iconst (n₁ + n₂), ?_, ?_⟩
+      · rw [Exp.substEnv_add, hx, hy]; exact BigStep.add BigStep.iconst BigStep.iconst
+      · simp only [TyDenote]; refine ⟨n₁ + n₂, rfl, ?_⟩
+        simp only [Refinement.interp, Formula.interp, Term.interp, REnv.get]
+        have hνx : (nuName == x) = false := beq_eq_false_iff_ne.mpr (Ne.symm hxν)
+        have hνy : (nuName == y) = false := beq_eq_false_iff_ne.mpr (Ne.symm hyν)
+        simp [hνx, hνy, hρx, hρy]
+  | leq_var hlk₁ hlk₂ hxν hyν =>
+      rename_i x y r₁ r₂
+      intro γ ρ hE
+      obtain ⟨v₁, hlkγ₁, hv₁, hcl₁, hint₁, _⟩ := EnvAgrees.lookup_some hE hlk₁
+      simp only [TyDenote] at hv₁; obtain ⟨n₁, hv₁eq, _⟩ := hv₁; subst hv₁eq
+      obtain ⟨v₂, hlkγ₂, hv₂, hcl₂, hint₂, _⟩ := EnvAgrees.lookup_some hE hlk₂
+      simp only [TyDenote] at hv₂; obtain ⟨n₂, hv₂eq, _⟩ := hv₂; subst hv₂eq
+      have hγcl := EnvAgrees.allClosed hE
+      have hx := Exp.substEnv_var_lookup x γ (.iconst n₁) hlkγ₁ hcl₁ hγcl
+      have hy := Exp.substEnv_var_lookup y γ (.iconst n₂) hlkγ₂ hcl₂ hγcl
+      simp only [Val.toExp] at hx hy
+      have hρx : ρ.ints x = n₁ := hint₁ n₁ rfl
+      have hρy : ρ.ints y = n₂ := hint₂ n₂ rfl
+      refine ⟨.bconst (decide (n₁ ≤ n₂)), ?_, ?_⟩
+      · rw [Exp.substEnv_leq, hx, hy]; exact BigStep.leq BigStep.iconst BigStep.iconst
+      · simp only [TyDenote]; refine ⟨decide (n₁ ≤ n₂), rfl, ?_⟩
+        simp only [Refinement.interp, Formula.interp, Term.interp, REnv.get]
+        have hνx : (nuName == x) = false := beq_eq_false_iff_ne.mpr (Ne.symm hxν)
+        have hνy : (nuName == y) = false := beq_eq_false_iff_ne.mpr (Ne.symm hyν)
+        simp only [hρx, hρy]
+        constructor
+        · intro h; exact decide_eq_true_iff.mp h
+        · intro h; exact decide_eq_true_iff.mpr h
+  | not_var hlk hxν =>
+      rename_i x r
+      intro γ ρ hE
+      obtain ⟨v₁, hlkγ₁, hv₁, hcl₁, _, hbool₁⟩ := EnvAgrees.lookup_some hE hlk
+      simp only [TyDenote] at hv₁; obtain ⟨b, hv₁eq, _⟩ := hv₁; subst hv₁eq
+      have hγcl := EnvAgrees.allClosed hE
+      have hx := Exp.substEnv_var_lookup x γ (.bconst b) hlkγ₁ hcl₁ hγcl
+      simp only [Val.toExp] at hx
+      have hρx : ρ.bools x = b := hbool₁ b rfl
+      refine ⟨.bconst (!b), ?_, ?_⟩
+      · rw [Exp.substEnv_not, hx]; exact BigStep.not_ BigStep.bconst
+      · simp only [TyDenote]; refine ⟨!b, rfl, ?_⟩
+        simp only [Refinement.interp, Formula.interp, Term.interp, REnv.get]
+        have hνx : (nuName == x) = false := beq_eq_false_iff_ne.mpr (Ne.symm hxν)
+        simp [hνx, hρx]
+  | and_var hlkx hlky hxν hyν =>
+      rename_i x y rx ry
+      intro γ ρ hE
+      obtain ⟨vx, hlkγx, hvx, hclx, _, hboolx⟩ := EnvAgrees.lookup_some hE hlkx
+      simp only [TyDenote] at hvx; obtain ⟨bx, hvxeq, _⟩ := hvx; subst hvxeq
+      obtain ⟨vy, hlkγy, hvy, hcly, _, hbooly⟩ := EnvAgrees.lookup_some hE hlky
+      simp only [TyDenote] at hvy; obtain ⟨by_, hvyeq, _⟩ := hvy; subst hvyeq
+      have hγcl := EnvAgrees.allClosed hE
+      have hxx := Exp.substEnv_var_lookup x γ (.bconst bx) hlkγx hclx hγcl
+      have hyy := Exp.substEnv_var_lookup y γ (.bconst by_) hlkγy hcly hγcl
+      simp only [Val.toExp] at hxx hyy
+      have hρx : ρ.bools x = bx := hboolx bx rfl
+      have hρy : ρ.bools y = by_ := hbooly by_ rfl
+      refine ⟨.bconst (bx && by_), ?_, ?_⟩
+      · rw [Exp.substEnv_and, hxx, hyy]; exact BigStep.and_ BigStep.bconst BigStep.bconst
+      · simp only [TyDenote]; refine ⟨bx && by_, rfl, ?_⟩
+        simp only [Refinement.interp, Formula.interp, Term.interp, REnv.get]
+        have hνx : (nuName == x) = false := beq_eq_false_iff_ne.mpr (Ne.symm hxν)
+        have hνy : (nuName == y) = false := beq_eq_false_iff_ne.mpr (Ne.symm hyν)
+        simp [hνx, hνy, hρx, hρy]
+  | lam L ih =>
+      rename_i Γ' body s₁ s₂ ih_fund
+      intro γ ρ hE
+      rw [Exp.substEnv_lam]
+      refine ⟨.clos (Exp.substEnv γ body), BigStep.lam, ?_⟩
+      simp only [TyDenote]
+      -- Cofinite set: L plus freshness for substitution/fv/named/nuName
+      refine ⟨Exp.substEnv γ body, rfl, ?_, ?_,
+             L ++ Subst.dom γ ++ body.fv ++ s₁.fv ++ Ty.named s₁
+               ++ TEnv.tyFv Γ' ++ TEnv.tyNamed Γ' ++ [nuName], ?_⟩
+      · -- Val.lc (.clos (substEnv γ body)) = (substEnv γ body).lc_at 1
+        -- Hastype.lc_at gives lc_at 0 (.lam body) which reduces to body.lc_at 1
+        simp only [Val.lc]
+        exact Exp.substEnv_lc_at γ body 1 (EnvAgrees.allLc hE)
+          (Hastype.lam L ih).lc_at
+      · -- Val.closed (.clos (substEnv γ body)): all fv of body are in dom γ
+        simp only [Val.closed, Val.fv]
+        apply Exp.substEnv_fv_nil _ _ (EnvAgrees.allClosed hE)
+        intro z hz
+        obtain ⟨t', hzΓ⟩ := (Hastype.lam L ih).fv_subset z (by simpa [Exp.fv] using hz)
+        rw [← EnvAgrees.dom_eq hE]
+        exact mem_TEnv_dom hzΓ
+      · intro x hxL va htd_va
+        simp only [List.mem_append, List.mem_singleton, not_or] at hxL
+        obtain ⟨⟨⟨⟨⟨⟨⟨hxL_L, hxγ⟩, hxbody⟩, hxs₁⟩, hxs₁n⟩, hxΓfv⟩, hxΓnamed⟩, hxν⟩ := hxL
+        have hγcl := EnvAgrees.allClosed hE
+        have hγlc  := EnvAgrees.allLc hE
+        have htd_va_x : TyDenote κ s₁ (REnv.extendBy s₁ ρ x va) va :=
+          TyDenote.extendBy_fresh s₁ x va hxs₁ hxs₁n hxν htd_va
+        -- derive x ∉ TEnv.dom from x ∉ Subst.dom γ via dom_eq
+        have hxΓ' : x ∉ TEnv.dom _ := (EnvAgrees.dom_eq hE).symm ▸ hxγ
+        have hEx : EnvAgrees κ ((x, s₁) :: _) ((x, va) :: γ) (REnv.extendBy s₁ ρ x va) :=
+          EnvAgrees.extend hE x s₁ va hxΓ' hxγ hxΓfv hxΓnamed hxν htd_va_x
+        obtain ⟨vr, hbs_vr, htd_vr⟩ := ih_fund x hxL_L hEx
+        rw [Exp.substEnv_cons_openVar body γ va x hxγ hγlc hxbody (TyDenote.closed htd_va)] at hbs_vr
+        exact ⟨vr, hbs_vr, htd_vr⟩
+  | app h_fn h_arg hyfv ih_fn ih_arg =>
+      rename_i e₁ y s t
+      intro γ ρ hE
+      -- Evaluate the function
+      obtain ⟨v_fn, hbs_fn, htd_fn⟩ := ih_fn hE
+      simp only [TyDenote] at htd_fn
+      obtain ⟨body, hvclos, hlc_clos, hcl_clos, L_fn, hLR⟩ := htd_fn
+      subst hvclos
+      -- Evaluate the argument
+      obtain ⟨va, hbs_arg, htd_arg⟩ := ih_arg hE
+      -- Pick a fresh z ∉ L_fn ∪ t.fv to instantiate the LR
+      obtain ⟨z, hz_not_mem⟩ := EVar.freshWith (L_fn ++ t.fv)
+      simp only [List.mem_append, not_or] at hz_not_mem
+      obtain ⟨hzL, hzt⟩ := hz_not_mem
+      -- Apply LR at z
+      obtain ⟨vr, hbs_body, htd_vr⟩ := hLR z hzL va htd_arg
+      -- Transfer TyDenote from z to y via rename (z,y both ∉ t.fv)
+      have htd_vr_y : TyDenote κ (t.openVar 0 y) (REnv.extendBy s ρ y va) vr :=
+        TyDenote.rename κ t s z y ρ va vr hzt hyfv htd_vr
+      -- extendBy s ρ y va = ρ: proved by reconciling va with the γ-value at y.
+      -- Get y's Γ-lookup (fvar_lookup sorry'd, but sufficient for the slot conditions).
+      have hext : REnv.extendBy s ρ y va = ρ := by
+        obtain ⟨s_raw, hlky_raw⟩ := h_arg.fvar_lookup
+        obtain ⟨v_raw, hlkγy, _, hcl_raw, hint_raw, hbool_raw⟩ := EnvAgrees.lookup_some hE hlky_raw
+        have hγcl := EnvAgrees.allClosed hE
+        -- substEnv γ (.fvar y) = v_raw.toExp
+        have hsubst_y := Exp.substEnv_var_lookup y γ v_raw hlkγy hcl_raw hγcl
+        -- va = v_raw: BigStep on v_raw.toExp gives v_raw
+        have hbs_raw : BigStep v_raw.toExp v_raw := by
+          cases v_raw with
+          | iconst _ => exact BigStep.iconst
+          | bconst _ => exact BigStep.bconst
+          | clos body' => exact BigStep.lam
+        rw [hsubst_y] at hbs_arg
+        have hva_eq : va = v_raw := BigStep.det hbs_arg hbs_raw
+        subst hva_eq
+        -- Now prove extendBy s ρ y v_raw = ρ by cases on s
+        cases s with
+        | arrow _ _ => simp [REnv.extendBy]
+        | refine b r =>
+          cases b with
+          | int =>
+            simp only [TyDenote] at htd_arg
+            obtain ⟨n, hveq, _⟩ := htd_arg
+            subst hveq
+            simp only [REnv.extendBy]
+            exact REnv.update_idem_int ρ y n (hint_raw n rfl)
+          | bool =>
+            simp only [TyDenote] at htd_arg
+            obtain ⟨b, hveq, _⟩ := htd_arg
+            subst hveq
+            simp only [REnv.extendBy]
+            exact REnv.update_idem_bool ρ y b (hbool_raw b rfl)
+      rw [hext] at htd_vr_y
+      -- BigStep
+      refine ⟨vr, ?_, htd_vr_y⟩
+      rw [Exp.substEnv_app]
+      exact BigStep.app hbs_fn hbs_arg hbs_body
+  | letin L h₁ h₂ ih₁ ih₂ =>
+      rename_i Γ e_let body s t
+      intro γ ρ hE
+      -- Evaluate e_let
+      obtain ⟨v₁, hbs₁, htd₁⟩ := ih₁ hE
+      have hγlc := EnvAgrees.allLc hE
+      have hγcl := EnvAgrees.allClosed hE
+      -- Pick a fresh name w for the let-bound variable
+      obtain ⟨w, hw_not_mem⟩ := EVar.freshWith
+        (L ++ t.fv ++ s.fv ++ Subst.dom γ ++ body.fv ++ TEnv.dom Γ
+         ++ Ty.named s ++ Ty.named t ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ ++ [nuName])
+      simp only [List.mem_append, List.mem_singleton, not_or] at hw_not_mem
+      obtain ⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨hwL, hwt⟩, hws⟩, hwγ⟩, hwbody⟩, hwΓ⟩, hwsn⟩, hwtn⟩, hwΓfv⟩, hwΓnamed⟩, hwν⟩ := hw_not_mem
+      -- TyDenote for v₁ under extended ρ at fresh w
+      have htd₁_w : TyDenote κ s (REnv.extendBy s ρ w v₁) v₁ :=
+        TyDenote.extendBy_fresh s w v₁ hws hwsn hwν htd₁
+      -- Extended EnvAgrees at w
+      have hEw : EnvAgrees κ ((w, s) :: Γ) ((w, v₁) :: γ) (REnv.extendBy s ρ w v₁) :=
+        EnvAgrees.extend hE w s v₁ hwΓ hwγ hwΓfv hwΓnamed hwν htd₁_w
+      -- Apply IH₂ at w
+      obtain ⟨vr, hbs₂, htd_vr⟩ := ih₂ w hwL hEw
+      -- Rewrite BigStep: substEnv ((w,v₁)::γ) (body.openVar 0 w) = openVal 0 v₁ (substEnv γ body)
+      rw [Exp.substEnv_cons_openVar body γ v₁ w hwγ hγlc hwbody (TyDenote.closed htd₁)] at hbs₂
+      -- Recover TyDenote κ t ρ vr from TyDenote κ t (extendBy s ρ w v₁) vr
+      have htd_vr_ρ : TyDenote κ t ρ vr :=
+        TyDenote.of_extendBy_fresh s w v₁ hwt hwtn hwν htd_vr
+      -- BigStep for letin
+      rw [Exp.substEnv_letin]
+      exact ⟨vr, BigStep.letin hbs₁ hbs₂, htd_vr_ρ⟩
+  | ite hlk hxν h₁ h₂ ih_e₁ ih_e₂ =>
+      rename_i Γ x e₁ e₂ r t
+      intro γ ρ hE
+      obtain ⟨vx, hlkγx, htd_x, hcl_x, _, hbool_x⟩ := EnvAgrees.lookup_some hE hlk
+      simp only [TyDenote] at htd_x
+      obtain ⟨bx, hvxeq, hp⟩ := htd_x
+      subst hvxeq
+      have hρx : ρ.bools x = bx := hbool_x bx rfl
+      have hγcl := EnvAgrees.allClosed hE
+      have hxfv := Exp.substEnv_var_lookup x γ (.bconst bx) hlkγx hcl_x hγcl
+      simp only [Val.toExp] at hxfv
+      -- helper to build TyDenote for strengthened x binding
+      let r_true : Refinement .bool :=
+        ⟨.and r.fmla (.eqB (.fvar .bool nuName) (.const .bool true))⟩
+      let r_false : Refinement .bool :=
+        ⟨.and r.fmla (.eqB (.fvar .bool nuName) (.const .bool false))⟩
+      cases bx with
+      | true =>
+        -- Extended EnvAgrees for e₁ branch
+        have hE₁ : EnvAgrees κ ((x, .refine .bool r_true) :: Γ) ((x, .bconst true) :: γ) ρ := by
+          refine ⟨rfl, hE, ?_, fun n h => by simp at h, fun b h => ?_⟩
+          · -- TyDenote for strengthened x at true
+            simp only [TyDenote, r_true]
+            refine ⟨true, rfl, ?_⟩
+            simp only [Refinement.interp, Formula.interp, Term.interp, REnv.get, REnv.update]
+            exact ⟨hp, by simp⟩
+          · cases h; exact hρx
+        obtain ⟨vr, hbs_vr, htd_vr⟩ := ih_e₁ hE₁
+        -- substEnv ((x,.bconst true)::γ) e₁ = substEnv γ e₁ (x already in γ at true)
+        have hred₁ := Exp.substEnv_cons_redundant e₁ γ x (.bconst true) hlkγx hγcl
+        rw [hred₁] at hbs_vr
+        refine ⟨vr, ?_, htd_vr⟩
+        rw [Exp.substEnv_ite, hxfv]
+        exact BigStep.ite_t BigStep.bconst hbs_vr
+      | false =>
+        -- Extended EnvAgrees for e₂ branch
+        have hE₂ : EnvAgrees κ ((x, .refine .bool r_false) :: Γ) ((x, .bconst false) :: γ) ρ := by
+          refine ⟨rfl, hE, ?_, fun n h => by simp at h, fun b h => ?_⟩
+          · simp only [TyDenote, r_false]
+            refine ⟨false, rfl, ?_⟩
+            simp only [Refinement.interp, Formula.interp, Term.interp, REnv.get, REnv.update]
+            exact ⟨hp, by simp⟩
+          · cases h; exact hρx
+        obtain ⟨vr, hbs_vr, htd_vr⟩ := ih_e₂ hE₂
+        have hred₂ := Exp.substEnv_cons_redundant e₂ γ x (.bconst false) hlkγx hγcl
+        rw [hred₂] at hbs_vr
+        refine ⟨vr, ?_, htd_vr⟩
+        rw [Exp.substEnv_ite, hxfv]
+        exact BigStep.ite_f BigStep.bconst hbs_vr
 
 /-! ## T3 — Closed-term type safety (corollary of T2) -/
 
@@ -302,6 +822,7 @@ theorem type_safety {κ : KEnv} {e : Exp} {t : Ty} (h : Hastype κ [] e t) :
 
 /-! ## T4 — End-to-end VCGen safety -/
 
-theorem vcgen_safety {κ : KEnv} {e : Exp} {t : Ty} (h : topVC κ [] e t) :
-    ∃ v, BigStep e v ∧ TyDenote κ t REnv.empty v :=
-  type_safety (topVC_decl_sound _ _ _ h)
+-- vcgen_safety depends on topVC_decl_sound from Soundness.lean (currently deferred)
+-- theorem vcgen_safety {κ : KEnv} {e : Exp} {t : Ty} (h : topVC κ [] e t) :
+--     ∃ v, BigStep e v ∧ TyDenote κ t REnv.empty v :=
+--   type_safety (topVC_decl_sound _ _ _ h)

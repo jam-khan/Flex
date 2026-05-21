@@ -27,9 +27,9 @@ inductive Subtyp : KEnv → TEnv → Ty → Ty → Prop where
       Subtyp κ Γ (.refine b r₁) (.refine b r₂)
 
   /-- SUB-FUN (cofinite): contravariant input, covariant output. -/
-  | arrow {κ Γ s₁ t₁ s₂ t₂ x} :
+  | arrow {κ Γ s₁ t₁ s₂ t₂} (L : List EVar) :
       Subtyp κ Γ s₂ s₁ →
-      x ∉ (s₁.fv ++ (s₂.fv ++ (t₁.fv ++ t₂.fv))) → Subtyp κ ((x, s₂) :: Γ) (t₁.openVar 0 x) (t₂.openVar 0 x) →
+      (∀ x, x ∉ L → Subtyp κ ((x, s₂) :: Γ) (t₁.openVar 0 x) (t₂.openVar 0 x)) →
       Subtyp κ Γ (.arrow s₁ t₁) (.arrow s₂ t₂)
 
 /-! ## Bidirectional typing -/
@@ -54,6 +54,7 @@ mutual
     | app {κ Γ e₁ y s t} :
         Synth κ Γ e₁ (.arrow s t) →
         Check κ Γ (.fvar y) s        →
+        y ∉ t.fv →
         Synth κ Γ (.app e₁ (.fvar y)) (t.openVar 0 y)
 
     | leq_var {κ Γ x y r₁ r₂} :
@@ -91,15 +92,13 @@ mutual
         Subtyp κ Γ s t →
         Check κ Γ e t
 
-    | lam {κ Γ e s₁ s₂ x} :
-        x ∉ (TEnv.dom Γ ++ (e.fv ++ s₂.fv)) →
-        Check κ ((x, s₁) :: Γ) (e.openVar 0 x) (s₂.openVar 0 x) →
+    | lam {κ Γ e s₁ s₂} (L : List EVar) :
+        (∀ x, x ∉ L → Check κ ((x, s₁) :: Γ) (e.openVar 0 x) (s₂.openVar 0 x)) →
         Check κ Γ (.lam e) (.arrow s₁ s₂)
 
-    | letin {κ Γ e₁ e₂ s t x}:
+    | letin {κ Γ e₁ e₂ s t} (L : List EVar) :
         Synth κ Γ e₁ s →
-        x ∉ TEnv.dom Γ ++ e₂.fv ++ t.fv →
-        Check κ ((x, s) :: Γ) (e₂.openVar 0 x) t →
+        (∀ x, x ∉ L → Check κ ((x, s) :: Γ) (e₂.openVar 0 x) t) →
         Check κ Γ (.letin e₁ e₂) t
 
     | ite {κ Γ x e₁ e₂ r t} :

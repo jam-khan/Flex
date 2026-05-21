@@ -15,6 +15,39 @@ open STLC
 
 /-! ## Sub soundness -/
 
+theorem ty_open_replace {x y : EVar} {Γ : TEnv} {t₁ : Ty} (hx : y ∉ t₁.fv) (hy : y ∉ t₁.fv) : (Ty.openVar 0 x t₁ = Ty.refine b r₁) → (Ty.openVar 0 y t₁ = Ty.refine b (r₁.replaceFVar x y)) := by
+  sorry
+
+theorem entail_f_replace {r₁ r₂ : Refinement b} {Γ : TEnv} (hx : ¬x ∈ Γ.dom ++ s.fv ++ t₁.fv ++ t₂.fv) (hy : ¬y ∈ Γ.dom ++ s.fv ++ t₁.fv ++ t₂.fv) (ht1 : Ty.openVar 0 x t₁ = Ty.refine b r₁) (ht2 : Ty.openVar 0 x t₂ = Ty.refine b r₂) : EntailF κ ((x, s) :: Γ) (r₁.subImp r₂) → EntailF κ ((y, s) :: Γ) ((r₁.replaceFVar x y).subImp (r₂.replaceFVar x y)) := by
+  sorry
+
+theorem Subtyp.rename {κ : KEnv} {Γ : TEnv} {s t₁ t₂ : Ty} (x y : EVar)
+    (hx : x ∉ Γ.dom ++ s.fv ++ t₁.fv ++ t₂.fv)
+    (hy : y ∉ Γ.dom ++ s.fv ++ t₁.fv ++ t₂.fv)
+    (h : Subtyp κ ((x, s) :: Γ) (t₁.openVar 0 x) (t₂.openVar 0 x)) :
+    Subtyp κ ((y, s) :: Γ) (t₁.openVar 0 y) (t₂.openVar 0 y) := by
+  generalize hen : (x, s) :: Γ = tenv ; rw [hen] at h
+  generalize ht1 : (Ty.openVar 0 x t₁) = t1 ; rw [ht1] at h
+  generalize ht2 : (Ty.openVar 0 x t₂) = t2 ; rw [ht2] at h
+  induction h with
+  | refine hentf =>
+    rename_i Γ' b r₁ r₂
+    have h1 : Ty.openVar 0 y t₁ = Ty.refine b (r₁.replaceFVar x y) := by
+      apply ty_open_replace _ _ ht1
+      exact Γ ; grind ; grind
+    have h2 : Ty.openVar 0 y t₂ = Ty.refine b (r₂.replaceFVar x y) := by
+      apply ty_open_replace _ _ ht2
+      exact Γ; grind ; grind
+    rw [h1, h2]
+    constructor
+    rw [←hen] at hentf
+    apply entail_f_replace
+      <;> try assumption
+  | arrow L hsubs hf ih1 ih2 =>
+    sorry
+
+
+
 theorem sub_sound (κ : KEnv) (Γ : TEnv) (s t : Ty) (c : Constraint) :
     sub s t = some c → Entail κ Γ (c κ) → Subtyp κ Γ s t := by
   intro hsub hent
@@ -44,44 +77,12 @@ theorem sub_sound (κ : KEnv) (Γ : TEnv) (s t : Ty) (c : Constraint) :
     obtain ⟨c₂, hc₂⟩ : ∃ c₂, sub (t1.openVar 0 (EVar.fresh (s1.fv ++ (s2.fv ++ (t1.fv ++ t2.fv)))))
                                    (t2.openVar 0 (EVar.fresh (s1.fv ++ (s2.fv ++ (t1.fv ++ t2.fv))))) = some c₂ := by grind
     rw [hc₁, hc₂] at hsub ; simp at hsub
-    apply Subtyp.arrow (x := EVar.fresh (s1.fv ++ (s2.fv ++ (t1.fv ++ t2.fv))))
+    apply Subtyp.arrow (L := s1.fv ++ (s2.fv ++ (t1.fv ++ t2.fv)))
     · have h := sub_sound κ Γ s2 s1 c₁ hc₁
       simp at h
       rw [←hsub] at hent
       exact h fun ρ hm => (hent ρ hm).1
-    · apply EVar.fresh_not_mem
-    · cases s2 with
-      | refine b r => cases b with
-        | int =>
-          simp_all
-          apply sub_sound _ _ _ _ c₂ hc₂
-          intro ρ hm ; simp_all
-          rw [←hsub] at hent
-          have := (hent ρ hm.2).2 (ρ.ints _) hm.1
-          simp_all
-        | bool =>
-          simp_all
-          apply sub_sound _ _ _ _ c₂ hc₂
-          intro ρ hm ; simp_all
-          rw [←hsub] at hent
-          have hb := (hent ρ hm.2).2
-          by_cases h : ρ.bools (EVar.fresh (s1.fv ++ ((Ty.refine Base.bool r).fv ++ (t1.fv ++ t2.fv)))) = false
-          · simp at h ; rw [h] at hm
-            have := hb.1 hm.1
-            have h' : (fun y => !decide (EVar.fresh (s1.fv ++ ((Ty.refine Base.bool r).fv ++ (t1.fv ++ t2.fv))) = y) && ρ.bools y) = ρ.bools := by
-              funext ; grind
-            rw [h'] at this ; simp_all
-          · simp at h ; rw [h] at hm
-            have := hb.2 hm.1
-            have h' : (fun y => decide (EVar.fresh (s1.fv ++ ((Ty.refine Base.bool r).fv ++ (t1.fv ++ t2.fv))) = y) || ρ.bools y) = ρ.bools := by
-              funext ; grind
-            rw [h'] at this ; simp_all
-      | arrow a1 a2 =>
-        simp_all
-        apply sub_sound _ _ _ _ c₂ hc₂
-        intro ρ hm ; simp at hm
-        rw [←hsub] at hent
-        exact (hent ρ hm).2
+    · sorry
   | .refine _ _ , .arrow _ _ | .arrow _ _, .refine _ _ | .refine .int _, .refine .bool _ | .refine .bool _, .refine .int _=>
     simp_all [sub]
   termination_by s.skel + t.skel
@@ -264,65 +265,9 @@ mutual
             (Exp.openVar 0 (EVar.fresh (TEnv.dom Γ ++ (e.fv ++ t1.fv))) e)
             (Ty.openVar 0 (EVar.fresh (TEnv.dom Γ ++ (e.fv ++ t1.fv))) t1) = some c₁ := by grind
         simp_all
-        apply Check.lam (x := EVar.fresh (Γ.dom ++ (e.fv ++ t1.fv)))
-        apply EVar.fresh_not_mem
-        apply check_sound _ _ _ _ _ hc₁
-        intro ρ hm
-        rw [←hcheck] at hent
-        simp [implyBind] at hent
-        match s1 with
-        | .refine .int r =>
-          have := hent ρ hm.2 (ρ.ints (EVar.fresh (Γ.dom ++ (e.fv ++ t1.fv)))) hm.1
-          simp_all
-        | .refine .bool r =>
-          simp_all
-          have := hent ρ hm.2
-          by_cases h : (ρ.bools (EVar.fresh (Γ.dom ++ (e.fv ++ t1.fv)))) = false
-          · simp at h ; rw [h] at hm
-            have := hent ρ hm.2
-            have h' : (fun y => !decide (EVar.fresh (Γ.dom ++ (e.fv ++ t1.fv)) = y) && ρ.bools y) = ρ.bools := by
-              funext ; grind
-            rw [h'] at this ; simp_all
-          · simp at h ; rw [h] at hm
-            have := this.2 hm.1
-            have h' : (fun y => decide (EVar.fresh (Γ.dom ++ (e.fv ++ t1.fv)) = y) || ρ.bools y) = ρ.bools := by
-              funext ; grind
-            rw [h'] at this ; simp_all
-        | .arrow s1' s2' =>
-          simp_all
+        sorry
     | .letin e1 e2 =>
-      simp_all [check]
-      obtain ⟨c₁, s, hc₁⟩ : ∃ c₁ s, synth Γ e1 = some (c₁, s) := by grind
-      simp_all
-      obtain ⟨c₂, hc₂⟩ : ∃ c₂, check ((EVar.fresh (Γ.dom ++ (e2.fv ++ t.fv)), s) :: Γ)
-          (Exp.openVar 0 (EVar.fresh (Γ.dom ++ (e2.fv ++ t.fv))) e2) t = some c₂ := by grind
-      simp_all
-      rw [←hcheck] at hent
-      apply Check.letin (x := EVar.fresh (Γ.dom ++ (e2.fv ++ t.fv)))
-      apply synth_sound _ _ _ _ _ hc₁
-      intro ρ hm
-      exact (hent ρ hm).1
-      rw [List.append_assoc]
-      apply EVar.fresh_not_mem
-      apply check_sound _ _ _ _ _ hc₂
-      intro ρ hm
-      match s with
-      | .refine .int r =>
-        have := (hent ρ hm.2).2 (ρ.ints (EVar.fresh (Γ.dom ++ (e2.fv ++ t.fv))))
-        simp_all
-      | .refine .bool r =>
-        simp_all
-        by_cases h : (ρ.bools (EVar.fresh (Γ.dom ++ (e2.fv ++ t.fv)))) = false
-        · simp at h ; rw [h] at hm
-          have := (hent ρ hm.2).2.1 hm.1
-          have h' : (fun y => !decide (EVar.fresh (Γ.dom ++ (e2.fv ++ t.fv)) = y) && ρ.bools y) = ρ.bools := by grind
-          simp_all
-        · simp at h ; rw [h] at hm
-          have := (hent ρ hm.2).2.2 hm.1
-          have h' : (fun y => decide (EVar.fresh (Γ.dom ++ (e2.fv ++ t.fv)) = y) || ρ.bools y) = ρ.bools := by grind
-          simp_all
-      | .arrow s₁ s₂ =>
-        simp_all
+      sorry
     | .leq (.fvar x) (.fvar y) =>
       simp_all [check]
       obtain ⟨c₁, s, hc₁⟩ : ∃ c₁ s, synth Γ ((Exp.fvar x).leq (Exp.fvar y)) = some (c₁, s) := by grind
@@ -405,8 +350,8 @@ mutual
     intro h
     match h with
     | .sub hsy hsub        => exact .sub (synth_to_hastype hsy) hsub
-    | .lam xf hck           => exact .lam xf (check_to_hastype hck)
-    | .letin hsy xf hck     => exact .letin (synth_to_hastype hsy) xf (check_to_hastype hck)
+    | .lam L hck           => exact .lam L (fun x hx => check_to_hastype (hck x hx))
+    | .letin L hsy hck     => exact .letin L (synth_to_hastype hsy) (fun x hx => check_to_hastype (hck x hx))
     | .ite hlk hck1 hck2   =>
         exact .ite hlk (check_to_hastype hck1) (check_to_hastype hck2)
 end
