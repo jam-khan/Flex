@@ -19,6 +19,8 @@ inductive Hastype : KEnv → TEnv → Exp → Ty → Prop where
       Hastype κ Γ e₁ (.arrow s t) →
       Hastype κ Γ (.fvar y) s →
       y ∉ t.fv →
+      y ∉ Ty.named t →
+      y ≠ nuName →
       Hastype κ Γ (.app e₁ (.fvar y)) (t.openVar 0 y)
   | letin {κ Γ e₁ e₂ s t} (L : List EVar) :
       Hastype κ Γ e₁ s →
@@ -124,7 +126,7 @@ theorem Hastype.fv_subset {κ Γ e t} (_h : Hastype κ Γ e t) :
     rcases zf
         <;> grind [List.lookup_eq_some_iff]
   | sub => grind
-  | @app Γ' e₁ y s t hht1 hht2 _hyfv ih1 ih2 =>
+  | @app Γ' e₁ y s t hht1 hht2 _hyfv _hynamed _hyν ih1 ih2 =>
     simp [Exp.fv] at zf
     rcases zf with hzf1 | hzf2
     · exact ih1 hzf1
@@ -146,7 +148,7 @@ theorem Hastype.lc_at {κ Γ e t} (_h : Hastype κ Γ e t) : Exp.lc_at 0 e := by
     simp only [Exp.lc_at]
     obtain ⟨x, hxL⟩ := EVar.freshWith L
     exact Exp.lc_at_of_openVar _ 0 x (ih x hxL)
-  | app _ _ _ ih₁ ih₂ =>
+  | app _ _ _ _ _ ih₁ ih₂ =>
     simp only [Exp.lc_at]; exact ⟨ih₁, ih₂⟩
   | letin L _ _ ih₁ ih₂ =>
     simp only [Exp.lc_at]
