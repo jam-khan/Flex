@@ -2383,4 +2383,160 @@ theorem Refinement.fv_filter_of_ne_nu {b : Base} (r : Refinement b) (x : EVar)
   intro hmem
   grind
 
+/-! ## fv/named monotonicity under openVar -/
+
+/-- Opening a `Term` with `z` can only add `z` to the free variables. -/
+private theorem Term.fv_openBVar_subset {b : Base} (b' : Base) (k : Nat) (z : EVar)
+    (t : Term b) : ∀ y ∈ Term.fv (Term.openBVar b' k z t), y = z ∨ y ∈ Term.fv t := by
+  induction t with
+  | const _ _ => simp [Term.openBVar, Term.fv]
+  | bvar b'' j =>
+    intro y hy
+    cases b'' <;> cases b' <;> simp only [Term.openBVar, Term.fv] at hy ⊢ <;>
+    (by_cases h : j = k <;> simp_all [Term.fv])
+  | fvar _ _ =>
+    intro y hy; simp only [Term.openBVar, Term.fv, List.mem_singleton] at hy ⊢; exact Or.inr (by simpa)
+  | add t₁ t₂ ih₁ ih₂ =>
+    intro y hy
+    simp only [Term.openBVar, Term.fv, List.mem_append] at hy ⊢
+    rcases hy with h | h
+    · rcases ih₁ y h with h' | h'
+      · exact Or.inl h'
+      · exact Or.inr (Or.inl h')
+    · rcases ih₂ y h with h' | h'
+      · exact Or.inl h'
+      · exact Or.inr (Or.inr h')
+  | not t ih =>
+    simp only [Term.openBVar, Term.fv]; exact ih
+  | and t₁ t₂ ih₁ ih₂ =>
+    intro y hy
+    simp only [Term.openBVar, Term.fv, List.mem_append] at hy ⊢
+    rcases hy with h | h
+    · rcases ih₁ y h with h' | h'
+      · exact Or.inl h'
+      · exact Or.inr (Or.inl h')
+    · rcases ih₂ y h with h' | h'
+      · exact Or.inl h'
+      · exact Or.inr (Or.inr h')
+
+/-- Opening a `Formula` with `z` can only add `z` to the free variables. -/
+private theorem Formula.fv_openBVar_subset (b' : Base) (k : Nat) (z : EVar)
+    (φ : Formula) : ∀ y ∈ Formula.fv (φ.openBVar b' k z), y = z ∨ y ∈ Formula.fv φ := by
+  induction φ with
+  | tt | ff => simp [Formula.openBVar, Formula.fv]
+  | eqI t₁ t₂ | eqB t₁ t₂ | leqI t₁ t₂ =>
+    intro y hy
+    simp only [Formula.openBVar, Formula.fv, List.mem_append] at hy ⊢
+    rcases hy with h | h
+    · rcases Term.fv_openBVar_subset b' k z t₁ y h with h' | h'
+      · exact Or.inl h'
+      · exact Or.inr (Or.inl h')
+    · rcases Term.fv_openBVar_subset b' k z t₂ y h with h' | h'
+      · exact Or.inl h'
+      · exact Or.inr (Or.inr h')
+  | and φ₁ φ₂ ih₁ ih₂ | or φ₁ φ₂ ih₁ ih₂ | imp φ₁ φ₂ ih₁ ih₂ =>
+    intro y hy
+    simp only [Formula.openBVar, Formula.fv, List.mem_append] at hy ⊢
+    rcases hy with h | h
+    · rcases ih₁ y h with h' | h'
+      · exact Or.inl h'
+      · exact Or.inr (Or.inl h')
+    · rcases ih₂ y h with h' | h'
+      · exact Or.inl h'
+      · exact Or.inr (Or.inr h')
+  | not φ ih =>
+    simp only [Formula.openBVar, Formula.fv]; exact ih
+  | exI w φ ih | exB w φ ih | allI w φ ih | allB w φ ih =>
+    intro y hy
+    simp only [Formula.openBVar, Formula.fv, List.mem_filter] at hy ⊢
+    obtain ⟨hy_mem, hy_ne⟩ := hy
+    rcases ih y hy_mem with h | h
+    · exact Or.inl h
+    · exact Or.inr ⟨h, hy_ne⟩
+  | kapp name args =>
+    intro y hy
+    simp only [Formula.openBVar, Formula.fv, List.mem_flatMap, List.mem_map] at hy ⊢
+    obtain ⟨a, ⟨a₀, ha₀_mem, rfl⟩, hy_in⟩ := hy
+    rcases Term.fv_openBVar_subset b' k z a₀.2 y hy_in with h | h
+    · exact Or.inl h
+    · exact Or.inr ⟨a₀, ha₀_mem, h⟩
+
+/-- Opening `Ty` with `z` doesn't add any `x ≠ z` to the free variables. -/
+theorem Ty.fv_openVar_not_mem (t : Ty) (k : Nat) (z x : EVar)
+    (hx : x ∉ t.fv) (hxz : x ≠ z) : x ∉ (t.openVar k z).fv := by
+  induction t generalizing k with
+  | refine b r =>
+    simp only [Ty.openVar, Ty.fv, Refinement.fv, Refinement.openBVar]
+    intro hmem
+    simp only [List.mem_filter] at hmem
+    obtain ⟨hmem', hnu⟩ := hmem
+    -- hmem' : x ∈ (r.fmla.openBVar .int k z).openBVar .bool k z).fv
+    have hstep : ∀ y ∈ Formula.fv ((r.fmla.openBVar .int k z).openBVar .bool k z), y = z ∨ y ∈ Formula.fv r.fmla := by
+      intro y hy
+      rcases Formula.fv_openBVar_subset .bool k z _ y hy with h | h
+      · exact Or.inl h
+      · rcases Formula.fv_openBVar_subset .int k z r.fmla y h with h' | h'
+        · exact Or.inl h'
+        · exact Or.inr h'
+    rcases hstep x hmem' with h | h
+    · exact hxz h
+    · apply hx; simp only [Ty.fv, Refinement.fv, List.mem_filter]; exact ⟨h, hnu⟩
+  | arrow s t ihs iht =>
+    simp only [Ty.openVar, Ty.fv, List.mem_append, not_or]
+    simp only [Ty.fv, List.mem_append, not_or] at hx
+    exact ⟨ihs k hx.1, iht (k + 1) hx.2⟩
+
+/-- Opening `Ty` with `z` doesn't add any `x ≠ z` to the named binders. -/
+theorem Ty.named_openVar_not_mem (t : Ty) (k : Nat) (z x : EVar)
+    (hx : x ∉ Ty.named t) (hxz : x ≠ z) : x ∉ Ty.named (t.openVar k z) := by
+  induction t generalizing k with
+  | refine b r =>
+    simp only [Ty.openVar, Ty.named, Refinement.openBVar]
+    -- Need: x ∉ (r.fmla.openBVar .int k z).openBVar .bool k z).named
+    simp only [Ty.named] at hx
+    -- Show named is preserved under openBVar (binder names unchanged, kapp adds only z)
+    suffices h : ∀ (φ : Formula), x ∉ φ.named → x ∉ (φ.openBVar .bool k z).named by
+      apply h
+      suffices h2 : ∀ (φ : Formula), x ∉ φ.named → x ∉ (φ.openBVar .int k z).named from
+        h2 r.fmla hx
+      intro φ hφ
+      induction φ with
+      | tt | ff | eqI _ _ | eqB _ _ | leqI _ _ => simp [Formula.openBVar, Formula.named]
+      | and φ₁ φ₂ ih₁ ih₂ | or φ₁ φ₂ ih₁ ih₂ | imp φ₁ φ₂ ih₁ ih₂ =>
+        simp only [Formula.openBVar, Formula.named, List.mem_append, not_or] at *
+        exact ⟨ih₁ hφ.1, ih₂ hφ.2⟩
+      | not φ ih => simp [Formula.openBVar, Formula.named] at *; exact ih hφ
+      | exI w φ ih | exB w φ ih | allI w φ ih | allB w φ ih =>
+        simp only [Formula.openBVar, Formula.named, List.mem_cons, not_or] at *
+        exact ⟨hφ.1, ih hφ.2⟩
+      | kapp name args =>
+        simp only [Formula.openBVar, Formula.named, List.mem_flatMap, List.mem_map] at *
+        intro hx_mem
+        apply hφ
+        obtain ⟨a, ⟨a₀, ha₀_mem, rfl⟩, hy_in⟩ := hx_mem
+        rcases Term.fv_openBVar_subset .int k z a₀.2 x hy_in with h | h
+        · exact absurd h hxz
+        · exact ⟨a₀, ha₀_mem, h⟩
+    intro φ hφ
+    induction φ with
+    | tt | ff | eqI _ _ | eqB _ _ | leqI _ _ => simp [Formula.openBVar, Formula.named]
+    | and φ₁ φ₂ ih₁ ih₂ | or φ₁ φ₂ ih₁ ih₂ | imp φ₁ φ₂ ih₁ ih₂ =>
+      simp only [Formula.openBVar, Formula.named, List.mem_append, not_or] at *
+      exact ⟨ih₁ hφ.1, ih₂ hφ.2⟩
+    | not φ ih => simp [Formula.openBVar, Formula.named] at *; exact ih hφ
+    | exI w φ ih | exB w φ ih | allI w φ ih | allB w φ ih =>
+      simp only [Formula.openBVar, Formula.named, List.mem_cons, not_or] at *
+      exact ⟨hφ.1, ih hφ.2⟩
+    | kapp name args =>
+      simp only [Formula.openBVar, Formula.named, List.mem_flatMap, List.mem_map] at *
+      intro hx_mem
+      apply hφ
+      obtain ⟨a, ⟨a₀, ha₀_mem, rfl⟩, hy_in⟩ := hx_mem
+      rcases Term.fv_openBVar_subset .bool k z a₀.2 x hy_in with h | h
+      · exact absurd h hxz
+      · exact ⟨a₀, ha₀_mem, h⟩
+  | arrow s t ihs iht =>
+    simp only [Ty.openVar, Ty.named, List.mem_append, not_or] at *
+    exact ⟨ihs k hx.1, iht (k + 1) hx.2⟩
+
 end STLC

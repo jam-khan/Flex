@@ -233,6 +233,19 @@ theorem EnvAgrees.extendBy_idem {κ Γ γ ρ x s va}
       | clos _   => simp only [REnv.extendBy]
   | arrow _ _ => simp [REnv.extendBy]
 
+/-! ## extendBy commutativity and extendBy_fresh -/
+
+/-- `extendBy` at two different variables commutes. -/
+private theorem REnv.extendBy_comm (s s' : Ty) (ρ : REnv) (x z : EVar) (va va' : Val)
+    (hxz : x ≠ z) :
+    REnv.extendBy s (REnv.extendBy s' ρ z va') x va =
+    REnv.extendBy s' (REnv.extendBy s ρ x va) z va' := by
+  rcases s with (_ | _ | _) | _ <;> rcases s' with (_ | _ | _) | _ <;>
+    rcases va with n | bv | _ <;> rcases va' with n' | bv' | _ <;>
+    simp only [REnv.extendBy]
+  · exact (REnv.update_int_int_comm ρ x z hxz n n').symm
+  · exact (REnv.update_bool_bool_comm ρ x z hxz bv bv').symm
+
 /-! ## TyDenote.rename and EnvAgrees.extend — rename helpers -/
 
 /-- Rename the cofinite witness in TyDenote: if `v` is in the denotation of
@@ -277,6 +290,79 @@ private theorem Refinement.interp_extendBy_fresh {κ : KEnv} {b : Base} (r : Ref
     rw [hcomm]
     assumption
 
+/-- Combined Iff proved by strong induction on `t.skel`.
+    Derives both `extendBy_fresh` and `of_extendBy_fresh` as corollaries. -/
+private theorem TyDenote.extendBy_fresh_iff_aux (n : Nat) :
+    ∀ (κ : KEnv) (t : Ty) (_ : t.skel ≤ n) (ρ : REnv) (v : Val)
+      (s : Ty) (x : EVar) (va : Val)
+      (_ : x ∉ t.fv) (_ : x ∉ Ty.named t) (_ : x ≠ nuName),
+      TyDenote κ t ρ v ↔ TyDenote κ t (REnv.extendBy s ρ x va) v := by
+  induction n with
+  | zero =>
+    intro κ t hn ρ v s x va hx hxn hxν
+    match t with
+    | .refine b r =>
+      have hx' := Refinement.fv_filter_of_ne_nu r x hx hxν
+      have hxn' : x ∉ r.fmla.named := by simpa [Ty.named] using hxn
+      cases b <;> simp only [TyDenote] <;> constructor
+      · intro ⟨m, hvm, hp⟩; exact ⟨m, hvm, (Refinement.interp_extendBy_fresh r s x va ρ hx' hxn' hxν).mp hp⟩
+      · intro ⟨m, hvm, hp⟩; exact ⟨m, hvm, (Refinement.interp_extendBy_fresh r s x va ρ hx' hxn' hxν).mpr hp⟩
+      · intro ⟨b, hvb, hp⟩; exact ⟨b, hvb, (Refinement.interp_extendBy_fresh r s x va ρ hx' hxn' hxν).mp hp⟩
+      · intro ⟨b, hvb, hp⟩; exact ⟨b, hvb, (Refinement.interp_extendBy_fresh r s x va ρ hx' hxn' hxν).mpr hp⟩
+    | .arrow _ _ => simp [Ty.skel] at hn
+  | succ n ih =>
+    intro κ t hn ρ v s x va hx hxn hxν
+    match t with
+    | .refine b r =>
+      have hx' := Refinement.fv_filter_of_ne_nu r x hx hxν
+      have hxn' : x ∉ r.fmla.named := by simpa [Ty.named] using hxn
+      cases b <;> simp only [TyDenote] <;> constructor
+      · intro ⟨m, hvm, hp⟩; exact ⟨m, hvm, (Refinement.interp_extendBy_fresh r s x va ρ hx' hxn' hxν).mp hp⟩
+      · intro ⟨m, hvm, hp⟩; exact ⟨m, hvm, (Refinement.interp_extendBy_fresh r s x va ρ hx' hxn' hxν).mpr hp⟩
+      · intro ⟨b, hvb, hp⟩; exact ⟨b, hvb, (Refinement.interp_extendBy_fresh r s x va ρ hx' hxn' hxν).mp hp⟩
+      · intro ⟨b, hvb, hp⟩; exact ⟨b, hvb, (Refinement.interp_extendBy_fresh r s x va ρ hx' hxn' hxν).mpr hp⟩
+    | .arrow s' t' =>
+      simp only [Ty.skel] at hn
+      have hns' : s'.skel ≤ n := by omega
+      have hnt' : t'.skel ≤ n := by omega
+      simp only [Ty.fv, List.mem_append, not_or] at hx
+      simp only [Ty.named, List.mem_append, not_or] at hxn
+      simp only [TyDenote]
+      constructor
+      · -- extendBy_fresh direction
+        intro ⟨body, hvclos, hlc, hcl, L, hLR⟩
+        refine ⟨body, hvclos, hlc, hcl, L ++ [x], fun z hzL va' htd_va' => ?_⟩
+        simp only [List.mem_append, List.mem_singleton, not_or] at hzL
+        obtain ⟨hzL', hzx⟩ := hzL
+        have hzx : x ≠ z := by grind
+        have htd_va'_ρ : TyDenote κ s' ρ va' :=
+          (ih κ s' hns' ρ va' s x va hx.1 hxn.1 hxν).mpr htd_va'
+        obtain ⟨vr, hbs_vr, htd_vr⟩ := hLR z hzL' va' htd_va'_ρ
+        have hnt'z : (t'.openVar 0 z).skel ≤ n := by
+          rw [Ty.skel_openVar]; exact hnt'
+        have hx_t'z := Ty.fv_openVar_not_mem t' 0 z x hx.2 hzx
+        have hxn_t'z := Ty.named_openVar_not_mem t' 0 z x hxn.2 hzx
+        have htd_vr' :=
+          (ih κ (t'.openVar 0 z) hnt'z (REnv.extendBy s' ρ z va') vr s x va hx_t'z hxn_t'z hxν).mp htd_vr
+        rw [REnv.extendBy_comm s s' ρ x z va va' hzx] at htd_vr'
+        exact ⟨vr, hbs_vr, htd_vr'⟩
+      · -- of_extendBy_fresh direction
+        intro ⟨body, hvclos, hlc, hcl, L, hLR⟩
+        refine ⟨body, hvclos, hlc, hcl, L ++ [x], fun z hzL va' htd_va' => ?_⟩
+        simp only [List.mem_append, List.mem_singleton, not_or] at hzL
+        obtain ⟨hzL', hzx⟩ := hzL
+        have hzx : x ≠ z := by grind
+        have htd_va'_ext : TyDenote κ s' (REnv.extendBy s ρ x va) va' :=
+          (ih κ s' hns' ρ va' s x va hx.1 hxn.1 hxν).mp htd_va'
+        obtain ⟨vr, hbs_vr, htd_vr⟩ := hLR z hzL' va' htd_va'_ext
+        rw [← REnv.extendBy_comm s s' ρ x z va va' hzx] at htd_vr
+        have hnt'z : (t'.openVar 0 z).skel ≤ n := by
+          rw [Ty.skel_openVar]; exact hnt'
+        have hx_t'z := Ty.fv_openVar_not_mem t' 0 z x hx.2 hzx
+        have hxn_t'z := Ty.named_openVar_not_mem t' 0 z x hxn.2 hzx
+        exact ⟨vr, hbs_vr,
+          (ih κ (t'.openVar 0 z) hnt'z (REnv.extendBy s' ρ z va') vr s x va hx_t'z hxn_t'z hxν).mpr htd_vr⟩
+
 /-- TyDenote is monotone under extension at a variable x that doesn't appear
     freely in t or as a named binder in t's formulas. -/
 theorem TyDenote.extendBy_fresh {κ : KEnv} {t : Ty} {ρ : REnv} {v : Val}
@@ -304,38 +390,15 @@ theorem TyDenote.extendBy_fresh {κ : KEnv} {t : Ty} {ρ : REnv} {v : Val}
       have hxn' : x ∉ r.fmla.named := by simpa [Ty.named] using hxn
       exact (Refinement.interp_extendBy_fresh r s x va ρ hx' hxn' hxν).mp hp
   | arrow s' t' =>
-    -- Arrow case: the closure witness/lc/closed are unchanged;
-    -- for the cofinite body, use the same L and apply IH.
-    -- This requires showing extendBy commutes with the body's extendBy at a fresh z.
-    -- Proved by mutual induction on t.skel; we use sorry here for this sub-case.
-    sorry
+    exact (TyDenote.extendBy_fresh_iff_aux (Ty.arrow s' t').skel κ (.arrow s' t') (by omega) ρ v s x va hx hxn hxν).mp h
 
 /-- Reverse direction: TyDenote under extendBy at fresh x implies TyDenote at ρ. -/
 theorem TyDenote.of_extendBy_fresh {κ : KEnv} {t : Ty} {ρ : REnv} {v : Val}
     (s : Ty) (x : EVar) (va : Val)
     (hx : x ∉ t.fv) (hxn : x ∉ Ty.named t) (hxν : x ≠ nuName)
     (h : TyDenote κ t (REnv.extendBy s ρ x va) v) :
-    TyDenote κ t ρ v := by
-  cases t with
-  | refine b r =>
-    cases b with
-    | int =>
-      simp only [TyDenote] at h ⊢
-      obtain ⟨n, hvn, hp⟩ := h
-      refine ⟨n, hvn, ?_⟩
-      have hx' : x ∉ r.fmla.fv :=
-        Refinement.fv_filter_of_ne_nu r x hx hxν
-      have hxn' : x ∉ r.fmla.named := by simpa [Ty.named] using hxn
-      exact (Refinement.interp_extendBy_fresh r s x va ρ hx' hxn' hxν).mpr hp
-    | bool =>
-      simp only [TyDenote] at h ⊢
-      obtain ⟨bv, hvb, hp⟩ := h
-      refine ⟨bv, hvb, ?_⟩
-      have hx' : x ∉ r.fmla.fv :=
-        Refinement.fv_filter_of_ne_nu r x hx hxν
-      have hxn' : x ∉ r.fmla.named := by simpa [Ty.named] using hxn
-      exact (Refinement.interp_extendBy_fresh r s x va ρ hx' hxn' hxν).mpr hp
-  | arrow _ _ => sorry
+    TyDenote κ t ρ v :=
+  (TyDenote.extendBy_fresh_iff_aux t.skel κ t (by omega) ρ v s x va hx hxn hxν).mpr h
 
 /-- Helper: extendBy at x ≠ y does not change ρ.ints y or ρ.bools y. -/
 private theorem REnv.extendBy_ints_other (s : Ty) (ρ : REnv) (x y : EVar) (va : Val)
