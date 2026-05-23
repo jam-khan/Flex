@@ -6,16 +6,6 @@ import LeanFixpoint.Core.Fusion.Graph
 
 open Lean Meta
 
--- Replace κ(arg₁, ..., argₙ) with sol[z₀ := arg₁, ..., zₙ := argₙ]
-def substKVarInExpr (κ : KVar) (sol : Expr) (e : Expr) : Expr :=
-  e.replace fun sub =>
-    if sub.getAppFn.isMVar && sub.getAppFn.mvarId! == κ.mvarId then
-      let args := sub.getAppArgs
-      let result := (κ.params.zip args.toList).foldl
-        (fun acc (param, arg) => acc.replaceFVar (.fvar (FVarId.mk param)) arg) sol
-      some result
-    else none
-
 /-! ## Expr-direct fusion functions
 
   These operate directly on `Lean.Expr` instead of the `Constraint` AST.
@@ -234,8 +224,6 @@ partial def collectKAppArgs (κ : KVar) (e : Expr) : List (Array Expr) :=
 def exprElim1 (κ : KVar) (e : Expr) : KM (Expr × Expr) := do
   let scoped' ← exprScope κ e
   let sol    ← exprSol1 κ scoped'
-  -- extra simplification added
-  -- let sol   := simplifyExpr sol
   let newE   ← exprElimStar κ sol e
   return (sol, newE)
 

@@ -1,20 +1,35 @@
 
 import Lean
+import LeanFixpoint.Core.Types
 
 open Lean Meta
 
 /-
-  Function to perform simplification on Expr.
+  Simplification over expression `e`.
 
-  This allows for simplified Expr, making it
-  easier to do the proof automatically.
+  Equational notation:
+  
+  ⟦ e₁ ∧ e₂ ⟧   =  False     if ⟦e₁⟧ = False  or  ⟦e₂⟧ = False
+              |  ⟦e₂⟧        if ⟦e₁⟧ = True
+              |  ⟦e₁⟧        if ⟦e₂⟧ = True
+              |  ⟦e₁⟧ ∧ ⟦e₂⟧  otherwise
+  ⟦ e₁ ∨ e₂ ⟧  =  True       if ⟦e₁⟧ = True  or  ⟦e₂⟧ = True
+              |  ⟦e₂⟧        if ⟦e₁⟧ = False
+              |  ⟦e₁⟧        if ⟦e₂⟧ = False
+              |  ⟦e₁⟧ ∨ ⟦e₂⟧  otherwise
+  ⟦ ∃ x : A, P ⟧ = False        if ⟦P⟧ = False        -- (body must be a λ)
+               | ∃ x : A, ⟦P⟧   otherwise
+                                -- if body is not a λ: ⟦e⟧ = e (unchanged)
+                                -- NOTE: A is NOT simplified here
+  ⟦ ∀ x : A, P ⟧ = True         if ⟦P⟧ = True         -- (when P uses x)
+               | ∀ x : ⟦A⟧, ⟦P⟧  otherwise
+  ⟦ A → B ⟧    =  True      if ⟦A⟧ = False        -- (when ∀'s body
+              |  ⟦B⟧        if ⟦A⟧ = True            ignores binder ⇒
+              |  True      if ⟦B⟧ = True             implication)
+              |  ⟦A⟧ → ⟦B⟧  otherwise
+  ⟦ e ⟧        =  e          otherwise (atoms, other connectives, etc.)
 -/
 partial def simplifyExpr (e : Expr) : Expr :=
-  -- Example interpretation for simplification over conjunction (∧)
-  -- [e₁ ∧ e₂] := ``False if [e₁] is False ∨ ![e₂] is False
-  --           |  [e₂]    if [e₁] is True
-  --           |  [e₁]    if [e₂] is True
-  --           |  [e₁] ∧ [e₂] otherwise
   if e.isAppOfArity ``And 2
   then
     let args  := e.getAppArgs
@@ -26,7 +41,6 @@ partial def simplifyExpr (e : Expr) : Expr :=
     else if l.isConstOf ``True then r
     else if r.isConstOf ``True then l
     else mkApp2 (mkConst ``And) l r
-  --  e₁ ∨ e₂
   else if e.isAppOfArity ``Or 2 then
     let args := e.getAppArgs
     let l    := simplifyExpr args[0]!
@@ -37,7 +51,6 @@ partial def simplifyExpr (e : Expr) : Expr :=
     else if l.isConstOf ``False then r
     else if r.isConstOf ``False then l
     else mkApp2 (mkConst ``Or) l r
-  -- ∃ x : A, e
   else if e.isAppOfArity ``Exists 2 then
     let args   := e.getAppArgs
     let ty     := args[0]!
@@ -49,30 +62,51 @@ partial def simplifyExpr (e : Expr) : Expr :=
       if b'.isConstOf ``False then mkConst ``False
       else mkApp2 (mkConst ``Exists univrs) ty (.lam n t b' bi)
     | _ => e
-  -- ∀ x : A, e (also, covers e₁ → e₂)
   else if e.isForall then
-    -- .forallE n t b bi:
-    -- implication if `b` has no loose bvar 0,
-    -- ∀ otherwise
     match e with
     | .forallE n t b bi =>
       let t' := simplifyExpr t
       let b' := simplifyExpr b
-      -- check if a de-bruijn refers to binder on ∀ x : A, ...
-      -- if no binder found, it is treated
-      -- as an implication
       if b.hasLooseBVar 0 then
-        -- binder found and body simplified is true, return true
-        -- ∀ x, e = True if [e] is ``True
         if b'.isConstOf ``True
         then mkConst ``True
-        -- else ∀ x, [e]
         else .forallE n t' b' bi
       else
-        -- P → Q
         if t'.isConstOf ``False then mkConst ``True
         else if t'.isConstOf ``True then b'
         else if b'.isConstOf ``True then mkConst ``True
         else .forallE n t' b' bi
     | _ => e
   else e
+
+/-
+  β-substitution for expression `e`
+
+  Arguments:
+  - κ   : refinement variable
+  - sol : solution for κ
+  - e   : expression in which κ occurs
+
+  `κ` is replaced with `sol` inside `e`.
+-/
+def substKVarInExpr (κ : KVar) (sol : Expr) (e : Expr) : Expr :=
+  e.replace
+    fun x =>
+      if  -- check if x is a function application `f a₁ .. aₙ`, then check if `f` is a meta-variable
+            x.getAppFn.isMVar
+          -- given `f` is a meta-variable, get meta-var id and compare to that of `κ`
+          -- if it is same, then proceed
+        &&  x.getAppFn.mvarId! == κ.mvarId
+        then
+          -- if x is `f a₁ .. aₙ`, then args gets `#[a₁, .., aₙ]`
+          let args := x.getAppArgs
+          -- Creates a list of (param, arg) pairs
+          -- then, performs a left fold operation passing `sol`
+          -- so, replaces `param` with `arg` in `sol`, and passes result as `acc`
+          -- and repeats this through each (`param`, `arg`) pair in the list.
+          let result := (κ.params.zip args.toList).foldl
+            (fun acc (param, arg) => acc.replaceFVar (.fvar (FVarId.mk param)) arg) sol
+          -- return result
+          some result
+      -- return none
+      else none
