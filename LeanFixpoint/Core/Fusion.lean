@@ -84,6 +84,24 @@ partial def exprScopeZapK (κ : KVar) (e : Expr) : KM Expr := do
   else
     return e
 
+/-- Smart `And`: `(_ ∧ False) = (False ∧ _) = False`, `(_ ∧ True) = _`.
+    Mirrors liquid-fixpoint's empty-cube absorption: when the inner sol1 is
+    `False`, the binder predicate above it is dropped, so dead κ-references
+    that would survive under `∧ False` never get built into the Expr. -/
+private def mkAndSmart (l r : Expr) : Expr :=
+  if l.isConstOf ``False || r.isConstOf ``False then mkConst ``False
+  else if l.isConstOf ``True then r
+  else if r.isConstOf ``True then l
+  else mkApp2 (mkConst ``And) l r
+
+/-- Smart `Or`: drops `False`, absorbs `True`. -/
+private def mkOrSmart (l r : Expr) : Expr :=
+  if l.isConstOf ``True || r.isConstOf ``True then mkConst ``True
+  else if l.isConstOf ``False then r
+  else if r.isConstOf ``False then l
+  else mkApp2 (mkConst ``Or) l r
+
+
 /-
 sol1(κ, c₁ ∧ c₂)        ≡ sol1(κ, c₁) ∨ sol1(κ, c₂)
 sol1(κ, ∀ x:b. p ⇒ c)   ≡ ∃x:b. p ∧ sol1(κ, c)
@@ -91,13 +109,15 @@ sol1(κ, κ(y₁, ..., yₙ)) ≡ x₁ = y₁ ∧ ... ∧ xₙ = yₙ
 sol1(κ, p)              ≡ false
 -/
 /-- `sol1(κ, e)` — strongest solution (Section 5.2).
-    Maps: `And → Or`, `∀(Prop) → And`, `∀(non-Prop) → ∃`, leaf κ-app → equality. -/
+    Maps: `And → Or`, `∀(Prop) → And`, `∀(non-Prop) → ∃`, leaf κ-app → equality.
+    Uses `mkAndSmart`/`mkOrSmart` and drops the ∃-wrap when the conjunct collapses
+    to `False`, mirroring liquid-fixpoint's `first (b :) <$> [] = []` absorption. -/
 partial def exprSol1 (κ : KVar) (e : Expr) : KM Expr := do
   -- let e ← whnf e
   let e ← exprScope κ e
   -- c₁ ∧ c₂
   if let some (l, r) := e.and? then
-    return mkApp2 (mkConst ``Or) (← exprSol1 κ l) (← exprSol1 κ r)
+    return mkOrSmart (← exprSol1 κ l) (← exprSol1 κ r)
   -- ∀ x : b. p ⇒ c
   else if e.isForall then
     let name := e.bindingName!
@@ -110,7 +130,7 @@ partial def exprSol1 (κ : KVar) (e : Expr) : KM Expr := do
       return ← withLocalDeclD name dom fun pfvar => do
         let body ← whnf (e.bindingBody!.instantiate1 pfvar)
         let inner ← exprSol1 κ body
-        return mkApp2 (mkConst ``And) dom inner
+        return mkAndSmart dom inner
 
     else
       -- ∀ x:b. body -- open x, and boyd is expected to be 'p ⇒ c'
@@ -126,24 +146,31 @@ partial def exprSol1 (κ : KVar) (e : Expr) : KM Expr := do
               withLocalDeclD body.bindingName! p fun pfvar => do
                 let c'  := body.bindingBody!.instantiate1 pfvar
                 let inner ← exprSol1 κ c'
-                return mkApp2 (mkConst ``And) p inner
+                return mkAndSmart p inner
             else
               exprSol1 κ body
           else
             exprSol1 κ body
-        -- Wrap ∃ x : b.
+        -- If the conjunct collapsed to False, drop the ∃ wrapper too —
+        -- this is the Expr-level analog of `first (b :) <$> [] = []`.
+        if conjunct.isConstOf ``False then
+          return mkConst ``False
         let abstr := conjunct.abstract #[fvar]
         let lam   := Expr.lam name dom abstr .default
         return mkApp2 (mkConst ``Exists [levelOne]) dom lam
   -- κ(y₁, ..., yₙ)
   else if e.getAppFn.isMVar && e.getAppFn.mvarId! == κ.mvarId then
     let args := e.getAppArgs.toList
-    let eqs := (κ.params.zip (args.zip κ.paramTypes)).map fun (pi, (ai, ty)) =>
-      mkApp3 (mkConst ``Eq [levelOne]) ty (.fvar (FVarId.mk pi)) ai
+    -- Build each equality `zᵢ = aᵢ`, but drop tautologies (`zᵢ = zᵢ`) that arise
+    -- when `stripScopePrefix` has already substituted the outer binder into `aᵢ`.
+    let eqs := (κ.params.zip (args.zip κ.paramTypes)).filterMap fun (pi, (ai, ty)) =>
+      let lhs : Expr := .fvar (FVarId.mk pi)
+      if lhs == ai then none
+      else some (mkApp3 (mkConst ``Eq [levelOne]) ty lhs ai)
     match eqs with
     | []      => return mkConst ``True
     | [eq]    => return eq
-    | eq :: rest => return rest.foldl (mkApp2 (mkConst ``And)) eq
+    | eq :: rest => return rest.foldl mkAndSmart eq
   else
     return mkConst ``False
 
@@ -210,6 +237,90 @@ partial def collectKAppArgs (κ : KVar) (e : Expr) : List (Array Expr) :=
     | _                => []
   hit ++ childHits
 
+/-- Find a κ-param position that `binderFvar` *consistently* fills across all
+    κ-applications in `body`.
+
+    For each κ-app, collect the set of positions where `binderFvar` appears.
+    Then the **universal positions** are those present in *every* κ-app's set.
+    If any universal position exists, return the smallest. Otherwise, fall back
+    to the last bare occurrence across all calls (legacy compatibility with the
+    pre-mvar-migration `resolveScopeParam`).
+
+    This tolerates binders that appear at multiple positions within a single
+    κ-app (common in FluxRS-generated VCs where the same value is passed both
+    as a base param and as a `.elems`/`.len` accessor target). -/
+def findOuterBinderToParam (κ : KVar) (binderFvar : FVarId) (body : Expr) : Option Nat :=
+  let kArgsList := collectKAppArgs κ body
+  let perCall : List (List Nat) := kArgsList.map fun args =>
+    (List.range args.size).filter fun i => args[i]! == .fvar binderFvar
+  let universal : List Nat :=
+    match perCall with
+    | []           => []
+    | first :: rest => first.filter fun i => rest.all (·.contains i)
+  match universal with
+  | i :: _ => some i
+  | []     =>
+    -- No universal position: fall back to last bare occurrence overall.
+    perCall.flatten.foldl (fun _ i => some i) (none : Option Nat)
+
+/-- `exprSolScoped κ e` — strip the κ-free outer ∀-prefix and compute sol1
+    on the inner `c'`, returning the paper's σ̂_body.
+
+    Behavior per outer ∀:
+    - **Type binder** `∀ x:T. body` — if `x` is consistently the i-th κ-arg,
+      record `(x_fvar, zᵢ)` to be substituted in the final sol. Otherwise
+      stop stripping and treat from this binder as part of `c'`.
+    - **Prop binder** `∀ _:p. body` (implication antecedent) — drop `p` and
+      descend (the hypothesis is in scope at every κ-use site, so the sol
+      doesn't repeat it).
+    - **κ-containing dom or non-∀** — `c'` starts here.
+
+    *Substitution is deferred*: we walk through `withLocalDeclD` keeping REAL
+    fvars in scope so that `exprSol1`'s `inferType`/`whnf` on sub-expressions
+    succeed (synthetic `FVarId.mk "zᵢ"` would fail since they're not in the
+    local context). Only AFTER sol1 builds the final sol do we substitute
+    each recorded fvar with its synthetic κ-param fvar — that substitution
+    is the analog of `solToWitnessExpr`'s param→fvar mapping. -/
+partial def exprSolScoped (κ : KVar) (e : Expr) : KM Expr :=
+  goStrip κ e []
+where
+  /-- Descend through the outer prefix, accumulating
+      `(fvar, paramName)` pairs of bindings we'll substitute on the final sol. -/
+  goStrip (κ : KVar) (e : Expr) (acc : List (FVarId × Name)) : KM Expr := do
+    if e.isForall then
+      let dom := e.bindingDomain!
+      if (← KM.exprKVars dom).contains κ then
+        finalize κ e acc
+      else
+        let domSort ← (inferType dom >>= whnf : MetaM Expr)
+        withLocalDeclD e.bindingName! dom fun fvar => do
+          let body := e.bindingBody!.instantiate1 fvar
+          if domSort.isProp then
+            goStrip κ body acc
+          else
+            match findOuterBinderToParam κ fvar.fvarId! body with
+            | some i =>
+              let paramName := κ.params[i]!
+              goStrip κ body (acc ++ [(fvar.fvarId!, paramName)])
+            | none =>
+              -- Stop stripping. Re-close `fvar` so c' is well-formed (no
+              -- dangling fvar after we exit this `withLocalDeclD`), then
+              -- hand off to finalize.
+              let bodyClosed := body.abstract #[fvar]
+              let cPrime := Expr.forallE e.bindingName! dom bodyClosed e.bindingInfo!
+              finalize κ cPrime acc
+    else
+      finalize κ e acc
+
+  /-- Build sol1 with REAL outer fvars in scope, then substitute each recorded
+      fvar with its synthetic κ-param fake-fvar. -/
+  finalize (κ : KVar) (cPrime : Expr) (acc : List (FVarId × Name)) : KM Expr := do
+    let sol ← exprSol1 κ cPrime
+    return acc.foldl
+      (fun s (fvarId, paramName) =>
+        s.replaceFVar (.fvar fvarId) (.fvar (FVarId.mk paramName)))
+      sol
+
 
 /-- `elim1(κ, c)` per Cosman & Jhala 2017 §5.3 (Fig. 11).
     Returns `(σ̂_body, elim*(σ̂, c))`:
@@ -223,8 +334,8 @@ partial def collectKAppArgs (κ : KVar) (e : Expr) : List (Array Expr) :=
 -- CHECK THIS
 def exprElim1 (κ : KVar) (e : Expr) : KM (Expr × Expr) := do
   let scoped' ← exprScope κ e
-  let sol    ← exprSol1 κ scoped'
-  let newE   ← exprElimStar κ sol e
+  let sol     ← exprSolScoped κ scoped'
+  let newE    ← exprElimStar κ sol e
   return (sol, newE)
 
 -- CHECK THIS
@@ -239,11 +350,13 @@ def exprElim (kvars : List KVar) (e : Expr) : KM (List (KVar × Expr) × Expr) :
 
 /-- Split κ-vars into (acyclic, cyclic). The acyclic list is topologically
     sorted so dependency sinks (no κ-deps) appear first — required so each
-    κ's sol is built only after its dependencies have been eliminated. -/
+    κ's sol is built only after its dependencies have been eliminated.
+
+    Uses `classifyKVars` (C-J §5.5 cut-set approach): compute SCCs, designate
+    a minimal cut set as cyclic, and treat *the rest as acyclic in the reduced
+    graph*. Per-κ `exprIsCyclic` would wrongly flag every member of a
+    cycle's transitive closure as cyclic. -/
 def exprPartitionKVars (e : Expr) : KM (List KVar × List KVar) := do
   let allKs := (← exprKVarsOrdered e).eraseDups
-  let cuts ← allKs.filterM (fun κ => exprIsCyclic κ e)
-  let acyclicRaw ← allKs.filterM (fun κ => return !(← exprIsCyclic κ e))
   let deps ← exprDeps e
-  let acyclic := topoSortAcyclic acyclicRaw deps
-  return (acyclic, cuts)
+  return classifyKVars allKs deps
