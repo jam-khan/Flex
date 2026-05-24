@@ -1,5 +1,5 @@
 import LeanFixpoint.Tactic.RewriteKs
-import LeanFixpoint.Fusion.Types
+import LeanFixpoint.Core.KVar
 import LeanFixpoint.Fusion.Fusion
 import LeanFixpoint.Elab.ToExpr
 import LeanFixpoint.Elab.FromExpr

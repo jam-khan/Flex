@@ -1,9 +1,9 @@
 import Lean
 
-import LeanFixpoint.Fusion.Types
+import LeanFixpoint.Core.KVar
 import LeanFixpoint.Fusion.Fusion
 import LeanFixpoint.Elab.ToExpr
-import LeanFixpoint.Monad
+import LeanFixpoint.Core.Monad
 import LeanFixpoint.Tactic.Internal.Utils
 import LeanFixpoint.Tactic.RewriteKs
 import LeanFixpoint.Tactic.Lazy

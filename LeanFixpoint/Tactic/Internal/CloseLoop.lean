@@ -1,11 +1,11 @@
 import Lean
 import Aesop
 
-import LeanFixpoint.Fusion.Types
+import LeanFixpoint.Core.KVar
 import LeanFixpoint.Fusion.Fusion
 import LeanFixpoint.Elab.ToExpr
 import LeanFixpoint.Elab.FromExpr
-import LeanFixpoint.Monad
+import LeanFixpoint.Core.Monad
 import LeanFixpoint.Tactic.Internal.Utils
 import LeanFixpoint.Tactic.Closers
 import LeanFixpoint.Tactic.SplitHyps

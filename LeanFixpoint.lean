@@ -2,10 +2,13 @@
   Core implementation, includes fusion algorithm
   and types for κ-variables, along with pretty printing.
 -/
-import LeanFixpoint.Fusion.Types
-import LeanFixpoint.Fusion.Pretty
+import LeanFixpoint.Core.KVar
+import LeanFixpoint.Core.Monad
+import LeanFixpoint.Core.Pretty
+import LeanFixpoint.Core.Simplify
+import LeanFixpoint.Core.SubstK
+
 import LeanFixpoint.Fusion.Fusion
-import LeanFixpoint.Fusion.Utils
 import LeanFixpoint.Fusion.Flatten
 import LeanFixpoint.Fusion.Graph
 
@@ -48,11 +51,6 @@ import LeanFixpoint.Solve.Fixpoint
 -/
 import LeanFixpoint.VCG.While.Types
 import LeanFixpoint.VCG.While.Semantics
-
-/-
-  Utils
--/
-import LeanFixpoint.Monad
 
 /-
   Sound verified gen for λᵣ

@@ -1,6 +1,6 @@
 import Lean
-import LeanFixpoint.Fusion.Types
-import LeanFixpoint.Monad
+import LeanFixpoint.Core.KVar
+import LeanFixpoint.Core.Monad
 
 open Lean Meta
 

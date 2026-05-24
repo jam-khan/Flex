@@ -1,6 +1,6 @@
 import Lean
 
-import LeanFixpoint.Monad
+import LeanFixpoint.Core.Monad
 import LeanFixpoint.Solve.Qualifier
 import LeanFixpoint.Solve.Instantiation
 import LeanFixpoint.Solve.Weaken

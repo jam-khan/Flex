@@ -1,6 +1,6 @@
 
-import LeanFixpoint.Fusion.Types
-import LeanFixpoint.Monad
+import LeanFixpoint.Core.KVar
+import LeanFixpoint.Core.Monad
 
 open Lean Meta
 /-- Flatten: split `And` at top level, distribute `∀` over `And`. -/

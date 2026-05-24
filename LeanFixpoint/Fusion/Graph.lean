@@ -1,8 +1,9 @@
 import Lean
 
-import LeanFixpoint.Fusion.Types
-import LeanFixpoint.Monad
-import LeanFixpoint.Fusion.Utils
+import LeanFixpoint.Core.KVar
+import LeanFixpoint.Core.Monad
+import LeanFixpoint.Core.Simplify
+import LeanFixpoint.Core.SubstK
 import LeanFixpoint.Fusion.Flatten
 
 open Lean Meta
