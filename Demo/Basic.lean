@@ -365,17 +365,13 @@ def ex14 : Prop :=
               ∀ ν : Int, ν = w + 2 → κ4 ν x a b c)
           ∧ (∀ z : Int, κ4 z x a b c → 0 ≤ z)
 
-set_option maxHeartbeats 1600000 in
 theorem ex14Proof : ex14 := by
   solve_fixpoint
 
-set_option maxHeartbeats 1600000 in
 theorem ex14Proof2 : ex14 := by
   unfold ex14
   zapK
   all_goals grind
-
-
 
 -- Nat refinement: predecessor is less than input
 def ex_nat : Prop :=
@@ -532,7 +528,6 @@ def ex_stress : Prop :=
           -- consumer
         ∧ (∀ s : Int, κ5 s x a b → 0 ≤ s)
 
-set_option maxHeartbeats 1600000 in
 theorem ex_stressProof : ex_stress := by
   solve_fixpoint
 

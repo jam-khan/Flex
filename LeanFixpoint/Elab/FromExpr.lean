@@ -1,5 +1,5 @@
 import Lean
-import LeanFixpoint.Core.Types
+import LeanFixpoint.Fusion.Types
 import LeanFixpoint.Monad
 
 open Lean Meta

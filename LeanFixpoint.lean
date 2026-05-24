@@ -2,12 +2,12 @@
   Core implementation, includes fusion algorithm
   and types for κ-variables, along with pretty printing.
 -/
-import LeanFixpoint.Core.Types
-import LeanFixpoint.Core.Pretty
-import LeanFixpoint.Core.Fusion
-import LeanFixpoint.Core.Utils
-import LeanFixpoint.Core.Fusion.Flatten
-import LeanFixpoint.Core.Fusion.Graph
+import LeanFixpoint.Fusion.Types
+import LeanFixpoint.Fusion.Pretty
+import LeanFixpoint.Fusion.Fusion
+import LeanFixpoint.Fusion.Utils
+import LeanFixpoint.Fusion.Flatten
+import LeanFixpoint.Fusion.Graph
 
 /-
   Elaboration helpers for peeling existentials

@@ -1,5 +1,5 @@
 import Lean
-import LeanFixpoint.Core.Fusion
+import LeanFixpoint.Fusion.Fusion
 
 open Lean Meta Elab Tactic
 

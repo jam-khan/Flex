@@ -1,8 +1,8 @@
-import LeanFixpoint.Core.Types
+import LeanFixpoint.Fusion.Types
 import LeanFixpoint.Monad
-import LeanFixpoint.Core.Utils
-import LeanFixpoint.Core.Fusion.Flatten
-import LeanFixpoint.Core.Fusion.Graph
+import LeanFixpoint.Fusion.Utils
+import LeanFixpoint.Fusion.Flatten
+import LeanFixpoint.Fusion.Graph
 
 open Lean Meta
 

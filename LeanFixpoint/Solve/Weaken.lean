@@ -1,7 +1,7 @@
 import Lean
 
 import LeanFixpoint.Monad
-import LeanFixpoint.Core.Fusion
+import LeanFixpoint.Fusion.Fusion
 import LeanFixpoint.Solve.Qualifier
 import LeanFixpoint.Solve.Check
 

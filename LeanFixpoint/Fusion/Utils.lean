@@ -1,6 +1,6 @@
 
 import Lean
-import LeanFixpoint.Core.Types
+import LeanFixpoint.Fusion.Types
 
 open Lean Meta
 
@@ -8,7 +8,7 @@ open Lean Meta
   Simplification over expression `e`.
 
   Equational notation:
-  
+
   ⟦ e₁ ∧ e₂ ⟧   =  False     if ⟦e₁⟧ = False  or  ⟦e₂⟧ = False
               |  ⟦e₂⟧        if ⟦e₁⟧ = True
               |  ⟦e₁⟧        if ⟦e₂⟧ = True

@@ -1,6 +1,6 @@
 import LeanFixpoint.Tactic.RewriteKs
-import LeanFixpoint.Core.Types
-import LeanFixpoint.Core.Fusion
+import LeanFixpoint.Fusion.Types
+import LeanFixpoint.Fusion.Fusion
 import LeanFixpoint.Elab.ToExpr
 import LeanFixpoint.Elab.FromExpr
 

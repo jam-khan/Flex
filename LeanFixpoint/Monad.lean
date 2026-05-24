@@ -1,6 +1,6 @@
 import Lean
 import Std
-import LeanFixpoint.Core.Types
+import LeanFixpoint.Fusion.Types
 
 open Lean List Meta
 
