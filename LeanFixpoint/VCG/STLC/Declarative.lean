@@ -177,9 +177,9 @@ theorem Ty.WFBVars_self (x : EVar) (t : Ty) (h : Ty.WFBVars t) : Ty.WFBVars (sel
     simp only [Formula.hasBVar] at hbv <;>
     rcases hbv with hbv | hbv
     · exact h b' k hbv
-    · simp [Formula.hasBVar, Term.hasBVar] at hbv
+    · simp [Term.hasBVar] at hbv
     · exact h b' k hbv
-    · simp [Formula.hasBVar, Term.hasBVar] at hbv
+    · simp [Term.hasBVar] at hbv
   | arrow s t => simp [self, h]
 
 /-- WFBVars of the concrete result types for primitives. -/

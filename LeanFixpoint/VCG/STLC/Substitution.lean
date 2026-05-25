@@ -775,6 +775,272 @@ theorem Ty.WFBVarCtx_openVar_last (t : Ty) (ctx : List (Option Base)) (opt : Opt
     rw [Ty.optBase_openVar]
     exact ih
 
+-- Helpers for WFBVarCtx_substBV_aux_last
+
+private theorem Term.not_hasBVar_substBV_same {b' : Base} (t : Term b') (b : Base) (k : Nat)
+    (v : b.interp) : ¬Term.hasBVar b k (Term.substBV b k v t) := by
+  induction t with
+  | const _ _ => simp [Term.hasBVar, Term.substBV]
+  | bvar b'' j => cases b <;> cases b'' <;> grind [Term.substBV, Term.hasBVar]
+  | fvar _ _ => simp [Term.hasBVar, Term.substBV]
+  | add t₁ t₂ ih1 ih2 =>
+    simp only [Term.hasBVar, Term.substBV, not_or]; exact ⟨ih1, ih2⟩
+  | not t ih => simp [Term.hasBVar, Term.substBV, ih]
+  | and t₁ t₂ ih1 ih2 =>
+    simp only [Term.hasBVar, Term.substBV, not_or]; exact ⟨ih1, ih2⟩
+
+private theorem Formula.not_hasBVar_substBV_same (b : Base) (k : Nat) (v : b.interp)
+    (φ : Formula) : ¬Formula.hasBVar b k (φ.substBV b k v) := by
+  induction φ with
+  | tt | ff => simp [Formula.hasBVar, Formula.substBV]
+  | eqI t₁ t₂ | eqB t₁ t₂ | leqI t₁ t₂ =>
+    simp only [Formula.substBV, Formula.hasBVar, not_or]
+    exact ⟨Term.not_hasBVar_substBV_same _ b k v, Term.not_hasBVar_substBV_same _ b k v⟩
+  | and φ₁ φ₂ ih1 ih2 | or φ₁ φ₂ ih1 ih2 | imp φ₁ φ₂ ih1 ih2 =>
+    simp only [Formula.substBV, Formula.hasBVar, not_or]; exact ⟨ih1, ih2⟩
+  | not φ ih | exI _ φ ih | exB _ φ ih | allI _ φ ih | allB _ φ ih =>
+    simp [Formula.substBV, Formula.hasBVar, ih]
+  | kapp kname args =>
+    simp only [Formula.substBV, Formula.hasBVar]
+    intro ⟨a, ha_mem, ha_bv⟩
+    simp only [List.mem_map] at ha_mem
+    obtain ⟨a', ha'_mem, ha'_eq⟩ := ha_mem
+    subst ha'_eq
+    exact Term.not_hasBVar_substBV_same a'.2 b k v ha_bv
+
+private theorem Term.hasBVar_substBV_mono {b'' : Base} (t : Term b'') (b b' : Base) (k j : Nat)
+    (v : b'.interp) (h : Term.hasBVar b k (Term.substBV b' j v t)) : Term.hasBVar b k t := by
+  induction t with
+  | const _ _ => simp [Term.hasBVar, Term.substBV] at h
+  | bvar b''' i =>
+    cases b' <;> cases b''' <;> grind [Term.substBV, Term.hasBVar]
+  | fvar _ _ => simp [Term.hasBVar, Term.substBV] at h
+  | add t₁ t₂ ih1 ih2 =>
+    simp only [Term.hasBVar, Term.substBV] at h ⊢
+    rcases h with h | h
+    · left; exact ih1 h
+    · right; exact ih2 h
+  | not t ih =>
+    simp only [Term.hasBVar, Term.substBV] at h ⊢; exact ih h
+  | and t₁ t₂ ih1 ih2 =>
+    simp only [Term.hasBVar, Term.substBV] at h ⊢
+    rcases h with h | h
+    · left; exact ih1 h
+    · right; exact ih2 h
+
+private theorem Formula.hasBVar_substBV_mono {b b' : Base} {k j : Nat} {v : b'.interp}
+    {φ : Formula} (h : Formula.hasBVar b k (φ.substBV b' j v)) : Formula.hasBVar b k φ := by
+  induction φ with
+  | tt | ff => simp [Formula.hasBVar, Formula.substBV] at h
+  | eqI t₁ t₂ | eqB t₁ t₂ | leqI t₁ t₂ =>
+    simp only [Formula.substBV, Formula.hasBVar] at h ⊢
+    rcases h with h | h
+    · left;  exact Term.hasBVar_substBV_mono _ b b' k j v h
+    · right; exact Term.hasBVar_substBV_mono _ b b' k j v h
+  | and φ₁ φ₂ ih1 ih2 | or φ₁ φ₂ ih1 ih2 | imp φ₁ φ₂ ih1 ih2 =>
+    simp only [Formula.substBV, Formula.hasBVar] at h ⊢
+    rcases h with h | h
+    · left; exact ih1 h
+    · right; exact ih2 h
+  | not φ ih | exI _ φ ih | exB _ φ ih | allI _ φ ih | allB _ φ ih =>
+    simp only [Formula.substBV, Formula.hasBVar] at h ⊢; exact ih h
+  | kapp kname args =>
+    simp only [Formula.substBV, Formula.hasBVar] at h ⊢
+    obtain ⟨a, ha_mem, ha_bv⟩ := h
+    simp only [List.mem_map] at ha_mem
+    obtain ⟨a', ha'_mem, ha'_eq⟩ := ha_mem; subst ha'_eq
+    exact ⟨a', ha'_mem, Term.hasBVar_substBV_mono a'.2 b b' k j v ha_bv⟩
+
+private theorem Ty.optBase_substBV_aux (t : Ty) (k : Nat) (va : Val) :
+    (t.substBV_aux k va).optBase = t.optBase := by
+  cases t with
+  | refine b r => cases va <;> simp [Ty.substBV_aux, Ty.optBase]
+  | arrow s' t' => simp [Ty.substBV_aux, Ty.optBase]
+
+/-- For k > ctx.length, both (ctx ++ [opt])[k]? and (ctx ++ [none])[k]? are none. -/
+private theorem List.getElem?_append_singleton_gt (opt : α) (ctx : List α) (k : Nat)
+    (hgt : ctx.length < k) : (ctx ++ [opt])[k]? = none := by
+  rw [List.getElem?_eq_none_iff]
+  simp; omega
+
+/-- WFBVarCtx is preserved by substBV_aux at the last (ctx.length-th) slot:
+    the slot changes from `opt` to `none` (since the BVar at that level is consumed). -/
+theorem Ty.WFBVarCtx_substBV_aux_last (t : Ty) (ctx : List (Option Base))
+    (opt : Option Base) (va : Val)
+    (hWF : Ty.WFBVarCtx (ctx ++ [opt]) t)
+    (hcompat_int  : opt = some .int  → ∃ n,  va = .iconst n)
+    (hcompat_bool : opt = some .bool → ∃ bv, va = .bconst bv) :
+    Ty.WFBVarCtx (ctx ++ [none]) (t.substBV_aux ctx.length va) := by
+  induction t generalizing ctx with
+  | refine b r =>
+    simp only [Ty.WFBVarCtx] at hWF ⊢
+    simp only [Ty.substBV_aux]
+    -- Helper: for k ≠ ctx.length, (ctx ++ [opt])[k]? = (ctx ++ [none])[k]?
+    have ctx_agree : ∀ k, k ≠ ctx.length → (ctx ++ [opt])[k]? = (ctx ++ [none])[k]? := by
+      intro k hk
+      by_cases hlt : k < ctx.length
+      · simp [List.getElem?_append, hlt]
+      · have hge : ctx.length ≤ k := Nat.le_of_not_lt hlt
+        have hgt : ctx.length < k := Nat.lt_of_le_of_ne hge (Ne.symm hk)
+        simp [List.getElem?_append_singleton_gt opt ctx k hgt,
+              List.getElem?_append_singleton_gt none ctx k hgt]
+    -- Helper: (ctx ++ [opt])[ctx.length]? = opt
+    have ctx_last : (ctx ++ [opt])[ctx.length]? = some opt := by
+      simp
+    cases va with
+    | clos _ =>
+      intro b' k hbv
+      have hctx := hWF b' k hbv
+      by_cases hk : k = ctx.length
+      · subst hk
+        rw [ctx_last] at hctx
+        -- hctx : some opt = some (some b')
+        have hopt : opt = some b' := Option.some.inj hctx
+        exfalso
+        cases opt with
+        | none => simp at hopt
+        | some ob =>
+          cases ob with
+          | int  => obtain ⟨n, hn⟩ := hcompat_int rfl; simp at hn
+          | bool => obtain ⟨bv, hbv'⟩ := hcompat_bool rfl; simp at hbv'
+      · rw [← ctx_agree k hk]; exact hctx
+    | iconst n =>
+      simp only [Refinement.substBV]
+      intro b' k hbv
+      have hbv_orig := Formula.hasBVar_substBV_mono hbv
+      have hctx := hWF b' k hbv_orig
+      by_cases hk : k = ctx.length
+      · subst hk
+        exfalso
+        cases b' with
+        | int  => exact Formula.not_hasBVar_substBV_same .int ctx.length n r.fmla hbv
+        | bool =>
+          rw [ctx_last] at hctx
+          have hopt : opt = some .bool := Option.some.inj hctx
+          obtain ⟨bv, hbv'⟩ := hcompat_bool hopt
+          simp at hbv'
+      · rw [← ctx_agree k hk]; exact hctx
+    | bconst bv =>
+      simp only [Refinement.substBV]
+      intro b' k hbv
+      have hbv_orig := Formula.hasBVar_substBV_mono hbv
+      have hctx := hWF b' k hbv_orig
+      by_cases hk : k = ctx.length
+      · subst hk
+        exfalso
+        cases b' with
+        | bool => exact Formula.not_hasBVar_substBV_same .bool ctx.length bv r.fmla hbv
+        | int  =>
+          rw [ctx_last] at hctx
+          have hopt : opt = some .int := Option.some.inj hctx
+          obtain ⟨n, hn⟩ := hcompat_int hopt
+          simp at hn
+      · rw [← ctx_agree k hk]; exact hctx
+  | arrow s' t' ihs iht =>
+    simp only [Ty.WFBVarCtx] at hWF ⊢
+    simp only [Ty.substBV_aux]
+    refine ⟨ihs ctx hWF.1, ?_⟩
+    -- Codomain: apply iht with ctx' = s'.optBase :: ctx
+    have ih := iht (s'.optBase :: ctx) hWF.2
+    simp only [List.length_cons] at ih
+    rw [Ty.optBase_substBV_aux, ← List.cons_append]
+    exact ih
+
+/-- For k ≠ ctx.length, replacing the element at ctx.length doesn't affect index k. -/
+private theorem optBase_list_getElem?_update_middle (ctx : List (Option Base)) (a b : Option Base)
+    (rest : List (Option Base)) (k : Nat) (hk : k ≠ ctx.length) :
+    (ctx ++ [a] ++ rest)[k]? = (ctx ++ [b] ++ rest)[k]? := by
+  induction ctx generalizing k with
+  | nil =>
+    simp only [List.nil_append, List.length_nil] at hk ⊢
+    rcases k with _ | k
+    · exact absurd rfl hk
+    · simp [List.getElem?_cons_succ]
+  | cons hd tl ih =>
+    simp only [List.cons_append, List.length_cons] at hk ⊢
+    rcases k with _ | k
+    · rfl
+    · simp only [List.getElem?_cons_succ]
+      exact ih _ (by omega)
+
+/-- The element at ctx.length in ctx ++ [a] ++ rest is some a. -/
+private theorem optBase_list_getElem?_middle (ctx : List (Option Base)) (a : Option Base)
+    (rest : List (Option Base)) :
+    (ctx ++ [a] ++ rest)[ctx.length]? = some a := by
+  induction ctx with
+  | nil => simp
+  | cons hd tl ih => simp
+
+/-- Generalization of `WFBVarCtx_substBV_aux_last` allowing extra context after the slot.
+    WFBVarCtx is preserved by substBV_aux at slot `ctx.length`, with `rest` unchanged. -/
+theorem Ty.WFBVarCtx_substBV_aux_prefix (t : Ty) (ctx : List (Option Base))
+    (opt : Option Base) (rest : List (Option Base)) (va : Val)
+    (hWF : Ty.WFBVarCtx (ctx ++ [opt] ++ rest) t)
+    (hcompat_int  : opt = some .int  → ∃ n,  va = .iconst n)
+    (hcompat_bool : opt = some .bool → ∃ bv, va = .bconst bv) :
+    Ty.WFBVarCtx (ctx ++ [none] ++ rest) (t.substBV_aux ctx.length va) := by
+  induction t generalizing ctx with
+  | refine b r =>
+    simp only [Ty.WFBVarCtx] at hWF ⊢
+    simp only [Ty.substBV_aux]
+    have ctx_last := optBase_list_getElem?_middle ctx opt rest
+    cases va with
+    | clos _ =>
+      intro b' k hbv
+      have hctx := hWF b' k hbv
+      by_cases hk : k = ctx.length
+      · subst hk
+        rw [ctx_last] at hctx
+        have hopt : opt = some b' := Option.some.inj hctx
+        exfalso
+        cases opt with
+        | none => simp at hopt
+        | some ob =>
+          cases ob with
+          | int  => obtain ⟨n, hn⟩ := hcompat_int rfl; simp at hn
+          | bool => obtain ⟨bv, hbv'⟩ := hcompat_bool rfl; simp at hbv'
+      · rw [← optBase_list_getElem?_update_middle ctx opt none rest k hk]; exact hctx
+    | iconst n =>
+      simp only [Refinement.substBV]
+      intro b' k hbv
+      have hbv_orig := Formula.hasBVar_substBV_mono hbv
+      have hctx := hWF b' k hbv_orig
+      by_cases hk : k = ctx.length
+      · subst hk
+        exfalso
+        cases b' with
+        | int  => exact Formula.not_hasBVar_substBV_same .int ctx.length n r.fmla hbv
+        | bool =>
+          rw [ctx_last] at hctx
+          have hopt : opt = some .bool := Option.some.inj hctx
+          obtain ⟨bv, hbv'⟩ := hcompat_bool hopt
+          simp at hbv'
+      · rw [← optBase_list_getElem?_update_middle ctx opt none rest k hk]; exact hctx
+    | bconst bv =>
+      simp only [Refinement.substBV]
+      intro b' k hbv
+      have hbv_orig := Formula.hasBVar_substBV_mono hbv
+      have hctx := hWF b' k hbv_orig
+      by_cases hk : k = ctx.length
+      · subst hk
+        exfalso
+        cases b' with
+        | bool => exact Formula.not_hasBVar_substBV_same .bool ctx.length bv r.fmla hbv
+        | int  =>
+          rw [ctx_last] at hctx
+          have hopt : opt = some .int := Option.some.inj hctx
+          obtain ⟨n, hn⟩ := hcompat_int hopt
+          simp at hn
+      · rw [← optBase_list_getElem?_update_middle ctx opt none rest k hk]; exact hctx
+  | arrow s' t' ihs iht =>
+    simp only [Ty.WFBVarCtx] at hWF ⊢
+    simp only [Ty.substBV_aux]
+    refine ⟨ihs ctx hWF.1, ?_⟩
+    have ih := iht (s'.optBase :: ctx) hWF.2
+    simp only [List.length_cons] at ih
+    rw [Ty.optBase_substBV_aux, ← List.cons_append]
+    exact ih
+
 def Ty.lc_at : Nat → Ty → Prop
   | k, .refine _ r => r.lc_at k
   | k, .arrow s t  => Ty.lc_at k s ∧ Ty.lc_at (k+1) t

@@ -384,6 +384,249 @@ theorem TyDenote.of_extendBy_fresh {κ : KEnv} {t : Ty} {ρ : REnv} {v : Val}
     TyDenote κ t ρ v :=
   (TyDenote.extendBy_fresh_iff_aux t.skel κ t (by omega) ρ v s x va hx hxn hxν).mpr h
 
+private theorem TyDenote.substBV_iff_aux (n : Nat) :
+      ∀ (j : Nat) (κ : KEnv) (t : Ty) (_ : t.skel ≤ n) (s : Ty) (x : EVar) (ρ : REnv)
+        (va : Val) (v : Val)
+        (_ : x ∉ t.fv) (_ : x ∉ Ty.named t) (_ : x ≠ nuName)
+        (_ : Ty.WFBVarCtx (List.replicate j none ++ [s.optBase]) t)
+        (_ : TyDenote κ s ρ va),
+        TyDenote κ (t.substBV_aux j va) ρ v ↔
+        TyDenote κ (t.openVar j x) (REnv.extendBy s ρ x va) v := by
+  induction n with
+  | zero =>
+    intro j κ t hsk
+    cases t <;> simp at hsk
+    rename_i b r
+    intro s x ρ va v hxf hxn hxnn hwfb htd
+      -- WF: at level 0, all BVars have base = s.optBase
+    simp only [Ty.WFBVarCtx] at hwfb
+    -- fv/named hypotheses
+    simp only [Ty.fv, Ty.named] at hxf hxn
+    -- x ∉ r.fmla.fv and x ∉ r.fmla.named
+    have hx_rfv : x ∉ r.fmla.fv := by
+      intro hm
+      exact hxf (List.mem_filter.mpr ⟨hm, by simp [hxnn]⟩)
+    -- openBVar for wrong base is noop (via WFBVarCtx)
+    -- Key: (r.openBVar .int 0 x).openBVar .bool 0 x = r.openBVar .int 0 x
+    --      when no .bool BVars at level 0 in r.fmla (by WF)
+    cases va with
+    | iconst n =>
+      -- s must be .refine .int r' for TyDenote κ s ρ (.iconst n) to hold
+      -- extendBy s ρ x (.iconst n): if s = .refine .int _, this is ρ.update .int x n; else ρ
+      cases s with
+      | arrow s_d s_c =>
+        simp [TyDenote] at htd
+      | refine sb r' =>
+        cases sb with
+        | int =>
+          -- s = .refine .int r', s.optBase = some .int
+          -- extendBy (.refine .int r') ρ x (.iconst n) = ρ.update .int x n
+          simp only [Ty.optBase] at hwfb
+          simp only [Ty.substBV_aux, REnv.extendBy, Ty.openVar, Refinement.openBVar]
+          -- openBVar .bool 0 x is noop (WF: only .int BVars at level 0)
+          have hno_bool : ¬Formula.hasBVar .bool j (Formula.openBVar Base.int j x r.fmla) := by
+            intro hbv
+            grind [Formula.hasBVar_openBVar_other]
+
+          rw [Formula.openBVar_noop _ .bool j x hno_bool]
+          -- Now need: TyDenote κ (.refine b (r.substBV .int 0 n)) ρ v ↔
+          --           TyDenote κ (.refine b (r.openBVar .int 0 x)) (ρ.update .int x n) v
+          cases b with
+          | int =>
+            simp only [TyDenote]
+            constructor
+            · rintro ⟨n', rfl, hi⟩
+              refine ⟨n', rfl, ?_⟩
+              simp only [Refinement.interp, Refinement.substBV] at hi ⊢
+              rw [Formula.interp_substBV κ r.fmla .int j n x (ρ.update .int nuName n')
+                    (by simp [hx_rfv]) hxn] at hi
+              rwa [REnv.update_comm_int_int _ _ _ _ _ (Ne.symm hxnn)] at hi
+            · rintro ⟨n', rfl, hi⟩
+              refine ⟨n', rfl, ?_⟩
+              simp only [Refinement.interp, Refinement.substBV]
+              rw [Formula.interp_substBV κ r.fmla .int j n x (ρ.update .int nuName n')
+                    (by simp [hx_rfv]) hxn]
+              rwa [REnv.update_comm_int_int _ _ _ _ _ (Ne.symm hxnn)]
+          | bool =>
+            simp only [TyDenote]
+            constructor
+            · rintro ⟨bv, rfl, hi⟩
+              refine ⟨bv, rfl, ?_⟩
+              simp only [Refinement.interp, Refinement.substBV] at hi ⊢
+              rw [Formula.interp_substBV κ r.fmla .int j n x (ρ.update .bool nuName bv)
+                    (by simp [hx_rfv]) hxn] at hi
+              rwa [REnv.update_comm_int_bool]
+            · rintro ⟨bv, rfl, hi⟩
+              refine ⟨bv, rfl, ?_⟩
+              simp only [Refinement.interp, Refinement.substBV] at hi ⊢
+              rw [Formula.interp_substBV κ r.fmla .int j n x (ρ.update .bool nuName bv)
+                    (by simp [hx_rfv]) hxn]
+              rwa [REnv.update_comm_int_bool] at hi
+        | bool =>
+          simp [TyDenote] at htd
+    | bconst bv =>
+      cases s with
+      | arrow s_d s_c =>
+        simp [TyDenote] at htd
+      | refine sb r' =>
+        cases sb with
+        | bool =>
+          simp only [Ty.optBase] at hwfb
+          simp only [Ty.substBV_aux, REnv.extendBy, Ty.openVar, Refinement.openBVar]
+          have hno_int : ¬Formula.hasBVar .int j r.fmla := by
+            intro hbv; exact absurd (hwfb .int j hbv) (by simp)
+          rw [Formula.openBVar_noop r.fmla .int j x hno_int]
+          cases b with
+          | bool =>
+            simp only [TyDenote]
+            constructor
+            · rintro ⟨bv', rfl, hi⟩
+              refine ⟨bv', rfl, ?_⟩
+              simp only [Refinement.interp, Refinement.substBV] at hi ⊢
+              rw [Formula.interp_substBV κ r.fmla .bool j bv x (ρ.update .bool nuName bv')
+                    (by simp [hx_rfv]) hxn] at hi
+              rwa [REnv.update_comm_bool_bool _ _ _ _ _ (Ne.symm hxnn)] at hi
+            · rintro ⟨bv', rfl, hi⟩
+              refine ⟨bv', rfl, ?_⟩
+              simp only [Refinement.interp, Refinement.substBV]
+              rw [Formula.interp_substBV κ r.fmla .bool j bv x (ρ.update .bool nuName bv')
+                    (by simp [hx_rfv]) hxn]
+              rwa [REnv.update_comm_bool_bool _ _ _ _ _ (Ne.symm hxnn)]
+          | int =>
+            simp only [TyDenote]
+            constructor
+            · rintro ⟨n', rfl, hi⟩
+              refine ⟨n', rfl, ?_⟩
+              simp only [Refinement.interp, Refinement.substBV] at hi ⊢
+              rw [Formula.interp_substBV κ r.fmla .bool j bv x (ρ.update .int nuName n')
+                    (by simp [hx_rfv]) hxn] at hi
+              rwa [(REnv.update_comm_int_bool _ _ _ _ _).symm] at hi
+            · rintro ⟨n', rfl, hi⟩
+              refine ⟨n', rfl, ?_⟩
+              simp only [Refinement.interp, Refinement.substBV]
+              rw [Formula.interp_substBV κ r.fmla .bool j bv x (ρ.update .int nuName n')
+                    (by simp [hx_rfv]) hxn]
+              rwa [(REnv.update_comm_int_bool _ _ _ _ _).symm]
+        | int =>
+          simp [TyDenote] at htd
+    | clos body =>
+      -- va = .clos body, extendBy _ ρ x (.clos body) = ρ always
+      -- substBV_aux 0 (.clos body) (.refine b r) = .refine b r
+      simp only [Ty.substBV_aux, REnv.extendBy, Ty.openVar, Refinement.openBVar]
+      cases s with
+      | arrow s_d s_c =>
+        simp only [Ty.optBase] at hwfb
+        have hno_int : ¬Formula.hasBVar .int j r.fmla := by
+          intro hbv; exact absurd (hwfb .int j hbv) (by simp)
+        have hno_bool : ¬Formula.hasBVar .bool j r.fmla := by
+          intro hbv; exact absurd (hwfb .bool j hbv) (by simp)
+        rw [Formula.openBVar_noop r.fmla .int j x hno_int,
+            Formula.openBVar_noop r.fmla .bool j x hno_bool]
+      | refine sb r' =>
+        -- TyDenote κ (.refine sb r') ρ (.clos body) = False
+        cases sb with
+        | int =>
+          simp only [TyDenote] at htd; obtain ⟨_, h, _⟩ := htd; simp at h
+        | bool =>
+          simp only [TyDenote] at htd; obtain ⟨_, h, _⟩ := htd; simp at h
+  | succ n ih =>
+    intro j κ t hsk s x ρ va v hxf hxn hxν hwfb htd
+    -- If t.skel ≤ n, delegate directly to IH
+    by_cases hn : t.skel ≤ n
+    · exact ih j κ t hn s x ρ va v hxf hxn hxν hwfb htd
+    -- Otherwise t.skel = n+1, so t must be an arrow type (refine has skel 0)
+    · match t with
+      | .refine b r =>
+        simp [Ty.skel] at hn
+      | .arrow s' t' =>
+        simp only [Ty.skel] at hsk hn
+        have hns' : s'.skel ≤ n := by omega
+        have hnt' : t'.skel ≤ n := by omega
+        simp only [Ty.fv, List.mem_append, not_or] at hxf hxn
+        -- Destructure WFBVarCtx for arrow (it's a def, not And, so need explicit obtain)
+        obtain ⟨hwfb_s', hwfb_t'⟩ : Ty.WFBVarCtx (List.replicate j none ++ [s.optBase]) s' ∧
+            Ty.WFBVarCtx (s'.optBase :: List.replicate j none ++ [s.optBase]) t' := hwfb
+        simp only [Ty.substBV_aux, Ty.openVar, TyDenote]
+        -- Helper: WF for t'.substBV_aux 0 va' at level j+1
+        -- Derives compat from TyDenote κ (s'.substBV_aux j va) ρ va' and builds WFBVarCtx
+        have mk_wf_cod : ∀ va',
+            TyDenote κ (s'.substBV_aux j va) ρ va' →
+            Ty.WFBVarCtx (List.replicate (j+1) none ++ [s.optBase]) (t'.substBV_aux 0 va') := by
+          intro va' htd_va'_ρ
+          have hci' : s'.optBase = some .int → ∃ n, va' = .iconst n := by
+            cases s' with
+            | arrow _ _ => simp [Ty.optBase]
+            | refine sb r =>
+              cases sb with
+              | bool => simp [Ty.optBase]
+              | int =>
+                intro _
+                have : ∃ r', (Ty.refine .int r).substBV_aux j va = .refine .int r' := by
+                  rcases va with n' | bv' | body
+                  · exact ⟨r.substBV .int j n', rfl⟩
+                  · exact ⟨r.substBV .bool j bv', rfl⟩
+                  · exact ⟨r, rfl⟩
+                obtain ⟨r', hr'⟩ := this
+                rw [hr'] at htd_va'_ρ; simp only [TyDenote] at htd_va'_ρ
+                exact ⟨_, htd_va'_ρ.choose_spec.1⟩
+          have hcb' : s'.optBase = some .bool → ∃ bv, va' = .bconst bv := by
+            cases s' with
+            | arrow _ _ => simp [Ty.optBase]
+            | refine sb r =>
+              cases sb with
+              | int => simp [Ty.optBase]
+              | bool =>
+                intro _
+                have : ∃ r', (Ty.refine .bool r).substBV_aux j va = .refine .bool r' := by
+                  rcases va with n' | bv' | body
+                  · exact ⟨r.substBV .int j n', rfl⟩
+                  · exact ⟨r.substBV .bool j bv', rfl⟩
+                  · exact ⟨r, rfl⟩
+                obtain ⟨r', hr'⟩ := this
+                rw [hr'] at htd_va'_ρ; simp only [TyDenote] at htd_va'_ρ
+                exact ⟨_, htd_va'_ρ.choose_spec.1⟩
+          have h := Ty.WFBVarCtx_substBV_aux_prefix t' [] s'.optBase
+            (List.replicate j none ++ [s.optBase]) va'
+            (by simpa using hwfb_t') hci' hcb'
+          simpa [List.replicate_succ] using h
+        constructor
+        · -- LHS (substBV/ρ) → RHS (openVar/extendBy)
+          rintro ⟨body, rfl, hlc, hcl, hLR⟩
+          refine ⟨body, rfl, hlc, hcl, fun va' htd_va' => ?_⟩
+          simp [Ty.named] at hxn
+          have htd_va'_ρ : TyDenote κ (s'.substBV_aux j va) ρ va' :=
+            (ih j κ s' hns' s x ρ va va' hxf.1 hxn.1 hxν hwfb_s' htd).mpr htd_va'
+          obtain ⟨vr, hbs, htd_vr⟩ := hLR va' htd_va'_ρ
+          refine ⟨vr, hbs, ?_⟩
+          -- htd_vr : TyDenote κ ((t'.substBV_aux (j+1) va).substBV va') ρ vr
+          simp only [Ty.substBV] at htd_vr ⊢
+          -- Now htd_vr uses substBV_aux 0; rewrite via comm
+          rw [Ty.substBV_aux_comm t' va (j+1) va' 0 (by omega)] at htd_vr
+          rw [← Ty.openVar_substBV_aux_comm t' (j+1) x va' 0 (by omega)]
+          exact (ih (j+1) κ (t'.substBV_aux 0 va') (by rw [←Ty.substBV] ; rw [Ty.skel_substBV]; exact hnt')
+                    s x ρ va vr
+                    (Ty.fv_substBV_not_mem t' x va' hxf.2)
+                    (Ty.named_substBV_not_mem t' x va' hxn.2)
+                    hxν (mk_wf_cod va' htd_va'_ρ) htd).mp htd_vr
+        · -- RHS (openVar/extendBy) → LHS (substBV/ρ)
+          rintro ⟨body, rfl, hlc, hcl, hLR⟩
+          refine ⟨body, rfl, hlc, hcl, fun va' htd_va'_ρ => ?_⟩
+          simp [Ty.named] at hxn
+          have htd_va' : TyDenote κ (s'.openVar j x) (REnv.extendBy s ρ x va) va' :=
+            (ih j κ s' hns' s x ρ va va' hxf.1 hxn.1 hxν hwfb_s' htd).mp htd_va'_ρ
+          obtain ⟨vr, hbs, htd_vr⟩ := hLR va' htd_va'
+          refine ⟨vr, hbs, ?_⟩
+          -- htd_vr : TyDenote κ ((t'.openVar (j+1) x).substBV va') (extendBy s ρ x va) vr
+          simp only [Ty.substBV] at htd_vr ⊢
+          rw [← Ty.openVar_substBV_aux_comm t' (j+1) x va' 0 (by omega)] at htd_vr
+          have htd_vr' := (ih (j+1) κ (t'.substBV_aux 0 va') (by rw [←Ty.substBV] ; rw [Ty.skel_substBV]; exact hnt')
+                    s x ρ va vr
+                    (Ty.fv_substBV_not_mem t' x va' hxf.2)
+                    (Ty.named_substBV_not_mem t' x va' hxn.2)
+                    hxν (mk_wf_cod va' htd_va'_ρ) htd).mpr htd_vr
+          rw [Ty.substBV_aux_comm]
+            <;> grind
+
 /-- `substBV va` in TyDenote corresponds to `openVar 0 x` with `extendBy s ρ x va`,
     when x is fresh for t, va is compatible with s (TyDenote κ s ρ va), and t is
     well-formed (WFBVarCtx [s.optBase] t) so that only the correct-base BVars appear. -/
@@ -394,165 +637,13 @@ theorem TyDenote.substBV_iff (κ : KEnv) (t : Ty) (s : Ty) (x : EVar) (ρ : REnv
     (hcompat : TyDenote κ s ρ va) :
     TyDenote κ (t.substBV va) ρ v ↔
     TyDenote κ (t.openVar 0 x) (REnv.extendBy s ρ x va) v := by
-  cases t with
-  | arrow s' t' => sorry
-  | refine b r =>
-    -- WF: at level 0, all BVars have base = s.optBase
-    simp only [Ty.WFBVarCtx] at hWF
-    -- fv/named hypotheses
-    simp only [Ty.fv, Ty.named] at hx_fv hx_named
-    -- x ∉ r.fmla.fv and x ∉ r.fmla.named
-    have hx_rfv : x ∉ r.fmla.fv := by
-      intro hm
-      exact hx_fv (List.mem_filter.mpr ⟨hm, by simp [hxν]⟩)
-    -- openBVar for wrong base is noop (via WFBVarCtx)
-    -- Key: (r.openBVar .int 0 x).openBVar .bool 0 x = r.openBVar .int 0 x
-    --      when no .bool BVars at level 0 in r.fmla (by WF)
-    cases va with
-    | iconst n =>
-      -- s must be .refine .int r' for TyDenote κ s ρ (.iconst n) to hold
-      -- extendBy s ρ x (.iconst n): if s = .refine .int _, this is ρ.update .int x n; else ρ
-      cases s with
-      | arrow s_d s_c =>
-        -- s.optBase = none, WF: no BVars at all
-        simp only [Ty.optBase] at hWF
-        -- substBV .clos _ is noop on refine, extendBy arrow ρ x _ = ρ
-        simp only [Ty.substBV, Ty.substBV_aux, REnv.extendBy, Ty.openVar, Refinement.openBVar]
-        -- both openBVars are noops (no BVars at level 0 by WF)
-        have hno_int : ¬Formula.hasBVar .int 0 r.fmla := by
-          intro hbv; exact absurd (hWF .int 0 hbv) (by simp)
-        have hno_bool : ¬Formula.hasBVar .bool 0 r.fmla := by
-          intro hbv; exact absurd (hWF .bool 0 hbv) (by simp)
-        rw [Formula.openBVar_noop r.fmla .int 0 x hno_int,
-            Formula.openBVar_noop r.fmla .bool 0 x hno_bool]
-        -- TyDenote κ s ρ (.iconst n) with s = .arrow is False
-        simp only [TyDenote] at hcompat
-        grind
-        -- Wait — hcompat : ∃ body, ... from the arrow TyDenote — that's fine, it holds
-        -- Both sides are the same now
-      | refine sb r' =>
-        cases sb with
-        | int =>
-          -- s = .refine .int r', s.optBase = some .int
-          -- extendBy (.refine .int r') ρ x (.iconst n) = ρ.update .int x n
-          simp only [Ty.optBase] at hWF
-          simp only [Ty.substBV, Ty.substBV_aux, REnv.extendBy, Ty.openVar, Refinement.openBVar]
-          -- openBVar .bool 0 x is noop (WF: only .int BVars at level 0)
-          have hno_bool : ¬Formula.hasBVar .bool 0 (Formula.openBVar Base.int 0 x r.fmla) := by
-            intro hbv
-            grind [Formula.hasBVar_openBVar_other]
-
-          rw [Formula.openBVar_noop _ .bool 0 x hno_bool]
-          -- Now need: TyDenote κ (.refine b (r.substBV .int 0 n)) ρ v ↔
-          --           TyDenote κ (.refine b (r.openBVar .int 0 x)) (ρ.update .int x n) v
-          cases b with
-          | int =>
-            simp only [TyDenote]
-            constructor
-            · rintro ⟨n', rfl, hi⟩
-              refine ⟨n', rfl, ?_⟩
-              simp only [Refinement.interp, Refinement.substBV] at hi ⊢
-              rw [Formula.interp_substBV κ r.fmla .int 0 n x (ρ.update .int nuName n')
-                    (by simp [hx_rfv]) hx_named] at hi
-              rwa [REnv.update_comm_int_int _ _ _ _ _ (Ne.symm hxν)] at hi
-            · rintro ⟨n', rfl, hi⟩
-              refine ⟨n', rfl, ?_⟩
-              simp only [Refinement.interp, Refinement.substBV]
-              rw [Formula.interp_substBV κ r.fmla .int 0 n x (ρ.update .int nuName n')
-                    (by simp [hx_rfv]) hx_named]
-              rwa [REnv.update_comm_int_int _ _ _ _ _ (Ne.symm hxν)]
-          | bool =>
-            simp only [TyDenote]
-            constructor
-            · rintro ⟨bv, rfl, hi⟩
-              refine ⟨bv, rfl, ?_⟩
-              simp only [Refinement.interp, Refinement.substBV] at hi ⊢
-              rw [Formula.interp_substBV κ r.fmla .int 0 n x (ρ.update .bool nuName bv)
-                    (by simp [hx_rfv]) hx_named] at hi
-              rwa [REnv.update_comm_int_bool]
-            · rintro ⟨bv, rfl, hi⟩
-              refine ⟨bv, rfl, ?_⟩
-              simp only [Refinement.interp, Refinement.substBV] at hi ⊢
-              rw [Formula.interp_substBV κ r.fmla .int 0 n x (ρ.update .bool nuName bv)
-                    (by simp [hx_rfv]) hx_named]
-              rwa [REnv.update_comm_int_bool] at hi
-        | bool =>
-          simp [TyDenote] at hcompat
-    | bconst bv =>
-      cases s with
-      | arrow s_d s_c =>
-        simp only [Ty.optBase] at hWF
-        simp only [Ty.substBV, Ty.substBV_aux, REnv.extendBy, Ty.openVar, Refinement.openBVar]
-        have hno_int : ¬Formula.hasBVar .int 0 r.fmla := by
-          intro hbv; exact absurd (hWF .int 0 hbv) (by simp)
-        have hno_bool : ¬Formula.hasBVar .bool 0 r.fmla := by
-          intro hbv; exact absurd (hWF .bool 0 hbv) (by simp)
-        rw [Formula.openBVar_noop r.fmla .int 0 x hno_int,
-            Formula.openBVar_noop r.fmla .bool 0 x hno_bool]
-        simp only [TyDenote] at hcompat
-        grind
-      | refine sb r' =>
-        cases sb with
-        | bool =>
-          simp only [Ty.optBase] at hWF
-          simp only [Ty.substBV, Ty.substBV_aux, REnv.extendBy, Ty.openVar, Refinement.openBVar]
-          have hno_int : ¬Formula.hasBVar .int 0 r.fmla := by
-            intro hbv; exact absurd (hWF .int 0 hbv) (by simp)
-          rw [Formula.openBVar_noop r.fmla .int 0 x hno_int]
-          cases b with
-          | bool =>
-            simp only [TyDenote]
-            constructor
-            · rintro ⟨bv', rfl, hi⟩
-              refine ⟨bv', rfl, ?_⟩
-              simp only [Refinement.interp, Refinement.substBV] at hi ⊢
-              rw [Formula.interp_substBV κ r.fmla .bool 0 bv x (ρ.update .bool nuName bv')
-                    (by simp [hx_rfv]) hx_named] at hi
-              rwa [REnv.update_comm_bool_bool _ _ _ _ _ (Ne.symm hxν)] at hi
-            · rintro ⟨bv', rfl, hi⟩
-              refine ⟨bv', rfl, ?_⟩
-              simp only [Refinement.interp, Refinement.substBV]
-              rw [Formula.interp_substBV κ r.fmla .bool 0 bv x (ρ.update .bool nuName bv')
-                    (by simp [hx_rfv]) hx_named]
-              rwa [REnv.update_comm_bool_bool _ _ _ _ _ (Ne.symm hxν)]
-          | int =>
-            simp only [TyDenote]
-            constructor
-            · rintro ⟨n', rfl, hi⟩
-              refine ⟨n', rfl, ?_⟩
-              simp only [Refinement.interp, Refinement.substBV] at hi ⊢
-              rw [Formula.interp_substBV κ r.fmla .bool 0 bv x (ρ.update .int nuName n')
-                    (by simp [hx_rfv]) hx_named] at hi
-              rwa [(REnv.update_comm_int_bool _ _ _ _ _).symm] at hi
-            · rintro ⟨n', rfl, hi⟩
-              refine ⟨n', rfl, ?_⟩
-              simp only [Refinement.interp, Refinement.substBV]
-              rw [Formula.interp_substBV κ r.fmla .bool 0 bv x (ρ.update .int nuName n')
-                    (by simp [hx_rfv]) hx_named]
-              rwa [(REnv.update_comm_int_bool _ _ _ _ _).symm]
-        | int =>
-          simp [TyDenote] at hcompat
-    | clos body =>
-      -- va = .clos body, extendBy _ ρ x (.clos body) = ρ always
-      -- substBV_aux 0 (.clos body) (.refine b r) = .refine b r
-      simp only [Ty.substBV, Ty.substBV_aux, REnv.extendBy, Ty.openVar, Refinement.openBVar]
-      cases s with
-      | arrow s_d s_c =>
-        simp only [Ty.optBase] at hWF
-        have hno_int : ¬Formula.hasBVar .int 0 r.fmla := by
-          intro hbv; exact absurd (hWF .int 0 hbv) (by simp)
-        have hno_bool : ¬Formula.hasBVar .bool 0 r.fmla := by
-          intro hbv; exact absurd (hWF .bool 0 hbv) (by simp)
-        rw [Formula.openBVar_noop r.fmla .int 0 x hno_int,
-            Formula.openBVar_noop r.fmla .bool 0 x hno_bool]
-      | refine sb r' =>
-        -- TyDenote κ (.refine sb r') ρ (.clos body) = False
-        cases sb with
-        | int =>
-          simp only [TyDenote] at hcompat; obtain ⟨_, h, _⟩ := hcompat; simp at h
-        | bool =>
-          simp only [TyDenote] at hcompat; obtain ⟨_, h, _⟩ := hcompat; simp at h
-
+  apply TyDenote.substBV_iff_aux t.skel
+  · omega
+  · assumption
+  · assumption
+  · assumption
+  · simp ; assumption
+  · assumption
 /-- Helper: extendBy at x ≠ y does not change ρ.ints y or ρ.bools y. -/
 private theorem REnv.extendBy_ints_other (s : Ty) (ρ : REnv) (x y : EVar) (va : Val)
     (hxy : x ≠ y) : (REnv.extendBy s ρ x va).ints y = ρ.ints y := by
@@ -651,7 +742,79 @@ theorem EnvAgrees.dom_eq :
 
 /-! ## T1 — Subtyping is semantic inclusion of denotations -/
 
-theorem subtyp_sound {κ Γ s t} (hsub : Subtyp κ Γ s t) :
+private theorem Subtyp.optBase_eq {κ Γ s t} (h : Subtyp κ Γ s t) : s.optBase = t.optBase := by
+  cases h with
+  | refine => rfl
+  | arrow => simp [Ty.optBase]
+
+/-- ModelsEnv is preserved when extending ρ at z fresh from Γ. -/
+private theorem ModelsEnv.extendBy_fresh_aux {κ : KEnv} {Γ : TEnv} {ρ : REnv}
+    (hm : ModelsEnv κ ρ Γ) (s : Ty) (z : EVar) (va : Val)
+    (hz_dom : z ∉ TEnv.dom Γ)
+    (hz_fv : z ∉ TEnv.tyFv Γ)
+    (hz_named : z ∉ TEnv.tyNamed Γ)
+    (hzν : z ≠ nuName) :
+    ModelsEnv κ (REnv.extendBy s ρ z va) Γ := by
+  induction Γ with
+  | nil => exact True.intro
+  | cons hd tl ih =>
+    obtain ⟨y, t⟩ := hd
+    simp only [TEnv.dom, List.mem_cons, not_or] at hz_dom
+    simp only [TEnv.tyFv, List.mem_append, not_or] at hz_fv
+    simp only [TEnv.tyNamed, List.mem_append, not_or] at hz_named
+    cases t with
+    | arrow s' t' =>
+      simp only [ModelsEnv] at hm ⊢
+      exact ih hm hz_dom.2 hz_fv.2 hz_named.2
+    | refine b r =>
+      simp only [ModelsEnv] at hm ⊢
+      obtain ⟨hhead, htail⟩ := hm
+      refine ⟨?_, ih htail hz_dom.2 hz_fv.2 hz_named.2⟩
+      have hzy : z ≠ y := hz_dom.1
+      have hz_rfv : z ∉ r.fmla.fv := Refinement.fv_filter_of_ne_nu r z hz_fv.1 hzν
+      have hz_rnamed : z ∉ r.fmla.named := by simpa [Ty.named] using hz_named.1
+      have hget : REnv.get b (REnv.extendBy s ρ z va) y = REnv.get b ρ y := by
+        cases b with
+        | int  => exact REnv.extendBy_ints_other s ρ z y va hzy
+        | bool => exact REnv.extendBy_bools_other s ρ z y va hzy
+      rw [hget]
+      exact (Refinement.interp_extendBy_fresh r s z va ρ hz_rfv hz_rnamed hzν).mp hhead
+
+/-- Build ModelsEnv after prepending a fresh binding (z, s₂). -/
+private theorem ModelsEnv.extendBy_cons {κ : KEnv} {Γ : TEnv} {ρ : REnv}
+    (hm : ModelsEnv κ ρ Γ) (s₂ : Ty) (z : EVar) (va : Val)
+    (hz_dom : z ∉ TEnv.dom Γ)
+    (hz_fv : z ∉ TEnv.tyFv Γ)
+    (hz_named : z ∉ TEnv.tyNamed Γ)
+    (hz_s2fv : z ∉ s₂.fv)
+    (hz_s2named : z ∉ Ty.named s₂)
+    (hzν : z ≠ nuName)
+    (htd_va : TyDenote κ s₂ ρ va) :
+    ModelsEnv κ (REnv.extendBy s₂ ρ z va) ((z, s₂) :: Γ) := by
+  have htail := ModelsEnv.extendBy_fresh_aux hm s₂ z va hz_dom hz_fv hz_named hzν
+  cases s₂ with
+  | arrow s' t' => simp only [ModelsEnv]; exact htail
+  | refine b r =>
+    simp only [ModelsEnv]
+    refine ⟨?_, htail⟩
+    have hz_rfv : z ∉ r.fmla.fv := Refinement.fv_filter_of_ne_nu r z hz_s2fv hzν
+    have hz_rnamed : z ∉ r.fmla.named := by simpa [Ty.named] using hz_s2named
+    cases b with
+    | int =>
+      simp only [TyDenote] at htd_va
+      obtain ⟨n, hvn, hp⟩ := htd_va; subst hvn
+      simp only [REnv.extendBy, REnv.get, REnv.update, beq_self_eq_true, ↓reduceIte]
+      exact (Refinement.interp_extendBy_fresh r (.refine .int r) z (.iconst n) ρ
+              hz_rfv hz_rnamed hzν).mp hp
+    | bool =>
+      simp only [TyDenote] at htd_va
+      obtain ⟨bv, hvb, hp⟩ := htd_va; subst hvb
+      simp only [REnv.extendBy, REnv.get, REnv.update, beq_self_eq_true, ↓reduceIte]
+      exact (Refinement.interp_extendBy_fresh r (.refine .bool r) z (.bconst bv) ρ
+              hz_rfv hz_rnamed hzν).mp hp
+
+theorem subtyp_sound {κ Γ s t} (hsub : Subtyp κ Γ s t)
+    (hWF_s : Ty.WFBVars s) (hWF_t : Ty.WFBVars t) :
     ∀ {ρ}, ModelsEnv κ ρ Γ → ∀ {v}, TyDenote κ s ρ v → TyDenote κ t ρ v := by
   induction hsub with
   | refine hent =>
@@ -672,17 +835,45 @@ theorem subtyp_sound {κ Γ s t} (hsub : Subtyp κ Γ s t) :
         exact ⟨bv, hvb, hf bv hp₁⟩
   | arrow hsub xf hin hout ih =>
     rename_i Γ' s₁ t₁ s₂ t₂
+    obtain ⟨hWF_s1, hWF_st1⟩ := hWF_s
+    obtain ⟨hWF_s2, hWF_t2⟩ := hWF_t
+    -- optBase equality from domain subtyping s₂ <: s₁
+    have hopt_eq : s₂.optBase = s₁.optBase := Subtyp.optBase_eq xf
+    have hWF_st1' : Ty.WFBVarCtx [s₂.optBase] t₁ := hopt_eq ▸ hWF_st1
     intro ρ hm v htd
     simp only [TyDenote] at htd ⊢
     obtain ⟨body, hvc, hlc, hcl, hLR⟩ := htd
     refine ⟨body, hvc, hlc, hcl, fun va htd_va => ?_⟩
-    -- Domain: s₂ <: s₁ (contravariant), convert va from s₂ to s₁
-    have htd_va_s1 : TyDenote κ s₁ ρ va := hout hm htd_va
-    -- Apply the function body
+    -- Domain conversion (contravariant): s₂ <: s₁ so s₂-typed va is also s₁-typed
+    have htd_va_s1 : TyDenote κ s₁ ρ va := hout hWF_s2 hWF_s1 hm htd_va
+    -- Apply the function body at s₁-typed va
     obtain ⟨vr, hbs, htd_vr_t1⟩ := hLR va htd_va_s1
-    exists vr ; and_intros
-    grind
-    sorry
+    refine ⟨vr, hbs, ?_⟩
+    -- Pick fresh z for the cofinite IH
+    obtain ⟨z, hzall⟩ := EVar.freshWith
+      (hsub ++ t₁.fv ++ t₂.fv ++ Ty.named t₁ ++ Ty.named t₂
+         ++ s₂.fv ++ Ty.named s₂ ++ [nuName]
+         ++ TEnv.dom Γ' ++ TEnv.tyFv Γ' ++ TEnv.tyNamed Γ')
+    simp only [List.mem_append, List.mem_singleton, not_or] at hzall
+    obtain ⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨hzL, hz_t1fv⟩, hz_t2fv⟩, hz_t1named⟩, hz_t2named⟩,
+              hz_s2fv⟩, hz_s2named⟩, hzν⟩, hz_Γdom⟩, hz_Γfv⟩, hz_Γnamed⟩ := hzall
+    -- WFBVars for opened types
+    have hWF_t1z : Ty.WFBVars (t₁.openVar 0 z) :=
+      Ty.WFBVarCtx_openVar_last t₁ [] s₂.optBase z hWF_st1'
+    have hWF_t2z : Ty.WFBVars (t₂.openVar 0 z) :=
+      Ty.WFBVarCtx_openVar_last t₂ [] s₂.optBase z hWF_t2
+    -- Convert t₁.substBV va ↔ t₁.openVar 0 z under extendBy s₂ ρ z va
+    rw [TyDenote.substBV_iff κ t₁ s₂ z ρ va vr hz_t1fv hz_t1named hzν hWF_st1' htd_va]
+      at htd_vr_t1
+    -- Build extended model for ((z, s₂) :: Γ')
+    have hm_ext : ModelsEnv κ (REnv.extendBy s₂ ρ z va) ((z, s₂) :: Γ') :=
+      ModelsEnv.extendBy_cons hm s₂ z va hz_Γdom hz_Γfv hz_Γnamed hz_s2fv hz_s2named hzν htd_va
+    -- Apply codomain IH at z
+    have htd_vr_t2 : TyDenote κ (t₂.openVar 0 z) (REnv.extendBy s₂ ρ z va) vr :=
+      ih z hzL hWF_t1z hWF_t2z hm_ext htd_vr_t1
+    -- Convert back: t₂.openVar 0 z ↔ t₂.substBV va
+    exact (TyDenote.substBV_iff κ t₂ s₂ z ρ va vr hz_t2fv hz_t2named hzν hWF_t2 htd_va).mpr
+      htd_vr_t2
 
 -- theorem hastype_preservation {κ Γ e t} (h : Hastype κ Γ e t) :
 --   ∀ {γ ρ}, EnvAgrees κ Γ γ ρ →
@@ -699,8 +890,8 @@ theorem hastype_fundamental {κ Γ e t} (h : Hastype κ Γ e t) :
     ∀ {γ ρ}, EnvAgrees κ Γ γ ρ →
     ∃ v, BigStep (Exp.substEnv γ e) v ∧ TyDenote κ t ρ v := by
   induction h with
-  | var hlk =>
-      rename_i x t
+  | var hlk _ =>
+      rename_i Γ x t hwf
       intro γ ρ hE
       obtain ⟨v, hlkγ, hv, hcl, hint, hbool⟩ := EnvAgrees.lookup_some hE hlk
       refine ⟨v, ?_, ?_⟩
@@ -755,16 +946,16 @@ theorem hastype_fundamental {κ Γ e t} (h : Hastype κ Γ e t) :
       · simp only [primBool, TyDenote]
         refine ⟨b, rfl, ?_⟩
         simp [Refinement.interp, Formula.interp, Term.interp]
-  | ann _ _ ih =>
+  | ann _ _ _ ih =>
       intro γ ρ hE
       obtain ⟨v, hbs, hv⟩ := ih hE
       refine ⟨v, ?_, hv⟩
       rw [Exp.substEnv_ann]
       exact BigStep.ann hbs
-  | sub _ hsub ih =>
+  | sub hhs hsub hwf_t ih =>
       intro γ ρ hE
       obtain ⟨v, hbs, hv⟩ := ih hE
-      exact ⟨v, hbs, subtyp_sound hsub (EnvAgrees.toModelsEnv hE) hv⟩
+      exact ⟨v, hbs, subtyp_sound hsub hhs.wf_bvars hwf_t (EnvAgrees.toModelsEnv hE) hv⟩
   | add_var hlk₁ hlk₂ hxν hyν =>
       rename_i x y r₁ r₂
       intro γ ρ hE
@@ -843,7 +1034,7 @@ theorem hastype_fundamental {κ Γ e t} (h : Hastype κ Γ e t) :
         have hνx : (nuName == x) = false := beq_eq_false_iff_ne.mpr (Ne.symm hxν)
         have hνy : (nuName == y) = false := beq_eq_false_iff_ne.mpr (Ne.symm hyν)
         simp [hνx, hνy, hρx, hρy]
-  | lam L ih =>
+  | lam L hwf_arr ih =>
       rename_i Γ' body s₁ s₂ ih_fund
       intro γ ρ hE
       rw [Exp.substEnv_lam]
@@ -852,12 +1043,12 @@ theorem hastype_fundamental {κ Γ e t} (h : Hastype κ Γ e t) :
       refine ⟨Exp.substEnv γ body, rfl, ?_, ?_, ?_⟩
       · -- Val.lc
         simp only [Val.lc]
-        exact Exp.substEnv_lc_at γ body 1 (EnvAgrees.allLc hE) (Hastype.lam L ih).lc_at
+        exact Exp.substEnv_lc_at γ body 1 (EnvAgrees.allLc hE) (Hastype.lam L hwf_arr ih).lc_at
       · -- Val.closed
         simp only [Val.closed, Val.fv]
         apply Exp.substEnv_fv_nil _ _ (EnvAgrees.allClosed hE)
         intro z hz
-        obtain ⟨t', hzΓ⟩ := (Hastype.lam L ih).fv_subset z (by simpa [Exp.fv] using hz)
+        obtain ⟨t', hzΓ⟩ := (Hastype.lam L hwf_arr ih).fv_subset z (by simpa [Exp.fv] using hz)
         rw [← EnvAgrees.dom_eq hE]
         exact mem_TEnv_dom hzΓ
       · -- LR: for any va : s₁, produce vr evaluating body and in s₂.substBV va
@@ -879,8 +1070,9 @@ theorem hastype_fundamental {κ Γ e t} (h : Hastype κ Γ e t) :
         rw [Exp.substEnv_cons_openVar body γ va x hxγ hγlc hxbody (TyDenote.closed htd_va)] at hbs_vr
         -- htd_vr : TyDenote κ (s₂.openVar 0 x) (extendBy s₁ ρ x va) vr
         -- Convert to TyDenote κ (s₂.substBV va) ρ vr via substBV_iff (← direction)
+        have hWF_s₂ : Ty.WFBVarCtx [s₁.optBase] s₂ := hwf_arr.2
         exact ⟨vr, hbs_vr,
-          (TyDenote.substBV_iff κ s₂ s₁ x ρ va vr hxs₂ hxs₂n hxν htd_va).mpr htd_vr⟩
+          (TyDenote.substBV_iff κ s₂ s₁ x ρ va vr hxs₂ hxs₂n hxν hWF_s₂ htd_va).mpr htd_vr⟩
   | app h_fn h_arg hyfv hynamed hyν ih_fn ih_arg =>
       rename_i e₁ y s t
       intro γ ρ hE
@@ -926,14 +1118,15 @@ theorem hastype_fundamental {κ Γ e t} (h : Hastype κ Γ e t) :
             simp only [REnv.extendBy]
             exact REnv.update_idem_bool ρ y b (hbool_raw b rfl)
       -- Use substBV_iff (→ direction) with x = y, then rewrite using hext
+      have hWF_t : Ty.WFBVarCtx [s.optBase] t := h_fn.wf_bvars.2
       have htd_vr_y : TyDenote κ (t.openVar 0 y) ρ vr := by
         rw [← hext]
-        exact (TyDenote.substBV_iff κ t s y ρ va vr hyfv hynamed hyν htd_arg).mp htd_vr
+        exact (TyDenote.substBV_iff κ t s y ρ va vr hyfv hynamed hyν hWF_t htd_arg).mp htd_vr
       refine ⟨vr, ?_, htd_vr_y⟩
       rw [Exp.substEnv_app]
       exact BigStep.app hbs_fn hbs_arg hbs_body
-  | letin L h₁ h₂ ih₁ ih₂ =>
-      rename_i Γ e_let body s t
+  | letin L _ h₁ h₂ ih₁ ih₂ =>
+      rename_i Γ e_let body s t _
       intro γ ρ hE
       -- Evaluate e_let
       obtain ⟨v₁, hbs₁, htd₁⟩ := ih₁ hE
@@ -961,8 +1154,8 @@ theorem hastype_fundamental {κ Γ e t} (h : Hastype κ Γ e t) :
       -- BigStep for letin
       rw [Exp.substEnv_letin]
       exact ⟨vr, BigStep.letin hbs₁ hbs₂, htd_vr_ρ⟩
-  | ite hlk hxν h₁ h₂ ih_e₁ ih_e₂ =>
-      rename_i Γ x e₁ e₂ r t
+  | ite hlk hxν _ h₁ h₂ ih_e₁ ih_e₂ =>
+      rename_i Γ x e₁ e₂ r t _
       intro γ ρ hE
       obtain ⟨vx, hlkγx, htd_x, hcl_x, _, hbool_x⟩ := EnvAgrees.lookup_some hE hlk
       simp only [TyDenote] at htd_x
