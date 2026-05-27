@@ -1,5 +1,5 @@
 import LeanFixpoint.VCG.STLC.VCGen
-import LeanFixpoint.Tactic.SolveFixpoint
+import LeanFixpoint.Tactic.Tactics.SolveFixpoint
 import LeanFixpoint.VCG.STLC.Soundness
 import LeanFixpoint.VCG.STLC.MakeHornUnderK
 

@@ -1,5 +1,5 @@
 import LeanFixpoint.VCG.STLC.Soundness
-import LeanFixpoint.Tactic.Hoist
+import LeanFixpoint.Tactic.Tactics.Hoist
 
 -- Applies `under_exists` once, then dispatches `check_sound` inside it.
 -- `args` (optional, default empty) are extra lemmas passed to `simp`.

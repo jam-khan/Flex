@@ -1,9 +1,9 @@
 import Lean
 
-import LeanFixpoint.Core.Monad
-import LeanFixpoint.Solve.Qualifier
-import LeanFixpoint.Solve.Instantiation
-import LeanFixpoint.Solve.Weaken
+import LeanFixpoint.Core
+import LeanFixpoint.PA.Qualifier
+import LeanFixpoint.PA.Instantiation
+import LeanFixpoint.PA.Weaken
 
 open Lean Meta Elab Term Tactic
 

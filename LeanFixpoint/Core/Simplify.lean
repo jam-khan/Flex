@@ -1,5 +1,4 @@
 import Lean
-import LeanFixpoint.Core.KVar
 
 open Lean Meta
 

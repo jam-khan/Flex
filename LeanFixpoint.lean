@@ -1,50 +1,35 @@
-/-
-  Core implementation, includes fusion algorithm
-  and types for κ-variables, along with pretty printing.
--/
-import LeanFixpoint.Core.KVar
-import LeanFixpoint.Core.Monad
-import LeanFixpoint.Core.Pretty
-import LeanFixpoint.Core.Simplify
-import LeanFixpoint.Core.SubstK
 
-import LeanFixpoint.Fusion.Fusion
-import LeanFixpoint.Fusion.Flatten
-import LeanFixpoint.Fusion.Graph
+-- Core utils, monads and infra
+import LeanFixpoint.Core
 
-/-
-  Elaboration helpers for peeling existentials
-  and building witness expressions.
--/
-import LeanFixpoint.Elab.ToExpr
-import LeanFixpoint.Elab.FromExpr
+-- Fusion algorithm
+import LeanFixpoint.Fusion
+
+--  Elaboration helpers for peeling existentials and building witness expressions.
+import LeanFixpoint.Elab
+
+-- Proof producing local refinement type inference
+import LeanFixpoint.Zap
 
 /-
   Meta-programming related code, including
   tactics, commands, and monadic code written
-  in MetaM. `SolveFusion` is the main tactic to discharge
-  verification conditions.
+  in MetaM.
 -/
-import LeanFixpoint.Tactic.SolveFixpoint
-import LeanFixpoint.Tactic.Hoist
-import LeanFixpoint.Tactic.Zap
-import LeanFixpoint.Tactic.Internal.Utils
-import LeanFixpoint.Tactic.SolveFusion
+import LeanFixpoint.Tactic.Utils
 import LeanFixpoint.Tactic.Closers
-import LeanFixpoint.Tactic.SplitHyps
-import LeanFixpoint.Tactic.RewriteKs
-import LeanFixpoint.Tactic.ZapK.ZapK
-import LeanFixpoint.Tactic.Sol1
+import LeanFixpoint.Tactic.Tactics.SolveFixpoint
+import LeanFixpoint.Tactic.Tactics.Hoist
+import LeanFixpoint.Tactic.Tactics.Zap
+import LeanFixpoint.Tactic.Tactics.SplitHyps
+import LeanFixpoint.Tactic.Tactics.RewriteKs
+import LeanFixpoint.Tactic.Tactics.ZapK
+import LeanFixpoint.Tactic.Tactics.Fusion
+import LeanFixpoint.Tactic.Tactics.Sol1
 
-/-
-  Predicate Abstraction related code,
-  includes the Qualifier AST and the
-  Solve method.
--/
-import LeanFixpoint.Solve.Qualifier
-import LeanFixpoint.Solve.Instantiation
-import LeanFixpoint.Solve.Weaken
-import LeanFixpoint.Solve.Fixpoint
+
+-- Predicate Abstraction
+import LeanFixpoint.PA
 
 /-
   Sound Verification Condition Generation

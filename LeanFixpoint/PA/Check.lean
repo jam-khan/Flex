@@ -1,6 +1,6 @@
 import Lean
 import Aesop
-import LeanFixpoint.Tactic.Internal.Utils
+import LeanFixpoint.Tactic.Utils
 
 open Lean Meta Elab Tactic
 
@@ -35,9 +35,8 @@ def checkExprVC (prop : Expr) : TermElabM Bool := withSilencedMessages do
          first
            | omega
            | grind
-          --  | (simp_all; grind)
-          -- | aesop
-           | (constructor <;> grind))))
+           | (constructor <;> grind)
+           | aesop)))
     if !goals.isEmpty then return false
     let proof ← instantiateMVars mvar
     return !proof.hasSorry
