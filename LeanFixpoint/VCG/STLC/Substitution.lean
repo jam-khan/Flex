@@ -68,6 +68,16 @@ def Term.substB {b : Base} (t : Term b) (x : EVar) (u : Term .bool) : Term b :=
   | .not t        => .not (t.substB x u)
   | .and t₁ t₂    => .and (t₁.substB x u) (t₂.substB x u)
 
+/-- Rename all free occurrences of `x` to `y` in a `Term`, preserving base.
+    Hits both int and bool slots since `x` may refer to either base. -/
+def Term.replaceFVar {b : Base} (x y : EVar) : Term b → Term b
+  | .const b c    => .const b c
+  | .bvar b j     => .bvar b j
+  | .fvar b z     => if z = x then .fvar b y else .fvar b z
+  | .add t₁ t₂    => .add (t₁.replaceFVar x y) (t₂.replaceFVar x y)
+  | .not t        => .not (t.replaceFVar x y)
+  | .and t₁ t₂    => .and (t₁.replaceFVar x y) (t₂.replaceFVar x y)
+
 /-- Locally closed at level `k`: every `BVar` index is strictly less than `k`. -/
 def Term.lc_at : Nat → {b : Base} → Term b → Prop
   | _, _, .const _ _   => True
@@ -126,6 +136,40 @@ def Formula.named : Formula → List EVar
   | .allB x φ     => x :: φ.named
   | .kapp _ args  => args.flatMap (fun a => Term.fv a.2)
 
+/-- Just the names introduced by existential/universal binders, with the
+    `.kapp` case yielding `[]`. Unlike `Formula.named`, this set is invariant
+    under `openBVar`, which makes it the right precondition for rename
+    lemmas applied to opened formulas. Used in `entail_f_replace`. -/
+def Formula.binderNames : Formula → List EVar
+  | .tt | .ff => []
+  | .eqI _ _ | .eqB _ _ | .leqI _ _ => []
+  | .and φ₁ φ₂ | .or φ₁ φ₂ | .imp φ₁ φ₂ => φ₁.binderNames ++ φ₂.binderNames
+  | .not φ => φ.binderNames
+  | .exI z φ | .exB z φ | .allI z φ | .allB z φ => z :: φ.binderNames
+  | .kapp _ _ => []
+
+theorem Formula.binderNames_subset_named (φ : Formula) :
+    ∀ x ∈ Formula.binderNames φ, x ∈ Formula.named φ := by
+  induction φ with
+  | tt | ff | eqI _ _ | eqB _ _ | leqI _ _ => intro x h; simp [Formula.binderNames] at h
+  | and φ₁ φ₂ ih₁ ih₂ | or φ₁ φ₂ ih₁ ih₂ | imp φ₁ φ₂ ih₁ ih₂ =>
+    intro x h
+    simp [Formula.binderNames, Formula.named] at h ⊢
+    rcases h with h | h
+    · exact Or.inl (ih₁ x h)
+    · exact Or.inr (ih₂ x h)
+  | not φ ih =>
+    intro x h
+    simp [Formula.binderNames, Formula.named] at h ⊢
+    exact ih x h
+  | exI _ φ ih | exB _ φ ih | allI _ φ ih | allB _ φ ih =>
+    intro x h
+    simp [Formula.binderNames, Formula.named, List.mem_cons] at h ⊢
+    rcases h with h | h
+    · exact Or.inl h
+    · exact Or.inr (ih x h)
+  | kapp _ _ => intro x h; simp [Formula.binderNames] at h
+
 /-- Open the `b'`-typed `BVar` at level `k` with a free var `x` throughout `φ`. -/
 def Formula.openBVar (b' : Base) (k : Nat) (x : EVar) : Formula → Formula
   | .tt           => .tt
@@ -143,6 +187,20 @@ def Formula.openBVar (b' : Base) (k : Nat) (x : EVar) : Formula → Formula
   | .allB y φ     => .allB y (φ.openBVar b' k x)
   | .kapp kname args =>
       .kapp kname (args.map (fun a => ⟨a.1, Term.openBVar b' k x a.2⟩))
+
+/-- `Formula.binderNames` is invariant under `Formula.openBVar`. This is the
+    key reason for using it (rather than `Formula.named`) as the precondition
+    in rename lemmas that we apply to opened formulas. -/
+theorem Formula.binderNames_openBVar (b' : Base) (k : Nat) (z : EVar) (φ : Formula) :
+    (φ.openBVar b' k z).binderNames = φ.binderNames := by
+  induction φ generalizing k with
+  | tt | ff | eqI _ _ | eqB _ _ | leqI _ _ => rfl
+  | and φ₁ φ₂ ih₁ ih₂ | or φ₁ φ₂ ih₁ ih₂ | imp φ₁ φ₂ ih₁ ih₂ =>
+    simp [Formula.openBVar, Formula.binderNames, ih₁ k, ih₂ k]
+  | not φ ih => simp [Formula.openBVar, Formula.binderNames, ih k]
+  | exI _ φ ih | exB _ φ ih | allI _ φ ih | allB _ φ ih =>
+    simp [Formula.openBVar, Formula.binderNames, ih k]
+  | kapp _ _ => simp [Formula.openBVar, Formula.binderNames]
 
 /-- Substitute `u : Term .int` for free occurrences of `fvar .int x`.
     Respects shadowing under `exI` of the same name. -/
@@ -178,6 +236,26 @@ def Formula.substB (x : EVar) (u : Term .bool) : Formula → Formula
   | .allI y φ     => .allI y (φ.substB x u)
   | .allB y φ     => if x = y then .allB y φ else .allB y (φ.substB x u)
   | .kapp k args  => .kapp k (args.map (fun a => ⟨a.1, a.2.substB x u⟩))
+
+/-- Rename all free occurrences of `x` to `y` in a `Formula`. Both int and
+    bool slots are renamed (a name may refer to either base in the same
+    formula). Named binders shadow: when binder `z = x`, the subtree is left
+    alone since the rename target is bound away. -/
+def Formula.replaceFVar (x y : EVar) : Formula → Formula
+  | .tt           => .tt
+  | .ff           => .ff
+  | .eqI t₁ t₂    => .eqI (t₁.replaceFVar x y) (t₂.replaceFVar x y)
+  | .eqB t₁ t₂    => .eqB (t₁.replaceFVar x y) (t₂.replaceFVar x y)
+  | .leqI t₁ t₂   => .leqI (t₁.replaceFVar x y) (t₂.replaceFVar x y)
+  | .and φ₁ φ₂    => .and (φ₁.replaceFVar x y) (φ₂.replaceFVar x y)
+  | .or φ₁ φ₂     => .or (φ₁.replaceFVar x y) (φ₂.replaceFVar x y)
+  | .not φ        => .not (φ.replaceFVar x y)
+  | .imp φ₁ φ₂    => .imp (φ₁.replaceFVar x y) (φ₂.replaceFVar x y)
+  | .exI z φ      => if z = x then .exI z φ else .exI z (φ.replaceFVar x y)
+  | .exB z φ      => if z = x then .exB z φ else .exB z (φ.replaceFVar x y)
+  | .allI z φ     => if z = x then .allI z φ else .allI z (φ.replaceFVar x y)
+  | .allB z φ     => if z = x then .allB z φ else .allB z (φ.replaceFVar x y)
+  | .kapp k args  => .kapp k (args.map (fun a => ⟨a.1, a.2.replaceFVar x y⟩))
 
 /-- Locally closed at level `k`: descends through formula structure. Named
     existentials don't affect `BVar` levels (they bind names, not indices). -/
@@ -235,6 +313,11 @@ def Refinement.substI (x : EVar) (u : Term .int)
 def Refinement.substB (x : EVar) (u : Term .bool)
     {b : Base} (r : Refinement b) : Refinement b :=
   ⟨r.fmla.substB x u⟩
+
+/-- Rename free occurrences of `x` to `y` inside a refinement's formula. -/
+def Refinement.replaceFVar {b : Base} (x y : EVar) (r : Refinement b) :
+    Refinement b :=
+  ⟨r.fmla.replaceFVar x y⟩
 
 def Refinement.lc_at (k : Nat) {b : Base} (r : Refinement b) : Prop :=
   r.fmla.lc_at k
@@ -554,6 +637,90 @@ def Ty.WFBVarCtx : List (Option Base) → Ty → Prop
 
 /-- Shorthand: `t` is well-formed with no outer binders. -/
 def Ty.WFBVars (t : Ty) : Prop := Ty.WFBVarCtx [] t
+
+/-- A typing context is WFBVars iff every binding's type is `Ty.WFBVars` and
+    `nuName` is reserved (never used as a binding name). -/
+def TEnv.WFBVars (Γ : TEnv) : Prop :=
+  (∀ x t, (x, t) ∈ Γ → Ty.WFBVars t) ∧ nuName ∉ Γ.dom
+
+/-- All type annotations syntactically present in `e` are `Ty.WFBVars`.
+    Used as a precondition on soundness theorems so the `.ann` case has the
+    WFBVars evidence to construct the corresponding `Hastype` node. -/
+def Exp.WFBVars : Exp → Prop
+  | .bvar _ | .fvar _ | .iconst _ | .bconst _ => True
+  | .lam e        => Exp.WFBVars e
+  | .letin e₁ e₂  => Exp.WFBVars e₁ ∧ Exp.WFBVars e₂
+  | .app e₁ e₂    => Exp.WFBVars e₁ ∧ Exp.WFBVars e₂
+  | .ann e t      => Ty.WFBVars t ∧ Exp.WFBVars e
+  | .and e₁ e₂    => Exp.WFBVars e₁ ∧ Exp.WFBVars e₂
+  | .not e        => Exp.WFBVars e
+  | .leq e₁ e₂    => Exp.WFBVars e₁ ∧ Exp.WFBVars e₂
+  | .ite e₀ e₁ e₂ => Exp.WFBVars e₀ ∧ Exp.WFBVars e₁ ∧ Exp.WFBVars e₂
+  | .add e₁ e₂    => Exp.WFBVars e₁ ∧ Exp.WFBVars e₂
+
+/-- Cons preserves `TEnv.WFBVars` given the new binding has WFBVars type and
+    its name is not `nuName`. -/
+theorem TEnv.WFBVars.cons {Γ : TEnv} {x : EVar} {t : Ty}
+    (hΓ : TEnv.WFBVars Γ) (ht : Ty.WFBVars t) (hxν : x ≠ nuName) :
+    TEnv.WFBVars ((x, t) :: Γ) := by
+  refine ⟨?_, ?_⟩
+  · intro y s h
+    simp only [List.mem_cons, Prod.mk.injEq] at h
+    rcases h with ⟨_, hst⟩ | h
+    · exact hst ▸ ht
+    · exact hΓ.1 y s h
+  · simp only [TEnv.dom, List.mem_cons, not_or]
+    refine ⟨?_, hΓ.2⟩
+    intro h; exact hxν h.symm
+
+/-- Lookup in a WFBVars context yields a WFBVars type. -/
+theorem TEnv.WFBVars.lookup {Γ : TEnv} (hΓ : TEnv.WFBVars Γ) {x : EVar} {t : Ty}
+    (hlk : Γ.lookup x = some t) : Ty.WFBVars t := by
+  induction Γ with
+  | nil => simp [List.lookup] at hlk
+  | cons hd tl ih =>
+    obtain ⟨y, s⟩ := hd
+    simp only [List.lookup] at hlk
+    by_cases hxy : x = y
+    · have heq : (x == y) = true := by simp [hxy]
+      rw [heq] at hlk
+      have hst : s = t := Option.some.inj hlk
+      subst hst
+      exact hΓ.1 y s (by simp)
+    · have hne : (x == y) = false := by simp [hxy]
+      rw [hne] at hlk
+      have hΓ_tl : TEnv.WFBVars tl := by
+        refine ⟨fun z r h => hΓ.1 z r (by simp [List.mem_cons, h]), ?_⟩
+        have hnu := hΓ.2
+        simp only [TEnv.dom, List.mem_cons, not_or] at hnu
+        exact hnu.2
+      exact ih hΓ_tl hlk
+
+/-- Lookup in a `nuName`-reserved context never yields `nuName`. -/
+theorem TEnv.WFBVars.lookup_ne_nu {Γ : TEnv} (hΓ : TEnv.WFBVars Γ)
+    {x : EVar} {t : Ty} (hlk : Γ.lookup x = some t) : x ≠ nuName := by
+  intro hxν
+  subst hxν
+  -- nuName ∈ Γ.dom would contradict hΓ.2
+  apply hΓ.2
+  -- Derive nuName ∈ Γ.dom from lookup
+  induction Γ with
+  | nil => simp [List.lookup] at hlk
+  | cons hd tl ih =>
+    obtain ⟨y, s⟩ := hd
+    simp only [List.lookup] at hlk
+    simp only [TEnv.dom, List.mem_cons]
+    by_cases hxy : nuName = y
+    · exact Or.inl hxy
+    · right
+      have hne : (nuName == y) = false := by simp [hxy]
+      rw [hne] at hlk
+      have hΓ_tl : TEnv.WFBVars tl := by
+        refine ⟨fun z r h => hΓ.1 z r (by simp [List.mem_cons, h]), ?_⟩
+        have hnu := hΓ.2
+        simp only [TEnv.dom, List.mem_cons, not_or] at hnu
+        exact hnu.2
+      exact ih hΓ_tl hlk
 
 /-- If t has no `BVar b k`, then `Term.openBVar b k x` is the identity. -/
 theorem Term.openBVar_noop (b : Base) (k : Nat) (x : EVar) :
@@ -1550,12 +1717,6 @@ theorem Term.interp_update_bool_of_int (t : Term .int)
   is equivalent to updating ρ at that name's slot. This is the deep-embedding
   payoff — `Refinement.interp` becomes algebraic.
 
-  We do NOT prove `Formula.interp_update_fresh` here. The hypothesis `x ∉ fv`
-  is too weak for named existentials over a different base (e.g. an `exB y` with
-  `x = y`): the same EVar can occur as both `.int` and `.bool`, and `Formula.fv`
-  doesn't distinguish. Stage 10 will address with either a base-tagged
-  `fvI`/`fvB` split or a stronger freshness premise; we don't need it for the
-  app-case sorry.
 -/
 
 theorem Formula.interp_substI_const (κ : KEnv) (φ : Formula)
@@ -1709,7 +1870,7 @@ theorem Formula.interp_substB_const (κ : KEnv) (φ : Formula)
 
   These connect syntactic substitution into a refinement (`substI`/`substB`)
   with a corresponding `ρ`-update at a non-ν name. Used by Safety.lean's T2
-  app-case (the only non-routine sorry under the old design). -/
+  app-case. -/
 
 theorem Refinement.interp_substI (κ : KEnv) {b : Base} (r : Refinement b)
     (x : EVar) (n : Int) (ρ : REnv) (ν : b.interp) (hx : x ≠ nuName) :
@@ -2522,11 +2683,6 @@ theorem Exp.substEnv_cons_redundant (e : Exp) (γ : List (EVar × Val)) (x : EVa
     simp [substEnv]
     rw [←ih1 γ x va hlk hγcl, ←ih2 γ x va hlk hγcl, ←ih3 γ x va hlk hγcl]
     simp [Exp.subst, substEnv]
-
-
-  -- substEnv ((x,va)::γ) e = substEnv γ (subst x va.toExp e)
-  -- = substEnv γ e, since γ already substitutes x → va.toExp
-  -- sorry
 
 /-! ## 20. Formula.interp rename: interpretation is invariant under renaming the opened variable -/
 
@@ -3594,5 +3750,425 @@ theorem Ty.named_substBV_not_mem (t : Ty) (x : EVar) (va : Val) (hx : x ∉ Ty.n
     simp only [Ty.named, List.mem_append, not_or] at hx
     simp only [Ty.substBV_aux, Ty.named, List.mem_append, not_or]
     exact ⟨ihs hx.1 k, iht hx.2 (k + 1)⟩
+
+/-! ## Rename keystone: openBVar then replaceFVar -/
+
+/-- Opening a term at `y` factors as opening at `x` and then renaming `x → y`,
+    provided `x` does not already occur free. -/
+theorem Term.openBVar_replace {b' b : Base} (k : Nat) (x y : EVar)
+    (t : Term b) (hx : x ∉ Term.fv t) :
+    (t.openBVar b' k x).replaceFVar x y = t.openBVar b' k y := by
+  induction t with
+  | const _ _    => simp [Term.openBVar, Term.replaceFVar]
+  | bvar b'' j   =>
+    cases b'' <;> cases b' <;>
+      simp only [Term.openBVar, Term.replaceFVar] <;>
+      (try (split <;> simp_all [Term.replaceFVar]))
+  | fvar b'' z   =>
+    simp only [Term.fv, List.mem_singleton] at hx
+    have hzne : z ≠ x := fun h => hx h.symm
+    simp [Term.openBVar, Term.replaceFVar, hzne]
+  | add t₁ t₂ ih₁ ih₂ =>
+    simp only [Term.fv, List.mem_append, not_or] at hx
+    simp [Term.openBVar, Term.replaceFVar, ih₁ hx.1, ih₂ hx.2]
+  | not t ih =>
+    simp only [Term.fv] at hx
+    simp [Term.openBVar, Term.replaceFVar, ih hx]
+  | and t₁ t₂ ih₁ ih₂ =>
+    simp only [Term.fv, List.mem_append, not_or] at hx
+    simp [Term.openBVar, Term.replaceFVar, ih₁ hx.1, ih₂ hx.2]
+
+/-- Opening a formula at `y` factors as opening at `x` followed by `x → y`
+    rename, provided `x` does not appear free and `x` is not a bound name. -/
+theorem Formula.openBVar_replace (b' : Base) (k : Nat) (x y : EVar) (φ : Formula)
+    (hx : x ∉ Formula.fv φ) (hxn : x ∉ Formula.named φ) :
+    (φ.openBVar b' k x).replaceFVar x y = φ.openBVar b' k y := by
+  induction φ generalizing k with
+  | tt | ff => simp [Formula.openBVar, Formula.replaceFVar]
+  | eqI t₁ t₂ | eqB t₁ t₂ | leqI t₁ t₂ =>
+    simp only [Formula.fv, List.mem_append, not_or] at hx
+    simp [Formula.openBVar, Formula.replaceFVar,
+          Term.openBVar_replace k x y _ hx.1, Term.openBVar_replace k x y _ hx.2]
+  | and φ₁ φ₂ ih₁ ih₂ | or φ₁ φ₂ ih₁ ih₂ | imp φ₁ φ₂ ih₁ ih₂ =>
+    simp only [Formula.fv, Formula.named, List.mem_append, not_or] at hx hxn
+    simp [Formula.openBVar, Formula.replaceFVar,
+          ih₁ k hx.1 hxn.1, ih₂ k hx.2 hxn.2]
+  | not φ ih =>
+    simp only [Formula.fv, Formula.named] at hx hxn
+    simp [Formula.openBVar, Formula.replaceFVar, ih k hx hxn]
+  | exI z φ ih | exB z φ ih | allI z φ ih | allB z φ ih =>
+    simp only [Formula.named, List.mem_cons, not_or] at hxn
+    have hzne : z ≠ x := fun h => hxn.1 h.symm
+    have hxfv : x ∉ φ.fv := by
+      intro hmem
+      apply hx
+      simp [Formula.fv, List.mem_filter]
+      exact ⟨hmem, Ne.symm hzne⟩
+    simp only [Formula.openBVar, Formula.replaceFVar, if_neg hzne, ih k hxfv hxn.2]
+  | kapp kname args =>
+    simp only [Formula.openBVar, Formula.replaceFVar]
+    congr 1
+    rw [List.map_map]
+    apply List.map_congr_left
+    intro ⟨b'', t⟩ hmem
+    show Sigma.mk b'' ((t.openBVar b' k x).replaceFVar x y) =
+         Sigma.mk b'' (t.openBVar b' k y)
+    have : x ∉ Term.fv t := by
+      intro hmemT
+      apply hx
+      simp [Formula.fv]
+      exact ⟨⟨b'', t⟩, hmem, hmemT⟩
+    rw [Term.openBVar_replace k x y t this]
+
+/-- Refinement counterpart of `Formula.openBVar_replace`. -/
+theorem Refinement.openBVar_replace {b'' : Base} (b' : Base) (k : Nat) (x y : EVar)
+    (r : Refinement b'')
+    (hx : x ∉ r.fmla.fv) (hxn : x ∉ r.fmla.named) :
+    (r.openBVar b' k x).replaceFVar x y = r.openBVar b' k y := by
+  obtain ⟨fmla⟩ := r
+  show (⟨_⟩ : Refinement b'') = ⟨_⟩
+  congr 1
+  exact Formula.openBVar_replace b' k x y fmla hx hxn
+
+/-! ## Commuting openBVar past replaceFVar (no freshness on `x` required) -/
+
+/-- Renaming a term commutes with opening: opening at `x` then renaming `x → y`
+    equals renaming `x → y` then opening at `y`. -/
+theorem Term.openBVar_replaceFVar_chain {b' b : Base} (k : Nat) (x y : EVar)
+    (t : Term b) :
+    (t.openBVar b' k x).replaceFVar x y =
+    (t.replaceFVar x y).openBVar b' k y := by
+  induction t with
+  | const _ _    => simp [Term.openBVar, Term.replaceFVar]
+  | bvar b'' j   =>
+    cases b'' <;> cases b' <;>
+      simp only [Term.openBVar, Term.replaceFVar] <;>
+      (try (split <;> simp_all [Term.replaceFVar]))
+  | fvar b'' z   =>
+    by_cases hzx : z = x <;>
+      cases b'' <;>
+      simp_all [Term.openBVar, Term.replaceFVar]
+  | add t₁ t₂ ih₁ ih₂ => simp [Term.openBVar, Term.replaceFVar, ih₁, ih₂]
+  | not t ih          => simp [Term.openBVar, Term.replaceFVar, ih]
+  | and t₁ t₂ ih₁ ih₂ => simp [Term.openBVar, Term.replaceFVar, ih₁, ih₂]
+
+/-- Renaming a formula commutes with opening, provided the rename source is
+    not also a bound name in any inner binder. -/
+theorem Formula.openBVar_replaceFVar_chain (b' : Base) (k : Nat) (x y : EVar)
+    (φ : Formula) (hxn : x ∉ Formula.named φ) :
+    (φ.openBVar b' k x).replaceFVar x y =
+    (φ.replaceFVar x y).openBVar b' k y := by
+  induction φ generalizing k with
+  | tt | ff => simp [Formula.openBVar, Formula.replaceFVar]
+  | eqI t₁ t₂ | eqB t₁ t₂ | leqI t₁ t₂ =>
+    simp [Formula.openBVar, Formula.replaceFVar,
+          Term.openBVar_replaceFVar_chain k x y t₁,
+          Term.openBVar_replaceFVar_chain k x y t₂]
+  | and φ₁ φ₂ ih₁ ih₂ | or φ₁ φ₂ ih₁ ih₂ | imp φ₁ φ₂ ih₁ ih₂ =>
+    simp only [Formula.named, List.mem_append, not_or] at hxn
+    simp [Formula.openBVar, Formula.replaceFVar, ih₁ k hxn.1, ih₂ k hxn.2]
+  | not φ ih =>
+    simp only [Formula.named] at hxn
+    simp [Formula.openBVar, Formula.replaceFVar, ih k hxn]
+  | exI z φ ih | exB z φ ih | allI z φ ih | allB z φ ih =>
+    simp only [Formula.named, List.mem_cons, not_or] at hxn
+    have hzx : z ≠ x := fun h => hxn.1 h.symm
+    simp only [Formula.openBVar, Formula.replaceFVar, if_neg hzx, ih k hxn.2]
+  | kapp kname args =>
+    simp only [Formula.openBVar, Formula.replaceFVar]
+    congr 1
+    rw [List.map_map, List.map_map]
+    apply List.map_congr_left
+    intro ⟨b'', t⟩ _
+    show Sigma.mk b'' ((t.openBVar b' k x).replaceFVar x y) =
+         Sigma.mk b'' ((t.replaceFVar x y).openBVar b' k y)
+    rw [Term.openBVar_replaceFVar_chain k x y t]
+
+/-- Refinement-level chain version. -/
+theorem Refinement.openBVar_replaceFVar_chain {b'' : Base} (b' : Base) (k : Nat)
+    (x y : EVar) (r : Refinement b'') (hxn : x ∉ r.fmla.named) :
+    (r.openBVar b' k x).replaceFVar x y =
+    (r.replaceFVar x y).openBVar b' k y := by
+  obtain ⟨fmla⟩ := r
+  show (⟨_⟩ : Refinement b'') = ⟨_⟩
+  congr 1
+  exact Formula.openBVar_replaceFVar_chain b' k x y fmla hxn
+
+/-! ## replaceFVar is identity on fresh terms/formulas/refinements -/
+
+theorem Term.replaceFVar_id_of_fresh {b : Base} (t : Term b) (x y : EVar)
+    (hx : x ∉ Term.fv t) : t.replaceFVar x y = t := by
+  induction t with
+  | const _ _ => rfl
+  | bvar _ _  => rfl
+  | fvar b' z =>
+    simp only [Term.fv, List.mem_singleton] at hx
+    have : z ≠ x := fun h => hx h.symm
+    simp [Term.replaceFVar, this]
+  | add t₁ t₂ ih₁ ih₂ =>
+    simp only [Term.fv, List.mem_append, not_or] at hx
+    simp [Term.replaceFVar, ih₁ hx.1, ih₂ hx.2]
+  | not t ih =>
+    simp only [Term.fv] at hx
+    simp [Term.replaceFVar, ih hx]
+  | and t₁ t₂ ih₁ ih₂ =>
+    simp only [Term.fv, List.mem_append, not_or] at hx
+    simp [Term.replaceFVar, ih₁ hx.1, ih₂ hx.2]
+
+theorem Formula.replaceFVar_id_of_fresh (φ : Formula) (x y : EVar)
+    (hx : x ∉ Formula.fv φ) : φ.replaceFVar x y = φ := by
+  induction φ with
+  | tt | ff => rfl
+  | eqI t₁ t₂ | eqB t₁ t₂ | leqI t₁ t₂ =>
+    simp only [Formula.fv, List.mem_append, not_or] at hx
+    simp [Formula.replaceFVar,
+          Term.replaceFVar_id_of_fresh t₁ x y hx.1,
+          Term.replaceFVar_id_of_fresh t₂ x y hx.2]
+  | and φ₁ φ₂ ih₁ ih₂ | or φ₁ φ₂ ih₁ ih₂ | imp φ₁ φ₂ ih₁ ih₂ =>
+    simp only [Formula.fv, List.mem_append, not_or] at hx
+    simp [Formula.replaceFVar, ih₁ hx.1, ih₂ hx.2]
+  | not φ ih =>
+    simp only [Formula.fv] at hx
+    simp [Formula.replaceFVar, ih hx]
+  | exI z φ ih | exB z φ ih | allI z φ ih | allB z φ ih =>
+    simp only [Formula.replaceFVar]
+    by_cases hzx : z = x
+    · simp [hzx]
+    · simp only [if_neg hzx]
+      congr 1
+      apply ih
+      intro hmem
+      apply hx
+      simp [Formula.fv, List.mem_filter]
+      exact ⟨hmem, fun h => hzx h.symm⟩
+  | kapp kname args =>
+    simp only [Formula.replaceFVar, Formula.fv] at hx ⊢
+    congr 1
+    have hall : ∀ a ∈ args, x ∉ Term.fv a.snd := by
+      intro a hmem hmemT
+      apply hx
+      rw [List.mem_flatMap]
+      exact ⟨a, hmem, hmemT⟩
+    clear hx
+    induction args with
+    | nil => rfl
+    | cons hd tl ih =>
+      simp only [List.map_cons, List.cons.injEq]
+      obtain ⟨b'', t⟩ := hd
+      refine ⟨?_, ih (fun a hmem => hall a (List.mem_cons_of_mem _ hmem))⟩
+      show Sigma.mk b'' (t.replaceFVar x y) = Sigma.mk b'' t
+      rw [Term.replaceFVar_id_of_fresh t x y (hall ⟨b'', t⟩ List.mem_cons_self)]
+
+theorem Refinement.replaceFVar_id_of_fresh {b'' : Base} (r : Refinement b'')
+    (x y : EVar) (hx : x ∉ r.fmla.fv) :
+    r.replaceFVar x y = r := by
+  obtain ⟨fmla⟩ := r
+  show (⟨_⟩ : Refinement b'') = ⟨fmla⟩
+  congr 1
+  exact Formula.replaceFVar_id_of_fresh fmla x y hx
+
+/-! ## Ty.replaceFVar and Ty.openVar_replace -/
+
+/-- Rename free occurrences of `x` to `y` throughout a type's refinements. -/
+def Ty.replaceFVar (x y : EVar) : Ty → Ty
+  | .refine b r => .refine b (r.replaceFVar x y)
+  | .arrow s t  => .arrow (s.replaceFVar x y) (t.replaceFVar x y)
+
+/-- Combined int+bool opening chain. Used by `Ty.openVar_replace` for the
+    `.refine` case where `Ty.openVar` opens at both bases at once. The
+    precondition refers to the *original* `φ`'s named set, avoiding the issue
+    that opening at one base may grow `Formula.named` of the intermediate. -/
+theorem Formula.openBVar2_replaceFVar_chain (k : Nat) (x y : EVar) (φ : Formula)
+    (hxn : x ∉ Formula.named φ) :
+    ((φ.openBVar .int k x).openBVar .bool k x).replaceFVar x y =
+    ((φ.replaceFVar x y).openBVar .int k y).openBVar .bool k y := by
+  induction φ generalizing k with
+  | tt | ff => simp [Formula.openBVar, Formula.replaceFVar]
+  | eqI t₁ t₂ | eqB t₁ t₂ | leqI t₁ t₂ =>
+    simp only [Formula.openBVar, Formula.replaceFVar,
+               Term.openBVar_replaceFVar_chain k x y (t₁.openBVar .int k x),
+               Term.openBVar_replaceFVar_chain k x y (t₂.openBVar .int k x),
+               Term.openBVar_replaceFVar_chain k x y t₁,
+               Term.openBVar_replaceFVar_chain k x y t₂]
+  | and φ₁ φ₂ ih₁ ih₂ | or φ₁ φ₂ ih₁ ih₂ | imp φ₁ φ₂ ih₁ ih₂ =>
+    simp only [Formula.named, List.mem_append, not_or] at hxn
+    simp [Formula.openBVar, Formula.replaceFVar, ih₁ k hxn.1, ih₂ k hxn.2]
+  | not φ ih =>
+    simp only [Formula.named] at hxn
+    simp [Formula.openBVar, Formula.replaceFVar, ih k hxn]
+  | exI z φ ih | exB z φ ih | allI z φ ih | allB z φ ih =>
+    simp only [Formula.named, List.mem_cons, not_or] at hxn
+    have hzx : z ≠ x := fun h => hxn.1 h.symm
+    simp only [Formula.openBVar, Formula.replaceFVar, if_neg hzx, ih k hxn.2]
+  | kapp kname args =>
+    simp only [Formula.openBVar, Formula.replaceFVar]
+    congr 1
+    rw [List.map_map, List.map_map, List.map_map, List.map_map]
+    apply List.map_congr_left
+    intro ⟨b'', t⟩ _
+    show Sigma.mk b'' (((t.openBVar .int k x).openBVar .bool k x).replaceFVar x y) =
+         Sigma.mk b'' (((t.replaceFVar x y).openBVar .int k y).openBVar .bool k y)
+    rw [Term.openBVar_replaceFVar_chain k x y (t.openBVar .int k x),
+        Term.openBVar_replaceFVar_chain k x y t]
+
+/-- Refinement-level combined int+bool chain. -/
+theorem Refinement.openBVar2_replaceFVar_chain {b'' : Base} (k : Nat) (x y : EVar)
+    (r : Refinement b'') (hxn : x ∉ r.fmla.named) :
+    ((r.openBVar .int k x).openBVar .bool k x).replaceFVar x y =
+    ((r.replaceFVar x y).openBVar .int k y).openBVar .bool k y := by
+  obtain ⟨fmla⟩ := r
+  show (⟨_⟩ : Refinement b'') = ⟨_⟩
+  congr 1
+  exact Formula.openBVar2_replaceFVar_chain k x y fmla hxn
+
+/-- `Ty.replaceFVar` is the identity on types where `x` is not free (and is
+    distinct from `nuName`, since `Ty.fv` filters out the reserved `ν`). -/
+theorem Ty.replaceFVar_id_of_fresh (t : Ty) (x y : EVar)
+    (hx : x ∉ t.fv) (hxν : x ≠ nuName) :
+    t.replaceFVar x y = t := by
+  induction t with
+  | refine b r =>
+    have hxfv : x ∉ r.fmla.fv := by
+      intro hmem
+      apply hx
+      simp [Ty.fv, Refinement.fv, List.mem_filter]
+      exact ⟨hmem, hxν⟩
+    simp [Ty.replaceFVar, Refinement.replaceFVar_id_of_fresh r x y hxfv]
+  | arrow s t ihs iht =>
+    simp only [Ty.fv, List.mem_append, not_or] at hx
+    simp [Ty.replaceFVar, ihs hx.1, iht hx.2]
+
+/-- Opening at `y` factors as opening at `x` followed by a rename, provided
+    `x` is fresh (free in neither the type nor among its named binders) and
+    distinct from `nuName`. -/
+theorem Ty.openVar_replace (k : Nat) (x y : EVar) (t : Ty)
+    (hx : x ∉ t.fv) (hxn : x ∉ Ty.named t) (hxν : x ≠ nuName) :
+    (t.openVar k x).replaceFVar x y = t.openVar k y := by
+  induction t generalizing k with
+  | refine b r =>
+    simp only [Ty.named] at hxn
+    have hxfv : x ∉ r.fmla.fv := by
+      intro hmem
+      apply hx
+      simp [Ty.fv, Refinement.fv, List.mem_filter]
+      exact ⟨hmem, hxν⟩
+    simp only [Ty.openVar, Ty.replaceFVar]
+    rw [Refinement.openBVar2_replaceFVar_chain k x y r hxn,
+        show r.replaceFVar x y = r from Refinement.replaceFVar_id_of_fresh r x y hxfv]
+  | arrow s t ihs iht =>
+    simp only [Ty.fv, List.mem_append, not_or] at hx
+    simp only [Ty.named, List.mem_append, not_or] at hxn
+    simp [Ty.openVar, Ty.replaceFVar,
+          ihs k hx.1 hxn.1, iht (k + 1) hx.2 hxn.2]
+
+/-! ## Rename keystone: interpretation -/
+
+/-- Interpretation of a term after renaming `x → y` equals interpretation under
+    an environment where `x`'s slots are set to `y`'s slot values. -/
+theorem Term.interp_replaceFVar {b : Base} (t : Term b) (x y : EVar) (ρ : REnv) :
+    Term.interp ρ (t.replaceFVar x y) =
+    Term.interp ((ρ.update .int x (ρ.ints y)).update .bool x (ρ.bools y)) t := by
+  induction t with
+  | const _ _  => simp [Term.replaceFVar, Term.interp]
+  | bvar b' _  => cases b' <;> simp [Term.replaceFVar, Term.interp]
+  | fvar b' z  =>
+    cases b' <;> by_cases hzx : z = x <;>
+      (first | (subst hzx; simp [Term.replaceFVar, Term.interp, REnv.get, REnv.update])
+             | (simp [Term.replaceFVar, Term.interp, REnv.get, REnv.update, hzx];
+                intro h; exact (hzx h.symm).elim))
+  | add t₁ t₂ ih₁ ih₂ => simp [Term.replaceFVar, Term.interp, ih₁, ih₂]
+  | not t ih          => simp [Term.replaceFVar, Term.interp, ih]
+  | and t₁ t₂ ih₁ ih₂ => simp [Term.replaceFVar, Term.interp, ih₁, ih₂]
+
+/-- The rename keystone: interpretation of `φ.replaceFVar x y` at ρ equals
+    interpretation of `φ` at the environment where `x`'s int and bool slots
+    have been retargeted to `y`'s values. Requires that neither `x` nor `y`
+    appears among the formula's binder names (the `binderNames` set, which
+    excludes `kapp` fv and is preserved by `openBVar`). -/
+theorem Formula.interp_replaceFVar (κ : KEnv) (φ : Formula) (x y : EVar) (ρ : REnv)
+    (hxn : x ∉ Formula.binderNames φ) (hyn : y ∉ Formula.binderNames φ) :
+    Formula.interp κ ρ (φ.replaceFVar x y) ↔
+    Formula.interp κ ((ρ.update .int x (ρ.ints y)).update .bool x (ρ.bools y)) φ := by
+  induction φ generalizing ρ with
+  | tt | ff => simp [Formula.replaceFVar, Formula.interp]
+  | eqI t₁ t₂ | eqB t₁ t₂ | leqI t₁ t₂ =>
+    simp only [Formula.replaceFVar, Formula.interp,
+               Term.interp_replaceFVar t₁ x y ρ, Term.interp_replaceFVar t₂ x y ρ]
+  | and φ₁ φ₂ ih₁ ih₂ =>
+    simp only [Formula.binderNames, List.mem_append, not_or] at hxn hyn
+    simp [Formula.replaceFVar, Formula.interp,
+          ih₁ ρ hxn.1 hyn.1, ih₂ ρ hxn.2 hyn.2]
+  | or φ₁ φ₂ ih₁ ih₂ =>
+    simp only [Formula.binderNames, List.mem_append, not_or] at hxn hyn
+    simp [Formula.replaceFVar, Formula.interp,
+          ih₁ ρ hxn.1 hyn.1, ih₂ ρ hxn.2 hyn.2]
+  | imp φ₁ φ₂ ih₁ ih₂ =>
+    simp only [Formula.binderNames, List.mem_append, not_or] at hxn hyn
+    simp [Formula.replaceFVar, Formula.interp,
+          ih₁ ρ hxn.1 hyn.1, ih₂ ρ hxn.2 hyn.2]
+  | not φ ih =>
+    simp only [Formula.binderNames] at hxn hyn
+    simp [Formula.replaceFVar, Formula.interp, ih ρ hxn hyn]
+  | exI z φ ih =>
+    simp only [Formula.binderNames, List.mem_cons, not_or] at hxn hyn
+    have hzx : z ≠ x := fun h => hxn.1 h.symm
+    have hzy : z ≠ y := fun h => hyn.1 h.symm
+    simp only [Formula.replaceFVar, if_neg hzx, Formula.interp]
+    refine exists_congr (fun n => ?_)
+    rw [ih (ρ.update .int z n) hxn.2 hyn.2]
+    have hI : (ρ.update .int z n).ints y = ρ.ints y := by
+      simp [REnv.update]; intro h; exact (hzy h).elim
+    have hB : (ρ.update .int z n).bools y = ρ.bools y := by simp [REnv.update]
+    rw [hI, hB,
+        REnv.update_comm_int_int ρ z x n (ρ.ints y) hzx,
+        REnv.update_comm_int_bool (ρ.update .int x (ρ.ints y)) z x n (ρ.bools y)]
+  | exB z φ ih =>
+    simp only [Formula.binderNames, List.mem_cons, not_or] at hxn hyn
+    have hzx : z ≠ x := fun h => hxn.1 h.symm
+    have hzy : z ≠ y := fun h => hyn.1 h.symm
+    simp only [Formula.replaceFVar, if_neg hzx, Formula.interp]
+    refine exists_congr (fun bv => ?_)
+    rw [ih (ρ.update .bool z bv) hxn.2 hyn.2]
+    have hI : (ρ.update .bool z bv).ints y = ρ.ints y := by simp [REnv.update]
+    have hB : (ρ.update .bool z bv).bools y = ρ.bools y := by
+      simp [REnv.update]; intro h; exact (hzy h).elim
+    rw [hI, hB,
+        ← REnv.update_comm_int_bool ρ x z (ρ.ints y) bv,
+        REnv.update_comm_bool_bool (ρ.update .int x (ρ.ints y)) z x bv (ρ.bools y) hzx]
+  | allI z φ ih =>
+    simp only [Formula.binderNames, List.mem_cons, not_or] at hxn hyn
+    have hzx : z ≠ x := fun h => hxn.1 h.symm
+    have hzy : z ≠ y := fun h => hyn.1 h.symm
+    simp only [Formula.replaceFVar, if_neg hzx, Formula.interp]
+    refine forall_congr' (fun n => ?_)
+    rw [ih (ρ.update .int z n) hxn.2 hyn.2]
+    have hI : (ρ.update .int z n).ints y = ρ.ints y := by
+      simp [REnv.update]; intro h; exact (hzy h).elim
+    have hB : (ρ.update .int z n).bools y = ρ.bools y := by simp [REnv.update]
+    rw [hI, hB,
+        REnv.update_comm_int_int ρ z x n (ρ.ints y) hzx,
+        REnv.update_comm_int_bool (ρ.update .int x (ρ.ints y)) z x n (ρ.bools y)]
+  | allB z φ ih =>
+    simp only [Formula.binderNames, List.mem_cons, not_or] at hxn hyn
+    have hzx : z ≠ x := fun h => hxn.1 h.symm
+    have hzy : z ≠ y := fun h => hyn.1 h.symm
+    simp only [Formula.replaceFVar, if_neg hzx, Formula.interp]
+    refine forall_congr' (fun bv => ?_)
+    rw [ih (ρ.update .bool z bv) hxn.2 hyn.2]
+    have hI : (ρ.update .bool z bv).ints y = ρ.ints y := by simp [REnv.update]
+    have hB : (ρ.update .bool z bv).bools y = ρ.bools y := by
+      simp [REnv.update]; intro h; exact (hzy h).elim
+    rw [hI, hB,
+        ← REnv.update_comm_int_bool ρ x z (ρ.ints y) bv,
+        REnv.update_comm_bool_bool (ρ.update .int x (ρ.ints y)) z x bv (ρ.bools y) hzx]
+  | kapp kname args =>
+    simp only [Formula.replaceFVar, Formula.interp, List.map_map]
+    apply iff_of_eq
+    congr 1
+    apply List.map_congr_left
+    intro ⟨b'', t⟩ _
+    show Sigma.mk b'' (Term.interp ρ (t.replaceFVar x y)) =
+         Sigma.mk b'' (Term.interp _ t)
+    rw [Term.interp_replaceFVar t x y ρ]
 
 end STLC

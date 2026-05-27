@@ -17,8 +17,6 @@ open STLC
   `simp + solve_fixpoint`, `make_horn_under_k + solve_fixpoint`,
   `topVC_decl_sound + simp + intros`.
 
-  Where the chain runs but goes through `check_sound` (Stage 13 to prove),
-  proofs are **sorry-tainted** but the tactic invocations are real.
 -/
 
 /-! ## Refinement helpers -/

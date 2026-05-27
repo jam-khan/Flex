@@ -1,7 +1,6 @@
 import LeanFixpoint.VCG.STLC.Semantics
 import LeanFixpoint.VCG.STLC.Declarative
--- Soundness.lean has downstream breakage from side-condition changes; deferred.
--- import LeanFixpoint.VCG.STLC.Soundness
+import LeanFixpoint.VCG.STLC.Soundness
 
 open STLC
 
@@ -20,11 +19,6 @@ open STLC
   deep `Formula` refinements. The arrow case of the logical relation is stated
   in the canonical cofinite form (`∃ L, ∀ x ∉ L, …`), with the rename keystone
   (`TyDenote.rename`) proved as a separate lemma.
-
-  This file is the **Stage A** skeleton — definitions and theorem statements are
-  final; proofs are top-level `sorry`. Subsequent stages (LN helpers in
-  Substitution.lean, then `TyDenote.rename`, then T1, then T2 case-by-case)
-  fill these in.
 -/
 
 namespace STLC
@@ -657,9 +651,6 @@ private theorem REnv.extendBy_bools_other (s : Ty) (ρ : REnv) (x y : EVar) (va 
   all_goals simp only [REnv.extendBy, REnv.update]
   simp [beq_eq_false_iff_ne.mpr hxy]
 
-/-- EnvAgrees is preserved when we extend ρ at a variable x fresh from Γ's domain.
-    The slot conditions (ints/bools at each Γ-name) are preserved because x ≠ each name.
-    The TyDenote condition requires x fresh for each type's fv/named (sorry'd for now). -/
 theorem EnvAgrees.extendBy_fresh {κ Γ γ ρ} (hE : EnvAgrees κ Γ γ ρ)
     (s : Ty) (x : EVar) (va : Val) (hx_dom : x ∉ TEnv.dom Γ)
     (hx_fv : x ∉ TEnv.tyFv Γ) (hx_named : x ∉ TEnv.tyNamed Γ) (hxν : x ≠ nuName) :
@@ -875,15 +866,6 @@ theorem subtyp_sound {κ Γ s t} (hsub : Subtyp κ Γ s t)
     exact (TyDenote.substBV_iff κ t₂ s₂ z ρ va vr hz_t2fv hz_t2named hzν hWF_t2 htd_va).mpr
       htd_vr_t2
 
--- theorem hastype_preservation {κ Γ e t} (h : Hastype κ Γ e t) :
---   ∀ {γ ρ}, EnvAgrees κ Γ γ ρ →
---     ∀ v, BigStep (Exp.substEnv γ e) v → TyDenote κ t ρ v := by
---   intro γ ρ hea v hbs
---   generalize hes : (Exp.substEnv γ e) = es; rw [hes] at hbs
---   -- Can you prove this by induction on hbs?
---   sorry
-
-
 /-! ## T2 — Fundamental Lemma -/
 
 theorem hastype_fundamental {κ Γ e t} (h : Hastype κ Γ e t) :
@@ -946,7 +928,8 @@ theorem hastype_fundamental {κ Γ e t} (h : Hastype κ Γ e t) :
       · simp only [primBool, TyDenote]
         refine ⟨b, rfl, ?_⟩
         simp [Refinement.interp, Formula.interp, Term.interp]
-  | ann _ _ _ ih =>
+  | ann _ _ =>
+      rename_i hht _ ih
       intro γ ρ hE
       obtain ⟨v, hbs, hv⟩ := ih hE
       refine ⟨v, ?_, hv⟩
@@ -1212,9 +1195,12 @@ theorem type_safety {κ : KEnv} {e : Exp} {t : Ty} (h : Hastype κ [] e t) :
     hastype_fundamental h (γ := []) (ρ := REnv.empty) (by simp [EnvAgrees])
   exact ⟨v, by simpa [Exp.substEnv] using hbs, hv⟩
 
-/-! ## T4 — End-to-end VCGen safety -/
+/-! ## T4 — End-to-end VCGen safety
 
--- vcgen_safety depends on topVC_decl_sound from Soundness.lean (currently deferred)
--- theorem vcgen_safety {κ : KEnv} {e : Exp} {t : Ty} (h : topVC κ [] e t) :
---     ∃ v, BigStep e v ∧ TyDenote κ t REnv.empty v :=
---   type_safety (topVC_decl_sound _ _ _ h)
+  The POPL headline: VCGen soundness composes with the logical-relations
+  fundamental lemma to give end-to-end refinement type safety for `topVC`. -/
+
+theorem vcgen_safety {κ : KEnv} {e : Exp} {t : Ty}
+    (hE : Exp.WFBVars e) (ht : Ty.WFBVars t) (h : topVC κ [] e t) :
+    ∃ v, BigStep e v ∧ TyDenote κ t REnv.empty v :=
+  type_safety (topVC_decl_sound κ e t hE ht h)

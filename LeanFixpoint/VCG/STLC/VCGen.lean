@@ -36,7 +36,9 @@ def sub : Ty → Ty → Option Constraint
       some (fun κ ρ => ∀ v : Bool,
               Refinement.interp κ r₁ ρ v → Refinement.interp κ r₂ ρ v)
   | .arrow s₁ t₁, .arrow s₂ t₂ =>
-      let x := EVar.fresh (s₁.fv ++ s₂.fv ++ t₁.fv ++ t₂.fv)
+      let x := EVar.fresh (s₁.fv ++ s₂.fv ++ t₁.fv ++ t₂.fv
+                            ++ Ty.named s₁ ++ Ty.named s₂
+                            ++ Ty.named t₁ ++ Ty.named t₂ ++ [nuName])
       match sub s₂ s₁, sub (t₁.openVar 0 x) (t₂.openVar 0 x) with
       | some c₁, some c₂ =>
           some (fun κ ρ => c₁ κ ρ ∧ implyBind x s₂ c₂ κ ρ)
@@ -61,9 +63,12 @@ mutual
     | .app e₁ (.fvar y) =>
         match synth Γ e₁ with
         | some (c, .arrow s t) =>
-            match check Γ (.fvar y) s with
-            | some c' => some ((fun κ ρ => c κ ρ ∧ c' κ ρ), t.openVar 0 y)
-            | none    => none
+            -- Hygiene: `y` must not capture into `t` when we open `t.openVar 0 y`.
+            if y ∈ t.fv ∨ y ∈ Ty.named t ∨ y = nuName then none
+            else
+              match check Γ (.fvar y) s with
+              | some c' => some ((fun κ ρ => c κ ρ ∧ c' κ ρ), t.openVar 0 y)
+              | none    => none
         | _ => none
     | .leq (.fvar x) (.fvar y) =>
         match Γ.lookup x, Γ.lookup y with
@@ -102,14 +107,18 @@ mutual
 
   def check (Γ : TEnv) : Exp → Ty → Option Constraint
     | .lam e, .arrow s₁ s₂ =>
-        let x := EVar.fresh (TEnv.dom Γ ++ e.fv ++ s₂.fv)
+        let x := EVar.fresh (TEnv.dom Γ ++ e.fv ++ s₁.fv ++ s₂.fv
+                              ++ Ty.named s₁ ++ Ty.named s₂
+                              ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ ++ [nuName])
         match check ((x, s₁) :: Γ) (e.openVar 0 x) (s₂.openVar 0 x) with
         | some c => some (implyBind x s₁ c)
         | none   => none
     | .letin e₁ e₂, t =>
         match synth Γ e₁ with
         | some (c₁, s) =>
-            let x := EVar.fresh (TEnv.dom Γ ++ e₂.fv ++ t.fv)
+            let x := EVar.fresh (TEnv.dom Γ ++ e₂.fv ++ s.fv ++ t.fv
+                                  ++ Ty.named s ++ Ty.named t
+                                  ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ ++ [nuName])
             match check ((x, s) :: Γ) (e₂.openVar 0 x) t with
             | some c₂ => some (fun κ ρ => c₁ κ ρ ∧ implyBind x s c₂ κ ρ)
             | none    => none
@@ -117,20 +126,23 @@ mutual
     | .ite e₀ e₁ e₂, t =>
         match e₀ with
         | .fvar x =>
-            match Γ.lookup x with
-            | some (.refine .bool r) =>
-                let r_true  : Ty := .refine .bool ⟨.and r.fmla
-                  (.eqB (.fvar .bool nuName) (.const .bool true))⟩
-                let r_false : Ty := .refine .bool ⟨.and r.fmla
-                  (.eqB (.fvar .bool nuName) (.const .bool false))⟩
-                match check ((x, r_true) :: Γ) e₁ t,
-                      check ((x, r_false) :: Γ) e₂ t with
-                | some c₁, some c₂ =>
-                    some (fun κ ρ =>
-                      implyBind x r_true  c₁ κ ρ ∧
-                      implyBind x r_false c₂ κ ρ)
-                | _, _ => none
-            | _ => none
+            -- Hygiene: `x` must not clash with the ν-reserved name.
+            if x = nuName then none
+            else
+              match Γ.lookup x with
+              | some (.refine .bool r) =>
+                  let r_true  : Ty := .refine .bool ⟨.and r.fmla
+                    (.eqB (.fvar .bool nuName) (.const .bool true))⟩
+                  let r_false : Ty := .refine .bool ⟨.and r.fmla
+                    (.eqB (.fvar .bool nuName) (.const .bool false))⟩
+                  match check ((x, r_true) :: Γ) e₁ t,
+                        check ((x, r_false) :: Γ) e₂ t with
+                  | some c₁, some c₂ =>
+                      some (fun κ ρ =>
+                        implyBind x r_true  c₁ κ ρ ∧
+                        implyBind x r_false c₂ κ ρ)
+                  | _, _ => none
+              | _ => none
         | _ => none
     | e, t =>
         -- Catch-all (Chk-Syn): synthesize, then subtype.

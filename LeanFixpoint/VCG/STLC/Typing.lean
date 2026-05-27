@@ -55,6 +55,8 @@ mutual
         Synth κ Γ e₁ (.arrow s t) →
         Check κ Γ (.fvar y) s        →
         y ∉ t.fv →
+        y ∉ Ty.named t →
+        y ≠ nuName →
         Synth κ Γ (.app e₁ (.fvar y)) (t.openVar 0 y)
 
     | leq_var {κ Γ x y r₁ r₂} :
@@ -103,6 +105,7 @@ mutual
 
     | ite {κ Γ x e₁ e₂ r t} :
         Γ.lookup x = some (.refine .bool r) →
+        x ≠ nuName →
         Check κ ((x, .refine .bool ⟨.and r.fmla
                   (.eqB (.fvar .bool nuName) (.const .bool true))⟩) :: Γ) e₁ t →
         Check κ ((x, .refine .bool ⟨.and r.fmla

@@ -31,7 +31,6 @@ inductive Hastype : KEnv → TEnv → Exp → Ty → Prop where
       Hastype κ Γ (.letin e₁ e₂) t
   | ann {κ Γ e t} :
       Hastype κ Γ e t →
-      Ty.WF Γ t →
       Ty.WFBVars t →
       Hastype κ Γ (.ann e t) t
   | sub {κ Γ e s t} :
@@ -138,7 +137,7 @@ theorem Hastype.fv_subset {κ Γ e t} (_h : Hastype κ Γ e t) :
     · exact ih1 hzf1
     · simp [Exp.fv] at ih2
       exact ih2 hzf2
-  | @ann Γ' e t hht hWF _ ih =>
+  | @ann Γ' e t hht _ ih =>
     simp [Exp.fv] at zf
     exact ih zf
 
@@ -160,7 +159,7 @@ theorem Hastype.lc_at {κ Γ e t} (_h : Hastype κ Γ e t) : Exp.lc_at 0 e := by
     simp only [Exp.lc_at]
     obtain ⟨x, hxL⟩ := EVar.freshWith L
     exact ⟨ih₁, Exp.lc_at_of_openVar _ 0 x (ih₂ x hxL)⟩
-  | ann _ _ _ ih => simp only [Exp.lc_at]; exact ih
+  | ann _ _ ih => simp only [Exp.lc_at]; exact ih
   | sub _ _ _ ih => exact ih
   | add_var => simp [Exp.lc_at]
   | leq_var => simp [Exp.lc_at]
@@ -223,7 +222,7 @@ theorem Hastype.wf_bvars {κ Γ e t} (h : Hastype κ Γ e t) : Ty.WFBVars t := b
     simp only [Ty.WFBVars, Ty.WFBVarCtx] at ih₁
     exact Ty.WFBVarCtx_openVar_last _ [] _ _ ih₁.2
   | letin _ hwf _ _ _ _ => exact hwf
-  | ann _ _ hwf _ => exact hwf
+  | ann _ hwf _ => exact hwf
   | sub _ _ hwf _ => exact hwf
   | add_var => exact Ty.WFBVars_add_result _ _
   | leq_var => exact Ty.WFBVars_leq_result _ _

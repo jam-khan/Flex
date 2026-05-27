@@ -52,12 +52,7 @@ def dec_while : Decorated :=
 example : dec_while.outerTriple := by
   apply verification_correct
   dsimp [Decorated.vconds, dec_while, vcond, assertImplies, DCom.postQ]
-  -- Goal:
-  --   (∀ s, True → True)
-  -- ∧ (∀ s, True ∧ (s "x" != 0) = true → True)
-  -- ∧ (∀ s, True → True)
-  -- ∧ (∀ s, True ∧ (s "x" != 0) = false → s "x" = 0)
-  sorry
+  solve_fixpoint
 
 theorem while_correct : dec_while.outerTriple := by
   apply verification_correct
@@ -95,5 +90,4 @@ theorem slow_correct : dec_slow.outerTriple := by
   apply verification_correct
   dsimp [Decorated.vconds, dec_slow, vcond, assertImplies, DCom.postQ,
         Inv_slow, State.update]
-  sorry
-  -- solve_fixpoint
+  solve_fixpoint
