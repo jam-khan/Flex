@@ -134,7 +134,7 @@ def Formula.named : Formula → List EVar
   | .exB x φ      => x :: φ.named
   | .allI x φ     => x :: φ.named
   | .allB x φ     => x :: φ.named
-  | .kapp _ args  => args.flatMap (fun a => Term.fv a.2)
+  | .kapp _ _  => []
 
 /-- Just the names introduced by existential/universal binders, with the
     `.kapp` case yielding `[]`. Unlike `Formula.named`, this set is invariant
@@ -3434,7 +3434,7 @@ theorem Ty.openVar_comm (t : Ty) (i j : Nat) (x y : EVar) (hij : i ≠ j) :
     · exact iht (i+1) (j+1) (by omega)
 
 private theorem Formula.named_openBVar_not_mem (φ : Formula) (b : Base) (k : Nat) (z x : EVar)
-    (hx : x ∉ φ.named) (hxz : x ≠ z) : x ∉ (φ.openBVar b k z).named := by
+    (hx : x ∉ φ.named) (_hxz : x ≠ z) : x ∉ (φ.openBVar b k z).named := by
   induction φ with
   | tt | ff | eqI _ _ | eqB _ _ | leqI _ _ => simp [Formula.openBVar, Formula.named]
   | and φ₁ φ₂ ih₁ ih₂ | or φ₁ φ₂ ih₁ ih₂ | imp φ₁ φ₂ ih₁ ih₂ =>
@@ -3445,12 +3445,8 @@ private theorem Formula.named_openBVar_not_mem (φ : Formula) (b : Base) (k : Na
     simp only [Formula.openBVar, Formula.named, List.mem_cons, not_or] at *
     exact ⟨hx.1, ih hx.2⟩
   | kapp name args =>
-    simp only [Formula.openBVar, Formula.named, List.mem_flatMap] at *
-    intro ⟨a, ha_mem, hx_in_fv⟩
-    apply hx
-    simp only [List.mem_map] at ha_mem
-    obtain ⟨a₀, ha₀_mem, rfl⟩ := ha_mem
-    exact ⟨a₀, ha₀_mem, (Term.fv_openBVar_subset b k z a₀.2 x hx_in_fv).resolve_left hxz⟩
+    simp only [Formula.openBVar, Formula.named] at *
+    grind
 
 theorem Ty.named_openVar_not_mem (t : Ty) (k : Nat) (z x : EVar)
     (hx : x ∉ Ty.named t) (hxz : x ≠ z) : x ∉ Ty.named (t.openVar k z) := by
@@ -3698,11 +3694,8 @@ private theorem Formula.substBV_named_not_mem (φ : Formula) (b : Base) (k : Nat
     simp only [Formula.substBV, Formula.named, List.mem_cons, not_or] at *
     exact ⟨hx.1, ih hx.2⟩
   | kapp kname args =>
-    simp only [Formula.substBV, Formula.named, List.mem_flatMap] at *
-    intro ⟨a, ha, hmem⟩
-    simp only [List.mem_map] at ha
-    obtain ⟨a', ha', rfl⟩ := ha
-    grind [Term.fv_substBV_not_mem]
+    simp only [Formula.substBV, Formula.named] at *
+    grind
 
 theorem Ty.fv_substBV_not_mem (t : Ty) (x : EVar) (va : Val) (hx : x ∉ t.fv) :
     x ∉ (t.substBV va).fv := by
@@ -3762,7 +3755,7 @@ theorem Term.openBVar_replace {b' b : Base} (k : Nat) (x y : EVar)
   | const _ _    => simp [Term.openBVar, Term.replaceFVar]
   | bvar b'' j   =>
     cases b'' <;> cases b' <;>
-      simp only [Term.openBVar, Term.replaceFVar] <;>
+      simp only [Term.openBVar] <;>
       (try (split <;> simp_all [Term.replaceFVar]))
   | fvar b'' z   =>
     simp only [Term.fv, List.mem_singleton] at hx
@@ -4073,8 +4066,8 @@ theorem Term.interp_replaceFVar {b : Base} (t : Term b) (x y : EVar) (ρ : REnv)
   | bvar b' _  => cases b' <;> simp [Term.replaceFVar, Term.interp]
   | fvar b' z  =>
     cases b' <;> by_cases hzx : z = x <;>
-      (first | (subst hzx; simp [Term.replaceFVar, Term.interp, REnv.get, REnv.update])
-             | (simp [Term.replaceFVar, Term.interp, REnv.get, REnv.update, hzx];
+      (first | (subst hzx; simp [Term.replaceFVar, Term.interp, REnv.get])
+             | (simp [Term.replaceFVar, Term.interp, REnv.get, hzx];
                 intro h; exact (hzx h.symm).elim))
   | add t₁ t₂ ih₁ ih₂ => simp [Term.replaceFVar, Term.interp, ih₁, ih₂]
   | not t ih          => simp [Term.replaceFVar, Term.interp, ih]
@@ -4117,8 +4110,8 @@ theorem Formula.interp_replaceFVar (κ : KEnv) (φ : Formula) (x y : EVar) (ρ :
     refine exists_congr (fun n => ?_)
     rw [ih (ρ.update .int z n) hxn.2 hyn.2]
     have hI : (ρ.update .int z n).ints y = ρ.ints y := by
-      simp [REnv.update]; intro h; exact (hzy h).elim
-    have hB : (ρ.update .int z n).bools y = ρ.bools y := by simp [REnv.update]
+      simp; intro h; exact (hzy h).elim
+    have hB : (ρ.update .int z n).bools y = ρ.bools y := by simp
     rw [hI, hB,
         REnv.update_comm_int_int ρ z x n (ρ.ints y) hzx,
         REnv.update_comm_int_bool (ρ.update .int x (ρ.ints y)) z x n (ρ.bools y)]
@@ -4129,9 +4122,9 @@ theorem Formula.interp_replaceFVar (κ : KEnv) (φ : Formula) (x y : EVar) (ρ :
     simp only [Formula.replaceFVar, if_neg hzx, Formula.interp]
     refine exists_congr (fun bv => ?_)
     rw [ih (ρ.update .bool z bv) hxn.2 hyn.2]
-    have hI : (ρ.update .bool z bv).ints y = ρ.ints y := by simp [REnv.update]
+    have hI : (ρ.update .bool z bv).ints y = ρ.ints y := by simp
     have hB : (ρ.update .bool z bv).bools y = ρ.bools y := by
-      simp [REnv.update]; intro h; exact (hzy h).elim
+      simp; intro h; exact (hzy h).elim
     rw [hI, hB,
         ← REnv.update_comm_int_bool ρ x z (ρ.ints y) bv,
         REnv.update_comm_bool_bool (ρ.update .int x (ρ.ints y)) z x bv (ρ.bools y) hzx]
@@ -4143,8 +4136,8 @@ theorem Formula.interp_replaceFVar (κ : KEnv) (φ : Formula) (x y : EVar) (ρ :
     refine forall_congr' (fun n => ?_)
     rw [ih (ρ.update .int z n) hxn.2 hyn.2]
     have hI : (ρ.update .int z n).ints y = ρ.ints y := by
-      simp [REnv.update]; intro h; exact (hzy h).elim
-    have hB : (ρ.update .int z n).bools y = ρ.bools y := by simp [REnv.update]
+      simp; intro h; exact (hzy h).elim
+    have hB : (ρ.update .int z n).bools y = ρ.bools y := by simp
     rw [hI, hB,
         REnv.update_comm_int_int ρ z x n (ρ.ints y) hzx,
         REnv.update_comm_int_bool (ρ.update .int x (ρ.ints y)) z x n (ρ.bools y)]
@@ -4155,9 +4148,9 @@ theorem Formula.interp_replaceFVar (κ : KEnv) (φ : Formula) (x y : EVar) (ρ :
     simp only [Formula.replaceFVar, if_neg hzx, Formula.interp]
     refine forall_congr' (fun bv => ?_)
     rw [ih (ρ.update .bool z bv) hxn.2 hyn.2]
-    have hI : (ρ.update .bool z bv).ints y = ρ.ints y := by simp [REnv.update]
+    have hI : (ρ.update .bool z bv).ints y = ρ.ints y := by simp
     have hB : (ρ.update .bool z bv).bools y = ρ.bools y := by
-      simp [REnv.update]; intro h; exact (hzy h).elim
+      simp; intro h; exact (hzy h).elim
     rw [hI, hB,
         ← REnv.update_comm_int_bool ρ x z (ρ.ints y) bv,
         REnv.update_comm_bool_bool (ρ.update .int x (ρ.ints y)) z x bv (ρ.bools y) hzx]

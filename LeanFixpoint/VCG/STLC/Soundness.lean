@@ -91,7 +91,7 @@ private theorem ModelsEnv.transport_to_x
       have hgetEq : REnv.get b ((ρ.update .int x vi).update .bool x vb) z
                   = REnv.get b ρ z := by
         cases b <;>
-          simp [REnv.get, REnv.update, beq_eq_false_iff_ne.mpr (Ne.symm hxz)]
+          simp [REnv.get, beq_eq_false_iff_ne.mpr (Ne.symm hxz)]
       refine ⟨?_, ih hxd.2 hxfv.2 hxn.2 hΓ.2⟩
       rw [hgetEq]
       rw [Refinement.interp_invariant_under_bool_update r x vb _ _ htfv htn hxν,
@@ -180,7 +180,7 @@ theorem entail_f_replace {κ : KEnv} {b : Base} {r₁ r₂ : Refinement b}
       have hxs_fv : x ∉ rs.fmla.fv := Ty.refine_fmla_fresh_of_fresh hxsfv hxν
       have hΓ_y : Refinement.interp κ rs ρ' (REnv.get bs ρ' y) := hΓ'.1
       have hgetEq : REnv.get bs ρ x = REnv.get bs ρ' y := by
-        cases bs <;> simp [ρ, REnv.get, REnv.update]
+        cases bs <;> simp [ρ, REnv.get]
       refine ⟨?_, ModelsEnv.transport_to_x hxΓd hxΓfv hxΓn hxν hΓ'.2⟩
       rw [hgetEq]
       show Refinement.interp κ rs ((ρ'.update .int x (ρ'.ints y)).update .bool x (ρ'.bools y))
@@ -301,7 +301,7 @@ theorem Term.fv_openBVar_subset_pub {b : Base} (b' : Base) (k : Nat) (z : EVar)
 
 /-- `x ∉ φ.named` and `x ≠ z` imply `x ∉ (φ.openBVar b k z).named`. -/
 theorem Formula.named_openBVar_not_mem_pub (φ : Formula) (b : Base) (k : Nat)
-    (z x : EVar) (hx : x ∉ φ.named) (hxz : x ≠ z) :
+    (z x : EVar) (hx : x ∉ φ.named) (_hxz : x ≠ z) :
     x ∉ (φ.openBVar b k z).named := by
   induction φ generalizing k with
   | tt | ff | eqI _ _ | eqB _ _ | leqI _ _ => simp [Formula.openBVar, Formula.named]
@@ -313,14 +313,8 @@ theorem Formula.named_openBVar_not_mem_pub (φ : Formula) (b : Base) (k : Nat)
     simp only [Formula.openBVar, Formula.named, List.mem_cons, not_or] at *
     exact ⟨hx.1, ih k hx.2⟩
   | kapp name args =>
-    simp only [Formula.openBVar, Formula.named, List.mem_flatMap, List.mem_map] at hx ⊢
-    rintro ⟨_, ⟨a₀, ha₀_mem, rfl⟩, hx_in⟩
-    apply hx
-    refine ⟨a₀, ha₀_mem, ?_⟩
-    have hx_in' : x ∈ (a₀.snd.openBVar b k z).fv := hx_in
-    rcases Term.fv_openBVar_subset_pub b k z a₀.2 x hx_in' with hz | hin
-    · exact absurd hz hxz
-    · exact hin
+    simp only [Formula.openBVar, Formula.named] at hx ⊢
+    grind
 
 /-! ## Commuting open/replace at a *different* name (z ≠ x, y) -/
 
@@ -460,9 +454,9 @@ private theorem REnv.swap_x_update_nu (b : Base) (ρ : REnv) (x y : EVar)
   apply REnv.ext <;> funext z <;> cases b <;>
     simp only [REnv.swap_x, REnv.update] <;>
     (by_cases hxz : x = z) <;>
-    (first | (subst hxz; simp [hxν', hyν', hxν.symm])
+    (first | (subst hxz; simp [hxν', hyν'])
            | (by_cases hνz : nuName = z
-              · subst hνz; simp [hxz, hyν']
+              · subst hνz; simp [hxz]
               · simp [hxz, hνz]))
 
 /-- Rename keystone: interpreting the renamed refinement at ρ equals
@@ -640,6 +634,52 @@ theorem Exp.WFBVars_openVar (e : Exp) (k : Nat) (x : EVar) :
   | ite e₀ e₁ e₂ ih₀ ih₁ ih₂ => simp [Exp.openVar, Exp.WFBVars, ih₀, ih₁, ih₂]
   | add e₁ e₂ ih₁ ih₂ => simp [Exp.openVar, Exp.WFBVars, ih₁, ih₂]
 
+/-- Opening a body at `y` equals opening at `x` then substituting `x → fvar y`,
+    provided `x` is not already free in the body. -/
+theorem Exp.openVar_replace (k : Nat) (x y : EVar) (e : Exp)
+    (hxfv : x ∉ e.fv) :
+    e.openVar k y = subst x (.fvar y) (e.openVar k x) := by
+  induction e generalizing k with
+  | bvar j =>
+    by_cases hjk : j = k
+    · subst hjk; simp [openVar, subst]   -- both sides reduce definitionally to fvar y
+    · have hy : (bvar j).openVar k y = bvar j := by simp only [Exp.openVar, if_neg hjk]
+      have hx : (bvar j).openVar k x = bvar j := by simp only [Exp.openVar, if_neg hjk]
+      rw [hy, hx]; simp [subst] -- (bvar j).subst x _ = bvar j definitionally
+  | fvar z =>
+    simp only [Exp.fv, List.mem_singleton] at hxfv
+    -- hxfv : x ≠ z; both sides are fvar z, RHS uses if_neg (Ne.symm hxfv)
+    simp only [Exp.openVar, Exp.subst, if_neg (Ne.symm hxfv)]
+  | iconst _ | bconst _ => rfl
+  | lam body ih =>
+    simp only [Exp.fv] at hxfv
+    simp only [Exp.openVar, Exp.subst]; rw [ih (k + 1) hxfv]
+  | letin e₁ e₂ ih₁ ih₂ =>
+    simp only [Exp.fv, List.mem_append, not_or] at hxfv
+    simp only [Exp.openVar, Exp.subst]; rw [ih₁ k hxfv.1, ih₂ (k + 1) hxfv.2]
+  | app e₁ e₂ ih₁ ih₂ =>
+    simp only [Exp.fv, List.mem_append, not_or] at hxfv
+    simp only [Exp.openVar, Exp.subst]; rw [ih₁ k hxfv.1, ih₂ k hxfv.2]
+  | ann e t ih =>
+    simp only [Exp.fv] at hxfv
+    simp only [Exp.openVar, Exp.subst]; rw [ih k hxfv]
+  | and e₁ e₂ ih₁ ih₂ =>
+    simp only [Exp.fv, List.mem_append, not_or] at hxfv
+    simp only [Exp.openVar, Exp.subst]; rw [ih₁ k hxfv.1, ih₂ k hxfv.2]
+  | not e ih =>
+    simp only [Exp.fv] at hxfv
+    simp only [Exp.openVar, Exp.subst]; rw [ih k hxfv]
+  | leq e₁ e₂ ih₁ ih₂ =>
+    simp only [Exp.fv, List.mem_append, not_or] at hxfv
+    simp only [Exp.openVar, Exp.subst]; rw [ih₁ k hxfv.1, ih₂ k hxfv.2]
+  | ite e₀ e₁ e₂ ih₀ ih₁ ih₂ =>
+    -- Exp.fv (ite e₀ e₁ e₂) = (e₀.fv ++ e₁.fv) ++ e₂.fv (left-assoc)
+    simp only [Exp.fv, List.mem_append, not_or] at hxfv
+    simp only [Exp.openVar, Exp.subst]; rw [ih₀ k hxfv.1.1, ih₁ k hxfv.1.2, ih₂ k hxfv.2]
+  | add e₁ e₂ ih₁ ih₂ =>
+    simp only [Exp.fv, List.mem_append, not_or] at hxfv
+    simp only [Exp.openVar, Exp.subst]; rw [ih₁ k hxfv.1, ih₂ k hxfv.2]
+
 end STLC
 
 /-- The generalized rename: rename `x → y` in `Δ ++ (x, s) :: Γ`, where the
@@ -651,17 +691,17 @@ end STLC
 theorem Subtyp.rename_general {κ : KEnv} {Γall : TEnv} {t₁ t₂ : Ty}
     (h : Subtyp κ Γall t₁ t₂) :
     ∀ (Δ Γ : TEnv) (s : Ty) (x y : EVar)
-      (hΓall : Γall = Δ ++ (x, s) :: Γ)
-      (hxΓdom : x ∉ Γ.dom) (hxsfv : x ∉ s.fv) (hxsn : x ∉ Ty.named s)
-      (hxΓfv : x ∉ TEnv.tyFv Γ) (hxΓn : x ∉ TEnv.tyNamed Γ) (hxν : x ≠ nuName)
-      (hxΔdom : x ∉ TEnv.dom Δ) (hxΔbn : x ∉ TEnv.tyBinderNames Δ)
-      (hyΓdom : y ∉ Γ.dom) (hysfv : y ∉ s.fv) (hysn : y ∉ Ty.named s)
-      (hyΓfv : y ∉ TEnv.tyFv Γ) (hyΓn : y ∉ TEnv.tyNamed Γ) (hyν : y ≠ nuName)
-      (hyΔdom : y ∉ TEnv.dom Δ) (hyΔbn : y ∉ TEnv.tyBinderNames Δ)
-      (hyΔfv : y ∉ TEnv.tyFv Δ) (hyΔn : y ∉ TEnv.tyNamed Δ)
-      (hyt₁ : y ∉ t₁.fv) (hyt₁n : y ∉ Ty.named t₁)
-      (hyt₂ : y ∉ t₂.fv) (hyt₂n : y ∉ Ty.named t₂)
-      (hxt₁bn : x ∉ Ty.binderNames t₁) (hxt₂bn : x ∉ Ty.binderNames t₂),
+      (_hΓall : Γall = Δ ++ (x, s) :: Γ)
+      (_hxΓdom : x ∉ Γ.dom) (_hxsfv : x ∉ s.fv) (_hxsn : x ∉ Ty.named s)
+      (_hxΓfv : x ∉ TEnv.tyFv Γ) (_hxΓn : x ∉ TEnv.tyNamed Γ) (_hxν : x ≠ nuName)
+      (_hxΔdom : x ∉ TEnv.dom Δ) (_hxΔbn : x ∉ TEnv.tyBinderNames Δ)
+      (_hyΓdom : y ∉ Γ.dom) (_hysfv : y ∉ s.fv) (_hysn : y ∉ Ty.named s)
+      (_hyΓfv : y ∉ TEnv.tyFv Γ) (_hyΓn : y ∉ TEnv.tyNamed Γ) (_hyν : y ≠ nuName)
+      (_hyΔdom : y ∉ TEnv.dom Δ) (_hyΔbn : y ∉ TEnv.tyBinderNames Δ)
+      (_hyΔfv : y ∉ TEnv.tyFv Δ) (_hyΔn : y ∉ TEnv.tyNamed Δ)
+      (_hyt₁ : y ∉ t₁.fv) (_hyt₁n : y ∉ Ty.named t₁)
+      (_hyt₂ : y ∉ t₂.fv) (_hyt₂n : y ∉ Ty.named t₂)
+      (_hxt₁bn : x ∉ Ty.binderNames t₁) (_hxt₂bn : x ∉ Ty.binderNames t₂),
       Subtyp κ (TEnv.replaceFVar x y Δ ++ (y, s) :: Γ)
               (t₁.replaceFVar x y) (t₂.replaceFVar x y) := by
   induction h with
