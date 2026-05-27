@@ -1,9 +1,6 @@
 import LeanFixpoint.VCG.While.Hoare
 import LeanFixpoint.VCG.While.Tactics
-import LeanFixpoint.Tactic.Tactics.Zap
-import LeanFixpoint.Tactic.Tactics.Hoist
-import LeanFixpoint.Tactic.Tactics.SolveFixpoint
-import LeanFixpoint.Tactic.Tactics.RewriteKs
+import LeanFixpoint.Tactic
 
 /-! # Constrained Horn Clause Generation
 

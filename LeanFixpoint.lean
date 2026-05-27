@@ -11,35 +11,17 @@ import LeanFixpoint.Elab
 -- Proof producing local refinement type inference
 import LeanFixpoint.Zap
 
-/-
-  Meta-programming related code, including
-  tactics, commands, and monadic code written
-  in MetaM.
--/
-import LeanFixpoint.Tactic.Utils
-import LeanFixpoint.Tactic.Closers
-import LeanFixpoint.Tactic.Tactics.SolveFixpoint
-import LeanFixpoint.Tactic.Tactics.Hoist
-import LeanFixpoint.Tactic.Tactics.Zap
-import LeanFixpoint.Tactic.Tactics.SplitHyps
-import LeanFixpoint.Tactic.Tactics.RewriteKs
-import LeanFixpoint.Tactic.Tactics.ZapK
-import LeanFixpoint.Tactic.Tactics.Fusion
-import LeanFixpoint.Tactic.Tactics.Sol1
-
+-- Tactic related code
+import LeanFixpoint.Tactic
 
 -- Predicate Abstraction
 import LeanFixpoint.PA
 
-/-
-  Sound Verification Condition Generation
--/
+-- Sound Verification Condition Generation for Imp
 import LeanFixpoint.VCG.While.Types
 import LeanFixpoint.VCG.While.Semantics
 
-/-
-  Sound verified gen for λᵣ
--/
+--  Sound verified gen for λᵣ
 import LeanFixpoint.VCG.STLC.Syntax
 import LeanFixpoint.VCG.STLC.Substitution
 import LeanFixpoint.VCG.STLC.Entailment

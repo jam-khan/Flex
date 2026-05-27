@@ -1,5 +1,5 @@
 import LeanFixpoint.VCG.While.VCGen
-import LeanFixpoint.Tactic.Tactics.SolveFixpoint
+import LeanFixpoint.Tactic
 
 open DCom
 
