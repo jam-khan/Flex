@@ -1,7 +1,7 @@
 import Lean
-import LeanFixpoint.Solve.Qualifier
-import LeanFixpoint.Solve.Instantiation
-import LeanFixpoint.Solve.Check
+import LeanFixpoint.PA.Qualifier
+import LeanFixpoint.PA.Instantiation
+import LeanFixpoint.PA.Check
 
 open Lean Meta
 

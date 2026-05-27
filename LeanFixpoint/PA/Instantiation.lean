@@ -1,5 +1,5 @@
 import Lean
-import LeanFixpoint.Solve.Qualifier
+import LeanFixpoint.PA.Qualifier
 
 open Lean Meta
 

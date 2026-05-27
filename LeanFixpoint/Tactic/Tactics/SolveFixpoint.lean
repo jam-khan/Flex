@@ -1,16 +1,14 @@
 import Lean
 import Aesop
 
-import LeanFixpoint.Core.Types
-import LeanFixpoint.Core.Fusion
+import LeanFixpoint.Core
+import LeanFixpoint.Fusion
 import LeanFixpoint.Elab.ToExpr
 import LeanFixpoint.Elab.FromExpr
-import LeanFixpoint.Monad
-import LeanFixpoint.Tactic.Internal.Utils
-import LeanFixpoint.Tactic.Zap
--- import LeanFixpoint.Tactic.Internal.CloseLoop
-import LeanFixpoint.Tactic.SplitHyps
-import LeanFixpoint.Solve.Fixpoint
+import LeanFixpoint.Tactic.Utils
+import LeanFixpoint.Tactic.Tactics.Zap
+import LeanFixpoint.Tactic.Tactics.SplitHyps
+import LeanFixpoint.PA.Fixpoint
 
 open Lean Elab Meta Tactic
 

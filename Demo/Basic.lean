@@ -2,11 +2,9 @@ import LeanFixpoint
 
 def ex1 : Prop :=
   ∃ κ : Int → Int → Prop,
-    ∀ x : Int,
-      0 ≤ x →
+    ∀ x : Int, 0 ≤ x →
       (∀ ν : Int, ν = x - 1 → κ ν x)
-    ∧ (∀ y : Int, κ y x →
-        ∀ ν : Int, ν = y + 1 → 0 ≤ ν)
+    ∧ (∀ y : Int, κ y x → ∀ ν : Int, ν = y + 1 → 0 ≤ ν)
 
 theorem ex1Proof : ex1 := by
   solve_fixpoint
@@ -367,17 +365,13 @@ def ex14 : Prop :=
               ∀ ν : Int, ν = w + 2 → κ4 ν x a b c)
           ∧ (∀ z : Int, κ4 z x a b c → 0 ≤ z)
 
-set_option maxHeartbeats 1600000 in
 theorem ex14Proof : ex14 := by
   solve_fixpoint
 
-set_option maxHeartbeats 1600000 in
 theorem ex14Proof2 : ex14 := by
   unfold ex14
   zapK
   all_goals grind
-
-
 
 -- Nat refinement: predecessor is less than input
 def ex_nat : Prop :=
@@ -534,83 +528,8 @@ def ex_stress : Prop :=
           -- consumer
         ∧ (∀ s : Int, κ5 s x a b → 0 ≤ s)
 
-set_option maxHeartbeats 1600000 in
 theorem ex_stressProof : ex_stress := by
-  unfold ex_stress
-  rewriteKs
-  solK1
-  solK1
-  solK1
-  solK1
-  solK1
-  intro x hx a ha b hb
-  constructor
-  · lazy_unfold κ1
-    simp
-    aesop
-  · constructor
-    · lazy_unfold κ1
-      simp
-      aesop
-    · constructor
-      · lazy_unfold κ1
-        intro v hkv v' hv'
-        lazy_unfold κ2
-        grind
-      · constructor
-        · lazy_unfold κ2
-          intro w hw v hv
-          lazy_unfold κ3
-          simp_all
-          aesop
-        · constructor
-          · lazy_unfold κ1
-            intro v hkv
-            lazy_unfold κ3
-            simp_all
-            aesop
-          · constructor
-            · lazy_unfold κ3
-              intro v hv
-              aesop
-            · constructor
-              · lazy_unfold κ3
-                lazy_unfold κ4
-                intro u hk3 v hvu
-                simp
-                lazy_unfold κ3
-                simp
-                exists x
-                constructor
-                · assumption
-                · exists u
-                  constructor
-                  · aesop
-                  · grind
-              · constructor
-                · lazy_unfold κ4
-                  intro t hkt
-                  lazy_unfold κ5
-                  simp
-                  exists x
-                  constructor
-                  · assumption
-                  · left
-                    exists t
-                    constructor
-                    · subst ha hb; exact hkt
-                    · grind
-                · constructor
-                  · -- κ3 → κ5 (via +2) producer
-                    intro u hku v hv
-                    lazy_unfold κ5
-                    subst ha hb hv
-                    exact ⟨x, hx, x - 1, rfl, x + 2, rfl,
-                           Or.inr (Or.inl ⟨u, hku, u + 2, rfl, ⟨⟨rfl, rfl⟩, rfl⟩, rfl⟩)⟩
-                  · -- κ5(s) → 0 ≤ s consumer
-                    intro s hk5
-                    lazy_unfold κ5 κ4 κ3 κ2 κ1
-                    grind
+  solve_fixpoint
 
 -- Same theorem via the fused `zapK`
 theorem ex_stressProof2 : ex_stress := by

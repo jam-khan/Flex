@@ -1,12 +1,11 @@
 import Lean
 
-import LeanFixpoint.Core.Types
-import LeanFixpoint.Core.Fusion
+import LeanFixpoint.Core
+import LeanFixpoint.Fusion
 import LeanFixpoint.Elab.ToExpr
-import LeanFixpoint.Monad
-import LeanFixpoint.Tactic.Internal.Utils
-import LeanFixpoint.Tactic.RewriteKs
-import LeanFixpoint.Tactic.Lazy
+import LeanFixpoint.Tactic.Utils
+import LeanFixpoint.Tactic.Tactics.RewriteKs
+import LeanFixpoint.Tactic.Tactics.Lazy
 
 open Lean Meta Elab Tactic
 
