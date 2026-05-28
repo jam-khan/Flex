@@ -92,7 +92,7 @@ example (κ : KEnv) : topVC κ [] ex3Exp ex3Ty := by
 attribute [simp] check synth sub EVar.fresh implyBind prim self Refinement.interp Formula.interp TEnv.dom
 attribute [simp] Term.interp REnv.get Exp.openVar Ty.openVar Exp.fv Refinement.fv Formula.fv Term.fv Ty.fv
 attribute [simp] Refinement.openBVar Formula.openBVar Term.openBVar nuName String.length EVar.maxLen
-attribute [simp] List.lookup
+attribute [simp] List.lookup TEnv.tyNamed TEnv.tyFv Ty.named Formula.named
 
 @[qualif]
 def Ge1 (i : Int) : Prop := 1 ≤ i
@@ -227,15 +227,20 @@ example (κ : KEnv) : topVC κ [] exAddExp exAddTy := by
 -- Identity (λx. x) is declaratively typeable at Pos → Pos.
 example (κ : KEnv) : Hastype κ [] ex2Exp ex2Ty := by
   apply topVC_decl_sound
-  simp [topVC, ex2Exp, exId, ex2Ty, Pos]
-  intros; assumption
+    <;> simp [topVC, ex2Exp, exId, ex2Ty, Pos]
+  · simp [Exp.WFBVars]
+  · unfold Ty.WFBVars
+    simp [Ty.WFBVarCtx, Formula.hasBVar, Term.hasBVar]
+  · intros ; assumption
+
+
 
 -- let z = 5 in z is declaratively typeable at Pos.
 example (κ : KEnv) : Hastype κ [] ex3Exp ex3Ty := by
-  apply topVC_decl_sound
+  apply topVC_decl_sound <;>
   simp [topVC, check, synth, sub, implyBind, ex3Exp, ex3Ty, Pos, prim, self,
         Refinement.interp, Formula.interp, Term.interp, REnv.get,
-        Exp.openVar]
+        Exp.openVar, Exp.WFBVars, Ty.WFBVars, Ty.WFBVarCtx, Formula.hasBVar, Term.hasBVar]
 
 /-! ## Declarative-side: direct constructor derivations -/
 
@@ -243,17 +248,17 @@ example (κ : KEnv) : Hastype κ [] (.iconst 5) (prim 5) := .int_const
 
 example (κ : KEnv) : Hastype κ [] (.bconst true) (primBool true) := .bool_const
 
-example (κ : KEnv) (x : EVar) (t : Ty) (Γ : TEnv) (h : Γ.lookup x = some t) :
-    Hastype κ Γ (.fvar x) (self x t) :=
-  .var h
-
-example (κ : KEnv) : Hastype κ [] (.ann (.iconst 5) (prim 5)) (prim 5) :=
-  .ann .int_const
+example (κ : KEnv) : Hastype κ [] (.ann (.iconst 5) (prim 5)) (prim 5) := by
+  constructor
+  constructor
+  simp [Ty.WFBVars, Ty.WFBVarCtx, Formula.hasBVar, Term.hasBVar]
 
 example (κ : KEnv) (Γ : TEnv) (x y : EVar) (r₁ r₂ : Refinement .int)
     (hx : Γ.lookup x = some (.refine .int r₁))
-    (hy : Γ.lookup y = some (.refine .int r₂)) :
+    (hy : Γ.lookup y = some (.refine .int r₂))
+    (hxν : x ≠ nuName)
+    (hyν : y ≠ nuName):
     Hastype κ Γ (.add (.fvar x) (.fvar y))
       (.refine .int ⟨.eqI (.fvar .int nuName)
-                          (.add (.fvar .int x) (.fvar .int y))⟩) :=
-  .add_var hx hy
+                          (.add (.fvar .int x) (.fvar .int y))⟩) := by
+  apply Hastype.add_var <;> assumption

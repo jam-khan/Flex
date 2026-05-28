@@ -707,60 +707,57 @@ theorem sub_sound (κ : KEnv) (Γ : TEnv) (s t : Ty) (c : Constraint) :
     · apply hr
   | .arrow s1 t1, .arrow s2 t2 =>
     simp_all [sub]
-    sorry
-    -- obtain ⟨c₁, hc₁⟩ : ∃ c₁, sub s2 s1 = some c₁ := by grind
-    -- obtain ⟨c₂, hc₂⟩ : ∃ c₂, sub (t1.openVar 0 (EVar.fresh (s1.fv ++ (s2.fv ++ (t1.fv ++ (t2.fv
-    --                                   ++ (Ty.named s1 ++ (Ty.named s2
-    --                                   ++ (Ty.named t1 ++ (Ty.named t2 ++ [nuName]))))))))))
-    --                                (t2.openVar 0 (EVar.fresh (s1.fv ++ (s2.fv ++ (t1.fv ++ (t2.fv
-    --                                   ++ (Ty.named s1 ++ (Ty.named s2
-    --                                   ++ (Ty.named t1 ++ (Ty.named t2 ++ [nuName])))))))))) = some c₂ := by grind
-    -- rw [hc₁, hc₂] at hsub ; simp at hsub
-    -- apply Subtyp.arrow (L := Γ.dom ++ s1.fv ++ s2.fv ++ t1.fv ++ t2.fv ++
-    --                           Ty.named s1 ++ Ty.named s2 ++ Ty.named t1 ++ Ty.named t2 ++
-    --                           TEnv.tyFv Γ ++ TEnv.tyNamed Γ ++ [nuName])
-    -- · have h := sub_sound κ Γ s2 s1 c₁ hc₁
-    --   simp at h
-    --   rw [←hsub] at hent
-    --   exact h fun ρ hm => (hent ρ hm).1
-    -- · -- Codomain: use `sub_arrow_codomain_sound` (stated; proof deferred).
-    --   intro z hz
-    --   simp only [List.mem_append, List.mem_singleton, not_or] at hz
-    --   -- Algorithm's NEW fresh name w (now includes Ty.named/[nuName]).
-    --   let L_alg : List EVar := s1.fv ++ (s2.fv ++ (t1.fv ++ (t2.fv ++
-    --                             (Ty.named s1 ++ (Ty.named s2 ++
-    --                             (Ty.named t1 ++ (Ty.named t2 ++ [nuName])))))))
-    --   let w := EVar.fresh L_alg
-    --   have hw_fresh_L : w ∉ L_alg := EVar.fresh_not_mem _
-    --   -- Extract entailment of implyBind from c.
-    --   rw [←hsub] at hent
-    --   have hent_imply : Entail κ Γ (implyBind w s2 c₂ κ) := by
-    --     intro ρ hm
-    --     have h := (hent ρ hm).2
-    --     grind
-    --   have ht1_fv : z ∉ t1.fv := by grind
-    --   have ht2_fv : z ∉ t2.fv := by grind
-    --   have ht1_n : z ∉ Ty.named t1 := by grind
-    --   have ht2_n : z ∉ Ty.named t2 := by grind
-    --   have hs1_fv : z ∉ s1.fv := by grind
-    --   have hs2_fv : z ∉ s2.fv := by grind
-    --   have hs1_n : z ∉ Ty.named s1 := by grind
-    --   have hs2_n : z ∉ Ty.named s2 := by grind
-    --   have hzΓdom : z ∉ Γ.dom := by grind
-    --   have hzΓfv : z ∉ TEnv.tyFv Γ := by grind
-    --   have hzΓn : z ∉ TEnv.tyNamed Γ := by grind
-    --   have hzν : z ≠ nuName := by grind
-    --   -- Algorithm's w now satisfies all the freshness requirements.
-    --   have hwt1 : w ∉ t1.fv := by grind
-    --   have hwt2 : w ∉ t2.fv := by grind
-    --   have hwn1 : w ∉ Ty.named t1 := by grind
-    --   have hwn2 : w ∉ Ty.named t2 := by grind
-    --   have hws2_fv : w ∉ s2.fv := by grind
-    --   have hws2_n : w ∉ Ty.named s2 := by grind
-    --   have hwν : w ≠ nuName := by grind
-    --   apply sub_arrow_codomain_sound (w := w) hc₂ hent_imply
-    --     hwt1 hwt2 hwn1 hwn2 hws2_fv hws2_n hwν
-    --     z hzΓdom hs1_fv hs2_fv ht1_fv ht2_fv ht1_n ht2_n hs1_n hs2_n hzΓfv hzΓn hzν
+    -- use `set` so `w` stays opaque, preventing whnf blowup
+    let w := (EVar.fresh
+            (Γ.dom ++
+              (Γ.tyFv ++
+                (Γ.tyNamed ++
+                  (s1.fv ++
+                    (s2.fv ++
+                      (t1.fv ++ (t2.fv ++ (s1.named ++ (s2.named ++ (t1.named ++ (t2.named ++ [nuName]))))))))))))
+    have hwd : w = EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
+                          ++ s1.fv ++ s2.fv ++ t1.fv ++ t2.fv
+                          ++ Ty.named s1 ++ Ty.named s2
+                          ++ Ty.named t1 ++ Ty.named t2 ++ [nuName]) := by grind
+    obtain ⟨c₁, hc₁⟩ : ∃ c₁, sub Γ s2 s1 = some c₁ := by
+      rcases Option.eq_none_or_eq_some (sub Γ s2 s1) with eqn | eqs
+      · simp_all
+      · assumption
+    obtain ⟨c₂, hc₂⟩ : ∃ c₂, sub ((w, s2) :: Γ) (t1.openVar 0 w) (t2.openVar 0 w) = some c₂ := by
+      rcases Option.eq_none_or_eq_some (sub ((w, s2) :: Γ) (t1.openVar 0 w) (t2.openVar 0 w)) with eqn | eqs
+      · simp_all
+      · assumption
+    -- avoid `simp at hsub` to keep implyBind folded
+    rw [hc₁, hc₂] at hsub
+    simp only [Option.some.injEq] at hsub
+    -- hsub : (fun κ ρ => c₁ κ ρ ∧ implyBind w s2 c₂ κ ρ) = c
+    have hw : w ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
+                ++ s1.fv ++ s2.fv ++ t1.fv ++ t2.fv
+                ++ Ty.named s1 ++ Ty.named s2 ++ Ty.named t1 ++ Ty.named t2 ++ [nuName] := by
+      grind [EVar.fresh_not_mem (Γ.dom ++
+              (Γ.tyFv ++
+                (Γ.tyNamed ++
+                  (s1.fv ++
+                    (s2.fv ++
+                      (t1.fv ++ (t2.fv ++ (s1.named ++ (s2.named ++ (t1.named ++ (t2.named ++ [nuName])))))))))))]
+    apply Subtyp.arrow (x := w) _ hw
+    · apply sub_sound κ ((w, s2) :: Γ) _ _ c₂ hc₂
+      intro ρ hm
+      have hΓρ : ModelsEnv κ ρ Γ := by
+        cases s2 with | refine _ _ => exact hm.2 | arrow _ _ => exact hm
+      -- use ▸ so implyBind stays folded until we need it
+      rw [←hsub] at hent
+      have hcρ : c₁ κ ρ ∧ implyBind w s2 c₂ κ ρ := by grind [hent ρ hΓρ]
+      simp only [implyBind] at hcρ
+      cases s2 with
+      | refine b r =>
+        have h := hcρ.2 (REnv.get b ρ w) hm.1
+        rw [REnv.update_self] at h ; exact h
+      | arrow _ _ => exact hcρ.2
+    · apply sub_sound κ Γ s2 s1 c₁ hc₁
+      intro ρ hm
+      rw [←hsub] at hent
+      grind
   | .refine _ _ , .arrow _ _ | .arrow _ _, .refine _ _ | .refine .int _, .refine .bool _ | .refine .bool _, .refine .int _=>
     simp_all [sub]
   termination_by s.skel + t.skel
@@ -980,26 +977,12 @@ mutual
             rw [REnv.update_self] at h
             exact h
           | arrow _ _ => exact hcρ
-        -- 2. Cofinite lift via `Check.rename`: transport `hbody₀` (at x₀) to
-        --    arbitrary x ∉ L'. The full freshness for `x₀` (Ty.named, tyFv, ...)
-        --    isn't guaranteed by check's algorithmic fresh (similar gap to Phase 5);
-        -- L' matches Check.rename's hx form (so hxL' directly satisfies hx_fresh).
-        let L' : List EVar := Γ.dom ++ s1.fv ++ e.fv ++ Ty.fv t1 ++
-                              Ty.named s1 ++ Ty.named t1 ++
-                              TEnv.tyFv Γ ++ TEnv.tyNamed Γ ++ [nuName]
-        sorry
-        -- refine Check.lam L' (fun x hxL' => ?_)
-        -- have hx_fresh : x ∉ Γ.dom ++ s1.fv ++ e.fv ++ Ty.fv t1
-        --         ++ Ty.named s1 ++ Ty.named t1
-        --         ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ ++ [nuName] := hxL'
-        -- -- x₀ ∈ L₀ ⊆ (mostly L'); x₀'s freshness against L' follows from EVar.fresh_not_mem.
-        -- have hx₀_fresh : x₀ ∉ Γ.dom ++ s1.fv ++ e.fv ++ Ty.fv t1
-        --         ++ Ty.named s1 ++ Ty.named t1
-        --         ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ ++ [nuName] := by
-        --   have hx₀_fresh_L₀ : x₀ ∉ L₀ := EVar.fresh_not_mem _
-        --   -- L₀ is a permutation of the target list (same components, right-assoc parens).
-        --   grind
-        -- exact Check.rename x₀ x hx₀_fresh hx_fresh hbody₀
+        have hfresh₀ : x₀ ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ ++
+                       e.fv ++ s1.fv ++ t1.fv ++ Ty.named s1 ++ Ty.named t1 ++ [nuName] := by
+          have h := EVar.fresh_not_mem L₀
+          simp only [L₀, List.mem_append, List.mem_singleton, not_or] at h ⊢
+          grind
+        exact Check.lam hfresh₀ hbody₀
     | .letin e1 e2 =>
       -- check Γ (.letin e1 e2) t algorithm: synth e1 → (c₁, s); check ((x₀, s) :: Γ) (e2.openVar 0 x₀) t = some c₂
       simp_all [check]
@@ -1046,17 +1029,12 @@ mutual
           rw [REnv.update_self] at h
           exact h
         | arrow _ _ => exact himply
-      -- 3. Cofinite lift via `Check.rename_letin_body`.
-      -- L' matches Check.rename_letin_body's hx form (so hxL' directly satisfies hx_fresh).
-      let L' : List EVar := Γ.dom ++ s.fv ++ e2.fv ++ Ty.fv t ++
-                            Ty.named s ++ Ty.named t ++
-                            TEnv.tyFv Γ ++ TEnv.tyNamed Γ ++ [nuName]
-      sorry
-      -- refine Check.letin L' hsy (fun x hxL' => ?_)
-      -- have hx_fresh : x ∉ Γ.dom ++ s.fv ++ e2.fv ++ Ty.fv t
-      --         ++ Ty.named s ++ Ty.named t
-      --         ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ ++ [nuName] := hxL'
-      -- -- x₀'s freshness follows from x₀ = EVar.fresh L₀ (L₀ contains all needed components).
+      have hfresh₀ : x₀ ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ ++
+                     e2.fv ++ s.fv ++ t.fv ++ Ty.named s ++ Ty.named t ++ [nuName] := by
+        have h := EVar.fresh_not_mem L₀
+        simp only [L₀, List.mem_append, List.mem_singleton, not_or] at h ⊢
+        grind
+      exact Check.letin hsy hfresh₀ hbody₀
       -- have hx₀_fresh : x₀ ∉ Γ.dom ++ s.fv ++ e2.fv ++ Ty.fv t
       --         ++ Ty.named s ++ Ty.named t
       --         ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ ++ [nuName] := by
@@ -1174,36 +1152,32 @@ mutual
     | .sub hsy hsub =>
       have ⟨hht, _⟩ := synth_to_hastype hΓ hE hsy
       exact .sub hht hsub ht
-    | .lam L hck =>
-      rename_i e s₁ s₂
-      -- Pick wider L' = L ∪ {nuName} so the chosen x satisfies x ≠ nuName.
-      sorry
-      -- apply Hastype.lam (L := L ++ [nuName]) ht
-      -- intro x hx_in_L'
-      -- simp only [List.mem_append, List.mem_singleton, not_or] at hx_in_L'
-      -- have hxν : x ≠ nuName := hx_in_L'.2
-      -- -- Derive WFBVars facts for the extended context and recursive call.
-      -- have ht_split : Ty.WFBVarCtx [] s₁ ∧ Ty.WFBVarCtx [s₁.optBase] s₂ := by
-      --   simp only [Ty.WFBVars, Ty.WFBVarCtx] at ht; exact ht
-      -- have hs₁_wfb : Ty.WFBVars s₁ := ht_split.1
-      -- have hs₂_open_wfb : Ty.WFBVars (s₂.openVar 0 x) :=
-      --   Ty.WFBVarCtx_openVar_last s₂ [] s₁.optBase x ht_split.2
-      -- have hΓ_ext : TEnv.WFBVars ((x, s₁) :: Γ) := hΓ.cons hs₁_wfb hxν
-      -- have hE_e : Exp.WFBVars e := by simp only [Exp.WFBVars] at hE; exact hE
-      -- have hE_ext : Exp.WFBVars (e.openVar 0 x) := (Exp.WFBVars_openVar e 0 x).mpr hE_e
-      -- exact check_to_hastype hΓ_ext hE_ext hs₂_open_wfb (hck x hx_in_L'.1)
-    | .letin L hsy hck =>
-      sorry
-      -- rename_i e₁ e₂ s
-      -- have ⟨hht1, hs_wfb⟩ := synth_to_hastype hΓ hE.1 hsy
-      -- apply Hastype.letin (L := L ++ [nuName]) ht hht1
-      -- intro x hx_in_L'
-      -- simp only [List.mem_append, List.mem_singleton, not_or] at hx_in_L'
-      -- have hxν : x ≠ nuName := hx_in_L'.2
-      -- have hΓ_ext : TEnv.WFBVars ((x, s) :: Γ) := hΓ.cons hs_wfb hxν
-      -- have hE_ext : Exp.WFBVars (e₂.openVar 0 x) :=
-      --   (Exp.WFBVars_openVar e₂ 0 x).mpr hE.2
-      -- exact check_to_hastype hΓ_ext hE_ext ht (hck x hx_in_L'.1)
+    | .lam hfresh hck =>
+      rename_i e s₁ s₂ x
+      have hxν : x ≠ nuName := by
+        have h := hfresh
+        simp only [List.mem_append, List.mem_singleton, not_or] at h
+        exact h.2
+      have ht_split : Ty.WFBVarCtx [] s₁ ∧ Ty.WFBVarCtx [s₁.optBase] s₂ := by
+        simp only [Ty.WFBVars, Ty.WFBVarCtx] at ht; exact ht
+      have hs₂_open_wfb : Ty.WFBVars (s₂.openVar 0 x) :=
+        Ty.WFBVarCtx_openVar_last s₂ [] s₁.optBase x ht_split.2
+      have hΓ_ext : TEnv.WFBVars ((x, s₁) :: Γ) := hΓ.cons ht_split.1 hxν
+      have hE_ext : Exp.WFBVars (e.openVar 0 x) := by
+        simp only [Exp.WFBVars] at hE; exact (Exp.WFBVars_openVar e 0 x).mpr hE
+      exact .lam ht hfresh (check_to_hastype hΓ_ext hE_ext hs₂_open_wfb hck)
+    | .letin hsy hfresh hck =>
+      rename_i e₁ e₂ s x
+      simp only [Exp.WFBVars] at hE
+      have ⟨hht1, hs_wfb⟩ := synth_to_hastype hΓ hE.1 hsy
+      have hxν : x ≠ nuName := by
+        have h := hfresh
+        simp only [List.mem_append, List.mem_singleton, not_or] at h
+        exact h.2
+      have hΓ_ext : TEnv.WFBVars ((x, s) :: Γ) := hΓ.cons hs_wfb hxν
+      have hE_ext : Exp.WFBVars (e₂.openVar 0 x) :=
+        (Exp.WFBVars_openVar e₂ 0 x).mpr hE.2
+      exact .letin ht hht1 hfresh (check_to_hastype hΓ_ext hE_ext ht hck)
     | .ite hlk hxν hck1 hck2 =>
       rename_i x e₁ e₂ r
       simp only [Exp.WFBVars] at hE
