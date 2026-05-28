@@ -27,8 +27,9 @@ def implyBind (x : EVar) (t : Ty) (c : Constraint) : Constraint :=
     | .arrow _ _  => c κ ρ
 
 /-- Algorithmic subtyping. Returns `none` on shape mismatch. Termination
-    by `Ty.skel` (preserved under `openVar`). -/
-def sub : Ty → Ty → Option Constraint
+    by `Ty.skel` (preserved under `openVar`). Takes `Γ` so the fresh name
+    for the arrow case is picked away from the context domain. -/
+def sub (Γ : TEnv) : Ty → Ty → Option Constraint
   | .refine .int  r₁, .refine .int  r₂ =>
       some (fun κ ρ => ∀ v : Int,
               Refinement.interp κ r₁ ρ v → Refinement.interp κ r₂ ρ v)
@@ -36,10 +37,11 @@ def sub : Ty → Ty → Option Constraint
       some (fun κ ρ => ∀ v : Bool,
               Refinement.interp κ r₁ ρ v → Refinement.interp κ r₂ ρ v)
   | .arrow s₁ t₁, .arrow s₂ t₂ =>
-      let x := EVar.fresh (s₁.fv ++ s₂.fv ++ t₁.fv ++ t₂.fv
+      let x := EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
+                            ++ s₁.fv ++ s₂.fv ++ t₁.fv ++ t₂.fv
                             ++ Ty.named s₁ ++ Ty.named s₂
                             ++ Ty.named t₁ ++ Ty.named t₂ ++ [nuName])
-      match sub s₂ s₁, sub (t₁.openVar 0 x) (t₂.openVar 0 x) with
+      match sub Γ s₂ s₁, sub ((x, s₂) :: Γ) (t₁.openVar 0 x) (t₂.openVar 0 x) with
       | some c₁, some c₂ =>
           some (fun κ ρ => c₁ κ ρ ∧ implyBind x s₂ c₂ κ ρ)
       | _, _ => none
@@ -148,7 +150,7 @@ mutual
         -- Catch-all (Chk-Syn): synthesize, then subtype.
         match synth Γ e with
         | some (c, s) =>
-            match sub s t with
+            match sub Γ s t with
             | some c' => some (fun κ ρ => c κ ρ ∧ c' κ ρ)
             | none    => none
         | none => none

@@ -13,9 +13,12 @@ inductive Hastype : KEnv → TEnv → Exp → Ty → Prop where
       Hastype κ Γ (.iconst n) (prim n)
   | bool_const {κ Γ b} :
       Hastype κ Γ (.bconst b) (primBool b)
-  | lam {κ Γ e s₁ s₂} (L : List EVar) :
+  | lam {κ Γ e s₁ s₂ x} :
       Ty.WFBVars (.arrow s₁ s₂) →
-      (∀ x, x ∉ L → Hastype κ ((x, s₁) :: Γ) (e.openVar 0 x) (s₂.openVar 0 x)) →
+      x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
+          ++ e.fv ++ s₁.fv ++ s₂.fv
+          ++ Ty.named s₁ ++ Ty.named s₂ ++ [nuName] →
+      Hastype κ ((x, s₁) :: Γ) (e.openVar 0 x) (s₂.openVar 0 x) →
       Hastype κ Γ (.lam e) (.arrow s₁ s₂)
   | app {κ Γ e₁ y s t} :
       Hastype κ Γ e₁ (.arrow s t) →
@@ -24,10 +27,13 @@ inductive Hastype : KEnv → TEnv → Exp → Ty → Prop where
       y ∉ Ty.named t →
       y ≠ nuName →
       Hastype κ Γ (.app e₁ (.fvar y)) (t.openVar 0 y)
-  | letin {κ Γ e₁ e₂ s t} (L : List EVar) :
+  | letin {κ Γ e₁ e₂ s t x} :
       Ty.WFBVars t →
       Hastype κ Γ e₁ s →
-      (∀ x, x ∉ L → Hastype κ ((x, s) :: Γ) (e₂.openVar 0 x) t) →
+      x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
+          ++ e₂.fv ++ s.fv ++ t.fv
+          ++ Ty.named s ++ Ty.named t ++ [nuName] →
+      Hastype κ ((x, s) :: Γ) (e₂.openVar 0 x) t →
       Hastype κ Γ (.letin e₁ e₂) t
   | ann {κ Γ e t} :
       Hastype κ Γ e t →
@@ -116,16 +122,22 @@ theorem Hastype.fv_subset {κ Γ e t} (_h : Hastype κ Γ e t) :
     grind
   | int_const | bool_const =>
     simp [Exp.fv] at zf
-  | @lam Γ' e s₁ s₂ L _ hf ih =>
+  | @lam Γ' e s₁ s₂ x _ hfresh hbody ih =>
     simp [Exp.fv] at *
-    obtain ⟨t', hzeq | foo⟩ := ih (EVar.fresh (L ++ e.fv)) (by grind [EVar.fresh_not_mem]) (EVar.not_free_in_open zf)
-        <;> grind [EVar.fresh_not_mem]
-  | @letin Γ' e₁ e₂ s t L _ hht hf ih1 ih2 =>
+    have hx_efv : x ∉ e.fv := hfresh.2.2.2.1
+      -- simp only [List.mem_append, not_or] at hfresh; exact hfresh.2.1
+    grind [EVar.not_free_in_open]
+    -- obtain ⟨t', hzeq | foo⟩ := ih (EVar.fv_subset_fv_openVar hx_efv zf)
+    --     <;> [grind [EVar.fresh_not_mem]; exact ⟨t', foo⟩]
+  | @letin Γ' e₁ e₂ s t x _ he1 hfresh hbody ih1 ih2 =>
     simp [Exp.fv] at *
     rcases zf with hzf1 | hzf2
     · exact ih1 hzf1
-    · obtain ⟨t', hzeq | foo⟩ := ih2 (EVar.fresh (L ++ e₂.fv)) (by grind [EVar.fresh_not_mem]) (EVar.not_free_in_open hzf2)
-        <;> grind [EVar.fresh_not_mem]
+    · have hx_efv : x ∉ e₂.fv := hfresh.2.2.2.1
+        -- simp only [List.mem_append, not_or] at hfresh; exact hfresh.2.1
+      grind [EVar.not_free_in_open]
+      -- obtain ⟨t', hzeq | foo⟩ := ih2 (EVar.fv_subset_fv_openVar hx_efv hzf2)
+      --     <;> [grind [EVar.fresh_not_mem]; exact ⟨t', foo⟩]
   | add_var | leq_var | not_var | and_var | ite =>
     simp [Exp.fv] at zf
     rcases zf
@@ -149,16 +161,14 @@ theorem Hastype.lc_at {κ Γ e t} (_h : Hastype κ Γ e t) : Exp.lc_at 0 e := by
   | var => simp [Exp.lc_at]
   | int_const => simp [Exp.lc_at]
   | bool_const => simp [Exp.lc_at]
-  | lam L _ _ ih =>
-    simp only [Exp.lc_at]
-    obtain ⟨x, hxL⟩ := EVar.freshWith L
-    exact Exp.lc_at_of_openVar _ 0 x (ih x hxL)
+  | lam =>
+      simp only [Exp.lc_at]
+      grind [Exp.lc_at_of_openVar]
   | app _ _ _ _ _ ih₁ ih₂ =>
     simp only [Exp.lc_at]; exact ⟨ih₁, ih₂⟩
-  | letin L _ _ _ ih₁ ih₂ =>
+  | letin =>
     simp only [Exp.lc_at]
-    obtain ⟨x, hxL⟩ := EVar.freshWith L
-    exact ⟨ih₁, Exp.lc_at_of_openVar _ 0 x (ih₂ x hxL)⟩
+    grind [Exp.lc_at_of_openVar]
   | ann _ _ ih => simp only [Exp.lc_at]; exact ih
   | sub _ _ _ ih => exact ih
   | add_var => simp [Exp.lc_at]
@@ -216,12 +226,12 @@ theorem Hastype.wf_bvars {κ Γ e t} (h : Hastype κ Γ e t) : Ty.WFBVars t := b
   | var _ hwf => exact Ty.WFBVars_self _ _ hwf
   | int_const  => exact Ty.WFBVars_prim _
   | bool_const => exact Ty.WFBVars_primBool _
-  | lam _ hwf _ => exact hwf
+  | lam _ hwf _ => grind
   | app _ _ _ _ _ ih₁ _ =>
     -- ih₁ : WFBVars (.arrow s t), need WFBVars (t.openVar 0 y)
     simp only [Ty.WFBVars, Ty.WFBVarCtx] at ih₁
     exact Ty.WFBVarCtx_openVar_last _ [] _ _ ih₁.2
-  | letin _ hwf _ _ _ _ => exact hwf
+  | letin _ hwf _ _ _ _ => grind
   | ann _ hwf _ => exact hwf
   | sub _ _ hwf _ => exact hwf
   | add_var => exact Ty.WFBVars_add_result _ _

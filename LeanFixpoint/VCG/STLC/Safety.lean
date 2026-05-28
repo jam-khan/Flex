@@ -824,46 +824,43 @@ theorem subtyp_sound {κ Γ s t} (hsub : Subtyp κ Γ s t)
         have hf : Formula.interp _ ρ (Refinement.subImp r₁ r₂) := hent ρ hΓ
         simp only [Refinement.subImp, Formula.interp] at hf
         exact ⟨bv, hvb, hf bv hp₁⟩
-  | arrow hsub xf hin hout ih =>
-    rename_i Γ' s₁ t₁ s₂ t₂
+  | arrow hdom hfresh hcodom ih_hdom ih_hcodom =>
+    rename_i Γ' s₁ t₁ s₂ t₂ x
     obtain ⟨hWF_s1, hWF_st1⟩ := hWF_s
     obtain ⟨hWF_s2, hWF_t2⟩ := hWF_t
     -- optBase equality from domain subtyping s₂ <: s₁
-    have hopt_eq : s₂.optBase = s₁.optBase := Subtyp.optBase_eq xf
+    have hopt_eq : s₂.optBase = s₁.optBase := by grind [Subtyp.optBase_eq]
     have hWF_st1' : Ty.WFBVarCtx [s₂.optBase] t₁ := hopt_eq ▸ hWF_st1
+    -- Extract freshness facts for x from hfresh
+    simp only [List.mem_append, List.mem_singleton, not_or] at hfresh
+    obtain ⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨hx_Γdom, hx_Γfv⟩, hx_Γnamed⟩,
+               hx_s1fv⟩, hx_s2fv⟩, hx_t1fv⟩, hx_t2fv⟩,
+               hx_s1named⟩, hx_s2named⟩, hx_t1named⟩, hx_t2named⟩, hxν⟩ := hfresh
     intro ρ hm v htd
     simp only [TyDenote] at htd ⊢
     obtain ⟨body, hvc, hlc, hcl, hLR⟩ := htd
     refine ⟨body, hvc, hlc, hcl, fun va htd_va => ?_⟩
     -- Domain conversion (contravariant): s₂ <: s₁ so s₂-typed va is also s₁-typed
-    have htd_va_s1 : TyDenote κ s₁ ρ va := hout hWF_s2 hWF_s1 hm htd_va
+    have htd_va_s1 : TyDenote κ s₁ ρ va := ih_hdom hWF_s2 hWF_s1 hm htd_va
     -- Apply the function body at s₁-typed va
     obtain ⟨vr, hbs, htd_vr_t1⟩ := hLR va htd_va_s1
     refine ⟨vr, hbs, ?_⟩
-    -- Pick fresh z for the cofinite IH
-    obtain ⟨z, hzall⟩ := EVar.freshWith
-      (hsub ++ t₁.fv ++ t₂.fv ++ Ty.named t₁ ++ Ty.named t₂
-         ++ s₂.fv ++ Ty.named s₂ ++ [nuName]
-         ++ TEnv.dom Γ' ++ TEnv.tyFv Γ' ++ TEnv.tyNamed Γ')
-    simp only [List.mem_append, List.mem_singleton, not_or] at hzall
-    obtain ⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨hzL, hz_t1fv⟩, hz_t2fv⟩, hz_t1named⟩, hz_t2named⟩,
-              hz_s2fv⟩, hz_s2named⟩, hzν⟩, hz_Γdom⟩, hz_Γfv⟩, hz_Γnamed⟩ := hzall
-    -- WFBVars for opened types
-    have hWF_t1z : Ty.WFBVars (t₁.openVar 0 z) :=
-      Ty.WFBVarCtx_openVar_last t₁ [] s₂.optBase z hWF_st1'
-    have hWF_t2z : Ty.WFBVars (t₂.openVar 0 z) :=
-      Ty.WFBVarCtx_openVar_last t₂ [] s₂.optBase z hWF_t2
-    -- Convert t₁.substBV va ↔ t₁.openVar 0 z under extendBy s₂ ρ z va
-    rw [TyDenote.substBV_iff κ t₁ s₂ z ρ va vr hz_t1fv hz_t1named hzν hWF_st1' htd_va]
+    -- Use x directly from the constructor (no fresh pick needed)
+    have hWF_t1x : Ty.WFBVars (t₁.openVar 0 x) :=
+      Ty.WFBVarCtx_openVar_last t₁ [] s₂.optBase x hWF_st1'
+    have hWF_t2x : Ty.WFBVars (t₂.openVar 0 x) :=
+      Ty.WFBVarCtx_openVar_last t₂ [] s₂.optBase x hWF_t2
+    -- Convert t₁.substBV va ↔ t₁.openVar 0 x under extendBy s₂ ρ x va
+    rw [TyDenote.substBV_iff κ t₁ s₂ x ρ va vr hx_t1fv hx_t1named hxν hWF_st1' htd_va]
       at htd_vr_t1
-    -- Build extended model for ((z, s₂) :: Γ')
-    have hm_ext : ModelsEnv κ (REnv.extendBy s₂ ρ z va) ((z, s₂) :: Γ') :=
-      ModelsEnv.extendBy_cons hm s₂ z va hz_Γdom hz_Γfv hz_Γnamed hz_s2fv hz_s2named hzν htd_va
-    -- Apply codomain IH at z
-    have htd_vr_t2 : TyDenote κ (t₂.openVar 0 z) (REnv.extendBy s₂ ρ z va) vr :=
-      ih z hzL hWF_t1z hWF_t2z hm_ext htd_vr_t1
-    -- Convert back: t₂.openVar 0 z ↔ t₂.substBV va
-    exact (TyDenote.substBV_iff κ t₂ s₂ z ρ va vr hz_t2fv hz_t2named hzν hWF_t2 htd_va).mpr
+    -- Build extended model for ((x, s₂) :: Γ')
+    have hm_ext : ModelsEnv κ (REnv.extendBy s₂ ρ x va) ((x, s₂) :: Γ') :=
+      ModelsEnv.extendBy_cons hm s₂ x va hx_Γdom hx_Γfv hx_Γnamed hx_s2fv hx_s2named hxν htd_va
+    -- Apply codomain IH at x
+    have htd_vr_t2 : TyDenote κ (t₂.openVar 0 x) (REnv.extendBy s₂ ρ x va) vr :=
+      ih_hcodom hWF_t1x hWF_t2x hm_ext htd_vr_t1
+    -- Convert back: t₂.openVar 0 x ↔ t₂.substBV va
+    exact (TyDenote.substBV_iff κ t₂ s₂ x ρ va vr hx_t2fv hx_t2named hxν hWF_t2 htd_va).mpr
       htd_vr_t2
 
 /-! ## T2 — Fundamental Lemma -/
@@ -1017,8 +1014,8 @@ theorem hastype_fundamental {κ Γ e t} (h : Hastype κ Γ e t) :
         have hνx : (nuName == x) = false := beq_eq_false_iff_ne.mpr (Ne.symm hxν)
         have hνy : (nuName == y) = false := beq_eq_false_iff_ne.mpr (Ne.symm hyν)
         simp [hνx, hνy, hρx, hρy]
-  | lam L hwf_arr ih =>
-      rename_i Γ' body s₁ s₂ ih_fund
+  | lam hwf_arr hfresh ih =>
+      rename_i Γ' body s₁ s₂ x ih_fund
       intro γ ρ hE
       rw [Exp.substEnv_lam]
       refine ⟨.clos (Exp.substEnv γ body), BigStep.lam, ?_⟩
@@ -1026,33 +1023,28 @@ theorem hastype_fundamental {κ Γ e t} (h : Hastype κ Γ e t) :
       refine ⟨Exp.substEnv γ body, rfl, ?_, ?_, ?_⟩
       · -- Val.lc
         simp only [Val.lc]
-        exact Exp.substEnv_lc_at γ body 1 (EnvAgrees.allLc hE) (Hastype.lam L hwf_arr ih).lc_at
+        exact Exp.substEnv_lc_at γ body 1 (EnvAgrees.allLc hE) (Hastype.lam hwf_arr hfresh ih).lc_at
       · -- Val.closed
         simp only [Val.closed, Val.fv]
         apply Exp.substEnv_fv_nil _ _ (EnvAgrees.allClosed hE)
         intro z hz
-        obtain ⟨t', hzΓ⟩ := (Hastype.lam L hwf_arr ih).fv_subset z (by simpa [Exp.fv] using hz)
+        obtain ⟨t', hzΓ⟩ := (Hastype.lam hwf_arr hfresh ih).fv_subset z (by simpa [Exp.fv] using hz)
         rw [← EnvAgrees.dom_eq hE]
         exact mem_TEnv_dom hzΓ
       · -- LR: for any va : s₁, produce vr evaluating body and in s₂.substBV va
         intro va htd_va
-        -- Pick a fresh x for the cofinite IH
-        obtain ⟨x, hxL⟩ := EVar.freshWith
-          (L ++ Subst.dom γ ++ body.fv ++ s₁.fv ++ s₂.fv ++ Ty.named s₁ ++ Ty.named s₂
-             ++ TEnv.tyFv Γ' ++ TEnv.tyNamed Γ' ++ [nuName])
-        simp only [List.mem_append, List.mem_singleton, not_or] at hxL
-        obtain ⟨⟨⟨⟨⟨⟨⟨⟨⟨hxL_L, hxγ⟩, hxbody⟩, hxs₁⟩, hxs₂⟩, hxs₁n⟩, hxs₂n⟩, hxΓfv⟩, hxΓnamed⟩, hxν⟩ := hxL
-        have hγcl := EnvAgrees.allClosed hE
+        -- x is the witness from the constructor; extract freshness facts
+        simp [List.mem_append, not_or] at hfresh
+        obtain ⟨hxΓ, hxΓfv, hxΓnamed, hxbody, hxs₁, hxs₂, hxs₁n, hxs₂n, hxν⟩ := hfresh
         have hγlc  := EnvAgrees.allLc hE
+        -- x ∉ Subst.dom γ follows from x ∉ TEnv.dom Γ' via EnvAgrees.dom_eq
+        have hxγ : x ∉ Subst.dom γ := (EnvAgrees.dom_eq hE) ▸ hxΓ
         have htd_va_x : TyDenote κ s₁ (REnv.extendBy s₁ ρ x va) va :=
           TyDenote.extendBy_fresh s₁ x va hxs₁ hxs₁n hxν htd_va
-        have hxΓ' : x ∉ TEnv.dom _ := (EnvAgrees.dom_eq hE).symm ▸ hxγ
-        have hEx : EnvAgrees κ ((x, s₁) :: _) ((x, va) :: γ) (REnv.extendBy s₁ ρ x va) :=
-          EnvAgrees.extend hE x s₁ va hxΓ' hxγ hxΓfv hxΓnamed hxν htd_va_x
-        obtain ⟨vr, hbs_vr, htd_vr⟩ := ih_fund x hxL_L hEx
+        have hEx : EnvAgrees κ ((x, s₁) :: Γ') ((x, va) :: γ) (REnv.extendBy s₁ ρ x va) :=
+          EnvAgrees.extend hE x s₁ va hxΓ hxγ hxΓfv hxΓnamed hxν htd_va_x
+        obtain ⟨vr, hbs_vr, htd_vr⟩ := ih_fund hEx
         rw [Exp.substEnv_cons_openVar body γ va x hxγ hγlc hxbody (TyDenote.closed htd_va)] at hbs_vr
-        -- htd_vr : TyDenote κ (s₂.openVar 0 x) (extendBy s₁ ρ x va) vr
-        -- Convert to TyDenote κ (s₂.substBV va) ρ vr via substBV_iff (← direction)
         have hWF_s₂ : Ty.WFBVarCtx [s₁.optBase] s₂ := hwf_arr.2
         exact ⟨vr, hbs_vr,
           (TyDenote.substBV_iff κ s₂ s₁ x ρ va vr hxs₂ hxs₂n hxν hWF_s₂ htd_va).mpr htd_vr⟩
@@ -1108,33 +1100,28 @@ theorem hastype_fundamental {κ Γ e t} (h : Hastype κ Γ e t) :
       refine ⟨vr, ?_, htd_vr_y⟩
       rw [Exp.substEnv_app]
       exact BigStep.app hbs_fn hbs_arg hbs_body
-  | letin L _ h₁ h₂ ih₁ ih₂ =>
-      rename_i Γ e_let body s t _
+  | @letin Γ' e₁ e₂ s' t' x hwfbv hht xf hhto ih₁ ih₂ =>
       intro γ ρ hE
       -- Evaluate e_let
       obtain ⟨v₁, hbs₁, htd₁⟩ := ih₁ hE
       have hγlc := EnvAgrees.allLc hE
-      have hγcl := EnvAgrees.allClosed hE
-      -- Pick a fresh name w for the let-bound variable
-      obtain ⟨w, hw_not_mem⟩ := EVar.freshWith
-        (L ++ t.fv ++ s.fv ++ Subst.dom γ ++ body.fv ++ TEnv.dom Γ
-         ++ Ty.named s ++ Ty.named t ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ ++ [nuName])
-      simp only [List.mem_append, List.mem_singleton, not_or] at hw_not_mem
-      obtain ⟨⟨⟨⟨⟨⟨⟨⟨⟨⟨hwL, hwt⟩, hws⟩, hwγ⟩, hwbody⟩, hwΓ⟩, hwsn⟩, hwtn⟩, hwΓfv⟩, hwΓnamed⟩, hwν⟩ := hw_not_mem
-      -- TyDenote for v₁ under extended ρ at fresh w
-      have htd₁_w : TyDenote κ s (REnv.extendBy s ρ w v₁) v₁ :=
-        TyDenote.extendBy_fresh s w v₁ hws hwsn hwν htd₁
-      -- Extended EnvAgrees at w
-      have hEw : EnvAgrees κ ((w, s) :: Γ) ((w, v₁) :: γ) (REnv.extendBy s ρ w v₁) :=
-        EnvAgrees.extend hE w s v₁ hwΓ hwγ hwΓfv hwΓnamed hwν htd₁_w
-      -- Apply IH₂ at w
-      obtain ⟨vr, hbs₂, htd_vr⟩ := ih₂ w hwL hEw
-      -- Rewrite BigStep: substEnv ((w,v₁)::γ) (body.openVar 0 w) = openVal 0 v₁ (substEnv γ body)
-      rw [Exp.substEnv_cons_openVar body γ v₁ w hwγ hγlc hwbody (TyDenote.closed htd₁)] at hbs₂
-      -- Recover TyDenote κ t ρ vr from TyDenote κ t (extendBy s ρ w v₁) vr
-      have htd_vr_ρ : TyDenote κ t ρ vr :=
-        TyDenote.of_extendBy_fresh s w v₁ hwt hwtn hwν htd_vr
-      -- BigStep for letin
+      -- x is the constructor's witness; extract freshness from h₁
+      simp [List.mem_append, not_or] at xf
+      obtain ⟨hxΓ, hxΓfv, hxΓnamed, hxbody, hxs, hxt, hxsn, hxtn, hxν⟩ := xf
+      have hxγ : x ∉ Subst.dom γ := by grind [EnvAgrees.dom_eq]--(EnvAgrees.dom_eq hE) ▸ hxΓ
+      -- TyDenote for v₁ under extended ρ at x
+      have htd₁_x : TyDenote κ s' (REnv.extendBy s' ρ x v₁) v₁ :=
+        TyDenote.extendBy_fresh s' x v₁ hxs hxsn hxν htd₁
+      -- Extended EnvAgrees at x
+      have hEx : EnvAgrees κ ((x, s') :: Γ') ((x, v₁) :: γ) (REnv.extendBy s' ρ x v₁) :=
+        EnvAgrees.extend hE x s' v₁ hxΓ hxγ hxΓfv hxΓnamed hxν htd₁_x
+      -- Apply IH₂ directly (no fresh pick needed)
+      obtain ⟨vr, hbs₂, htd_vr⟩ := ih₂ hEx
+      -- Rewrite BigStep: substEnv ((x,v₁)::γ) (body.openVar 0 x) = openVal 0 v₁ (substEnv γ body)
+      rw [Exp.substEnv_cons_openVar _ γ v₁ x hxγ hγlc hxbody (TyDenote.closed htd₁)] at hbs₂
+      -- Recover TyDenote κ t ρ vr from TyDenote κ t (extendBy s ρ x v₁) vr
+      have htd_vr_ρ : TyDenote κ t' ρ vr :=
+        TyDenote.of_extendBy_fresh s' x v₁ hxt hxtn hxν htd_vr
       rw [Exp.substEnv_letin]
       exact ⟨vr, BigStep.letin hbs₁ hbs₂, htd_vr_ρ⟩
   | ite hlk hxν _ h₁ h₂ ih_e₁ ih_e₂ =>
