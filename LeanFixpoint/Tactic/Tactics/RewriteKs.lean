@@ -1,5 +1,7 @@
 import Lean
-import LeanFixpoint.Core.Fusion
+
+import LeanFixpoint.Core
+import LeanFixpoint.Fusion
 
 open Lean Meta Elab Tactic
 
@@ -86,7 +88,7 @@ elab "perm_exists" : tactic => withMainContext do
 
 /-- Peel ∃-binders, opening each with a fresh fvar. CPS so fvars stay
     in scope while `k` runs. Returns `(name, type, fvar)` per binder. -/
-private partial def withPeeledExists (e : Expr)
+partial def withPeeledExists (e : Expr)
     (acc : Array (Name × Expr × Expr))
     (k : Array (Name × Expr × Expr) → Expr → TacticM Unit) :
     TacticM Unit := do
@@ -103,7 +105,7 @@ private partial def withPeeledExists (e : Expr)
 
 /-- Build `∃ x₀ : T₀, ∃ x₁ : T₁, …, body` by abstracting `fvar` out of
     `body` for each binder, innermost first. -/
-private def mkExistsChain (binders : Array (Name × Expr × Expr))
+def mkExistsChain (binders : Array (Name × Expr × Expr))
     (body : Expr) : MetaM Expr := do
   let mut result := body
   for i in (List.range binders.size).reverse do
@@ -114,7 +116,7 @@ private def mkExistsChain (binders : Array (Name × Expr × Expr))
 
 /-- Walk a curried function type `T₁ → T₂ → … → Tₙ → Sort` and return
     the parameter types `[T₁, …, Tₙ]`. -/
-private partial def collectArrowTypes (ty : Expr) : MetaM (List Expr) := do
+partial def collectArrowTypes (ty : Expr) : MetaM (List Expr) := do
   let ty ← whnf ty
   if ty.isForall then
     let dom := ty.bindingDomain!

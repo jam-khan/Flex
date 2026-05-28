@@ -1,6 +1,6 @@
 import Lean
 import Std
-import LeanFixpoint.Core.Types
+import LeanFixpoint.Core.KVar
 
 open Lean List Meta
 

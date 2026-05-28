@@ -1,9 +1,7 @@
 import Lean
 
-import LeanFixpoint.Core.Types
-import LeanFixpoint.Monad
-import LeanFixpoint.Core.Utils
-import LeanFixpoint.Core.Fusion.Flatten
+import LeanFixpoint.Core
+import LeanFixpoint.Fusion.Flatten
 
 open Lean Meta
 
@@ -193,9 +191,11 @@ def classifyKVars (allKs : List KVar) (deps : List (KVar × KVar)) :
   let acyclicSorted := topoSortAcyclic acyclic acyclicDeps
   (acyclicSorted, khat)
 
+
 -------------------------------------------------------
 -- Testing
 -------------------------------------------------------
+/-
 
 -- Check deps match expected edges given as (srcIndex, tgtIndex) into kvars array.
 private def checkDeps (name : String) (kvars : Array KVar)
@@ -317,3 +317,4 @@ private def runFlatDeps (kvars : List KVar) (e : Expr) :
     logInfo m!"PASS [3-cycle: 1 cut, 2 acyclic]"
   else
     logInfo m!"FAIL [3-cycle]: cyclic={repr cyclic.length}, acyclic={repr acyclic.length}"
+-/

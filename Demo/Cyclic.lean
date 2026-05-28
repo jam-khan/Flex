@@ -7,12 +7,6 @@ import LeanFixpoint
   `solve_fusion`, which after Step 6 wiring will automatically run fusion
   for acyclic κ's and predicate-abstraction for cyclic κ's, drawing
   qualifiers from any in-scope `@[qualif]` declaration.
-
-  NOTE: Until Step 6 is merged, `solve_fusion` only handles acyclic κ's.
-  Every test below has at least one cyclic κ, so they currently fail.
-  They are written in their final form so a single edit to `SolveFusion.lean`
-  makes them all attempt a proof; the qualifier set is believed to be
-  sufficient but awaits end-to-end verification.
 -/
 
 @[qualif] def q_gez  (v : Int)   : Prop := 0 ≤ v
@@ -168,3 +162,20 @@ def pa7 : Prop :=
 
 theorem pa7_proof : pa7 := by
   solve_fixpoint
+
+/-
+  fusion
+  - reorder: cyclic first, then topo sort acyclic
+  - eliminates acylic kvars
+  - leaving cyclic as meta-vars to provide
+  - prop intact, not flattened, head κ gone
+
+  flatten
+  - if any existential, leaves as meta-vars
+  - flattens a prop
+
+  fixpoint
+  - predicate abstraction
+  - assumes kappa as meta-vars
+  - existentials handle too
+-/

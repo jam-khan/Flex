@@ -1,62 +1,27 @@
-/-
-  Core implementation, includes fusion algorithm
-  and types for κ-variables, along with pretty printing.
--/
-import LeanFixpoint.Core.Types
-import LeanFixpoint.Core.Pretty
-import LeanFixpoint.Core.Fusion
-import LeanFixpoint.Core.Utils
-import LeanFixpoint.Core.Fusion.Flatten
-import LeanFixpoint.Core.Fusion.Graph
 
-/-
-  Elaboration helpers for peeling existentials
-  and building witness expressions.
--/
-import LeanFixpoint.Elab.ToExpr
-import LeanFixpoint.Elab.FromExpr
+-- Core utils, monads and infra
+import LeanFixpoint.Core
 
-/-
-  Meta-programming related code, including
-  tactics, commands, and monadic code written
-  in MetaM. `SolveFusion` is the main tactic to discharge
-  verification conditions.
--/
-import LeanFixpoint.Tactic.SolveFixpoint
-import LeanFixpoint.Tactic.Hoist
-import LeanFixpoint.Tactic.Zap
-import LeanFixpoint.Tactic.Internal.Utils
-import LeanFixpoint.Tactic.SolveFusion
-import LeanFixpoint.Tactic.Closers
-import LeanFixpoint.Tactic.SplitHyps
-import LeanFixpoint.Tactic.RewriteKs
-import LeanFixpoint.Tactic.ZapK.Step
-import LeanFixpoint.Tactic.ZapK.SolveHead
+-- Fusion algorithm
+import LeanFixpoint.Fusion
 
-/-
-  Predicate Abstraction related code,
-  includes the Qualifier AST and the
-  Solve method.
--/
-import LeanFixpoint.Solve.Qualifier
-import LeanFixpoint.Solve.Instantiation
-import LeanFixpoint.Solve.Weaken
-import LeanFixpoint.Solve.Fixpoint
+--  Elaboration helpers for peeling existentials and building witness expressions.
+import LeanFixpoint.Elab
 
-/-
-  Sound Verification Condition Generation
--/
+-- Proof producing local refinement type inference
+import LeanFixpoint.Zap
+
+-- Tactic related code
+import LeanFixpoint.Tactic
+
+-- Predicate Abstraction
+import LeanFixpoint.PA
+
+-- Sound Verification Condition Generation for Imp
 import LeanFixpoint.VCG.While.Types
 import LeanFixpoint.VCG.While.Semantics
 
-/-
-  Utils
--/
-import LeanFixpoint.Monad
-
-/-
-  Sound verified gen for λᵣ
--/
+--  Sound verified gen for λᵣ
 import LeanFixpoint.VCG.STLC.Syntax
 import LeanFixpoint.VCG.STLC.Substitution
 import LeanFixpoint.VCG.STLC.Entailment

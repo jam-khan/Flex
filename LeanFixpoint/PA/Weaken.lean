@@ -1,9 +1,8 @@
 import Lean
 
-import LeanFixpoint.Monad
-import LeanFixpoint.Core.Fusion
-import LeanFixpoint.Solve.Qualifier
-import LeanFixpoint.Solve.Check
+import LeanFixpoint.Core
+import LeanFixpoint.PA.Qualifier
+import LeanFixpoint.PA.Check
 
 open Lean Meta Elab Term Tactic
 

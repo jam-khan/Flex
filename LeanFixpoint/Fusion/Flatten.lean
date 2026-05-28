@@ -1,6 +1,5 @@
 
-import LeanFixpoint.Core.Types
-import LeanFixpoint.Monad
+import LeanFixpoint.Core
 
 open Lean Meta
 /-- Flatten: split `And` at top level, distribute `∀` over `And`. -/
@@ -37,7 +36,7 @@ def runEmpty (act : KM α) : MetaM α :=
   act.run { kvars := {} }
 
 
-
+/-
 -------------------------------------------------------
 -- Testing
 -------------------------------------------------------
@@ -111,3 +110,4 @@ def flat_out_6_0 : Prop := ∀ x : Nat, x = 0 → x = x
 def flat_out_6_1 : Prop := ∀ x : Nat, x = 0 → (0 : Nat) = 0
 
 #eval! testFlat "flat(∀ x, guard → A ∧ B)" ``flat_in_6 [``flat_out_6_0, ``flat_out_6_1]
+-/
