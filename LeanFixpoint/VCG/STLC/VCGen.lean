@@ -4,200 +4,165 @@ import LeanFixpoint.VCG.STLC.Typing
 
 open STLC
 
--- VC Generation for STLC
+/-! # VC Generation for STLC (LN + deep Formula + κ)
+
+  Algorithmic bidirectional refinement type-checker that produces a
+  `Constraint : KEnv → REnv → Prop`. The user existentially quantifies the
+  `KEnv` parameter to invoke the solver (`solve_fixpoint`).
+
+-/
 
 @[simp]
-abbrev Constraint := REnv → Prop
+abbrev Constraint := KEnv → REnv → Prop
 
--- Implication-constraint helper from page 17 of the refinement-types tutorial.
+/-- Implication-constraint helper: bind `x` to a value satisfying refinement
+    `r` (under `κ`), then assert `c` holds. For function-typed bindings, no
+    quantification. -/
 @[simp, reducible]
 def implyBind (x : EVar) (t : Ty) (c : Constraint) : Constraint :=
-  match t with
-  | .refine b r => fun ρ => ∀ v : b.interp, r.pred ρ v → c (REnv.update b ρ x v)
-  | .arrow ..   => c
+  fun κ ρ =>
+    match t with
+    | .refine b r => ∀ v : b.interp,
+                       Refinement.interp κ r ρ v → c κ (REnv.update b ρ x v)
+    | .arrow _ _  => c κ ρ
 
--- Algorithmic subtyping. Returns `none` on shape mismatch.
-def sub (x : Ty) (y : Ty) : Option Constraint :=
-  match x, y with
-    | .refine .int r₁, .refine .int r₂ =>
-        some (fun ρ => ∀ v : Int, r₁.pred ρ v → r₂.pred ρ v)
-    | .refine .bool r₁, .refine .bool r₂ =>
-        some (fun ρ => ∀ v : Bool, r₁.pred ρ v → r₂.pred ρ v)
-    | .arrow x₁ s₁ t₁, .arrow x₂ s₂ t₂ =>
-        if x₁ == x₂ then
-          match sub s₂ s₁, sub t₁ t₂ with
-          | some c₁, some c₂ =>
-              some (fun ρ => c₁ ρ ∧ implyBind x₁ s₂ c₂ ρ)
-          | _, _ => none
-        else none
-    | _, _ => none
-termination_by sizeOf x + sizeOf y
-decreasing_by all_goals simp_wf; omega
-
--- One-step unfolding equations (no recursion in RHS) — used in soundness proofs.
-@[simp]
-theorem sub_refine_int_refine_int_eq (r₁ r₂ : Refinement .int) :
-    sub (.refine .int r₁) (.refine .int r₂) =
-      some (fun ρ => ∀ v : Int, r₁.pred ρ v → r₂.pred ρ v) := by
-  unfold sub; rfl
-
-@[simp]
-theorem sub_refine_bool_refine_bool_eq (r₁ r₂ : Refinement .bool) :
-    sub (.refine .bool r₁) (.refine .bool r₂) =
-      some (fun ρ => ∀ v : Bool, r₁.pred ρ v → r₂.pred ρ v) := by
-  unfold sub; rfl
-
-@[simp]
-theorem sub_refine_arrow_eq (b : Base) (r : Refinement b)
-    (x : EVar) (s t : Ty) :
-    sub (.refine b r) (.arrow x s t) = none := by
-  unfold sub; cases b <;> rfl
-
-@[simp]
-theorem sub_arrow_refine_eq (x : EVar) (s t : Ty)
-    (b : Base) (r : Refinement b) :
-    sub (.arrow x s t) (.refine b r) = none := by
-  unfold sub; rfl
+/-- Algorithmic subtyping. Returns `none` on shape mismatch. Termination
+    by `Ty.skel` (preserved under `openVar`). Takes `Γ` so the fresh name
+    for the arrow case is picked away from the context domain. -/
+def sub (Γ : TEnv) : Ty → Ty → Option Constraint
+  | .refine .int  r₁, .refine .int  r₂ =>
+      some (fun κ ρ => ∀ v : Int,
+              Refinement.interp κ r₁ ρ v → Refinement.interp κ r₂ ρ v)
+  | .refine .bool r₁, .refine .bool r₂ =>
+      some (fun κ ρ => ∀ v : Bool,
+              Refinement.interp κ r₁ ρ v → Refinement.interp κ r₂ ρ v)
+  | .arrow s₁ t₁, .arrow s₂ t₂ =>
+      let x := EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
+                            ++ s₁.fv ++ s₂.fv ++ t₁.fv ++ t₂.fv
+                            ++ Ty.named s₁ ++ Ty.named s₂
+                            ++ Ty.named t₁ ++ Ty.named t₂ ++ [nuName])
+      match sub Γ s₂ s₁, sub ((x, s₂) :: Γ) (t₁.openVar 0 x) (t₂.openVar 0 x) with
+      | some c₁, some c₂ =>
+          some (fun κ ρ => c₁ κ ρ ∧ implyBind x s₂ c₂ κ ρ)
+      | _, _ => none
+  | _, _ => none
+termination_by s t => s.skel + t.skel
+decreasing_by all_goals
+  first
+    | (simp_wf; simp only [Ty.skel, Ty.skel_openVar]; omega)
+    | (simp only [Ty.skel, Ty.skel_openVar]; omega)
+    | omega
 
 mutual
   def synth (Γ : TEnv) : Exp → Option (Constraint × Ty)
-    | .var x    => Γ.lookup x |>.map (fun t => ((fun _ => True), self x t))
-    | .iconst n => some ((fun _ => True), prim n)
-    | .bconst b => some ((fun _ => True), primBool b)
+    | .fvar x    => Γ.lookup x |>.map (fun t => ((fun _ _ => True), self x t))
+    | .iconst n  => some ((fun _ _ => True), prim n)
+    | .bconst b  => some ((fun _ _ => True), primBool b)
     | .ann e t =>
         match check Γ e t with
         | some c => some (c, t)
         | none   => none
-    | .app e₁ (.var y) =>
+    | .app e₁ (.fvar y) =>
         match synth Γ e₁ with
-        | some (c, .arrow x s t) =>
-            match check Γ (.var y) s with
-            | some c' => some ((fun ρ => c ρ ∧ c' ρ), t.rename x y)
-            | none    => none
+        | some (c, .arrow s t) =>
+            -- Hygiene: `y` must not capture into `t` when we open `t.openVar 0 y`.
+            if y ∈ t.fv ∨ y ∈ Ty.named t ∨ y = nuName then none
+            else
+              match check Γ (.fvar y) s with
+              | some c' => some ((fun κ ρ => c κ ρ ∧ c' κ ρ), t.openVar 0 y)
+              | none    => none
         | _ => none
-    | .leq (.var x) (.var y) =>
+    | .leq (.fvar x) (.fvar y) =>
         match Γ.lookup x, Γ.lookup y with
         | some (.refine .int _), some (.refine .int _) =>
-            some ((fun _ => True),
-              .refine .bool ⟨fun ρ v => v = decide (ρ.ints x ≤ ρ.ints y)⟩)
+            some ((fun _ _ => True),
+              .refine .bool ⟨.and
+                (.imp (.eqB (.fvar .bool nuName) (.const .bool true))
+                      (.leqI (.fvar .int x) (.fvar .int y)))
+                (.imp (.leqI (.fvar .int x) (.fvar .int y))
+                      (.eqB (.fvar .bool nuName) (.const .bool true)))⟩)
         | _, _ => none
-    | .add (.var x) (.var y) =>
+    | .add (.fvar x) (.fvar y) =>
         match Γ.lookup x, Γ.lookup y with
         | some (.refine .int _), some (.refine .int _) =>
-            some ((fun _ => True),
-              .refine .int ⟨fun ρ v => v = ρ.ints x + ρ.ints y⟩)
+            some ((fun _ _ => True),
+              .refine .int ⟨.eqI (.fvar .int nuName)
+                                 (.add (.fvar .int x) (.fvar .int y))⟩)
         | _, _ => none
-    | .not e =>
-        match synth Γ e with
-        | some (c, .refine .bool r) =>
-            some (c, .refine .bool ⟨fun ρ v => ∃ b, r.pred ρ b ∧ v = !b⟩)
+    | .not (.fvar x) =>
+        match Γ.lookup x with
+        | some (.refine .bool _) =>
+            some ((fun _ _ => True),
+              .refine .bool ⟨.eqB (.fvar .bool nuName) (.not (.fvar .bool x))⟩)
         | _ => none
-    | .and e₁ e₂ =>
-        match synth Γ e₁ with
-        | some (c₁, .refine .bool r₁) =>
-            match synth Γ e₂ with
-            | some (c₂, .refine .bool r₂) =>
-                some (fun ρ => c₁ ρ ∧ c₂ ρ,
-                      .refine .bool
-                        ⟨fun ρ v =>
-                          ∃ b₁ b₂, r₁.pred ρ b₁ ∧ r₂.pred ρ b₂ ∧ v = (b₁ && b₂)⟩)
-            | _ => none
-        | _ => none
+    | .and (.fvar x) (.fvar y) =>
+        match Γ.lookup x, Γ.lookup y with
+        | some (.refine .bool _), some (.refine .bool _) =>
+            some ((fun _ _ => True),
+              .refine .bool ⟨.eqB (.fvar .bool nuName) (.and (.fvar .bool x) (.fvar .bool y))⟩)
+        | _, _ => none
     | _ => none
-  termination_by e => 2 * sizeOf e
+  termination_by e => 2 * e.skel
+  decreasing_by all_goals
+    (first | (simp only [Exp.skel]; omega) | omega)
 
 
   def check (Γ : TEnv) : Exp → Ty → Option Constraint
-    | .lam x e, .arrow x' s t =>
-        -- Same-binder convention: alpha-renaming is the user's responsibility.
-        -- Also reject shadowing: the binder must be fresh in Γ.
-        if x == x' then
-          match Γ.lookup x with
-          | none =>
-              match check ((x, s) :: Γ) e t with
-              | some c => some (implyBind x s c)
-              | none   => none
-          | some _ => none
-        else none
-    | .letin x e₁ e₂, t =>
-        match Γ.lookup x with
-        | none =>
-            match synth Γ e₁ with
-            | some (c₁, s) =>
-                match check ((x, s) :: Γ) e₂ t with
-                | some c₂ => some (fun ρ => c₁ ρ ∧ implyBind x s c₂ ρ)
-                | none    => none
-            | none => none
-        | some _ => none
+    | .lam e, .arrow s₁ s₂ =>
+        let x := EVar.fresh (TEnv.dom Γ ++ e.fv ++ s₁.fv ++ s₂.fv
+                              ++ Ty.named s₁ ++ Ty.named s₂
+                              ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ ++ [nuName])
+        match check ((x, s₁) :: Γ) (e.openVar 0 x) (s₂.openVar 0 x) with
+        | some c => some (implyBind x s₁ c)
+        | none   => none
+    | .letin e₁ e₂, t =>
+        match synth Γ e₁ with
+        | some (c₁, s) =>
+            let x := EVar.fresh (TEnv.dom Γ ++ e₂.fv ++ s.fv ++ t.fv
+                                  ++ Ty.named s ++ Ty.named t
+                                  ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ ++ [nuName])
+            match check ((x, s) :: Γ) (e₂.openVar 0 x) t with
+            | some c₂ => some (fun κ ρ => c₁ κ ρ ∧ implyBind x s c₂ κ ρ)
+            | none    => none
+        | none => none
     | .ite e₀ e₁ e₂, t =>
         match e₀ with
-        | .var x =>
-            match Γ.lookup x with
-            | some (.refine .bool r) =>
-                match check ((x, .refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = true⟩) :: Γ) e₁ t,
-                      check ((x, .refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = false⟩) :: Γ) e₂ t with
-                | some c₁, some c₂ =>
-                    some (fun ρ =>
-                      implyBind x (.refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = true⟩)  c₁ ρ ∧
-                      implyBind x (.refine .bool ⟨fun ρ v => r.pred ρ v ∧ v = false⟩) c₂ ρ)
-                | _, _ => none
-            | _ => none
+        | .fvar x =>
+            -- Hygiene: `x` must not clash with the ν-reserved name.
+            if x = nuName then none
+            else
+              match Γ.lookup x with
+              | some (.refine .bool r) =>
+                  let r_true  : Ty := .refine .bool ⟨.and r.fmla
+                    (.eqB (.fvar .bool nuName) (.const .bool true))⟩
+                  let r_false : Ty := .refine .bool ⟨.and r.fmla
+                    (.eqB (.fvar .bool nuName) (.const .bool false))⟩
+                  match check ((x, r_true) :: Γ) e₁ t,
+                        check ((x, r_false) :: Γ) e₂ t with
+                  | some c₁, some c₂ =>
+                      some (fun κ ρ =>
+                        implyBind x r_true  c₁ κ ρ ∧
+                        implyBind x r_false c₂ κ ρ)
+                  | _, _ => none
+              | _ => none
         | _ => none
     | e, t =>
         -- Catch-all (Chk-Syn): synthesize, then subtype.
         match synth Γ e with
         | some (c, s) =>
-            match sub s t with
-            | some c' => some (fun ρ => c ρ ∧ c' ρ)
+            match sub Γ s t with
+            | some c' => some (fun κ ρ => c κ ρ ∧ c' κ ρ)
             | none    => none
         | none => none
-  termination_by e _ => 2 * sizeOf e + 1
+  termination_by e _ => 2 * e.skel + 1
+  decreasing_by all_goals
+    (first | (simp only [Exp.skel, Exp.skel_openVar]; omega) | omega)
 end
 
--- One-step unfolding equations for synth cases — used in examples and soundness proofs.
--- `add_var` and `leq_var` are now conditional on operand lookups producing
--- int-refined types, so they take the lookup hypotheses explicitly.
-theorem synth_add_var_eq (Γ : TEnv) (x y : EVar) {r₁ r₂ : Refinement .int}
-    (hx : Γ.lookup x = some (.refine .int r₁))
-    (hy : Γ.lookup y = some (.refine .int r₂)) :
-    synth Γ (.add (.var x) (.var y)) =
-      some ((fun _ => True), .refine .int ⟨fun ρ v => v = ρ.ints x + ρ.ints y⟩) := by
-  simp [synth, hx, hy]
-
-theorem synth_leq_var_eq (Γ : TEnv) (x y : EVar) {r₁ r₂ : Refinement .int}
-    (hx : Γ.lookup x = some (.refine .int r₁))
-    (hy : Γ.lookup y = some (.refine .int r₂)) :
-    synth Γ (.leq (.var x) (.var y)) =
-      some ((fun _ => True), .refine .bool ⟨fun ρ v => v = decide (ρ.ints x ≤ ρ.ints y)⟩) := by
-  simp [synth, hx, hy]
-
+/-- Top-level: produce a closed Lean `Prop` (parameterized by a κ-assignment)
+    to hand to `solve_fixpoint`. The user writes `∃ κ, topVC κ [] e t`. -/
 @[simp]
-theorem synth_not_eq (Γ : TEnv) (e : Exp) :
-    synth Γ (.not e) =
-      match synth Γ e with
-      | some (c, .refine .bool r) =>
-          some (c, .refine .bool ⟨fun ρ v => ∃ b, r.pred ρ b ∧ v = !b⟩)
-      | _ => none := by
-  simp [synth]
-
-@[simp]
-theorem synth_and_eq (Γ : TEnv) (e₁ e₂ : Exp) :
-    synth Γ (.and e₁ e₂) =
-      match synth Γ e₁ with
-      | some (c₁, .refine .bool r₁) =>
-          match synth Γ e₂ with
-          | some (c₂, .refine .bool r₂) =>
-              some (fun ρ => c₁ ρ ∧ c₂ ρ,
-                    .refine .bool
-                      ⟨fun ρ v =>
-                        ∃ b₁ b₂, r₁.pred ρ b₁ ∧ r₂.pred ρ b₂ ∧ v = (b₁ && b₂)⟩)
-          | _ => none
-      | _ => none := by
-  simp [synth]
-
--- Top-level: produce a closed Lean `Prop` to hand to `solve_fixpoint`.
-@[simp]
-def topVC (Γ : TEnv) (e : Exp) (t : Ty) : Prop :=
+def topVC (κ : KEnv) (Γ : TEnv) (e : Exp) (t : Ty) : Prop :=
   match check Γ e t with
-  | some c => ∀ ρ : REnv, c ρ
+  | some c => ∀ ρ : REnv, c κ ρ
   | none   => False

@@ -2,29 +2,30 @@ import LeanFixpoint.VCG.STLC.Substitution
 
 open STLC
 
-/-! # Big-Step Operational Semantics for STLC
+/-! # Big-Step Operational Semantics for STLC (locally nameless)
 
-  Substitution-based call-by-value big-step semantics. `Val` and `Exp.subst`
-  live in [Substitution.lean]; this file only contributes the inductive
-  evaluation relation and its determinism.
+  Call-by-value big-step semantics over locally-nameless terms. Closures carry
+  a single body (`Val.clos body`) with `BVar 0` for the parameter; application
+  and `letin` plug arguments in via `Exp.openVal 0`. `Val` and its operations
+  live in [Substitution.lean].
 -/
 
 namespace STLC
 
-/-- Big-step evaluation `e ⇓ v` (call-by-value, substitution-based). -/
+/-- Big-step evaluation `e ⇓ v` (call-by-value, LN-substitution-based). -/
 inductive BigStep : Exp → Val → Prop
   | iconst {n}   : BigStep (.iconst n) (.iconst n)
   | bconst {b}   : BigStep (.bconst b) (.bconst b)
-  | lam   {x e}  : BigStep (.lam x e)  (.clos x e)
+  | lam   {body} : BigStep (.lam body)  (.clos body)
   | ann   {e t v} : BigStep e v → BigStep (.ann e t) v
-  | letin {x e₁ e₂ v₁ v₂} :
+  | letin {e₁ e₂ v₁ v₂} :
       BigStep e₁ v₁ →
-      BigStep (e₂.subst x v₁) v₂ →
-      BigStep (.letin x e₁ e₂) v₂
-  | app   {e₁ e₂ x body va v} :
-      BigStep e₁ (.clos x body) →
+      BigStep (e₂.openVal 0 v₁) v₂ →
+      BigStep (.letin e₁ e₂) v₂
+  | app   {e₁ e₂ body va v} :
+      BigStep e₁ (.clos body) →
       BigStep e₂ va →
-      BigStep (body.subst x va) v →
+      BigStep (body.openVal 0 va) v →
       BigStep (.app e₁ e₂) v
   | add   {e₁ e₂ n₁ n₂} :
       BigStep e₁ (.iconst n₁) → BigStep e₂ (.iconst n₂) →
@@ -45,7 +46,7 @@ inductive BigStep : Exp → Val → Prop
       BigStep e₀ (.bconst false) → BigStep e₂ v →
       BigStep (.ite e₀ e₁ e₂) v
 
-/-- Big-step is deterministic. Useful downstream; not strictly required for safety. -/
+/-- Big-step is deterministic. -/
 theorem BigStep.det {e : Exp} {v₁ v₂ : Val}
     (h₁ : BigStep e v₁) (h₂ : BigStep e v₂) : v₁ = v₂ := by
   induction h₁ generalizing v₂ with
