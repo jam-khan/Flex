@@ -35,8 +35,13 @@ def checkExprVC (prop : Expr) : TermElabM Bool := withSilencedMessages do
          first
            | omega
            | grind
-           | (constructor <;> grind)
-           | aesop)))
+           -- `aesop` drives `simp` normalization that unfolds recursive
+           -- `@[grind]` defs (e.g. `fib_spec_fib`) without bound; the
+           -- resulting `maxRecDepth` is logged as a diagnostic rather than
+           -- thrown, so `withSilencedMessages`/`try` can't swallow it and it
+           -- fails the whole build. It also over-weakens PA solutions on
+           -- several benchmarks (12 regressions when enabled). Keep dropped.
+           | (constructor <;> grind))))
     if !goals.isEmpty then return false
     let proof ← instantiateMVars mvar
     return !proof.hasSorry

@@ -75,14 +75,22 @@ def findOuterBinderToParam (κ : KVar) (binderFvar : FVarId) (body : Expr) : Opt
     sorted so dependency sinks (no κ-deps) appear first — required so each
     κ's sol is built only after its dependencies have been eliminated.
 
-    Uses `classifyKVars` (C-J §5.5 cut-set approach): compute SCCs, designate
-    a minimal cut set as cyclic, and treat *the rest as acyclic in the reduced
-    graph*. Per-κ `exprIsCyclic` would wrongly flag every member of a
-    cycle's transitive closure as cyclic. -/
+    A κ is cyclic iff it lies on any cycle (`exprIsCyclic`); everything else
+    is acyclic and eliminated by fusion. We deliberately do NOT use a minimal
+    feedback-vertex cut set (C-J §5.5): cutting only one κ per SCC and fusing
+    the *rest* of the SCC inlines the cut κ's mvar into those fused solutions,
+    and the resulting constraints handed to PA are too weak to recover the
+    invariant (see `comment.lean`, where cutting only `k4` and fusing its
+    co-cyclic `k0`/`k5` drops the needed `z1 ≤ z0` on `k4`). Sending every
+    SCC member through PA is safe and complete — PA solves the extra κs — so
+    over-approximating the cyclic set is the robust choice here. -/
 def exprPartitionKVars (e : Expr) : KM (List KVar × List KVar) := do
   let allKs := (← exprKVarsOrdered e).eraseDups
   let deps ← exprDeps e
-  return classifyKVars allKs deps
+  let cyclic    ← allKs.filterM (fun κ => exprIsCyclic κ e)
+  let acyclicRaw ← allKs.filterM (fun κ => return !(← exprIsCyclic κ e))
+  let acyclic := topoSortAcyclic acyclicRaw deps
+  return (acyclic, cyclic)
 
 
 /-- `exprSolScoped κ e` — strip the κ-free outer ∀-prefix and compute sol1
