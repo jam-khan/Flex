@@ -7,8 +7,32 @@ import LeanFixpoint.Zap
 
 open Lean Meta Elab Tactic
 
+/-! ## `fusion` tactic
+
+  Cosman–Jhala fusion for the *acyclic* κ's of a refinement constraint — the
+  first half of the solver, complementing `fixpoint` (predicate abstraction for
+  the cyclic κ's).
+
+  On a goal `∃ κ₁ … κₙ, P`, `fusion`:
+
+  1. peels the ∃-chain into fresh κ-mvars and classifies them into acyclic /
+     cyclic (`exprPartitionKVars`);
+  2. for each acyclic κ in topological order, computes its strongest solution
+     `σ̂` (`sol`) and eliminates it (`elim*`): head-position κ-apps collapse to
+     `True`, hypothesis-position κ-apps are replaced by `σ̂`;
+  3. rebuilds the proof (the `destructAndBuild`/`walkPhase5` bridge) and leaves
+     the residual `∃ κ_cyclic, P'` — body with every acyclic κ gone, cyclic κ's
+     still bound — plus any leaf obligations fusion could not discharge.
+
+  Hand the residual to `fixpoint`, or use `solve_fixpoint` (= `fusion` then
+  `fixpoint`). -/
 syntax "fusion" : tactic
 
+/-- Build the bridge proof `(∃ κ_cyclic, P') → (∃ κ₁ … κₙ, P)`: ∃-eliminate the
+    cyclic-κ witnesses out of the supplied proof (recursing over `cycRem`), then
+    re-introduce all κ's over the original ∃-chain — acyclic κ's via their
+    solutions `kLams`, cyclic κ's via the eliminated fvars — with `walkPhase5`
+    supplying the body proof. -/
 partial def destructAndBuild
     (kvars : Array KVar)
     (kLams : List (KVar × Expr))
@@ -44,7 +68,7 @@ partial def destructAndBuild
           | none =>
             match cycFvMap.get? κmvar with
             | some fv => pure fv
-            | none => throwError "zapAcyclic: no witness for κ idx={idx}"
+            | none => throwError "fusion: no witness for κ idx={idx}"
         let restType := pred.beta #[witness]
         let restProof ← buildIntros restType (idx + 1)
         mkAppOptM ``Exists.intro
@@ -83,7 +107,7 @@ elab_rules : tactic
 
       withPeeledExists originalType #[] fun binders body => do
         if binders.size == 0 then
-          throwError "zapAcyclic: goal has no ∃-binders"
+          throwError "fusion: goal has no ∃-binders"
 
         -- Build fresh κ-mvars + substitute fvar → mvar in body for KM classification.
         let mut kvars : Array KVar := #[]
@@ -142,7 +166,7 @@ elab_rules : tactic
       let some (newGoalType, kLams, acyclic, cyclic, kvars, bodyWithMvars)
         ← dataRef.get
         | do
-            logInfo m!"zapAcyclic: no acyclic κs to eliminate"
+            logInfo m!"fusion: no acyclic κs to eliminate"
             return
 
       -- Create bridge and new-goal mvars in original lctx.
@@ -163,17 +187,17 @@ elab_rules : tactic
       bridgeMvar.mvarId!.assign bridge
 
       let residuals := (← residualOut.get).toList
-      logInfo m!"zapAcyclic: eliminated {acyclic.length} acyclic κ \
+      logInfo m!"fusion: eliminated {acyclic.length} acyclic κ \
                 {acyclic.map (·.name)}; new goal is ∃ \
                 {cyclic.length} cyclic κ + body; \
                 {residuals.length} residual obligation(s)"
       replaceMainGoal (newGoalM.mvarId! :: residuals)
 
 -- ───────────────────────────────────────────────────────────────────────
--- Tests for zapAcyclic
+-- Tests for fusion
 -- ───────────────────────────────────────────────────────────────────────
 
-/-- A-test: one acyclic κ. zapAcyclic should leave only the non-κ leaf. -/
+/-- A-test: one acyclic κ. fusion should leave only the non-κ leaf. -/
 example : ∃ κ : Int → Int → Prop,
     ∀ x : Int, 0 ≤ x →
       (∀ ν : Int, ν = x - 1 → κ ν x)
@@ -182,7 +206,7 @@ example : ∃ κ : Int → Int → Prop,
   fusion
   all_goals first | rfl | grind
 
-/-- B-test: two independent acyclic κs.  zapAcyclic should leave two
+/-- B-test: two independent acyclic κs.  fusion should leave two
     non-κ leaves. -/
 example :
   ∃ κ1 : Int → Int → Prop, ∃ κ2 : Int → Int → Prop,
@@ -196,7 +220,7 @@ example :
   all_goals first | rfl | grind
 
 /-- D-test (Phase 5): mixed — κ1 cyclic (self-loop), κ2 acyclic.
-    zapAcyclic eliminates κ2 in-place; residual is the single ∃-form goal
+    fusion eliminates κ2 in-place; residual is the single ∃-form goal
     `∃ κ1, c′`. The cyclic-κ1 witness `λ y => 0 ≤ y` is supplied manually
     (grind cannot synthesize it). -/
 example : ∃ κ1 : Int → Prop, ∃ κ2 : Int → Prop,
