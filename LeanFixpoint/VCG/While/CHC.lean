@@ -1,5 +1,6 @@
 import LeanFixpoint.VCG.While.Hoare
 import LeanFixpoint.VCG.While.Tactics
+import LeanFixpoint.VCG.While.Notation
 import LeanFixpoint.Tactic
 
 /-! # Constrained Horn Clause Generation
@@ -24,7 +25,7 @@ import LeanFixpoint.Tactic
     - `.ite`: branches stay isolated (no escape of assigned variables)
     - `.cwhile`: loop body can assign locally; invariant stays at pre-loop scope -/
 @[simp]
-def whileCHC (readOnlyVars : List CVar) (inScope : List CVar)
+def whileCHC (inScope : List CVar)
     (pre : Assertion) (c : Cmd) (post : Assertion) : Prop :=
   match c with
   | .skip =>
@@ -36,26 +37,26 @@ def whileCHC (readOnlyVars : List CVar) (inScope : List CVar)
   | .seq c₁ c₂ =>
     let midScope := (inScope ++ c₁.assignedVars).eraseDups
     ∃ κ : NaryProp midScope.length,
-      whileCHC readOnlyVars inScope pre c₁ (applyNary midScope κ) ∧
-      whileCHC readOnlyVars midScope (applyNary midScope κ) c₂ post
+      whileCHC inScope pre c₁ (applyNary midScope κ) ∧
+      whileCHC midScope (applyNary midScope κ) c₂ post
 
   | .ite g c₁ c₂ =>
-    whileCHC readOnlyVars inScope (fun s => pre s ∧ g s = true) c₁ post
-    ∧ whileCHC readOnlyVars inScope (fun s => pre s ∧ g s = false) c₂ post
+    whileCHC inScope (fun s => pre s ∧ g s = true) c₁ post
+    ∧ whileCHC inScope (fun s => pre s ∧ g s = false) c₂ post
 
   | .cwhile g body =>
     let bodyScope := (inScope ++ body.assignedVars).eraseDups
     ∃ κ : NaryProp inScope.length,
       (∀ s, pre s → applyNary inScope κ s)                                                   -- init
-    ∧ whileCHC readOnlyVars bodyScope (fun s => applyNary inScope κ s ∧ g s = true) body (applyNary inScope κ)    -- preserve
+    ∧ whileCHC bodyScope (fun s => applyNary inScope κ s ∧ g s = true) body (applyNary inScope κ)    -- preserve
     ∧ (∀ s, applyNary inScope κ s ∧ g s = false → post s)                                    -- exit
 
 /-- Soundness: if the CHC system is satisfiable, the Hoare triple holds. -/
 @[simp]
-theorem whileCHC_sound (readOnlyVars : List CVar) (inScope : List CVar)
+theorem whileCHC_sound (inScope : List CVar)
     (pre : Assertion) (c : Cmd) (post : Assertion) :
-    whileCHC readOnlyVars inScope pre c post → ValidHoareTriple pre c post := by
-  induction c generalizing readOnlyVars inScope pre post with
+    whileCHC inScope pre c post → ValidHoareTriple pre c post := by
+  induction c generalizing inScope pre post with
   | skip =>
     intro h s₁ s₂ heval hpre
     cases heval; exact h _ hpre
@@ -65,29 +66,27 @@ theorem whileCHC_sound (readOnlyVars : List CVar) (inScope : List CVar)
   | seq c₁ c₂ ih₁ ih₂ =>
     intro ⟨κ, h₁, h₂⟩
     let midScope := (inScope ++ c₁.assignedVars).eraseDups
-    exact hoare_seq (ih₁ readOnlyVars inScope _ _ h₁) (ih₂ readOnlyVars midScope _ _ h₂)
+    exact hoare_seq (ih₁ inScope _ _ h₁) (ih₂ midScope _ _ h₂)
   | ite g c₁ c₂ ih₁ ih₂ =>
     intro ⟨h₁, h₂⟩
-    exact hoare_if (ih₁ readOnlyVars inScope _ _ h₁) (ih₂ readOnlyVars inScope _ _ h₂)
+    exact hoare_if (ih₁ inScope _ _ h₁) (ih₂ inScope _ _ h₂)
   | cwhile g body ih =>
     intro ⟨κ, hinit, hpres, hpost⟩
     let bodyScope := (inScope ++ body.assignedVars).eraseDups
-    exact hoare_while hinit (ih readOnlyVars bodyScope _ _ hpres) hpost
+    exact hoare_while hinit (ih bodyScope _ _ hpres) hpost
 
 /-! # Examples -/
 
 -- Program: x := 0; while x < n do x := x + 1 end
 -- Pre: 0 ≤ n, Post: x = n
 def countToN : Cmd :=
-  .seq (.assign "x" (fun _ => 0))
-       (.cwhile (fun s => decide (s "x" < s "n"))
-                (.assign "x" (fun s => s "x" + 1)))
+  <| x := 0 ; while x < n do x := x + 1 |>
 
 @[qualif] def Le (i1 i2 : Int) : Prop := i1 ≤ i2
 
 -- vars=["n","x"]: inScope expands from ["n"] to ["n","x"] after first assignment
 example : ValidHoareTriple (fun s => 0 ≤ s "n") countToN (fun s => s "x" = s "n") := by
-  apply whileCHC_sound ["n"] ["n"]
+  apply whileCHC_sound ["n"]
   dsimp [whileCHC, countToN, State.update, applyNary, Cmd.assignedVars]
   simp_scopes ; simp
   hoist_exists
@@ -97,14 +96,13 @@ example : ValidHoareTriple (fun s => 0 ≤ s "n") countToN (fun s => s "x" = s "
 -- Pre: True, Post: x = 0
 @[simp]
 def reduceToZero : Cmd :=
-  .cwhile (fun s => s "x" != 0)
-          (.assign "x" (fun s => s "x" - 1))
+  <| while x != 0 do x := x - 1 |>
 
 set_option maxHeartbeats 1600000 in
 -- x is pre-existing variable (in readOnlyVars); inScope stays ["x"]
 theorem reduceToZero_correct :
     ValidHoareTriple (fun _ => True) reduceToZero (fun s => s "x" = 0) := by
-  apply whileCHC_sound ["x"] ["x"]
+  apply whileCHC_sound ["x"]
   simp [whileCHC]
   solve_fixpoint
 
@@ -124,16 +122,12 @@ def Ge0 (i1 : Int) : Prop :=
 -- Pre: 0 ≤ n, Post: y = n
 -- vars=["n","x","y"]: every ∃ has type Int → Int → Int → Prop  (args: s "n", s "x", s "y")
 def slowAssign : Cmd :=
-  .seq (.assign "x" (fun s => s "n"))
-  (.seq (.assign "y" (fun _ => 0))
-  (.cwhile (fun s => s "x" != 0)
-    (.seq (.assign "x" (fun s => s "x" - 1))
-          (.assign "y" (fun s => s "y" + 1)))))
+  <| x := n ; y := 0 ; while x != 0 do (x := x - 1 ; y := y + 1) |>
 
 -- κ = fun nv xv yv => xv + yv = nv ∧ 0 ≤ xv
 theorem slowAssign_correct :
     ValidHoareTriple (fun s => 0 ≤ s "n") slowAssign (fun s => s "y" = s "n") := by
-  apply whileCHC_sound ["n"] ["n"]
+  apply whileCHC_sound ["n"]
   dsimp [whileCHC, slowAssign, State.update, applyNary, Cmd.assignedVars]
   simp_scopes ; simp
   hoist_exists
