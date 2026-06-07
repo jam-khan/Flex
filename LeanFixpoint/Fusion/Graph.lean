@@ -46,26 +46,6 @@ partial def exprKVarsOrdered (e : Expr) : KM (List KVar) := do
   else
     KM.exprKVars e
 
-/-- κ-vars reachable from `start` via 1+ dep edges.
-    `deps` convention: `(u, v) ∈ deps` ⟺ u in body, v in head ⟹ edge u → v. -/
-private partial def reachableFrom
-    (start : KVar) (deps : List (KVar × KVar)) : List KVar :=
-  let succs (k : KVar) : List KVar :=
-    deps.filterMap fun (u, v) => if u == k then some v else none
-  let rec dfs (visited : List KVar) (frontier : List KVar) : List KVar :=
-    match frontier with
-    | []      => visited
-    | x :: xs =>
-      if visited.contains x then dfs visited xs
-      else dfs (x :: visited) (succs x ++ xs)
-  dfs [] (succs start)
-
-/-- κ is cyclic iff it lies on any directed cycle in the dep graph
-    (self-loop or longer cycle through other κ's). -/
-def exprIsCyclic (κ : KVar) (e : Expr) : KM Bool := do
-  let deps ← exprDeps e
-  return (reachableFrom κ deps).contains κ
-
 /-- Topologically sort the acyclic κ-vars so dependency sinks come first.
     If `(u, v) ∈ deps` (u in body where v in head), then u must be eliminated
     before v so v's sol doesn't leak a free reference to u. -/

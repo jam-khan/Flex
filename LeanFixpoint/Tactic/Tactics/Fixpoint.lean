@@ -68,6 +68,15 @@ private def fixpointImpl : TacticM Unit := withMainContext do
   let unfilled ← kvarsInOrder.filterMapM fun κ => do
     if (← κ.mvarId.isAssigned) then return none else return some κ.mvarId
   if unfilled.isEmpty then
+    -- Force the PA κ-mvar assignments into the residual goal(s): replace each
+    -- target with its instantiated form so the closer sees concrete predicates
+    -- (e.g. `(fun _ => True) 0`) rather than the κ-mvar `?k`. Without this the
+    -- closer can run against `?k 0` and fail (swallowed by `try`), leaving the
+    -- body mvar → "(kernel) declaration has metavariables".
+    let goals ← getGoals
+    let goals' ← goals.mapM fun g =>
+      g.withContext do g.replaceTargetDefEq (← instantiateMVars (← g.getType))
+    replaceMainGoal goals'
     withMainContext do
       evalTactic (← `(tactic| all_goals (try (first | rfl | grind | omega | aesop))))
   else

@@ -70,13 +70,50 @@ class Result:
         self.elapsed = elapsed
 
 
-def check_file(path: Path, strict_sorry: bool) -> Result:
+def make_runner(bench: bool):
+    """Return (cmd_fn, env) for compiling a file.
+
+    Default: `lake env lean <file>` (core, no mathlib).
+
+    `--bench`: mathlib (and its deps) are gated out of the lake-manifest, and
+    the lakefile's `meta if get_config? bench` does not reliably re-add them on
+    this toolchain. So instead of relying on `lake -Kbench`, we run the
+    toolchain `lean` directly with the already-built package oleans prepended to
+    `LEAN_PATH` — this is what lets the 6 Set/Finset benchmarks resolve `Mathlib`.
+    """
+    if not bench:
+        return (lambda path: ["lake", "env", "lean", str(path)]), None
+
+    def _capture(args: list[str]) -> str:
+        return subprocess.run(args, cwd=REPO_ROOT,
+                              capture_output=True, text=True).stdout.strip()
+
+    base_path = _capture(["lake", "env", "printenv", "LEAN_PATH"])
+    lean_bin = _capture(["lake", "env", "which", "lean"])
+    pkg_libs = sorted(
+        str(p) for p in (REPO_ROOT / ".lake" / "packages").glob(
+            "*/.lake/build/lib/lean")
+    )
+    if not pkg_libs:
+        print(YELLOW("! --bench: no built packages under .lake/packages — "
+                     "fetch+build mathlib first (see lakefile)."))
+    lean_path = ":".join([p for p in [base_path, *pkg_libs] if p])
+    env = os.environ.copy()
+    env["LEAN_PATH"] = lean_path
+    return (lambda path: [lean_bin, str(path)]), env
+
+
+def check_file(path: Path, strict_sorry: bool, runner=None,
+               bench_env=None) -> Result:
+    if runner is None:
+        runner = lambda path: ["lake", "env", "lean", str(path)]
     start = time.monotonic()
     proc = subprocess.run(
-        ["lake", "env", "lean", str(path)],
+        runner(path),
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
+        env=bench_env,
     )
     elapsed = time.monotonic() - start
     out = proc.stdout + proc.stderr
@@ -107,9 +144,15 @@ def main() -> int:
                     help="only check files whose path contains this substring")
     ap.add_argument("--strict-sorry", action="store_true",
                     help="treat `sorry` usage as a failure")
+    ap.add_argument("--bench", action="store_true",
+                    help="put built mathlib on LEAN_PATH so the Set/Finset "
+                         "benchmarks resolve `Mathlib` (replaces broken "
+                         "`lake -Kbench`)")
     ap.add_argument("--verbose", action="store_true",
                     help="print the first error line for each failing file")
     args = ap.parse_args()
+
+    runner, bench_env = make_runner(args.bench)
 
     # Collect files per group, sorted for stable output.
     jobs: list[tuple[str, Path]] = []
@@ -131,7 +174,8 @@ def main() -> int:
     results: dict[Path, Result] = {}
     with ThreadPoolExecutor(max_workers=args.jobs) as ex:
         futures = {
-            ex.submit(check_file, path, args.strict_sorry): (group, path)
+            ex.submit(check_file, path, args.strict_sorry, runner, bench_env):
+                (group, path)
             for group, path in jobs
         }
         for fut in as_completed(futures):

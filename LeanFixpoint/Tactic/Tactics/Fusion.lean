@@ -46,9 +46,22 @@ partial def destructAndBuild
   match cycRem with
   | [] =>
     -- curWit : c′_with_cyclic_fvars. Use it as h_c' for walkPhase5.
-    let bodyFV := replaceKMvarsWithFvars
-      (cycAcc.toList.map fun (κ, fv) => (κ.mvarId, fv))
-      bodyWithMvars
+    -- An acyclic κ's solution σ̂ may reference a cyclic κ (e.g. σ̂(k1) mentions
+    -- k0 for the clause `k0 i → k1 i`). Here the cyclic κ is in scope only as
+    -- its fvar `fv` (bound by the enclosing `Exists.elim`), not as its mvar, so
+    -- substitute cyclic mvars → fvars in BOTH the body and the κ-solutions
+    -- before emitting; otherwise the unassigned cyclic mvar leaks into the
+    -- proof term ("(kernel) declaration has metavariables").
+    let cycSubst := cycAcc.toList.map fun (κ, fv) => (κ.mvarId, fv)
+    let bodyFV := replaceKMvarsWithFvars cycSubst bodyWithMvars
+    let kLams  := kLams.map fun (κ, lam) =>
+      (κ, replaceKMvarsWithFvars cycSubst lam)
+    -- Assign acyclic κ-mvars to their (cyclic-fvar-substituted) solutions HERE,
+    -- inside the cyclic fvars' scope, so defeq β-reduces κ-applications in
+    -- bodyFV to σ̂ over the SAME fvars the residual c′ uses. Doing it at
+    -- analysis time (before `κfv` existed) baked in the cyclic mvar and made
+    -- k-use/guard types disagree with `curWit` (`h_c'`).
+    for (κ, lam) in kLams do κ.mvarId.assign lam
     let bodyProof ← walkPhase5 kLams bodyFV curWit [] [] [] residualOut
     -- Build Exists.intro chain in ORIGINAL κ-order over originalType.
     let kLamMap : Std.HashMap MVarId Expr :=
@@ -141,10 +154,8 @@ elab_rules : tactic
           kLams := kLams ++ [(κ, lam)]
           curr   ← (exprElimStar κ sol curr).run kctx
 
-        -- Assign acyclic κ-mvars to their lambdas so Lean's defeq treats
-        -- κ-mvar applications in bodyFV as β-reduced σ̂. Required for the
-        -- bridge proof to typecheck against `Exists.intro pred witness` shapes.
-        for (κ, lam) in kLams do κ.mvarId.assign lam
+        -- (Acyclic κ-mvars are assigned later, inside `destructAndBuild`'s
+        -- cyclic-fvar scope, to their cyclic-fvar-substituted solutions.)
 
         -- Substitute cyclic-κ-mvars in curr with original fvars (still in scope).
         let cyclicSubst : List (MVarId × Expr) := cyclic.map fun κ =>
@@ -187,11 +198,26 @@ elab_rules : tactic
       bridgeMvar.mvarId!.assign bridge
 
       let residuals := (← residualOut.get).toList
+      -- Hand the closer a CLEAN residual. The structure-preserving σ̂ leaves
+      -- inert `False ∨`/`True ∧`/dead-`∃` noise — required for the bridge's
+      -- And/Or mirror, but it overflows simp/grind on deep VCs (e.g. Quicksort).
+      -- `collapseInert` peels it in one structural pass (`iff : e ↔ clean`) and
+      -- discharges the noisy goal via `iff.mpr`, leaving the user the clean goal.
+      let cleanGoals ← goal.withContext do
+        (newGoalM.mvarId! :: residuals).mapM fun m => do
+          let ty ← m.getType
+          let (clean, iff) ← collapseInert ty
+          if clean == ty then
+            return m
+          else
+            let cleanM ← mkFreshExprMVar (some clean) (kind := .syntheticOpaque)
+            m.assign (← mkAppM ``Iff.mpr #[iff, cleanM])
+            return cleanM.mvarId!
       logInfo m!"fusion: eliminated {acyclic.length} acyclic κ \
                 {acyclic.map (·.name)}; new goal is ∃ \
                 {cyclic.length} cyclic κ + body; \
                 {residuals.length} residual obligation(s)"
-      replaceMainGoal (newGoalM.mvarId! :: residuals)
+      replaceMainGoal cleanGoals
 
 -- ───────────────────────────────────────────────────────────────────────
 -- Tests for fusion
