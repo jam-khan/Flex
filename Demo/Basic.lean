@@ -84,15 +84,10 @@ def ex4 : Prop :=
 theorem ex4Proof' : ex4 := by
   -- solve_fixpoint-- solve_fusion
   fusion
-  sorry
+  all_goals grind
 
 theorem ex4Proof : ex4 := by
   solve_fixpoint-- solve_fusion
-
-theorem ex4Proof2 : ex4 := by
-  unfold ex4
-  zapK
-  all_goals grind
 
 -- ex5: Three-step chain: dec → inc → inc
 -- ex5 x = inc (inc (dec x))  =  x+1 ≥ 0
@@ -107,13 +102,14 @@ def ex5 : Prop :=
     ∧ (∀ z : Int, κ2 z x →
         ∀ ν : Int, ν = z + 1 → 0 ≤ ν)
 
+theorem ex5Proof' : ex5 := by
+  unfold ex5 -- solve_fusion
+  fusion
+  fixpoint
+
 theorem ex5Proof : ex5 := by
   solve_fixpoint-- solve_fusion
 
-theorem ex5Proof2 : ex5 := by
-  unfold ex5
-  zapK
-  all_goals grind
 
 -- ex6: Two independent paths, each checked separately
 -- ex6 x = (inc x, inc (dec x))  both outputs ≥ 0
@@ -127,6 +123,11 @@ def ex6 : Prop :=
     ∧ (∀ a : Int, κ1 a x → 0 ≤ a)
     ∧ (∀ b : Int, κ2 b x →
         ∀ ν : Int, ν = b + 1 → 0 ≤ ν)
+
+theorem ex6Proof' : ex6 := by
+  unfold ex6
+  fusion
+  fixpoint
 
 theorem ex6Proof : ex6 := by
   solve_fixpoint-- solve_fusion
@@ -147,6 +148,11 @@ def ex7 : Prop :=
     ∧ (∀ ν : Int, ν = x - 1 → κ ν x)
     ∧ (∀ y : Int, κ y x →
         ∀ ν : Int, ν = y + 1 → 0 ≤ ν)
+
+theorem ex7Proof' : ex7 := by
+  unfold ex7
+  fusion
+  all_goals grind
 
 theorem prove_ex7_exact : ex7 := by
   -- 1. Give a name to your witness using `let`
@@ -206,6 +212,11 @@ theorem ex8Proof : ex8 := by
   -- try solve_fusion
   --sorry
 
+theorem ex8Proof' : ex8 := by
+  unfold ex8
+  fusion
+  all_goals grind
+
 theorem ex8Proof2 : ex8 := by
   unfold ex8
   zapK
@@ -229,7 +240,11 @@ def ex9 : Prop :=
 theorem ex9Proof : ex9 := by
   try solve_fixpoint
 
-  -- solve_fixpoint
+theorem ex9Proof' : ex9 := by
+  unfold ex9
+  fusion
+  all_goals grind
+
 
 theorem ex9Proof2 : ex9 := by
   unfold ex9
@@ -253,6 +268,11 @@ def ex10 : Prop :=
 theorem ex10Proof : ex10 := by
   try solve_fixpoint -- try solve_fusion
   --sorry
+
+theorem ex10Proof' : ex10 := by
+  unfold ex10
+  fusion
+  all_goals grind
 
 theorem ex10Proof2 : ex10 := by
   unfold ex10
@@ -278,6 +298,11 @@ def ex11 : Prop :=
 
 theorem ex11Proof : ex11 := by
   solve_fixpoint
+
+theorem ex11Proof' : ex11 := by
+  unfold ex11
+  fusion
+  all_goals grind
 
 theorem ex11Proof2 : ex11 := by
   unfold ex11
@@ -310,6 +335,11 @@ def ex12 : Prop :=
         ∀ ν : Int, ν = c → κ4 ν x)
     ∧ (∀ d : Int, κ4 d x → 0 ≤ d)
 
+theorem ex12Proof' : ex12 := by
+  unfold ex12
+  fusion
+  all_goals grind
+
 theorem ex12Proof : ex12 := by
   try solve_fixpoint
 
@@ -341,11 +371,14 @@ def ex13 : Prop :=
             ∀ ν : Int, ν = y + 1 → κ3 ν x a b)
         ∧ (∀ z : Int, κ3 z x a b → 0 ≤ z)
 
-set_option maxHeartbeats 1600000 in
+theorem ex13Proof' : ex13 := by
+  unfold ex13
+  fusion
+  all_goals grind
+
 theorem ex13Proof : ex13 := by
   solve_fixpoint
 
-set_option maxHeartbeats 1600000 in
 theorem ex13Proof2 : ex13 := by
   unfold ex13
   zapK
@@ -384,6 +417,11 @@ def ex14 : Prop :=
               ∀ ν : Int, ν = w + 2 → κ4 ν x a b c)
           ∧ (∀ z : Int, κ4 z x a b c → 0 ≤ z)
 
+theorem ex14Proof' : ex14 := by
+  unfold ex14
+  fusion
+  all_goals grind
+
 theorem ex14Proof : ex14 := by
   solve_fixpoint
 
@@ -408,6 +446,11 @@ theorem ex_natProof2 : ex_nat := by
   zapK
   all_goals grind
 
+theorem ex_natProof' : ex_nat := by
+  unfold ex_nat
+  fusion
+  all_goals grind
+
 
 -- Bool-sorted κ: tracking a boolean property
 def ex_bool : Prop :=
@@ -416,6 +459,11 @@ def ex_bool : Prop :=
       0 < x →
       (∀ b : Bool, b = decide (x > 0) → κ b x)
     ∧ (∀ b : Bool, κ b x → b = true)
+
+theorem ex_boolProof' : ex_bool := by
+  unfold ex_bool
+  fusion
+  all_goals grind
 
 theorem ex_boolProof : ex_bool := by
   solve_fixpoint
@@ -442,6 +490,11 @@ def ex_pair : Prop :=
 theorem ex_pairProof : ex_pair := by
   solve_fixpoint
 
+theorem ex_pairProof' : ex_pair := by
+  unfold ex_pair
+  fusion
+  all_goals grind
+
 theorem ex_pairProof2 : ex_pair := by
   unfold ex_pair
   zapK
@@ -455,6 +508,11 @@ def ex_prod : Prop :=
         0 ≤ b →
         (∀ p : Int × Int, p = (a, b) → κ p)
       ∧ (∀ p : Int × Int, κ p → 0 ≤ p.1 ∧ 0 ≤ p.2)
+
+theorem ex_prodProof' : ex_prod := by
+  unfold ex_prod
+  fusion
+  all_goals grind
 
 theorem ex_prodProof : ex_prod := by
   solve_fixpoint
@@ -474,6 +532,11 @@ def ex_userfn : Prop :=
       0 ≤ x →
       (∀ ν : Int, ν = double x → κ x ν)
     ∧ (∀ y : Int, κ x y → 0 ≤ y)
+
+theorem ex_userfnProof' : ex_userfn := by
+  unfold ex_userfn
+  fusion
+  all_goals (simp_all; grind)
 
 theorem ex_userfnProof : ex_userfn := by
   solve_fixpoint
@@ -546,6 +609,11 @@ def ex_stress : Prop :=
             ∀ ν : Int, ν = u + 2 → κ5 ν x a b)
           -- consumer
         ∧ (∀ s : Int, κ5 s x a b → 0 ≤ s)
+
+theorem ex_stressProof' : ex_stress := by
+  unfold ex_stress
+  fusion
+  all_goals grind
 
 theorem ex_stressProof : ex_stress := by
   solve_fixpoint
