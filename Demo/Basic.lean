@@ -6,6 +6,10 @@ def ex1 : Prop :=
       (∀ ν : Int, ν = x - 1 → κ ν x)
     ∧ (∀ y : Int, κ y x → ∀ ν : Int, ν = y + 1 → 0 ≤ ν)
 
+theorem ex1Proof' : ex1 := by
+  fusion
+  sorry
+
 theorem ex1Proof : ex1 := by
   solve_fixpoint
 
@@ -29,6 +33,11 @@ def ex2 : Prop :=
               ∀ ν : Int, ν = y + 1 → 0 ≤ ν)
           )
 
+theorem ex2Proof' : ex2 := by
+  fusion
+  sorry
+--  solve_fixpoint
+
 theorem ex2Proof : ex2 := by
   solve_fixpoint
 
@@ -44,6 +53,11 @@ def ex3 : Prop :=
   ∧ (∀ b : Int, κb b → ∀ ν : Int, ν = b + 1 → κc ν)
   ∧ (∀ ν : Int, 0 ≤ ν → κa ν)
   ∧ (∀ ν : Int, κc ν → 0 ≤ ν)
+
+theorem ex3Proof' : ex3 := by
+  fusion
+  sorry
+  -- solve_fixpoint
 
 theorem ex3Proof : ex3 := by
   solve_fixpoint
@@ -66,6 +80,11 @@ def ex4 : Prop :=
         ∀ ν : Int, ν = y - 1 → κ2 ν x)
     ∧ (∀ z : Int, κ2 z x →
         ∀ ν : Int, ν = z + 1 → 0 ≤ ν)
+
+theorem ex4Proof' : ex4 := by
+  -- solve_fixpoint-- solve_fusion
+  fusion
+  sorry
 
 theorem ex4Proof : ex4 := by
   solve_fixpoint-- solve_fusion
