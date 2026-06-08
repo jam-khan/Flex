@@ -41,6 +41,11 @@ def pa1 : Prop :=
         ∀ ν : Int, ν = i - 1 → κinv ν x)
     ∧ (∀ i : Int, κinv i x → 0 ≤ i)
 
+theorem pa1_proof_fusion_fixpoint : pa1 := by
+  unfold pa1
+  fusion
+  fixpoint
+
 theorem pa1_proof : pa1 := by
   try solve_fixpoint
 
@@ -59,6 +64,12 @@ def pa2 : Prop :=
         ∀ ν : Int, ν = i - 1 → κinv ν x)
     ∧ (∀ i : Int, κinv i x → 0 ≤ i)
 
+theorem pa2_proof_fusion_fixpoint : pa2 := by
+  unfold pa2
+  fusion
+  fixpoint
+  all_goals grind
+
 theorem pa2_proof : pa2 := by
   try solve_fixpoint
 
@@ -76,6 +87,13 @@ def pa3 : Prop :=
         ∀ ν : Int, ν = i - 2 → κinv ν x)
     ∧ (∀ i : Int, κinv i x → 0 ≤ i)
     ∧ (∀ r : Int, κout r x → 3 ≤ r)
+
+theorem pa3_proof_fusion_fixpoint : pa3 := by
+  unfold pa3
+  fusion
+  fixpoint
+  all_goals grind
+  -- try solve_fixpoint
 
 theorem pa3_proof : pa3 := by
   try solve_fixpoint
@@ -98,6 +116,12 @@ def pa4 : Prop :=
     ∧ (∀ i : Int, κlp2 i x → 0 ≤ i)
     ∧ (∀ r : Int, κfused r x → 1 ≤ r)
 
+theorem pa4_proof_fusion_fixpoint : pa4 := by
+  unfold pa4
+  fusion
+  fixpoint
+  all_goals grind
+
 theorem pa4_proof : pa4 := by
   try solve_fixpoint
 
@@ -118,6 +142,12 @@ def pa5 : Prop :=
     ∧ (∀ i : Int, κinv i x → 0 ≤ i)
     ∧ (∀ ν : Int, ν = x + 5 → κfin ν x)
     ∧ (∀ r : Int, κfin r x → 5 ≤ r)
+
+theorem pa5_proof_fusion_fixpoint : pa5 := by
+  unfold pa5
+  fusion
+  fixpoint
+  all_goals grind
 
 theorem pa5_proof : pa5 := by
   try solve_fixpoint
@@ -143,6 +173,12 @@ def pa6 : Prop :=
     ∧ (∀ i m : Int, κcnt i m n → i ≥ m →
         ∀ a : Int, κacc a m n → 0 ≤ a)
 
+theorem pa6_proof_fusion_fixpoint : pa6 := by
+  unfold pa6
+  fusion
+  fixpoint
+  all_goals grind
+
 set_option maxHeartbeats 1600000 in
 theorem pa6_proof : pa6 := by
   try solve_fixpoint
@@ -159,6 +195,12 @@ def pa7 : Prop :=
     ∧ (∀ i b : Int, κinv i b n → i < b →
         ∀ ν : Int, ν = i + 1 → κinv ν b n)
     ∧ (∀ i b : Int, κinv i b n → i ≥ b → 0 ≤ i)
+
+theorem pa7_proof_fusion_fixpoint : pa7 := by
+  unfold pa7
+  fusion
+  fixpoint
+  all_goals grind
 
 theorem pa7_proof : pa7 := by
   solve_fixpoint
