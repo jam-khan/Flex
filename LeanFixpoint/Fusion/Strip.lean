@@ -75,22 +75,17 @@ def findOuterBinderToParam (κ : KVar) (binderFvar : FVarId) (body : Expr) : Opt
     sorted so dependency sinks (no κ-deps) appear first — required so each
     κ's sol is built only after its dependencies have been eliminated.
 
-    A κ is cyclic iff it lies on any cycle (`exprIsCyclic`); everything else
-    is acyclic and eliminated by fusion. We deliberately do NOT use a minimal
-    feedback-vertex cut set (C-J §5.5): cutting only one κ per SCC and fusing
-    the *rest* of the SCC inlines the cut κ's mvar into those fused solutions,
-    and the resulting constraints handed to PA are too weak to recover the
-    invariant (see `comment.lean`, where cutting only `k4` and fusing its
-    co-cyclic `k0`/`k5` drops the needed `z1 ≤ z0` on `k4`). Sending every
-    SCC member through PA is safe and complete — PA solves the extra κs — so
-    over-approximating the cyclic set is the robust choice here. -/
+    The cyclic set is a **feedback-vertex cut set** (the liquid-fixpoint
+    "kuts"): the minimal-ish set of κ's whose removal makes the dependency
+    graph acyclic (`classifyKVars`/`cutVarsIterative`). Every non-cut κ is then
+    eliminated by fusion, matching hs-fixpoint — e.g. on `SimpleLoop`
+    (`k0→k1`, `k1→k0`, `k0→k0`) the self-loop forces `k0` into the cut and `k1`
+    is fused, instead of the old reachability rule ("cyclic = on any cycle")
+    which sent the whole `{k0,k1}` SCC to PA. -/
 def exprPartitionKVars (e : Expr) : KM (List KVar × List KVar) := do
   let allKs := (← exprKVarsOrdered e).eraseDups
-  let deps ← exprDeps e
-  let cyclic    ← allKs.filterM (fun κ => exprIsCyclic κ e)
-  let acyclicRaw ← allKs.filterM (fun κ => return !(← exprIsCyclic κ e))
-  let acyclic := topoSortAcyclic acyclicRaw deps
-  return (acyclic, cyclic)
+  let deps  ← exprDeps e
+  return classifyKVars allKs deps
 
 
 /-- `exprSolScoped κ e` — strip the κ-free outer ∀-prefix and compute sol1

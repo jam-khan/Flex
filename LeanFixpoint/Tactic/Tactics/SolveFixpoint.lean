@@ -129,36 +129,45 @@ private def solveFixpointImpl : TacticM Unit := withMainContext do
       IO.println s!"[solve_fixpoint] Acyclic κ: {acyclic.map (·.name)}"
       IO.println s!"[solve_fixpoint] Cyclic κ:  {cyclic.map (·.name)}"
 
-      -- Fusion for acyclic κs. Each sol becomes a closed lambda and
-      -- is assigned to its κ-mvar immediately. No cleanliness filter:
-      -- sols may reference other κ-mvars; instantiateMVars resolves them.
+      -- Fusion for acyclic κs (no proof-term construction — we just assign
+      -- κ-mvars and let the kernel re-check the final term). We refine the
+      -- FVS cut here: an acyclic κ is only *fused* if its strongest solution
+      -- σ̂ does not reference a cyclic κ. If σ̂ DOES reference a cyclic κ
+      -- (e.g. `k4 a5 → k0 a5` forces `k4` into σ̂(k0)), fusing it would inline
+      -- that cyclic κ into PA's own head-clauses and weaken what Houdini can
+      -- recover (see `comment.lean`). Such κs are instead *deferred* to PA
+      -- alongside the cut, where PA sees their original simple clauses.
       let mut curr := body
+      let mut cyclicSet : List KVar := cyclic   -- grows as κs are deferred
+      let mut deferred  : List KVar := []
       for κ in acyclic do
         IO.println s!"[solve] --- {κ.name} ---"
 
-        -- Compute sol AND substituted constraint in ONE call, BEFORE any assign.
-        let (sol, curr') ← (exprElim1 κ curr).run kctx
+        -- Compute σ̂ WITHOUT committing the elimination (replicates the first
+        -- two steps of `exprElim1`); decide fuse-vs-defer, then elim if clean.
+        let scoped' ← (exprScope κ curr).run kctx
+        let sol     ← (exprSolScoped κ scoped').run kctx
         IO.println s!"[solve]   sol = {← ppExpr sol}"
-        let lam ← solToWitnessExpr sol κ.params κ.paramTypes
-        IO.println s!"[solve]   lam = {← ppExpr lam}"
 
-        -- Occurs check on the lam BEFORE assigning. If sol references κ
-        -- (κ-in-hyp litter), leave κ as user goal — but still update curr,
-        -- because elim* already substituted what it could.
-        let selfRef := lam.find? fun sub =>
-          sub.isMVar && sub.mvarId! == κ.mvarId
-        if selfRef.isSome then
-          IO.println s!"[solve]   ⚠ {κ.name}: sol self-references — leaving as user goal"
+        -- Does σ̂ reference a cyclic κ (or κ itself)?  If so, defer to PA.
+        let solKs ← (KM.exprKVars sol).run kctx
+        let refsCyclic := solKs.any fun k => cyclicSet.contains k || k == κ
+        if refsCyclic then
+          IO.println s!"[solve]   ↪ {κ.name}: σ̂ references a cyclic κ — deferring to PA"
+          cyclicSet := cyclicSet ++ [κ]
+          deferred  := deferred ++ [κ]
         else
+          let lam ← solToWitnessExpr sol κ.params κ.paramTypes
+          IO.println s!"[solve]   lam = {← ppExpr lam}"
           κ.mvarId.assign lam
+          curr ← (exprElimStar κ sol curr).run kctx
 
-        curr := curr'
-
-      -- Predicate abstraction for cyclic κs.
-      if !cyclic.isEmpty then
-        IO.println s!"[solve_fixpoint] --- PA on cyclic κ's ---"
+      -- Predicate abstraction for the cut κs plus any deferred co-cyclic κs.
+      let paSet := cyclic ++ deferred
+      if !paSet.isEmpty then
+        IO.println s!"[solve_fixpoint] --- PA on cyclic κ's {paSet.map (·.name)} ---"
         let flatCs ← (exprFlat curr).run kctx
-        let paSols ← predicateAbstraction kctx cyclic flatCs
+        let paSols ← predicateAbstraction kctx paSet flatCs
         for (κ, sol) in paSols do
           IO.println s!"[solve_fixpoint]   PA sol for {κ.name} = {← ppExpr sol}"
           let lam ← solToWitnessExpr sol κ.params κ.paramTypes

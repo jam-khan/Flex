@@ -43,16 +43,6 @@ def comment_vc : Prop :=
 theorem test : comment_vc := by
   solve_fixpoint
 
--- Only allows fors solving closed kappa
--- for example, kappas that don't refer to a cyclic or other kappa inside
-theorem test1 : comment_vc := by
-  unfold comment_vc
-  solK1
-  lazy_unfold k1
-  solK1
-
-  sorry
-
 -- -- Reordered: ∃ k0 k4 k5 k1 k2 k3, body  (cut-first)
 -- def comment_vc_reordered : Prop :=
 --   ∃ k0 : Int → Int → Int → Prop,
