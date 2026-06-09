@@ -129,41 +129,25 @@ private def solveFixpointImpl : TacticM Unit := withMainContext do
       IO.println s!"[solve_fixpoint] Acyclic κ: {acyclic.map (·.name)}"
       IO.println s!"[solve_fixpoint] Cyclic κ:  {cyclic.map (·.name)}"
 
-      -- Fusion for acyclic κs (no proof-term construction — we just assign
-      -- κ-mvars and let the kernel re-check the final term). We refine the
-      -- FVS cut here: an acyclic κ is only *fused* if its strongest solution
-      -- σ̂ does not reference a cyclic κ. If σ̂ DOES reference a cyclic κ
-      -- (e.g. `k4 a5 → k0 a5` forces `k4` into σ̂(k0)), fusing it would inline
-      -- that cyclic κ into PA's own head-clauses and weaken what Houdini can
-      -- recover (see `comment.lean`). Such κs are instead *deferred* to PA
-      -- alongside the cut, where PA sees their original simple clauses.
+      -- Fusion for ALL acyclic κs (no proof-term construction — we just assign
+      -- κ-mvars and let the kernel re-check the final term). An acyclic κ's σ̂
+      -- may reference a cut κ's mvar (e.g. `k4 a5 → k0 a5` puts `?k4` in σ̂(k0));
+      -- that is fine — κ-mvars are global, so the unifier resolves `?k4` once PA
+      -- assigns the cut. Fuse every acyclic κ (exactly like `fusion`); PA then
+      -- solves ONLY the genuine feedback-vertex cut.
       let mut curr := body
-      let mut cyclicSet : List KVar := cyclic   -- grows as κs are deferred
-      let mut deferred  : List KVar := []
       for κ in acyclic do
         IO.println s!"[solve] --- {κ.name} ---"
-
-        -- Compute σ̂ WITHOUT committing the elimination (replicates the first
-        -- two steps of `exprElim1`); decide fuse-vs-defer, then elim if clean.
         let scoped' ← (exprScope κ curr).run kctx
         let sol     ← (exprSolScoped κ scoped').run kctx
         IO.println s!"[solve]   sol = {← ppExpr sol}"
+        let lam ← solToWitnessExpr sol κ.params κ.paramTypes
+        IO.println s!"[solve]   lam = {← ppExpr lam}"
+        κ.mvarId.assign lam
+        curr ← (exprElimStar κ sol curr).run kctx
 
-        -- Does σ̂ reference a cyclic κ (or κ itself)?  If so, defer to PA.
-        let solKs ← (KM.exprKVars sol).run kctx
-        let refsCyclic := solKs.any fun k => cyclicSet.contains k || k == κ
-        if refsCyclic then
-          IO.println s!"[solve]   ↪ {κ.name}: σ̂ references a cyclic κ — deferring to PA"
-          cyclicSet := cyclicSet ++ [κ]
-          deferred  := deferred ++ [κ]
-        else
-          let lam ← solToWitnessExpr sol κ.params κ.paramTypes
-          IO.println s!"[solve]   lam = {← ppExpr lam}"
-          κ.mvarId.assign lam
-          curr ← (exprElimStar κ sol curr).run kctx
-
-      -- Predicate abstraction for the cut κs plus any deferred co-cyclic κs.
-      let paSet := cyclic ++ deferred
+      -- Predicate abstraction only for the genuine cut κs.
+      let paSet := cyclic
       if !paSet.isEmpty then
         IO.println s!"[solve_fixpoint] --- PA on cyclic κ's {paSet.map (·.name)} ---"
         let flatCs ← (exprFlat curr).run kctx

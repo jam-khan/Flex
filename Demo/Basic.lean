@@ -13,11 +13,6 @@ theorem ex1Proof' : ex1 := by
 theorem ex1Proof : ex1 := by
   solve_fixpoint
 
-theorem ex1Proof2 : ex1 := by
-  unfold ex1
-  zapK
-  all_goals grind
-
 def ex2 : Prop :=
     ∃ κx : Int → Int → Int → Int → Prop, ∃ κy : Int → Int → Int → Int → Prop,
     ∀ x : Int,
@@ -41,11 +36,6 @@ theorem ex2Proof' : ex2 := by
 theorem ex2Proof : ex2 := by
   solve_fixpoint
 
-theorem ex2Proof2 : ex2 := by
-  unfold ex2
-  zapK
-  all_goals grind
-
 
 def ex3 : Prop :=
   ∃ κa : Int → Prop, ∃ κb : Int → Prop, ∃ κc : Int → Prop,
@@ -61,12 +51,6 @@ theorem ex3Proof' : ex3 := by
 
 theorem ex3Proof : ex3 := by
   solve_fixpoint
-
-theorem ex3Proof2 : ex3 := by
-  unfold ex3
-  zapK
-  all_goals grind
-
 
 -- ex4: Three-step chain: inc → dec → inc
 -- ex4 x = inc (dec (inc x))  =  x+1 ≥ 0
@@ -132,11 +116,6 @@ theorem ex6Proof' : ex6 := by
 theorem ex6Proof : ex6 := by
   solve_fixpoint-- solve_fusion
 
-theorem ex6Proof2 : ex6 := by
-  unfold ex6
-  zapK
-  all_goals grind
-
 -- ex7: Diamond — two sources flow into one κ, then one consumer
 -- ex7 x = let ys = [inc x, dec x] in inc (last ys)  ≥ 0
 -- κ = almost-nat: both (x+1) and (x-1) satisfy 0 ≤ ν+1
@@ -189,11 +168,6 @@ theorem prove_ex7_exact : ex7 := by
 
       grind
 
-theorem ex7Proof2 : ex7 := by
-  unfold ex7
-  zapK
-  all_goals grind
-
 -- ex8: Two Nat inputs, one intermediate binder
 -- ex8 (x y : Nat) = let a = dec x in a + 1 + y  ≥ 0
 -- κ = almost-nat; consumer uses both κ a and 0 ≤ y
@@ -215,11 +189,6 @@ theorem ex8Proof : ex8 := by
 theorem ex8Proof' : ex8 := by
   unfold ex8
   fusion
-  all_goals grind
-
-theorem ex8Proof2 : ex8 := by
-  unfold ex8
-  zapK
   all_goals grind
 
 -- ex9: Four-step chain: inc → dec → inc → dec
@@ -245,12 +214,6 @@ theorem ex9Proof' : ex9 := by
   fusion
   all_goals grind
 
-
-theorem ex9Proof2 : ex9 := by
-  unfold ex9
-  zapK
-  all_goals grind
-
 -- ex10: Three-way merge into one κ, stronger consumer (needs inc inc)
 -- ex10 x = let ys = [dec x, x, inc x] in inc (inc (last ys))  ≥ 0
 -- κ = almost-nat: weakest common refinement is 0 ≤ ν+1 (from dec x)
@@ -274,12 +237,6 @@ theorem ex10Proof' : ex10 := by
   fusion
   all_goals grind
 
-theorem ex10Proof2 : ex10 := by
-  unfold ex10
-  zapK
-  all_goals grind
-
-
 -- ex11: Three-κ chain with multi-producer merge at κ2
 -- Given 0 ≤ x, produce x into κ1. Then κ1 feeds two values (a-2) and (a+1)
 -- both into κ2. κ2 feeds into κ3 via +2. κ3 must be ≥ 0.
@@ -302,11 +259,6 @@ theorem ex11Proof : ex11 := by
 theorem ex11Proof' : ex11 := by
   unfold ex11
   fusion
-  all_goals grind
-
-theorem ex11Proof2 : ex11 := by
-  unfold ex11
-  zapK
   all_goals grind
 
 
@@ -343,12 +295,6 @@ theorem ex12Proof' : ex12 := by
 theorem ex12Proof : ex12 := by
   try solve_fixpoint
 
-theorem ex12Proof2 : ex12 := by
-  unfold ex12
-  zapK
-  all_goals grind
-
-
 -- ex13: 3-κ chain with nested binders and cross-flow
 -- Given 0 ≤ x, let a = x-1, b = x+1:
 --   a → κ1, b → κ2, κ1 flows into κ2 (cross-flow)
@@ -378,12 +324,6 @@ theorem ex13Proof' : ex13 := by
 
 theorem ex13Proof : ex13 := by
   solve_fixpoint
-
-theorem ex13Proof2 : ex13 := by
-  unfold ex13
-  zapK
-  all_goals grind
-
 
 -- ex14: 4-κ chain with nested binders, cross-flow, and merge
 -- Given 0 ≤ x, let a = x-1, b = x+1, c = x:
@@ -425,11 +365,6 @@ theorem ex14Proof' : ex14 := by
 theorem ex14Proof : ex14 := by
   solve_fixpoint
 
-theorem ex14Proof2 : ex14 := by
-  unfold ex14
-  zapK
-  all_goals grind
-
 -- Nat refinement: predecessor is less than input
 def ex_nat : Prop :=
   ∃ κ : Nat → Nat → Prop,
@@ -440,11 +375,6 @@ def ex_nat : Prop :=
 
 theorem ex_natProof : ex_nat := by
   solve_fixpoint
-
-theorem ex_natProof2 : ex_nat := by
-  unfold ex_nat
-  zapK
-  all_goals grind
 
 theorem ex_natProof' : ex_nat := by
   unfold ex_nat
@@ -468,10 +398,6 @@ theorem ex_boolProof' : ex_bool := by
 theorem ex_boolProof : ex_bool := by
   solve_fixpoint
 
-theorem ex_boolProof2 : ex_bool := by
-  unfold ex_bool
-  zapK
-  all_goals grind
 
 @[grind]
 structure Point where
@@ -495,11 +421,6 @@ theorem ex_pairProof' : ex_pair := by
   fusion
   all_goals grind
 
-theorem ex_pairProof2 : ex_pair := by
-  unfold ex_pair
-  zapK
-  all_goals grind
-
 def ex_prod : Prop :=
   ∃ κ : (Int × Int) → Prop,
     ∀ a : Int,
@@ -516,11 +437,6 @@ theorem ex_prodProof' : ex_prod := by
 
 theorem ex_prodProof : ex_prod := by
   solve_fixpoint
-
-theorem ex_prodProof2 : ex_prod := by
-  unfold ex_prod
-  zapK
-  all_goals grind
 
 -- User-defined function in refinement
 @[simp]
@@ -540,11 +456,6 @@ theorem ex_userfnProof' : ex_userfn := by
 
 theorem ex_userfnProof : ex_userfn := by
   solve_fixpoint
-
-theorem ex_userfnProof2 : ex_userfn := by
-  unfold ex_userfn
-  zapK
-  all_goals (simp_all [double]; grind)
 
 
 -- ex_stress: 5-κ extreme test — chain + diamond + 3-way merge + cross-flow + nested binders
@@ -618,8 +529,3 @@ theorem ex_stressProof' : ex_stress := by
 theorem ex_stressProof : ex_stress := by
   solve_fixpoint
 
--- Same theorem via the fused `zapK`
-theorem ex_stressProof2 : ex_stress := by
-  unfold ex_stress
-  zapK
-  all_goals grind

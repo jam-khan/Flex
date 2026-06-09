@@ -346,7 +346,6 @@ def ex_stress : Prop :=
           -- consumer
         ∧ (∀ s : Int, κ5 s x a b → 0 ≤ s)
 
--- Same theorem via the fused `zapK`
 
 -- ===== benchmarked proof pairs =====
 bench "ex1_A" in
