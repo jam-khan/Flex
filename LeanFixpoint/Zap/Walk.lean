@@ -59,12 +59,17 @@ partial def walkPhase5
     (hCprime : Expr)
     (binders guards : List (Name × Expr × FVarId))
     (orPath : List Bool)
+    (prefixInfo : Std.HashMap MVarId (Nat × Nat × Nat))
     (residualOut : IO.Ref (Array MVarId)) :
     MetaM Expr := do
-  -- (a) Head-acyclic-κ leaf → emitKLeaf, ignore hCprime.
-  if let some (_κ, lam, args) := kHead? kLams goal then
+  -- (a) Head-acyclic-κ leaf → emitKLeaf on the BELOW-LCA suffix: drop the
+  --     prefix (above-LCA) binders/guards/orPath bits, which the LCA-scoped
+  --     σ̂ folds into κ-params rather than ∃/guard/∨ nodes.
+  if let some (κLeaf, lam, args) := kHead? kLams goal then
     let lamBody := lam.beta args
-    return ← emitKLeaf lamBody binders guards orPath residualOut
+    let (nB, nG, nOr) := prefixInfo.getD κLeaf.mvarId (0, 0, 0)
+    return ← emitKLeaf lamBody (binders.drop nB) (guards.drop nG)
+              (orPath.drop nOr) residualOut
   -- (b) ∀ — intro fv, beta-apply hCprime to fv, recurse, λ-wrap.
   if goal.isForall then
     let dom := goal.bindingDomain!
@@ -77,17 +82,17 @@ partial def walkPhase5
       let inner ←
         if domSort.isProp then
           walkPhase5 kLams body hCprime' binders
-            (guards ++ [(name, dom, fv.fvarId!)]) orPath residualOut
+            (guards ++ [(name, dom, fv.fvarId!)]) orPath prefixInfo residualOut
         else
           walkPhase5 kLams body hCprime'
-            (binders ++ [(name, dom, fv.fvarId!)]) guards orPath residualOut
+            (binders ++ [(name, dom, fv.fvarId!)]) guards orPath prefixInfo residualOut
       mkLambdaFVars #[fv] inner
   -- (c) ∧ — project hCprime via And.left / And.right, recurse, And.intro.
   if let some (l, r) := goal.and? then
     let hL ← mkAppM ``And.left  #[hCprime]
     let hR ← mkAppM ``And.right #[hCprime]
-    let pL ← walkPhase5 kLams l hL binders guards (orPath ++ [false]) residualOut
-    let pR ← walkPhase5 kLams r hR binders guards (orPath ++ [true])  residualOut
+    let pL ← walkPhase5 kLams l hL binders guards (orPath ++ [false]) prefixInfo residualOut
+    let pR ← walkPhase5 kLams r hR binders guards (orPath ++ [true])  prefixInfo residualOut
     return mkAndIntro l r pL pR
   -- (d) Anything else (non-κ atom OR cyclic-κ-head app) — direct transfer.
   return hCprime

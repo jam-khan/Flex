@@ -12,7 +12,24 @@ def SimpleLoop := ∃ k0 : Int -> Prop, ∃ k1 : Int -> Prop,
       ((k1 i) ∧
        ((k1 (i + 1)) -> (k0 (i + 1)))))
 
-theorem SimpleLoopProof : SimpleLoop := by
-  unfold SimpleLoop
+def SimpleLoop1 :=
+  ∃ k0 : Int -> Prop,
+  ∃ k1 : Int -> Prop,
+  (k0 0) ∧
+  (∀ (i : Int),
+    (k0 i) ->
+      (((i > 0) -> (k1 i)) ∧
+        ((i < 0) -> (k1 (i + 1)) -> (k0 (i + 1)))))
+
+
+theorem SimpleLoopProof : SimpleLoop1 := by
+  unfold SimpleLoop1
   fusion
   fixpoint
+
+theorem SimpleLoopProof' : SimpleLoop := by
+  unfold SimpleLoop
+  fusion
+  solve_fixpoint
+  -- fusion
+  -- fixpoint
