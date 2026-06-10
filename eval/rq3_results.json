@@ -1,0 +1,650 @@
+{
+  "arbitrary-kvar-arg": {
+    "group": "Liquid-fixpoint",
+    "B": {
+      "config": "B",
+      "status": "ok",
+      "hb": 969,
+      "ms": 66,
+      "depth": 99,
+      "nconst": 40,
+      "kerus": 4288,
+      "phases": {
+        "fusion:sol": 20,
+        "fusion:build": 18,
+        "fusion:clean": 101,
+        "solve_fixpoint:fuse": 0,
+        "solve_fixpoint:pa": 0,
+        "solve_fixpoint:close": 755
+      }
+    },
+    "A": {
+      "config": "A",
+      "status": "ok",
+      "hb": 6424,
+      "ms": 319,
+      "depth": 73,
+      "nconst": 49,
+      "kerus": 2844,
+      "phases": {
+        "solve_fixpoint:fuse": 159,
+        "solve_fixpoint:pa": 0,
+        "solve_fixpoint:close": 6203
+      },
+      "n_acyclic": 2,
+      "n_cyclic": 0
+    }
+  },
+  "exists_oddity": {
+    "group": "Liquid-fixpoint",
+    "B": {
+      "config": "B",
+      "status": "ok",
+      "hb": 127,
+      "ms": 12,
+      "depth": 45,
+      "nconst": 31,
+      "kerus": 627,
+      "phases": {
+        "fusion:sol": 3,
+        "fusion:build": 4,
+        "fusion:clean": 20,
+        "solve_fixpoint:fuse": 0,
+        "solve_fixpoint:pa": 0,
+        "solve_fixpoint:close": 81
+      }
+    },
+    "A": {
+      "config": "A",
+      "status": "ok",
+      "hb": 345,
+      "ms": 23,
+      "depth": 21,
+      "nconst": 13,
+      "kerus": 243,
+      "phases": {
+        "solve_fixpoint:fuse": 24,
+        "solve_fixpoint:pa": 0,
+        "solve_fixpoint:close": 308
+      },
+      "n_acyclic": 1,
+      "n_cyclic": 0
+    }
+  },
+  "icfp17-ex1": {
+    "group": "Liquid-fixpoint",
+    "B": {
+      "config": "B",
+      "status": "ok",
+      "hb": 233,
+      "ms": 25,
+      "depth": 47,
+      "nconst": 36,
+      "kerus": 975,
+      "phases": {
+        "fusion:sol": 3,
+        "fusion:build": 4,
+        "fusion:clean": 16,
+        "solve_fixpoint:fuse": 0,
+        "solve_fixpoint:pa": 0,
+        "solve_fixpoint:close": 189
+      }
+    },
+    "A": {
+      "config": "A",
+      "status": "ok",
+      "hb": 415,
+      "ms": 32,
+      "depth": 21,
+      "nconst": 20,
+      "kerus": 331,
+      "phases": {
+        "solve_fixpoint:fuse": 18,
+        "solve_fixpoint:pa": 0,
+        "solve_fixpoint:close": 384
+      },
+      "n_acyclic": 1,
+      "n_cyclic": 0
+    }
+  },
+  "icfp17-ex2": {
+    "group": "Liquid-fixpoint",
+    "A": {
+      "config": "A",
+      "status": "ok",
+      "hb": 3023,
+      "ms": 152,
+      "depth": 41,
+      "nconst": 23,
+      "kerus": 702,
+      "phases": {
+        "solve_fixpoint:fuse": 97,
+        "solve_fixpoint:pa": 0,
+        "solve_fixpoint:close": 2900
+      },
+      "n_acyclic": 2,
+      "n_cyclic": 0
+    },
+    "B": {
+      "config": "B",
+      "status": "ok",
+      "hb": 582,
+      "ms": 44,
+      "depth": 74,
+      "nconst": 39,
+      "kerus": 1551,
+      "phases": {
+        "fusion:sol": 10,
+        "fusion:build": 12,
+        "fusion:clean": 66,
+        "solve_fixpoint:fuse": 0,
+        "solve_fixpoint:pa": 0,
+        "solve_fixpoint:close": 450
+      }
+    }
+  },
+  "icfp17-ex3": {
+    "group": "Liquid-fixpoint",
+    "B": {
+      "config": "B",
+      "status": "ok",
+      "hb": 495,
+      "ms": 31,
+      "depth": 68,
+      "nconst": 39,
+      "kerus": 998,
+      "phases": {
+        "fusion:sol": 9,
+        "fusion:build": 7,
+        "fusion:clean": 64,
+        "solve_fixpoint:fuse": 0,
+        "solve_fixpoint:pa": 0,
+        "solve_fixpoint:close": 385
+      }
+    },
+    "A": {
+      "config": "A",
+      "status": "ok",
+      "hb": 3073,
+      "ms": 154,
+      "depth": 38,
+      "nconst": 34,
+      "kerus": 495,
+      "phases": {
+        "solve_fixpoint:fuse": 80,
+        "solve_fixpoint:pa": 0,
+        "solve_fixpoint:close": 2974
+      },
+      "n_acyclic": 3,
+      "n_cyclic": 0
+    }
+  },
+  "kut00": {
+    "group": "Liquid-fixpoint",
+    "A": {
+      "config": "A",
+      "status": "ok",
+      "hb": 418,
+      "ms": 23,
+      "depth": 29,
+      "nconst": 21,
+      "kerus": 257,
+      "phases": {
+        "solve_fixpoint:fuse": 27,
+        "solve_fixpoint:pa": 0,
+        "solve_fixpoint:close": 378
+      },
+      "n_acyclic": 1,
+      "n_cyclic": 0
+    },
+    "B": {
+      "config": "B",
+      "status": "ok",
+      "hb": 54,
+      "ms": 8,
+      "depth": 47,
+      "nconst": 37,
+      "kerus": 526,
+      "phases": {
+        "fusion:sol": 3,
+        "fusion:build": 3,
+        "fusion:clean": 20,
+        "solve_fixpoint:fuse": 0,
+        "solve_fixpoint:pa": 0,
+        "solve_fixpoint:close": 9
+      }
+    }
+  },
+  "mod00": {
+    "group": "Liquid-fixpoint",
+    "A": {
+      "config": "A",
+      "status": "ok",
+      "hb": 528,
+      "ms": 31,
+      "depth": 20,
+      "nconst": 18,
+      "kerus": 260,
+      "phases": {
+        "solve_fixpoint:fuse": 23,
+        "solve_fixpoint:pa": 0,
+        "solve_fixpoint:close": 493
+      },
+      "n_acyclic": 1,
+      "n_cyclic": 0
+    },
+    "B": {
+      "config": "B",
+      "status": "ok",
+      "hb": 237,
+      "ms": 19,
+      "depth": 46,
+      "nconst": 32,
+      "kerus": 469,
+      "phases": {
+        "fusion:sol": 3,
+        "fusion:build": 4,
+        "fusion:clean": 19,
+        "solve_fixpoint:fuse": 0,
+        "solve_fixpoint:pa": 0,
+        "solve_fixpoint:close": 191
+      }
+    }
+  },
+  "scrape03": {
+    "group": "Liquid-fixpoint",
+    "A": {
+      "config": "A",
+      "status": "ok",
+      "hb": 3527,
+      "ms": 689,
+      "depth": 65,
+      "nconst": 148,
+      "kerus": 8154,
+      "phases": {
+        "solve_fixpoint:fuse": 7,
+        "solve_fixpoint:pa": 0,
+        "solve_fixpoint:close": 3440
+      },
+      "n_acyclic": 1,
+      "n_cyclic": 0
+    },
+    "B": {
+      "config": "B",
+      "status": "ok",
+      "hb": 3527,
+      "ms": 709,
+      "depth": 83,
+      "nconst": 160,
+      "kerus": 5066,
+      "phases": {
+        "fusion:sol": 4,
+        "fusion:build": 4,
+        "fusion:clean": 8,
+        "solve_fixpoint:fuse": 0,
+        "solve_fixpoint:pa": 0,
+        "solve_fixpoint:close": 3423
+      }
+    }
+  },
+  "test02": {
+    "group": "Liquid-fixpoint",
+    "A": {
+      "config": "A",
+      "status": "ok",
+      "hb": 865,
+      "ms": 49,
+      "depth": 26,
+      "nconst": 17,
+      "kerus": 391,
+      "phases": {
+        "solve_fixpoint:fuse": 28,
+        "solve_fixpoint:pa": 0,
+        "solve_fixpoint:close": 822
+      },
+      "n_acyclic": 1,
+      "n_cyclic": 0
+    },
+    "B": {
+      "config": "B",
+      "status": "ok",
+      "hb": 334,
+      "ms": 29,
+      "depth": 51,
+      "nconst": 33,
+      "kerus": 620,
+      "phases": {
+        "fusion:sol": 4,
+        "fusion:build": 5,
+        "fusion:clean": 22,
+        "solve_fixpoint:fuse": 0,
+        "solve_fixpoint:pa": 0,
+        "solve_fixpoint:close": 278
+      }
+    }
+  },
+  "comment": {
+    "group": "Liquid-fixpoint",
+    "B": {
+      "config": "B",
+      "status": "ok",
+      "hb": 173781,
+      "ms": 4900,
+      "depth": 88,
+      "nconst": 57,
+      "kerus": 6696,
+      "phases": {
+        "fusion:sol": 62,
+        "fusion:build": 61,
+        "fusion:clean": 312,
+        "solve_fixpoint:fuse": 0,
+        "solve_fixpoint:pa": 168101,
+        "solve_fixpoint:close": 5041
+      }
+    },
+    "A": {
+      "config": "A",
+      "status": "ok",
+      "hb": 180806,
+      "ms": 5250,
+      "depth": 112,
+      "nconst": 67,
+      "kerus": 5647,
+      "phases": {
+        "solve_fixpoint:fuse": 331,
+        "solve_fixpoint:pa": 168217,
+        "solve_fixpoint:close": 12073
+      },
+      "n_acyclic": 5,
+      "n_cyclic": 1
+    }
+  },
+  "scrape02": {
+    "group": "Liquid-fixpoint",
+    "B": {
+      "config": "B",
+      "status": "ok",
+      "hb": 33287,
+      "ms": 1270,
+      "depth": 128,
+      "nconst": 51,
+      "kerus": 8363,
+      "phases": {
+        "fusion:sol": 32,
+        "fusion:build": 56,
+        "fusion:clean": 146,
+        "solve_fixpoint:fuse": 0,
+        "solve_fixpoint:pa": 25429,
+        "solve_fixpoint:close": 7386
+      }
+    },
+    "A": {
+      "config": "A",
+      "status": "ok",
+      "hb": 39414,
+      "ms": 1472,
+      "depth": 166,
+      "nconst": 48,
+      "kerus": 4127,
+      "phases": {
+        "solve_fixpoint:fuse": 182,
+        "solve_fixpoint:pa": 25417,
+        "solve_fixpoint:close": 13663
+      },
+      "n_acyclic": 2,
+      "n_cyclic": 4
+    }
+  },
+  "Fix-Test4": {
+    "group": "FluxRS",
+    "A": {
+      "config": "A",
+      "status": "ok",
+      "hb": 4414,
+      "ms": 172,
+      "depth": 59,
+      "nconst": 22,
+      "kerus": 1550,
+      "phases": {
+        "solve_fixpoint:fuse": 337,
+        "solve_fixpoint:pa": 0,
+        "solve_fixpoint:close": 4021
+      },
+      "n_acyclic": 10,
+      "n_cyclic": 0
+    },
+    "B": {
+      "config": "B",
+      "status": "ok",
+      "hb": 893,
+      "ms": 69,
+      "depth": 145,
+      "nconst": 33,
+      "kerus": 4310,
+      "phases": {
+        "fusion:sol": 96,
+        "fusion:build": 23,
+        "fusion:clean": 296,
+        "solve_fixpoint:fuse": 0,
+        "solve_fixpoint:pa": 0,
+        "solve_fixpoint:close": 384
+      }
+    }
+  },
+  "Fix-Test5": {
+    "group": "FluxRS",
+    "B": {
+      "config": "B",
+      "status": "ok",
+      "hb": 981,
+      "ms": 59,
+      "depth": 93,
+      "nconst": 45,
+      "kerus": 2333,
+      "phases": {
+        "fusion:sol": 23,
+        "fusion:build": 23,
+        "fusion:clean": 86,
+        "solve_fixpoint:fuse": 0,
+        "solve_fixpoint:pa": 0,
+        "solve_fixpoint:close": 775
+      }
+    },
+    "A": {
+      "config": "A",
+      "status": "ok",
+      "hb": 1722,
+      "ms": 82,
+      "depth": 42,
+      "nconst": 27,
+      "kerus": 974,
+      "phases": {
+        "solve_fixpoint:fuse": 115,
+        "solve_fixpoint:pa": 0,
+        "solve_fixpoint:close": 1569
+      },
+      "n_acyclic": 4,
+      "n_cyclic": 0
+    }
+  },
+  "Fix-Test7": {
+    "group": "FluxRS",
+    "A": {
+      "config": "A",
+      "status": "ok",
+      "hb": 2695,
+      "ms": 132,
+      "depth": 106,
+      "nconst": 44,
+      "kerus": 1389,
+      "phases": {
+        "solve_fixpoint:fuse": 117,
+        "solve_fixpoint:pa": 0,
+        "solve_fixpoint:close": 2533
+      },
+      "n_acyclic": 2,
+      "n_cyclic": 0
+    },
+    "B": {
+      "config": "B",
+      "status": "ok",
+      "hb": 646,
+      "ms": 40,
+      "depth": 85,
+      "nconst": 36,
+      "kerus": 1649,
+      "phases": {
+        "fusion:sol": 15,
+        "fusion:build": 15,
+        "fusion:clean": 74,
+        "solve_fixpoint:fuse": 0,
+        "solve_fixpoint:pa": 0,
+        "solve_fixpoint:close": 493
+      }
+    }
+  },
+  "FibMemoBoth": {
+    "group": "FluxRS",
+    "B": {
+      "config": "B",
+      "status": "ok",
+      "hb": 11857,
+      "ms": 523,
+      "depth": 46,
+      "nconst": 56,
+      "kerus": 1228,
+      "phases": {
+        "fusion:sol": 4,
+        "fusion:build": 10,
+        "fusion:clean": 26,
+        "solve_fixpoint:fuse": 0,
+        "solve_fixpoint:pa": 132,
+        "solve_fixpoint:close": 11637
+      }
+    },
+    "A": {
+      "config": "A",
+      "status": "ok",
+      "hb": 12810,
+      "ms": 571,
+      "depth": 45,
+      "nconst": 36,
+      "kerus": 918,
+      "phases": {
+        "solve_fixpoint:fuse": 17,
+        "solve_fixpoint:pa": 131,
+        "solve_fixpoint:close": 12625
+      },
+      "n_acyclic": 1,
+      "n_cyclic": 1
+    }
+  },
+  "Fix-Test1": {
+    "group": "FluxRS",
+    "B": {
+      "config": "B",
+      "status": "ok",
+      "hb": 9081,
+      "ms": 365,
+      "depth": 62,
+      "nconst": 54,
+      "kerus": 1942,
+      "phases": {
+        "fusion:sol": 7,
+        "fusion:build": 19,
+        "fusion:clean": 45,
+        "solve_fixpoint:fuse": 0,
+        "solve_fixpoint:pa": 6456,
+        "solve_fixpoint:close": 2468
+      }
+    },
+    "A": {
+      "config": "A",
+      "status": "ok",
+      "hb": 10314,
+      "ms": 442,
+      "depth": 49,
+      "nconst": 64,
+      "kerus": 1342,
+      "phases": {
+        "solve_fixpoint:fuse": 45,
+        "solve_fixpoint:pa": 6460,
+        "solve_fixpoint:close": 3745
+      },
+      "n_acyclic": 1,
+      "n_cyclic": 2
+    }
+  },
+  "Fix-Test6": {
+    "group": "FluxRS",
+    "B": {
+      "config": "B",
+      "status": "ok",
+      "hb": 10044,
+      "ms": 428,
+      "depth": 80,
+      "nconst": 59,
+      "kerus": 2976,
+      "phases": {
+        "fusion:sol": 23,
+        "fusion:build": 30,
+        "fusion:clean": 76,
+        "solve_fixpoint:fuse": 0,
+        "solve_fixpoint:pa": 6616,
+        "solve_fixpoint:close": 3184
+      }
+    },
+    "A": {
+      "config": "A",
+      "status": "ok",
+      "hb": 10907,
+      "ms": 453,
+      "depth": 49,
+      "nconst": 40,
+      "kerus": 1283,
+      "phases": {
+        "solve_fixpoint:fuse": 122,
+        "solve_fixpoint:pa": 6615,
+        "solve_fixpoint:close": 4100
+      },
+      "n_acyclic": 3,
+      "n_cyclic": 1
+    }
+  },
+  "Quicksort": {
+    "group": "FluxRS",
+    "B": {
+      "config": "B",
+      "status": "ok",
+      "hb": 306127,
+      "ms": 8487,
+      "depth": 209,
+      "nconst": 104,
+      "kerus": 24446,
+      "phases": {
+        "fusion:sol": 51,
+        "fusion:build": 73,
+        "fusion:clean": 261,
+        "solve_fixpoint:fuse": 0,
+        "solve_fixpoint:pa": 0,
+        "solve_fixpoint:close": 305019
+      }
+    },
+    "A": {
+      "config": "A",
+      "status": "ok",
+      "hb": 314737,
+      "ms": 8815,
+      "depth": 159,
+      "nconst": 92,
+      "kerus": 17530,
+      "phases": {
+        "solve_fixpoint:fuse": 303,
+        "solve_fixpoint:pa": 0,
+        "solve_fixpoint:close": 313882
+      },
+      "n_acyclic": 2,
+      "n_cyclic": 0
+    }
+  }
+}
