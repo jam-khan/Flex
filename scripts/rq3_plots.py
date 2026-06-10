@@ -75,8 +75,8 @@ def geomean(xs):
 def fig_phases(rows):
     rows = sorted(rows, key=lambda r: (r["bucket"] != "acyclic_only", -r["spd"]))
     n = len(rows)
-    fig, ax = plt.subplots(figsize=(7.0, 0.62 * n + 0.7))
-    H = 0.34                      # bar height
+    fig, ax = plt.subplots(figsize=(7.0, 0.34 * n + 0.55))
+    H = 0.36                      # bar height
     sep_after = None
     for i, r in enumerate(rows):
         cy = n - 1 - i            # top-to-bottom
@@ -106,10 +106,6 @@ def fig_phases(rows):
     ax.axvline(1.0, color="#bbb", lw=0.6, ls=(0, (3, 3)), zorder=0)
     if sep_after is not None:
         ax.axhline(sep_after, color="#888", lw=0.7)
-        ax.text(1.16, sep_after + 0.25, "acyclic-only", fontsize=6.5,
-                ha="right", style="italic", color="#666")
-        ax.text(1.16, sep_after - 0.25, "acyclic + cut", fontsize=6.5,
-                ha="right", va="top", style="italic", color="#666")
     for sp in ("top", "right"):
         ax.spines[sp].set_visible(False)
     ax.legend(handles=[
@@ -202,7 +198,8 @@ def latex_table(rows):
         r"\begin{table}[t]", r"\centering", r"\small",
         r"\caption{Proof-term shape and kernel re-check time (foundational). The"
         r" constructive Zap term (B) is larger than grind's but is built without"
-        r" search and re-checks in well under a millisecond.}",
+        r" search, and the kernel re-checks it in a few milliseconds"
+        r" (sub-millisecond on all but the largest VC, 24\,ms on Quicksort).}",
         r"\label{tab:rq3-term}",
         r"\begin{tabular}{lrrrrrr}", r"\toprule",
         r" & \multicolumn{2}{c}{depth} & \multicolumn{2}{c}{\#consts}"
