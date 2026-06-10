@@ -50,7 +50,14 @@ where
           if domSort.isProp then
             goStrip κ body acc nB (nG + 1) nOr
           else
-            match findOuterBinderToParam κ fvar.fvarId! body with
+            -- A binder ranging over a sort (`∀ _ : Prop`/`Type`) is NOT a numeric
+            -- κ-param, even though `domSort.isProp` is false (its domain-sort is
+            -- `Type`, not `Prop`). Folding it into a param corrupts any guard that
+            -- mentions it (`¬a'₁` → `¬z2`), breaking the σ̂↔proof mirror when a
+            -- sibling clause pins the slot to a literal. Keep it as a σ̂ ∃-binder.
+            let foldAt := if dom.isSort then none
+                          else findOuterBinderToParam κ fvar.fvarId! body
+            match foldAt with
             | some i =>
               goStrip κ body (acc ++ [(fvar.fvarId!, κ.params[i]!)]) (nB + 1) nG nOr
             | none =>

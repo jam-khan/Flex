@@ -123,7 +123,11 @@ where
           if domSort.isProp then
             goStrip κ body acc
           else
-            match findOuterBinderToParam κ fvar.fvarId! body with
+            -- See `exprSolScopedPres`: never fold a sort-typed (`Prop`/`Type`)
+            -- binder into a κ-param — it would corrupt guards mentioning it.
+            let foldAt := if dom.isSort then none
+                          else findOuterBinderToParam κ fvar.fvarId! body
+            match foldAt with
             | some i =>
               let paramName := κ.params[i]!
               goStrip κ body (acc ++ [(fvar.fvarId!, paramName)])

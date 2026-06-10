@@ -135,27 +135,30 @@ private def solveFixpointImpl : TacticM Unit := withMainContext do
       -- that is fine — κ-mvars are global, so the unifier resolves `?k4` once PA
       -- assigns the cut. Fuse every acyclic κ (exactly like `fusion`); PA then
       -- solves ONLY the genuine feedback-vertex cut.
-      let mut curr := body
-      for κ in acyclic do
-        IO.println s!"[solve] --- {κ.name} ---"
-        let scoped' ← (exprScope κ curr).run kctx
-        let sol     ← (exprSolScoped κ scoped').run kctx
-        IO.println s!"[solve]   sol = {← ppExpr sol}"
-        let lam ← solToWitnessExpr sol κ.params κ.paramTypes
-        IO.println s!"[solve]   lam = {← ppExpr lam}"
-        κ.mvarId.assign lam
-        curr ← (exprElimStar κ sol curr).run kctx
+      let curr ← benchPhase "solve_fixpoint" "fuse" do
+        let mut curr := body
+        for κ in acyclic do
+          IO.println s!"[solve] --- {κ.name} ---"
+          let scoped' ← (exprScope κ curr).run kctx
+          let sol     ← (exprSolScoped κ scoped').run kctx
+          IO.println s!"[solve]   sol = {← ppExpr sol}"
+          let lam ← solToWitnessExpr sol κ.params κ.paramTypes
+          IO.println s!"[solve]   lam = {← ppExpr lam}"
+          κ.mvarId.assign lam
+          curr ← (exprElimStar κ sol curr).run kctx
+        pure curr
 
       -- Predicate abstraction only for the genuine cut κs.
       let paSet := cyclic
-      if !paSet.isEmpty then
-        IO.println s!"[solve_fixpoint] --- PA on cyclic κ's {paSet.map (·.name)} ---"
-        let flatCs ← (exprFlat curr).run kctx
-        let paSols ← predicateAbstraction kctx paSet flatCs
-        for (κ, sol) in paSols do
-          IO.println s!"[solve_fixpoint]   PA sol for {κ.name} = {← ppExpr sol}"
-          let lam ← solToWitnessExpr sol κ.params κ.paramTypes
-          κ.mvarId.assign lam
+      benchPhase "solve_fixpoint" "pa" do
+        if !paSet.isEmpty then
+          IO.println s!"[solve_fixpoint] --- PA on cyclic κ's {paSet.map (·.name)} ---"
+          let flatCs ← (exprFlat curr).run kctx
+          let paSols ← predicateAbstraction kctx paSet flatCs
+          for (κ, sol) in paSols do
+            IO.println s!"[solve_fixpoint]   PA sol for {κ.name} = {← ppExpr sol}"
+            let lam ← solToWitnessExpr sol κ.params κ.paramTypes
+            κ.mvarId.assign lam
     )
     (fun e => do
       logInfo m!"[solve_fixpoint] ✗ Solver failed: {e.toMessageData}"
@@ -170,7 +173,7 @@ private def solveFixpointImpl : TacticM Unit := withMainContext do
   if unfilled.isEmpty then
     -- Refresh LCtx — fusion's mvar assignments / earlier tactics may have
     -- mutated the main goal beyond the surrounding `withMainContext` snapshot.
-    withMainContext closeResidualGoals
+    benchPhase "solve_fixpoint" "close" (withMainContext closeResidualGoals)
   else
     let residual ← getMainGoal
     -- κs first so the user fills them before tackling the residual,
