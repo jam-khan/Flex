@@ -11,8 +11,4 @@ def maps00Prop : Prop :=
           ∧ (∀ v : Int, v = m2 30 → v = 0))
 
 theorem maps00Proof : maps00Prop := by
-  intro m1 hm1
-  subst hm1
-  refine ⟨by simp, fun m2 hm2 => ?_⟩
-  subst hm2
-  simp [Function.update_self, Function.update_of_ne]
+  solve_fixpoint

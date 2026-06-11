@@ -18,6 +18,7 @@ def lhSetProp : Prop :=
         ∀ _x : Int, xs = {a0} ∪ a1 → xs ≠ (∅ : Finset Int))
 
 theorem lhSetProof : lhSetProp := by
+  unfold lhSetProp
   intro xs _
   refine ⟨fun _ h => h, ?_⟩
   intro a0 _ a1 _ _x hxs

@@ -37,18 +37,44 @@ def bitv_vc : Prop :=
   ∀ res : Int, res = res_.toInt →
     res < size
 
--- Ground VC (no κ-vars): requires bitvector reasoning about power-of-2 masks
--- mixed with `Int`. `size : Int` is unbounded while `size_ : BitVec 32` is
--- 32-bit; strictly this statement would need `size < 2^32` or similar to
--- hold. Left as `sorry` — outside the fusion/fixpoint solver's scope.
--- Tried `bv_decide`: rejected — hypotheses mix `Int` and `BitVec 32` via
--- `BitVec.ofInt` / `.toInt`, outside `bv_decide`'s supported fragment. A
--- pure-bitvector reformulation (or a `size < 2^32` bound) would be needed.
--- Manual proof sketch (why this is non-trivial):
---   split on size_ = 0 vs size_ = 2^k (power-of-2)
---   case size_ = 0 : size ≥ 2^32, and res_.toInt < 2^31 ≤ size
---   case size_ = 2^k: mask = 2^k - 1, res_.toNat < 2^k = size_.toNat ≤ size
--- The bridge `BitVec.ofInt⁻¹` ↔ `Int` requires `%` reasoning that neither
--- `bv_decide` nor `omega`/`grind` handles. Left as `sorry`.
 theorem bitv_proof : bitv_vc := by
-  sorry
+  unfold bitv_vc
+  intro one_ hone_ zero_ hzero_ size hsize index hindex size_ hsize_ index_ hindex_ mask_ hmask_ res_ hres_ res hres
+  by_cases h : size % 2^32 = 0
+  · grind
+  · -- h : size % 2^32 ≠ 0
+    subst hone_ hzero_ hindex_ hmask_ hres_ hres
+    obtain ⟨hsize_eq, hpow⟩ := hsize_
+    subst hsize_eq
+    -- Goal: (BitVec.ofInt 32 index &&& (BitVec.ofInt 32 size - BitVec.ofInt 32 1)).toInt < size
+    -- size_.toNat ≠ 0 because size % 2^32 ≠ 0
+    have hsize_ne : (BitVec.ofInt 32 size).toNat ≠ 0 := by
+      rw [BitVec.toNat_ofInt]; omega
+    -- (size_ - 1).toNat = size_.toNat - 1 (no wrap since size_.toNat ≥ 1)
+    have hsub : (BitVec.ofInt 32 size - BitVec.ofInt 32 1).toNat =
+                (BitVec.ofInt 32 size).toNat - 1 := by
+      rw [show BitVec.ofInt 32 1 = 1#32 from by decide,
+          BitVec.toNat_sub, BitVec.toNat_one (by grind)]
+      have := (BitVec.ofInt 32 size).isLt; omega
+    -- res_.toNat ≤ mask_.toNat (and-with-mask ≤ mask)
+    have hle : (BitVec.ofInt 32 index &&& (BitVec.ofInt 32 size - BitVec.ofInt 32 1)).toNat ≤
+               (BitVec.ofInt 32 size - BitVec.ofInt 32 1).toNat := by
+      rw [BitVec.toNat_and]; exact Nat.and_le_right
+    -- res_.toNat < size_.toNat
+    have hlt : (BitVec.ofInt 32 index &&& (BitVec.ofInt 32 size - BitVec.ofInt 32 1)).toNat <
+               (BitVec.ofInt 32 size).toNat := by omega
+    -- size_.toNat ≤ size (since size ≥ size % 2^32 = size_.toNat)
+    have hnat_le : ((BitVec.ofInt 32 size).toNat : Int) ≤ size := by
+      rw [BitVec.toNat_ofInt]
+      have : 0 ≤ size % (2 : Int) ^ 32 := Int.emod_nonneg _ (by grind)
+      omega
+    -- Split on sign of res_
+    let r := (BitVec.ofInt 32 index &&& (BitVec.ofInt 32 size - BitVec.ofInt 32 1))
+    rcases Nat.lt_or_ge (2 * r.toNat) (2 ^ 32) with hpos | hneg
+    · -- r.toInt = r.toNat (non-negative signed value)
+      have := BitVec.toInt_eq_toNat_of_lt hpos
+      grind
+    · -- r.toInt < 0
+      have hbound := r.isLt
+      have : r.toInt = (r.toNat : Int) - 2 ^ 32 := by simp [BitVec.toInt]; omega
+      grind
