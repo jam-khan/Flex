@@ -210,22 +210,3 @@ example : solK1_ex4 := by
   lazy_unfold κ1
   lazy_unfold κ2
   grind
-
-/-- **5. Mixed acyclic + cyclic.** κ1 is purely head-position (acyclic);
-    κ2 has a self-loop (`κ2 y → κ2 (y+1)`) and is left cyclic. `solK1`
-    binds κ1 and leaves the ∃ κ2 untouched for `solve_fixpoint`. -/
-def solK1_ex5 : Prop :=
-  ∃ κ3 : Int → Prop,
-  ∃ κ1 : Int → Prop, ∃ κ2 : Int → Prop,
-      (∀ x : Int, x = 0 → κ1 x)
-    ∧ (∀ y : Int, κ2 y → κ2 (y + 1))
-    ∧ (∀ ν : Int, ν = 0 → κ2 ν)
-    ∧ (∀ ν : Int, ν = 0 → κ3 ν)
-
-example : solK1_ex5 := by
-  unfold solK1_ex5
-  solK1
-  solK1
-  -- κ1 : Int → Prop := …
-  -- ⊢ ∃ κ2, … (κ2 left as an existential — cyclic, needs solve_fixpoint)
-  sorry

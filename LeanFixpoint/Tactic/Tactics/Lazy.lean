@@ -117,6 +117,6 @@ theorem ex6Proof : ex6 := by
   name_witness fun z0 z1 => ∃ ν, ν = z1 - 1 ∧ z0 = ν
   lazy_unfold κ1
   lazy_unfold κ2
-  sorry
+  grind
 
 end Examples
