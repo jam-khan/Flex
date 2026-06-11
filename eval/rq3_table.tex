@@ -2,7 +2,7 @@
 \begin{table}[t]
 \centering
 \small
-\caption{RQ3: deterministic proof term (fusion, \textbf{B}) vs.\ proof search (grind, \textbf{A}) on benchmarks with $\geq 1$ acyclic $\kappa$ (LF: Liquid-fixpoint, FX: FluxRS). Heartbeats in thousands; deterministic.}
+\caption{RQ3: deterministic proof term (Zap, \textbf{B}) vs.\ proof search (grind, \textbf{A}) on benchmarks with $\geq 1$ acyclic $\kappa$ (LF: Liquid-fixpoint, FX: FluxRS). Heartbeat counts (in thousands) are deterministic across runs.}
 \label{tab:rq3}
 \begin{tabular}{llrrrrr}
 \toprule
@@ -39,7 +39,7 @@ Benchmark & Src & $\kappa_{\text{acy}}$ & $\kappa_{\text{cut}}$ & A (hb) & B (hb
 \begin{table}[t]
 \centering
 \small
-\caption{Proof-term shape and kernel re-check time (foundational). The constructive Zap term (B) is larger than grind's but is built without search, and the kernel re-checks it in a few milliseconds (sub-millisecond on all but the largest VC, 24\,ms on Quicksort).}
+\caption{Proof-term shape and kernel re-check time (foundational). Depth is the elaborated proof term's expression-tree depth; \#consts its number of distinct constants. The constructive Zap term (B) is deeper than grind's on 15 of 18 VCs but is built without search, and the kernel re-checks every term in under 25\,ms.}
 \label{tab:rq3-term}
 \begin{tabular}{lrrrrrr}
 \toprule
