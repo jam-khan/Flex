@@ -15,5 +15,4 @@ def lhMapProp : Prop :=
     ∧ foo moo
 
 theorem lhMapProof : lhMapProp := by
-  intro moo hfoo
-  exact ⟨rfl, hfoo⟩
+  solve_fixpoint
