@@ -96,7 +96,7 @@ private def closeResidualGoals : TacticM Unit := do
   Expected to handle every example in `Demo/Cyclic.lean` and benchmarks with
   invariants expressible as a conjunction of tagged qualifier instantiations.
 -/
-private def solveFixpointImpl : TacticM Unit := withMainContext do
+def solveFixpointImpl : TacticM Unit := withMainContext do
   -- Unfolding essentially
   let goal ← getMainGoal
   let _    ← attemptTactic
