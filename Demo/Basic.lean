@@ -7,6 +7,7 @@ def ex1 : Prop :=
     ∧ (∀ y : Int, κ y x → ∀ ν : Int, ν = y + 1 → 0 ≤ ν)
 
 theorem ex1Proof' : ex1 := by
+  unfold ex1
   fusion
   sorry
 
@@ -421,6 +422,7 @@ theorem ex_pairProof' : ex_pair := by
   fusion
   all_goals grind
 
+
 def ex_prod : Prop :=
   ∃ κ : (Int × Int) → Prop,
     ∀ a : Int,
@@ -528,4 +530,3 @@ theorem ex_stressProof' : ex_stress := by
 
 theorem ex_stressProof : ex_stress := by
   solve_fixpoint
-
