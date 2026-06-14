@@ -1,650 +1,940 @@
 {
   "arbitrary-kvar-arg": {
     "group": "Liquid-fixpoint",
-    "B": {
-      "config": "B",
+    "n_acyclic": 2,
+    "n_cyclic": 0,
+    "zap": {
+      "config": "zap",
+      "tactic": "fusion",
       "status": "ok",
-      "hb": 969,
-      "ms": 66,
+      "hb": 264,
+      "ms": 25,
       "depth": 99,
-      "nconst": 40,
-      "kerus": 4288,
+      "nconst": 46,
+      "kerus": 9387,
       "phases": {
         "fusion:sol": 20,
         "fusion:build": 18,
-        "fusion:clean": 101,
-        "solve_fixpoint:fuse": 0,
-        "solve_fixpoint:pa": 0,
-        "solve_fixpoint:close": 755
-      }
-    },
-    "A": {
-      "config": "A",
-      "status": "ok",
-      "hb": 6424,
-      "ms": 319,
-      "depth": 73,
-      "nconst": 49,
-      "kerus": 2844,
-      "phases": {
-        "solve_fixpoint:fuse": 159,
-        "solve_fixpoint:pa": 0,
-        "solve_fixpoint:close": 6203
+        "fusion:clean": 101
       },
-      "n_acyclic": 2,
-      "n_cyclic": 0
+      "elim_hb": 139
+    },
+    "grind": {
+      "config": "grind",
+      "tactic": "fusion_grind",
+      "status": "FAIL",
+      "hb": 3383,
+      "ms": 195,
+      "depth": 0,
+      "nconst": 0,
+      "kerus": 0,
+      "phases": {
+        "fusion_grind:sol": 20
+      },
+      "elim_hb": 20
+    },
+    "aesop": {
+      "config": "aesop",
+      "tactic": "fusion_aesop",
+      "status": "ok",
+      "hb": 12387,
+      "ms": 556,
+      "depth": 99,
+      "nconst": 66,
+      "kerus": 10844,
+      "phases": {
+        "fusion_aesop:sol": 20,
+        "fusion_aesop:build": 12093,
+        "fusion_aesop:clean": 102
+      },
+      "elim_hb": 12215
     }
   },
   "exists_oddity": {
     "group": "Liquid-fixpoint",
-    "B": {
-      "config": "B",
+    "n_acyclic": 1,
+    "n_cyclic": 0,
+    "zap": {
+      "config": "zap",
+      "tactic": "fusion",
       "status": "ok",
-      "hb": 127,
-      "ms": 12,
+      "hb": 49,
+      "ms": 8,
       "depth": 45,
-      "nconst": 31,
-      "kerus": 627,
+      "nconst": 38,
+      "kerus": 824,
       "phases": {
         "fusion:sol": 3,
         "fusion:build": 4,
-        "fusion:clean": 20,
-        "solve_fixpoint:fuse": 0,
-        "solve_fixpoint:pa": 0,
-        "solve_fixpoint:close": 81
-      }
-    },
-    "A": {
-      "config": "A",
-      "status": "ok",
-      "hb": 345,
-      "ms": 23,
-      "depth": 21,
-      "nconst": 13,
-      "kerus": 243,
-      "phases": {
-        "solve_fixpoint:fuse": 24,
-        "solve_fixpoint:pa": 0,
-        "solve_fixpoint:close": 308
+        "fusion:clean": 20
       },
-      "n_acyclic": 1,
-      "n_cyclic": 0
+      "elim_hb": 27
+    },
+    "aesop": {
+      "config": "aesop",
+      "tactic": "fusion_aesop",
+      "status": "ok",
+      "hb": 360,
+      "ms": 38,
+      "depth": 45,
+      "nconst": 49,
+      "kerus": 859,
+      "phases": {
+        "fusion_aesop:sol": 3,
+        "fusion_aesop:build": 313,
+        "fusion_aesop:clean": 20
+      },
+      "elim_hb": 336
+    },
+    "grind": {
+      "config": "grind",
+      "tactic": "fusion_grind",
+      "status": "ok",
+      "hb": 406,
+      "ms": 33,
+      "depth": 45,
+      "nconst": 36,
+      "kerus": 2193,
+      "phases": {
+        "fusion_grind:sol": 3,
+        "fusion_grind:build": 362,
+        "fusion_grind:clean": 20
+      },
+      "elim_hb": 385
     }
   },
   "icfp17-ex1": {
     "group": "Liquid-fixpoint",
-    "B": {
-      "config": "B",
+    "n_acyclic": 1,
+    "n_cyclic": 0,
+    "zap": {
+      "config": "zap",
+      "tactic": "fusion",
       "status": "ok",
-      "hb": 233,
-      "ms": 25,
+      "hb": 46,
+      "ms": 13,
       "depth": 47,
-      "nconst": 36,
-      "kerus": 975,
+      "nconst": 43,
+      "kerus": 786,
       "phases": {
         "fusion:sol": 3,
         "fusion:build": 4,
-        "fusion:clean": 16,
-        "solve_fixpoint:fuse": 0,
-        "solve_fixpoint:pa": 0,
-        "solve_fixpoint:close": 189
-      }
-    },
-    "A": {
-      "config": "A",
-      "status": "ok",
-      "hb": 415,
-      "ms": 32,
-      "depth": 21,
-      "nconst": 20,
-      "kerus": 331,
-      "phases": {
-        "solve_fixpoint:fuse": 18,
-        "solve_fixpoint:pa": 0,
-        "solve_fixpoint:close": 384
+        "fusion:clean": 16
       },
-      "n_acyclic": 1,
-      "n_cyclic": 0
+      "elim_hb": 23
+    },
+    "grind": {
+      "config": "grind",
+      "tactic": "fusion_grind",
+      "status": "ok",
+      "hb": 587,
+      "ms": 45,
+      "depth": 47,
+      "nconst": 42,
+      "kerus": 735,
+      "phases": {
+        "fusion_grind:sol": 3,
+        "fusion_grind:build": 546,
+        "fusion_grind:clean": 16
+      },
+      "elim_hb": 565
+    },
+    "aesop": {
+      "config": "aesop",
+      "tactic": "fusion_aesop",
+      "status": "ok",
+      "hb": 244,
+      "ms": 48,
+      "depth": 47,
+      "nconst": 51,
+      "kerus": 789,
+      "phases": {
+        "fusion_aesop:sol": 3,
+        "fusion_aesop:build": 199,
+        "fusion_aesop:clean": 16
+      },
+      "elim_hb": 218
     }
   },
   "icfp17-ex2": {
     "group": "Liquid-fixpoint",
-    "A": {
-      "config": "A",
+    "n_acyclic": 2,
+    "n_cyclic": 0,
+    "zap": {
+      "config": "zap",
+      "tactic": "fusion",
       "status": "ok",
-      "hb": 3023,
-      "ms": 152,
-      "depth": 41,
-      "nconst": 23,
-      "kerus": 702,
-      "phases": {
-        "solve_fixpoint:fuse": 97,
-        "solve_fixpoint:pa": 0,
-        "solve_fixpoint:close": 2900
-      },
-      "n_acyclic": 2,
-      "n_cyclic": 0
-    },
-    "B": {
-      "config": "B",
-      "status": "ok",
-      "hb": 582,
-      "ms": 44,
+      "hb": 156,
+      "ms": 13,
       "depth": 74,
-      "nconst": 39,
-      "kerus": 1551,
+      "nconst": 46,
+      "kerus": 2663,
       "phases": {
         "fusion:sol": 10,
         "fusion:build": 12,
-        "fusion:clean": 66,
-        "solve_fixpoint:fuse": 0,
-        "solve_fixpoint:pa": 0,
-        "solve_fixpoint:close": 450
-      }
+        "fusion:clean": 66
+      },
+      "elim_hb": 88
+    },
+    "grind": {
+      "config": "grind",
+      "tactic": "fusion_grind",
+      "status": "ok",
+      "hb": 8733,
+      "ms": 495,
+      "depth": 74,
+      "nconst": 46,
+      "kerus": 3610,
+      "phases": {
+        "fusion_grind:sol": 10,
+        "fusion_grind:build": 8594,
+        "fusion_grind:clean": 66
+      },
+      "elim_hb": 8670
+    },
+    "aesop": {
+      "config": "aesop",
+      "tactic": "fusion_aesop",
+      "status": "ok",
+      "hb": 2412,
+      "ms": 212,
+      "depth": 99,
+      "nconst": 59,
+      "kerus": 4711,
+      "phases": {
+        "fusion_aesop:sol": 10,
+        "fusion_aesop:build": 2240,
+        "fusion_aesop:clean": 66
+      },
+      "elim_hb": 2316
     }
   },
   "icfp17-ex3": {
     "group": "Liquid-fixpoint",
-    "B": {
-      "config": "B",
+    "n_acyclic": 3,
+    "n_cyclic": 0,
+    "zap": {
+      "config": "zap",
+      "tactic": "fusion",
       "status": "ok",
-      "hb": 495,
-      "ms": 31,
+      "hb": 123,
+      "ms": 11,
       "depth": 68,
-      "nconst": 39,
-      "kerus": 998,
+      "nconst": 46,
+      "kerus": 1571,
       "phases": {
         "fusion:sol": 9,
         "fusion:build": 7,
-        "fusion:clean": 64,
-        "solve_fixpoint:fuse": 0,
-        "solve_fixpoint:pa": 0,
-        "solve_fixpoint:close": 385
-      }
-    },
-    "A": {
-      "config": "A",
-      "status": "ok",
-      "hb": 3073,
-      "ms": 154,
-      "depth": 38,
-      "nconst": 34,
-      "kerus": 495,
-      "phases": {
-        "solve_fixpoint:fuse": 80,
-        "solve_fixpoint:pa": 0,
-        "solve_fixpoint:close": 2974
+        "fusion:clean": 64
       },
-      "n_acyclic": 3,
-      "n_cyclic": 0
+      "elim_hb": 80
+    },
+    "grind": {
+      "config": "grind",
+      "tactic": "fusion_grind",
+      "status": "FAIL",
+      "hb": 1367,
+      "ms": 101,
+      "depth": 0,
+      "nconst": 0,
+      "kerus": 0,
+      "phases": {
+        "fusion_grind:sol": 9
+      },
+      "elim_hb": 9
+    },
+    "aesop": {
+      "config": "aesop",
+      "tactic": "fusion_aesop",
+      "status": "ok",
+      "hb": 2768,
+      "ms": 171,
+      "depth": 68,
+      "nconst": 59,
+      "kerus": 2627,
+      "phases": {
+        "fusion_aesop:sol": 9,
+        "fusion_aesop:build": 2640,
+        "fusion_aesop:clean": 64
+      },
+      "elim_hb": 2713
     }
   },
   "kut00": {
     "group": "Liquid-fixpoint",
-    "A": {
-      "config": "A",
+    "n_acyclic": 1,
+    "n_cyclic": 0,
+    "zap": {
+      "config": "zap",
+      "tactic": "fusion",
       "status": "ok",
-      "hb": 418,
-      "ms": 23,
-      "depth": 29,
-      "nconst": 21,
-      "kerus": 257,
-      "phases": {
-        "solve_fixpoint:fuse": 27,
-        "solve_fixpoint:pa": 0,
-        "solve_fixpoint:close": 378
-      },
-      "n_acyclic": 1,
-      "n_cyclic": 0
-    },
-    "B": {
-      "config": "B",
-      "status": "ok",
-      "hb": 54,
-      "ms": 8,
+      "hb": 49,
+      "ms": 9,
       "depth": 47,
-      "nconst": 37,
-      "kerus": 526,
+      "nconst": 40,
+      "kerus": 1245,
       "phases": {
         "fusion:sol": 3,
         "fusion:build": 3,
-        "fusion:clean": 20,
-        "solve_fixpoint:fuse": 0,
-        "solve_fixpoint:pa": 0,
-        "solve_fixpoint:close": 9
-      }
+        "fusion:clean": 20
+      },
+      "elim_hb": 26
+    },
+    "grind": {
+      "config": "grind",
+      "tactic": "fusion_grind",
+      "status": "ok",
+      "hb": 523,
+      "ms": 45,
+      "depth": 47,
+      "nconst": 39,
+      "kerus": 2095,
+      "phases": {
+        "fusion_grind:sol": 3,
+        "fusion_grind:build": 479,
+        "fusion_grind:clean": 20
+      },
+      "elim_hb": 502
+    },
+    "aesop": {
+      "config": "aesop",
+      "tactic": "fusion_aesop",
+      "status": "ok",
+      "hb": 318,
+      "ms": 58,
+      "depth": 59,
+      "nconst": 47,
+      "kerus": 967,
+      "phases": {
+        "fusion_aesop:sol": 3,
+        "fusion_aesop:build": 267,
+        "fusion_aesop:clean": 20
+      },
+      "elim_hb": 290
     }
   },
   "mod00": {
     "group": "Liquid-fixpoint",
-    "A": {
-      "config": "A",
+    "n_acyclic": 1,
+    "n_cyclic": 0,
+    "zap": {
+      "config": "zap",
+      "tactic": "fusion",
       "status": "ok",
-      "hb": 528,
-      "ms": 31,
-      "depth": 20,
-      "nconst": 18,
-      "kerus": 260,
-      "phases": {
-        "solve_fixpoint:fuse": 23,
-        "solve_fixpoint:pa": 0,
-        "solve_fixpoint:close": 493
-      },
-      "n_acyclic": 1,
-      "n_cyclic": 0
-    },
-    "B": {
-      "config": "B",
-      "status": "ok",
-      "hb": 237,
-      "ms": 19,
+      "hb": 48,
+      "ms": 9,
       "depth": 46,
-      "nconst": 32,
-      "kerus": 469,
+      "nconst": 39,
+      "kerus": 678,
       "phases": {
         "fusion:sol": 3,
         "fusion:build": 4,
-        "fusion:clean": 19,
-        "solve_fixpoint:fuse": 0,
-        "solve_fixpoint:pa": 0,
-        "solve_fixpoint:close": 191
-      }
+        "fusion:clean": 19
+      },
+      "elim_hb": 26
+    },
+    "grind": {
+      "config": "grind",
+      "tactic": "fusion_grind",
+      "status": "ok",
+      "hb": 627,
+      "ms": 58,
+      "depth": 46,
+      "nconst": 38,
+      "kerus": 690,
+      "phases": {
+        "fusion_grind:sol": 3,
+        "fusion_grind:build": 583,
+        "fusion_grind:clean": 19
+      },
+      "elim_hb": 605
+    },
+    "aesop": {
+      "config": "aesop",
+      "tactic": "fusion_aesop",
+      "status": "ok",
+      "hb": 496,
+      "ms": 53,
+      "depth": 46,
+      "nconst": 51,
+      "kerus": 2741,
+      "phases": {
+        "fusion_aesop:sol": 3,
+        "fusion_aesop:build": 449,
+        "fusion_aesop:clean": 19
+      },
+      "elim_hb": 471
     }
   },
   "scrape03": {
     "group": "Liquid-fixpoint",
-    "A": {
-      "config": "A",
+    "n_acyclic": 1,
+    "n_cyclic": 0,
+    "zap": {
+      "config": "zap",
+      "tactic": "fusion",
       "status": "ok",
-      "hb": 3527,
-      "ms": 689,
-      "depth": 65,
-      "nconst": 148,
-      "kerus": 8154,
-      "phases": {
-        "solve_fixpoint:fuse": 7,
-        "solve_fixpoint:pa": 0,
-        "solve_fixpoint:close": 3440
-      },
-      "n_acyclic": 1,
-      "n_cyclic": 0
-    },
-    "B": {
-      "config": "B",
-      "status": "ok",
-      "hb": 3527,
-      "ms": 709,
-      "depth": 83,
-      "nconst": 160,
-      "kerus": 5066,
+      "hb": 34,
+      "ms": 13,
+      "depth": 49,
+      "nconst": 38,
+      "kerus": 1823,
       "phases": {
         "fusion:sol": 4,
         "fusion:build": 4,
-        "fusion:clean": 8,
-        "solve_fixpoint:fuse": 0,
-        "solve_fixpoint:pa": 0,
-        "solve_fixpoint:close": 3423
-      }
+        "fusion:clean": 8
+      },
+      "elim_hb": 16
+    },
+    "grind": {
+      "config": "grind",
+      "tactic": "fusion_grind",
+      "status": "ok",
+      "hb": 213,
+      "ms": 15,
+      "depth": 49,
+      "nconst": 37,
+      "kerus": 472,
+      "phases": {
+        "fusion_grind:sol": 4,
+        "fusion_grind:build": 183,
+        "fusion_grind:clean": 8
+      },
+      "elim_hb": 195
+    },
+    "aesop": {
+      "config": "aesop",
+      "tactic": "fusion_aesop",
+      "status": "ok",
+      "hb": 934,
+      "ms": 71,
+      "depth": 49,
+      "nconst": 41,
+      "kerus": 454,
+      "phases": {
+        "fusion_aesop:sol": 4,
+        "fusion_aesop:build": 903,
+        "fusion_aesop:clean": 8
+      },
+      "elim_hb": 915
     }
   },
   "test02": {
     "group": "Liquid-fixpoint",
-    "A": {
-      "config": "A",
+    "n_acyclic": 1,
+    "n_cyclic": 0,
+    "zap": {
+      "config": "zap",
+      "tactic": "fusion",
       "status": "ok",
-      "hb": 865,
-      "ms": 49,
-      "depth": 26,
-      "nconst": 17,
-      "kerus": 391,
-      "phases": {
-        "solve_fixpoint:fuse": 28,
-        "solve_fixpoint:pa": 0,
-        "solve_fixpoint:close": 822
-      },
-      "n_acyclic": 1,
-      "n_cyclic": 0
-    },
-    "B": {
-      "config": "B",
-      "status": "ok",
-      "hb": 334,
-      "ms": 29,
+      "hb": 61,
+      "ms": 7,
       "depth": 51,
-      "nconst": 33,
-      "kerus": 620,
+      "nconst": 40,
+      "kerus": 910,
       "phases": {
         "fusion:sol": 4,
         "fusion:build": 5,
-        "fusion:clean": 22,
-        "solve_fixpoint:fuse": 0,
-        "solve_fixpoint:pa": 0,
-        "solve_fixpoint:close": 278
-      }
+        "fusion:clean": 22
+      },
+      "elim_hb": 31
+    },
+    "grind": {
+      "config": "grind",
+      "tactic": "fusion_grind",
+      "status": "ok",
+      "hb": 1210,
+      "ms": 71,
+      "depth": 51,
+      "nconst": 39,
+      "kerus": 938,
+      "phases": {
+        "fusion_grind:sol": 4,
+        "fusion_grind:build": 1155,
+        "fusion_grind:clean": 22
+      },
+      "elim_hb": 1181
+    },
+    "aesop": {
+      "config": "aesop",
+      "tactic": "fusion_aesop",
+      "status": "ok",
+      "hb": 876,
+      "ms": 83,
+      "depth": 51,
+      "nconst": 55,
+      "kerus": 1640,
+      "phases": {
+        "fusion_aesop:sol": 4,
+        "fusion_aesop:build": 816,
+        "fusion_aesop:clean": 22
+      },
+      "elim_hb": 842
     }
   },
   "comment": {
     "group": "Liquid-fixpoint",
-    "B": {
-      "config": "B",
+    "n_acyclic": 5,
+    "n_cyclic": 1,
+    "zap": {
+      "config": "zap",
+      "tactic": "fusion",
       "status": "ok",
-      "hb": 173781,
-      "ms": 4900,
+      "hb": 680,
+      "ms": 71,
       "depth": 88,
-      "nconst": 57,
-      "kerus": 6696,
+      "nconst": 53,
+      "kerus": 12622,
       "phases": {
         "fusion:sol": 62,
         "fusion:build": 61,
-        "fusion:clean": 312,
-        "solve_fixpoint:fuse": 0,
-        "solve_fixpoint:pa": 168101,
-        "solve_fixpoint:close": 5041
-      }
-    },
-    "A": {
-      "config": "A",
-      "status": "ok",
-      "hb": 180806,
-      "ms": 5250,
-      "depth": 112,
-      "nconst": 67,
-      "kerus": 5647,
-      "phases": {
-        "solve_fixpoint:fuse": 331,
-        "solve_fixpoint:pa": 168217,
-        "solve_fixpoint:close": 12073
+        "fusion:clean": 312
       },
-      "n_acyclic": 5,
-      "n_cyclic": 1
+      "elim_hb": 435
+    },
+    "grind": {
+      "config": "grind",
+      "tactic": "fusion_grind",
+      "status": "FAIL",
+      "hb": 8200,
+      "ms": 381,
+      "depth": 0,
+      "nconst": 0,
+      "kerus": 0,
+      "phases": {
+        "fusion_grind:sol": 62
+      },
+      "elim_hb": 62
+    },
+    "aesop": {
+      "config": "aesop",
+      "tactic": "fusion_aesop",
+      "status": "ok",
+      "hb": 90337,
+      "ms": 3310,
+      "depth": 194,
+      "nconst": 88,
+      "kerus": 26394,
+      "phases": {
+        "fusion_aesop:sol": 62,
+        "fusion_aesop:build": 89481,
+        "fusion_aesop:clean": 314
+      },
+      "elim_hb": 89857
     }
   },
   "scrape02": {
     "group": "Liquid-fixpoint",
-    "B": {
-      "config": "B",
+    "n_acyclic": 2,
+    "n_cyclic": 4,
+    "zap": {
+      "config": "zap",
+      "tactic": "fusion",
       "status": "ok",
-      "hb": 33287,
-      "ms": 1270,
+      "hb": 514,
+      "ms": 37,
       "depth": 128,
-      "nconst": 51,
-      "kerus": 8363,
+      "nconst": 45,
+      "kerus": 15935,
       "phases": {
         "fusion:sol": 32,
         "fusion:build": 56,
-        "fusion:clean": 146,
-        "solve_fixpoint:fuse": 0,
-        "solve_fixpoint:pa": 25429,
-        "solve_fixpoint:close": 7386
-      }
-    },
-    "A": {
-      "config": "A",
-      "status": "ok",
-      "hb": 39414,
-      "ms": 1472,
-      "depth": 166,
-      "nconst": 48,
-      "kerus": 4127,
-      "phases": {
-        "solve_fixpoint:fuse": 182,
-        "solve_fixpoint:pa": 25417,
-        "solve_fixpoint:close": 13663
+        "fusion:clean": 146
       },
-      "n_acyclic": 2,
-      "n_cyclic": 4
+      "elim_hb": 234
+    },
+    "grind": {
+      "config": "grind",
+      "tactic": "fusion_grind",
+      "status": "FAIL",
+      "hb": 33661,
+      "ms": 1448,
+      "depth": 0,
+      "nconst": 0,
+      "kerus": 0,
+      "phases": {
+        "fusion_grind:sol": 32
+      },
+      "elim_hb": 32
+    },
+    "aesop": {
+      "config": "aesop",
+      "tactic": "fusion_aesop",
+      "status": "FAIL",
+      "hb": 1469616,
+      "ms": 39088,
+      "depth": 0,
+      "nconst": 0,
+      "kerus": 0,
+      "phases": {
+        "fusion_aesop:sol": 32
+      },
+      "elim_hb": 32
     }
   },
   "Fix-Test4": {
     "group": "FluxRS",
-    "A": {
-      "config": "A",
+    "n_acyclic": 10,
+    "n_cyclic": 0,
+    "zap": {
+      "config": "zap",
+      "tactic": "fusion",
       "status": "ok",
-      "hb": 4414,
-      "ms": 172,
-      "depth": 59,
-      "nconst": 22,
-      "kerus": 1550,
-      "phases": {
-        "solve_fixpoint:fuse": 337,
-        "solve_fixpoint:pa": 0,
-        "solve_fixpoint:close": 4021
-      },
-      "n_acyclic": 10,
-      "n_cyclic": 0
-    },
-    "B": {
-      "config": "B",
-      "status": "ok",
-      "hb": 893,
-      "ms": 69,
+      "hb": 587,
+      "ms": 59,
       "depth": 145,
-      "nconst": 33,
-      "kerus": 4310,
+      "nconst": 40,
+      "kerus": 6869,
       "phases": {
         "fusion:sol": 96,
         "fusion:build": 23,
-        "fusion:clean": 296,
-        "solve_fixpoint:fuse": 0,
-        "solve_fixpoint:pa": 0,
-        "solve_fixpoint:close": 384
-      }
+        "fusion:clean": 296
+      },
+      "elim_hb": 415
+    },
+    "grind": {
+      "config": "grind",
+      "tactic": "fusion_grind",
+      "status": "ok",
+      "hb": 17091,
+      "ms": 741,
+      "depth": 145,
+      "nconst": 46,
+      "kerus": 12683,
+      "phases": {
+        "fusion_grind:sol": 96,
+        "fusion_grind:build": 16534,
+        "fusion_grind:clean": 295
+      },
+      "elim_hb": 16925
+    },
+    "aesop": {
+      "config": "aesop",
+      "tactic": "fusion_aesop",
+      "status": "ok",
+      "hb": 10870,
+      "ms": 469,
+      "depth": 145,
+      "nconst": 54,
+      "kerus": 11551,
+      "phases": {
+        "fusion_aesop:sol": 96,
+        "fusion_aesop:build": 10265,
+        "fusion_aesop:clean": 296
+      },
+      "elim_hb": 10657
     }
   },
   "Fix-Test5": {
     "group": "FluxRS",
-    "B": {
-      "config": "B",
+    "n_acyclic": 4,
+    "n_cyclic": 0,
+    "zap": {
+      "config": "zap",
+      "tactic": "fusion",
       "status": "ok",
-      "hb": 981,
-      "ms": 59,
+      "hb": 229,
+      "ms": 25,
       "depth": 93,
-      "nconst": 45,
-      "kerus": 2333,
+      "nconst": 47,
+      "kerus": 5355,
       "phases": {
         "fusion:sol": 23,
         "fusion:build": 23,
-        "fusion:clean": 86,
-        "solve_fixpoint:fuse": 0,
-        "solve_fixpoint:pa": 0,
-        "solve_fixpoint:close": 775
-      }
-    },
-    "A": {
-      "config": "A",
-      "status": "ok",
-      "hb": 1722,
-      "ms": 82,
-      "depth": 42,
-      "nconst": 27,
-      "kerus": 974,
-      "phases": {
-        "solve_fixpoint:fuse": 115,
-        "solve_fixpoint:pa": 0,
-        "solve_fixpoint:close": 1569
+        "fusion:clean": 86
       },
-      "n_acyclic": 4,
-      "n_cyclic": 0
+      "elim_hb": 132
+    },
+    "grind": {
+      "config": "grind",
+      "tactic": "fusion_grind",
+      "status": "ok",
+      "hb": 19125,
+      "ms": 874,
+      "depth": 93,
+      "nconst": 49,
+      "kerus": 5432,
+      "phases": {
+        "fusion_grind:sol": 23,
+        "fusion_grind:build": 18921,
+        "fusion_grind:clean": 86
+      },
+      "elim_hb": 19030
+    },
+    "aesop": {
+      "config": "aesop",
+      "tactic": "fusion_aesop",
+      "status": "ok",
+      "hb": 18433,
+      "ms": 731,
+      "depth": 93,
+      "nconst": 55,
+      "kerus": 8638,
+      "phases": {
+        "fusion_aesop:sol": 23,
+        "fusion_aesop:build": 18215,
+        "fusion_aesop:clean": 86
+      },
+      "elim_hb": 18324
     }
   },
   "Fix-Test7": {
     "group": "FluxRS",
-    "A": {
-      "config": "A",
+    "n_acyclic": 2,
+    "n_cyclic": 0,
+    "zap": {
+      "config": "zap",
+      "tactic": "fusion",
       "status": "ok",
-      "hb": 2695,
-      "ms": 132,
-      "depth": 106,
-      "nconst": 44,
-      "kerus": 1389,
-      "phases": {
-        "solve_fixpoint:fuse": 117,
-        "solve_fixpoint:pa": 0,
-        "solve_fixpoint:close": 2533
-      },
-      "n_acyclic": 2,
-      "n_cyclic": 0
-    },
-    "B": {
-      "config": "B",
-      "status": "ok",
-      "hb": 646,
-      "ms": 40,
+      "hb": 181,
+      "ms": 21,
       "depth": 85,
-      "nconst": 36,
-      "kerus": 1649,
+      "nconst": 43,
+      "kerus": 6163,
       "phases": {
         "fusion:sol": 15,
         "fusion:build": 15,
-        "fusion:clean": 74,
-        "solve_fixpoint:fuse": 0,
-        "solve_fixpoint:pa": 0,
-        "solve_fixpoint:close": 493
-      }
+        "fusion:clean": 74
+      },
+      "elim_hb": 104
+    },
+    "grind": {
+      "config": "grind",
+      "tactic": "fusion_grind",
+      "status": "FAIL",
+      "hb": 4407,
+      "ms": 218,
+      "depth": 0,
+      "nconst": 0,
+      "kerus": 0,
+      "phases": {
+        "fusion_grind:sol": 15
+      },
+      "elim_hb": 15
+    },
+    "aesop": {
+      "config": "aesop",
+      "tactic": "fusion_aesop",
+      "status": "ok",
+      "hb": 8394,
+      "ms": 391,
+      "depth": 119,
+      "nconst": 64,
+      "kerus": 6343,
+      "phases": {
+        "fusion_aesop:sol": 15,
+        "fusion_aesop:build": 8195,
+        "fusion_aesop:clean": 74
+      },
+      "elim_hb": 8284
     }
   },
   "FibMemoBoth": {
     "group": "FluxRS",
-    "B": {
-      "config": "B",
+    "n_acyclic": 1,
+    "n_cyclic": 1,
+    "zap": {
+      "config": "zap",
+      "tactic": "fusion",
       "status": "ok",
-      "hb": 11857,
-      "ms": 523,
-      "depth": 46,
-      "nconst": 56,
-      "kerus": 1228,
+      "hb": 75,
+      "ms": 12,
+      "depth": 37,
+      "nconst": 50,
+      "kerus": 2305,
       "phases": {
         "fusion:sol": 4,
         "fusion:build": 10,
-        "fusion:clean": 26,
-        "solve_fixpoint:fuse": 0,
-        "solve_fixpoint:pa": 132,
-        "solve_fixpoint:close": 11637
-      }
-    },
-    "A": {
-      "config": "A",
-      "status": "ok",
-      "hb": 12810,
-      "ms": 571,
-      "depth": 45,
-      "nconst": 36,
-      "kerus": 918,
-      "phases": {
-        "solve_fixpoint:fuse": 17,
-        "solve_fixpoint:pa": 131,
-        "solve_fixpoint:close": 12625
+        "fusion:clean": 26
       },
-      "n_acyclic": 1,
-      "n_cyclic": 1
+      "elim_hb": 40
+    },
+    "grind": {
+      "config": "grind",
+      "tactic": "fusion_grind",
+      "status": "ok",
+      "hb": 838,
+      "ms": 41,
+      "depth": 37,
+      "nconst": 49,
+      "kerus": 1123,
+      "phases": {
+        "fusion_grind:sol": 4,
+        "fusion_grind:build": 773,
+        "fusion_grind:clean": 26
+      },
+      "elim_hb": 803
+    },
+    "aesop": {
+      "config": "aesop",
+      "tactic": "fusion_aesop",
+      "status": "ok",
+      "hb": 7324,
+      "ms": 324,
+      "depth": 37,
+      "nconst": 58,
+      "kerus": 3298,
+      "phases": {
+        "fusion_aesop:sol": 4,
+        "fusion_aesop:build": 7256,
+        "fusion_aesop:clean": 26
+      },
+      "elim_hb": 7286
     }
   },
   "Fix-Test1": {
     "group": "FluxRS",
-    "B": {
-      "config": "B",
+    "n_acyclic": 1,
+    "n_cyclic": 2,
+    "zap": {
+      "config": "zap",
+      "tactic": "fusion",
       "status": "ok",
-      "hb": 9081,
-      "ms": 365,
+      "hb": 145,
+      "ms": 17,
       "depth": 62,
-      "nconst": 54,
-      "kerus": 1942,
+      "nconst": 51,
+      "kerus": 2489,
       "phases": {
         "fusion:sol": 7,
         "fusion:build": 19,
-        "fusion:clean": 45,
-        "solve_fixpoint:fuse": 0,
-        "solve_fixpoint:pa": 6456,
-        "solve_fixpoint:close": 2468
-      }
-    },
-    "A": {
-      "config": "A",
-      "status": "ok",
-      "hb": 10314,
-      "ms": 442,
-      "depth": 49,
-      "nconst": 64,
-      "kerus": 1342,
-      "phases": {
-        "solve_fixpoint:fuse": 45,
-        "solve_fixpoint:pa": 6460,
-        "solve_fixpoint:close": 3745
+        "fusion:clean": 45
       },
-      "n_acyclic": 1,
-      "n_cyclic": 2
+      "elim_hb": 71
+    },
+    "grind": {
+      "config": "grind",
+      "tactic": "fusion_grind",
+      "status": "FAIL",
+      "hb": 4010,
+      "ms": 177,
+      "depth": 0,
+      "nconst": 0,
+      "kerus": 0,
+      "phases": {
+        "fusion_grind:sol": 7
+      },
+      "elim_hb": 7
+    },
+    "aesop": {
+      "config": "aesop",
+      "tactic": "fusion_aesop",
+      "status": "ok",
+      "hb": 102376,
+      "ms": 3933,
+      "depth": 88,
+      "nconst": 81,
+      "kerus": 7270,
+      "phases": {
+        "fusion_aesop:sol": 7,
+        "fusion_aesop:build": 102166,
+        "fusion_aesop:clean": 46
+      },
+      "elim_hb": 102219
     }
   },
   "Fix-Test6": {
     "group": "FluxRS",
-    "B": {
-      "config": "B",
+    "n_acyclic": 3,
+    "n_cyclic": 1,
+    "zap": {
+      "config": "zap",
+      "tactic": "fusion",
       "status": "ok",
-      "hb": 10044,
-      "ms": 428,
+      "hb": 250,
+      "ms": 26,
       "depth": 80,
-      "nconst": 59,
-      "kerus": 2976,
+      "nconst": 49,
+      "kerus": 7827,
       "phases": {
         "fusion:sol": 23,
         "fusion:build": 30,
-        "fusion:clean": 76,
-        "solve_fixpoint:fuse": 0,
-        "solve_fixpoint:pa": 6616,
-        "solve_fixpoint:close": 3184
-      }
-    },
-    "A": {
-      "config": "A",
-      "status": "ok",
-      "hb": 10907,
-      "ms": 453,
-      "depth": 49,
-      "nconst": 40,
-      "kerus": 1283,
-      "phases": {
-        "solve_fixpoint:fuse": 122,
-        "solve_fixpoint:pa": 6615,
-        "solve_fixpoint:close": 4100
+        "fusion:clean": 76
       },
-      "n_acyclic": 3,
-      "n_cyclic": 1
+      "elim_hb": 129
+    },
+    "grind": {
+      "config": "grind",
+      "tactic": "fusion_grind",
+      "status": "ok",
+      "hb": 13269,
+      "ms": 684,
+      "depth": 80,
+      "nconst": 50,
+      "kerus": 5843,
+      "phases": {
+        "fusion_grind:sol": 23,
+        "fusion_grind:build": 13051,
+        "fusion_grind:clean": 76
+      },
+      "elim_hb": 13150
+    },
+    "aesop": {
+      "config": "aesop",
+      "tactic": "fusion_aesop",
+      "status": "ok",
+      "hb": 75349,
+      "ms": 2921,
+      "depth": 80,
+      "nconst": 63,
+      "kerus": 6309,
+      "phases": {
+        "fusion_aesop:sol": 23,
+        "fusion_aesop:build": 75115,
+        "fusion_aesop:clean": 76
+      },
+      "elim_hb": 75214
     }
   },
   "Quicksort": {
     "group": "FluxRS",
-    "B": {
-      "config": "B",
+    "n_acyclic": 2,
+    "n_cyclic": 0,
+    "zap": {
+      "config": "zap",
+      "tactic": "fusion",
       "status": "ok",
-      "hb": 306127,
-      "ms": 8487,
-      "depth": 209,
-      "nconst": 104,
-      "kerus": 24446,
+      "hb": 750,
+      "ms": 63,
+      "depth": 145,
+      "nconst": 59,
+      "kerus": 14304,
       "phases": {
         "fusion:sol": 51,
         "fusion:build": 73,
-        "fusion:clean": 261,
-        "solve_fixpoint:fuse": 0,
-        "solve_fixpoint:pa": 0,
-        "solve_fixpoint:close": 305019
-      }
-    },
-    "A": {
-      "config": "A",
-      "status": "ok",
-      "hb": 314737,
-      "ms": 8815,
-      "depth": 159,
-      "nconst": 92,
-      "kerus": 17530,
-      "phases": {
-        "solve_fixpoint:fuse": 303,
-        "solve_fixpoint:pa": 0,
-        "solve_fixpoint:close": 313882
+        "fusion:clean": 261
       },
-      "n_acyclic": 2,
-      "n_cyclic": 0
+      "elim_hb": 385
+    },
+    "grind": {
+      "config": "grind",
+      "tactic": "fusion_grind",
+      "status": "FAIL",
+      "hb": 350525,
+      "ms": 16577,
+      "depth": 0,
+      "nconst": 0,
+      "kerus": 0,
+      "phases": {
+        "fusion_grind:sol": 51
+      },
+      "elim_hb": 51
+    },
+    "aesop": {
+      "config": "aesop",
+      "tactic": "fusion_aesop",
+      "status": "ok",
+      "hb": 797295,
+      "ms": 22272,
+      "depth": 161,
+      "nconst": 94,
+      "kerus": 30429,
+      "phases": {
+        "fusion_aesop:sol": 51,
+        "fusion_aesop:build": 796277,
+        "fusion_aesop:clean": 264
+      },
+      "elim_hb": 796592
     }
   }
 }
