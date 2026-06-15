@@ -47,21 +47,6 @@ example : ex := by
   grind
 ```
 
-### `zapK`
-Source: [Tactics/ZapK.lean:10](../LeanFixpoint/Tactic/Tactics/ZapK.lean#L10). Single-pass solver: for every κ in `∃`-order, computes a path-preserving sol via `exprScopePres` + `exprSol1Pres` + `simplifyAndExists`, assigns the κ-mvar directly, and emits the full proof in one `walkProof` traversal. Faster than `fusion` when the constraint mirrors the and-tree cleanly; does not classify κ's into acyclic / cyclic.
-
-```lean
-example :
-    ∃ κ₁ κ₂ : Int → Int → Prop,
-      ∀ x : Int, 0 ≤ x →
-        (∀ ν, ν = x + 1 → κ₁ ν x)
-      ∧ (∀ ν, ν = x - 1 → κ₂ ν x)
-      ∧ (∀ a, κ₁ a x → 0 ≤ a)
-      ∧ (∀ b, κ₂ b x → ∀ ν, ν = b + 1 → 0 ≤ ν) := by
-  zapK
-  all_goals first | rfl | grind
-```
-
 ### `rewriteKs`
 Source: [Tactics/RewriteKs.lean:129](../LeanFixpoint/Tactic/Tactics/RewriteKs.lean#L129). Reorders the head `∃`-chain into the order the elimination solvers expect (cyclic κ's first, then acyclic in topological / sinks-first order). Discharges the resulting `Iff` via `perm_exists`.
 
@@ -239,4 +224,4 @@ example : <some VC with ∃ κ, … > := by
   -- residuals (if any): zap / split_hyps / leafClosers
 ```
 
-When only acyclic κ's are present, prefer `fusion` (or `zapK` for path-preserving sols). When you want a single κ as a named `let`, use `solK1`.
+When only acyclic κ's are present, prefer `fusion`. When you want a single κ as a named `let`, use `solK1`.

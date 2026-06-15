@@ -43,3 +43,9 @@ def KappaPropArg : Prop :=
 
 theorem KappaPropArg_proof : KappaPropArg := by
   solve_fixpoint
+
+theorem KappaPropArg_proof' : KappaPropArg := by
+  fusion
+  fixpoint
+  all_goals grind
+  

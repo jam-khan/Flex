@@ -1,4 +1,5 @@
 import LeanFixpoint.Tactic.Tactics.RewriteKs
+import LeanFixpoint.Tactic.Utils
 import LeanFixpoint.Core
 import LeanFixpoint.Fusion
 import LeanFixpoint.Elab.ToExpr
@@ -6,6 +7,10 @@ import LeanFixpoint.Elab.FromExpr
 import LeanFixpoint.Zap
 
 open Lean Meta Elab Tactic
+
+/-- Debug trace for the `fusion` tactic (per-κ σ̂ + prefix counts, elimination
+    summary). Off by default — enable with `set_option trace.Fusion.debug true`. -/
+initialize registerTraceClass `Fusion.debug
 
 /-! ## `fusion` tactic
 
@@ -36,6 +41,7 @@ syntax "fusion" : tactic
 partial def destructAndBuild
     (kvars : Array KVar)
     (kLams : List (KVar × Expr))
+    (prefixInfo : Std.HashMap MVarId (Nat × Nat × Nat))
     (bodyWithMvars : Expr)
     (originalType : Expr)
     (residualOut : IO.Ref (Array MVarId))
@@ -62,7 +68,7 @@ partial def destructAndBuild
     -- analysis time (before `κfv` existed) baked in the cyclic mvar and made
     -- k-use/guard types disagree with `curWit` (`h_c'`).
     for (κ, lam) in kLams do κ.mvarId.assign lam
-    let bodyProof ← walkPhase5 kLams bodyFV curWit [] [] [] residualOut
+    let bodyProof ← walkPhase5 kLams bodyFV curWit [] [] [] prefixInfo residualOut
     -- Build Exists.intro chain in ORIGINAL κ-order over originalType.
     let kLamMap : Std.HashMap MVarId Expr :=
       kLams.foldl (fun m (κ, lam) => m.insert κ.mvarId lam)
@@ -96,7 +102,7 @@ partial def destructAndBuild
     withLocalDeclD κ.name α fun κfv => do
       let nextTy := pred.beta #[κfv]
       withLocalDeclD `h_inner nextTy fun innerFv => do
-        let innerProof ← destructAndBuild kvars kLams bodyWithMvars
+        let innerProof ← destructAndBuild kvars kLams prefixInfo bodyWithMvars
           originalType residualOut innerFv nextTy rest
           (cycAcc.push (κ, κfv))
         let elimLam ← mkLambdaFVars #[κfv, innerFv] innerProof
@@ -116,6 +122,7 @@ elab_rules : tactic
         × List KVar                         -- cyclic κs
         × Array KVar                        -- kvars in original ∃-order
         × Expr                              -- bodyWithMvars
+        × Std.HashMap MVarId (Nat × Nat × Nat)  -- prefixInfo (per acyclic κ)
         )) ← IO.mkRef none
 
       withPeeledExists originalType #[] fun binders body => do
@@ -143,16 +150,23 @@ elab_rules : tactic
           dataRef.set none
           return
 
-        -- Acyclic loop: compute kLams + curr.
-        let mut curr := bodyWithMvars
-        let mut kLams : List (KVar × Expr) := []
-        for κ in acyclic do
-          let scoped' ← (exprScopePres κ curr).run kctx
-          let sol    ← (exprSol1Pres κ scoped').run kctx
-          let sol    := simplifyAndExists sol
-          let lam    ← solToWitnessExpr sol κ.params κ.paramTypes
-          kLams := kLams ++ [(κ, lam)]
-          curr   ← (exprElimStar κ sol curr).run kctx
+        -- Acyclic loop: compute kLams + curr + prefixInfo.
+        let (curr, kLams, prefixInfo) ← benchPhase "fusion" "sol" do
+          let mut curr := bodyWithMvars
+          let mut kLams : List (KVar × Expr) := []
+          let mut prefixInfo : Std.HashMap MVarId (Nat × Nat × Nat) := ∅
+          for κ in acyclic do
+            -- LCA-scoped, structure-preserving σ̂ + prefix counts (= "same level
+            -- of scope as original fusion": prefix binders fold into κ-params,
+            -- no extra ∃/guards in the solution).
+            let r ← (exprSolScopedPres κ curr).run kctx
+            trace[Fusion.debug] m!"sol = {r.sol}  (nB={r.nBinders} nG={r.nGuards} nOr={r.nOr})"
+            let sol    := simplifyAndExists r.sol
+            let lam    ← solToWitnessExpr sol κ.params κ.paramTypes
+            kLams := kLams ++ [(κ, lam)]
+            prefixInfo := prefixInfo.insert κ.mvarId (r.nBinders, r.nGuards, r.nOr)
+            curr   ← (exprElimStar κ sol curr).run kctx
+          pure (curr, kLams, prefixInfo)
 
         -- (Acyclic κ-mvars are assigned later, inside `destructAndBuild`'s
         -- cyclic-fvar scope, to their cyclic-fvar-substituted solutions.)
@@ -171,13 +185,13 @@ elab_rules : tactic
         let newGoalType ← mkExistsChain cyclicBinders curr_fv
 
         dataRef.set (some (newGoalType, kLams, acyclic, cyclic, kvars,
-                           bodyWithMvars))
+                           bodyWithMvars, prefixInfo))
 
       -- ─── Back in original lctx ─────────────────────────────────────────
-      let some (newGoalType, kLams, acyclic, cyclic, kvars, bodyWithMvars)
+      let some (newGoalType, kLams, acyclic, cyclic, kvars, bodyWithMvars, prefixInfo)
         ← dataRef.get
         | do
-            logInfo m!"fusion: no acyclic κs to eliminate"
+            trace[Fusion.debug] m!"fusion: no acyclic κs to eliminate"
             return
 
       -- Create bridge and new-goal mvars in original lctx.
@@ -190,10 +204,11 @@ elab_rules : tactic
       -- ─── Construct bridge term: λ h => Exists.elim … walkPhase5 ──────
       let residualOut ← IO.mkRef #[]
 
-      let bridge ← withLocalDeclD `h newGoalType fun h_fv => do
-        let inner ← destructAndBuild kvars kLams bodyWithMvars originalType
-          residualOut h_fv newGoalType cyclic #[]
-        mkLambdaFVars #[h_fv] inner
+      let bridge ← benchPhase "fusion" "build" <|
+        withLocalDeclD `h newGoalType fun h_fv => do
+          let inner ← destructAndBuild kvars kLams prefixInfo bodyWithMvars originalType
+            residualOut h_fv newGoalType cyclic #[]
+          mkLambdaFVars #[h_fv] inner
 
       bridgeMvar.mvarId!.assign bridge
 
@@ -203,7 +218,7 @@ elab_rules : tactic
       -- And/Or mirror, but it overflows simp/grind on deep VCs (e.g. Quicksort).
       -- `collapseInert` peels it in one structural pass (`iff : e ↔ clean`) and
       -- discharges the noisy goal via `iff.mpr`, leaving the user the clean goal.
-      let cleanGoals ← goal.withContext do
+      let cleanGoals ← benchPhase "fusion" "clean" <| goal.withContext do
         (newGoalM.mvarId! :: residuals).mapM fun m => do
           let ty ← m.getType
           let (clean, iff) ← collapseInert ty
@@ -213,7 +228,7 @@ elab_rules : tactic
             let cleanM ← mkFreshExprMVar (some clean) (kind := .syntheticOpaque)
             m.assign (← mkAppM ``Iff.mpr #[iff, cleanM])
             return cleanM.mvarId!
-      logInfo m!"fusion: eliminated {acyclic.length} acyclic κ \
+      trace[Fusion.debug] m!"fusion: eliminated {acyclic.length} acyclic κ \
                 {acyclic.map (·.name)}; new goal is ∃ \
                 {cyclic.length} cyclic κ + body; \
                 {residuals.length} residual obligation(s)"

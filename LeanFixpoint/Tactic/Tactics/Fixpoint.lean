@@ -54,13 +54,14 @@ private def fixpointImpl : TacticM Unit := withMainContext do
         logInfo m!"[fixpoint] ⚠ acyclic κ present — run `fusion` first: \
                    {acyclic.map (·.name)}"
 
-      if !cyclic.isEmpty then
-        let flatCs ← (exprFlat body).run kctx
-        let paSols ← predicateAbstraction kctx cyclic flatCs
-        for (κ, sol) in paSols do
-          logInfo m!"[fixpoint] PA sol for {κ.name} := {← ppExpr sol}"
-          let lam ← solToWitnessExpr sol κ.params κ.paramTypes
-          κ.mvarId.assign lam)
+      benchPhase "fixpoint" "pa" do
+        if !cyclic.isEmpty then
+          let flatCs ← (exprFlat body).run kctx
+          let paSols ← predicateAbstraction kctx cyclic flatCs
+          for (κ, sol) in paSols do
+            logInfo m!"[fixpoint] PA sol for {κ.name} := {← ppExpr sol}"
+            let lam ← solToWitnessExpr sol κ.params κ.paramTypes
+            κ.mvarId.assign lam)
     (fun e => logInfo m!"[fixpoint] ✗ solver failed: {e.toMessageData}")
 
   -- Surface unfilled κ-mvars as user goals; otherwise close residual leaf
@@ -77,7 +78,7 @@ private def fixpointImpl : TacticM Unit := withMainContext do
     let goals' ← goals.mapM fun g =>
       g.withContext do g.replaceTargetDefEq (← instantiateMVars (← g.getType))
     replaceMainGoal goals'
-    withMainContext do
+    benchPhase "fixpoint" "close" <| withMainContext do
       evalTactic (← `(tactic| all_goals (try (first | rfl | grind | omega | aesop))))
   else
     let residual ← getMainGoal
