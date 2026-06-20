@@ -29,8 +29,13 @@ partial def countScopeVars (κ : KVar) (e : Expr) : KM Nat := do
     Skips into inner binders without instantiating, so args may contain loose bvars.
     The caller should filter for args matching intended free variables. -/
 partial def collectKAppArgs (κ : KVar) (e : Expr) : List (Array Expr) :=
+  -- Only record FULL applications (args count == κ arity). Partial-application
+  -- sub-expressions (e.g., `k0 a` inside `k0 a b c d`) also satisfy
+  -- `getAppFn.isMVar == κ.mvarId`, but they have fewer args and corrupt
+  -- `findOuterBinderToParam`'s universal-position intersection.
   let hit : List (Array Expr) :=
-    if e.getAppFn.isMVar && e.getAppFn.mvarId! == κ.mvarId then [e.getAppArgs]
+    if e.getAppFn.isMVar && e.getAppFn.mvarId! == κ.mvarId
+       && e.getAppArgs.size == κ.params.length then [e.getAppArgs]
     else []
   let rec childArgs (e : Expr) : List (Array Expr) :=
     collectKAppArgs κ e
