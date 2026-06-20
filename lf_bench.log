@@ -123,8 +123,9 @@
     [solve_fixpoint] Acyclic κ: []
     [solve_fixpoint] Cyclic κ:  []
 [9/47] Building: comment.lean ... OK
-    [solve_fixpoint] closed by: grind
-    [solve_fixpoint] closed by: grind
+    [solve_fixpoint] closed by: aesop
+    [solve_fixpoint] closed by: aesop
+    [solve_fixpoint] closed by: aesop
     [solve_fixpoint] closed by: aesop
     [solve_fixpoint] closed by: grind
     [solve_fixpoint] closed by: grind
@@ -133,13 +134,19 @@
     [solve_fixpoint] closed by: grind
     [solve_fixpoint] closed by: grind
     [solve_fixpoint] closed by: grind
-    [solve_fixpoint] closed by: grind
-    [solve_fixpoint] closed by: grind
-    [solve_fixpoint] closed by: grind
+    [solve_fixpoint] closed by: aesop
+    [solve_fixpoint] closed by: aesop
+    [solve_fixpoint] closed by: aesop
+    [solve_fixpoint] closed by: aesop
     [solve_fixpoint] closed by: aesop
     [solve_fixpoint] closed by: grind
     [solve_fixpoint] closed by: grind
     [solve_fixpoint] closed by: grind
+    [solve_fixpoint] closed by: grind
+    [solve_fixpoint] closed by: grind
+    [solve_fixpoint] closed by: grind
+    [solve_fixpoint] closed by: grind
+    [solve_fixpoint] closed by: aesop
     [solve_fixpoint] closed by: grind
     [solve_fixpoint] closed by: grind
     [solve_fixpoint] closed by: grind
@@ -152,29 +159,59 @@
     [solve_fixpoint] Cyclic κ:  [k4]
     [solve] --- k0 ---
     [solve]   sol = ∃ a2, z1 < z2 ∧ a2 = false ∧ ((z0 = z2 ∧ z1 = z1) ∧ z2 = z2 ∨ ∃ a5, ?k4 a5 z1 z2 ∧ (z0 = a5 ∧ z1 = z1) ∧ z2 = z2)
-    [solve]   ↪ k0: σ̂ references a cyclic κ — deferring to PA
+    [solve]   lam = fun z0 z1 z2 =>
+      ∃ a2, z1 < z2 ∧ a2 = false ∧ ((z0 = z2 ∧ z1 = z1) ∧ z2 = z2 ∨ ∃ a5, ?k4 a5 z1 z2 ∧ (z0 = a5 ∧ z1 = z1) ∧ z2 = z2)
     [solve] --- k1 ---
     [solve]   sol = ∃ a2, z0 < z1 ∧ (a2 = false ∧ z0 = z0 ∧ z1 = z1 ∨ a2 = true ∧ z0 = z0 ∧ z1 = z1)
     [solve]   lam = fun z0 z1 => ∃ a2, z0 < z1 ∧ (a2 = false ∧ z0 = z0 ∧ z1 = z1 ∨ a2 = true ∧ z0 = z0 ∧ z1 = z1)
     [solve] --- k3 ---
     [solve]   sol = ∃ a2,
       z1 < z2 ∧
-        ((a2 = false ∧ ∃ a3, ?k0 a3 z1 z2 ∧ (z0 = a3 ∧ z1 = z1) ∧ z2 = z2) ∨ a2 = true ∧ (z0 = z2 ∧ z1 = z1) ∧ z2 = z2)
-    [solve]   ↪ k3: σ̂ references a cyclic κ — deferring to PA
+        ((a2 = false ∧
+            ∃ a3,
+              (∃ a2,
+                  z1 < z2 ∧
+                    a2 = false ∧ ((a3 = z2 ∧ z1 = z1) ∧ z2 = z2 ∨ ∃ a5, ?k4 a5 z1 z2 ∧ (a3 = a5 ∧ z1 = z1) ∧ z2 = z2)) ∧
+                (z0 = a3 ∧ z1 = z1) ∧ z2 = z2) ∨
+          a2 = true ∧ (z0 = z2 ∧ z1 = z1) ∧ z2 = z2)
+    [solve]   lam = fun z0 z1 z2 =>
+      ∃ a2,
+        z1 < z2 ∧
+          ((a2 = false ∧
+              ∃ a3,
+                (∃ a2,
+                    z1 < z2 ∧
+                      a2 = false ∧ ((a3 = z2 ∧ z1 = z1) ∧ z2 = z2 ∨ ∃ a5, ?k4 a5 z1 z2 ∧ (a3 = a5 ∧ z1 = z1) ∧ z2 = z2)) ∧
+                  (z0 = a3 ∧ z1 = z1) ∧ z2 = z2) ∨
+            a2 = true ∧ (z0 = z2 ∧ z1 = z1) ∧ z2 = z2)
     [solve] --- k5 ---
     [solve]   sol = ∃ a2, z1 < z2 ∧ a2 = true ∧ ((z0 = z1 ∧ z1 = z1) ∧ z2 = z2 ∨ ∃ a8, ?k4 a8 z1 z2 ∧ (z0 = a8 ∧ z1 = z1) ∧ z2 = z2)
-    [solve]   ↪ k5: σ̂ references a cyclic κ — deferring to PA
+    [solve]   lam = fun z0 z1 z2 =>
+      ∃ a2, z1 < z2 ∧ a2 = true ∧ ((z0 = z1 ∧ z1 = z1) ∧ z2 = z2 ∨ ∃ a8, ?k4 a8 z1 z2 ∧ (z0 = a8 ∧ z1 = z1) ∧ z2 = z2)
     [solve] --- k2 ---
     [solve]   sol = ∃ a2,
       z1 < z2 ∧
-        (a2 = false ∧ (z0 = z1 ∧ z1 = z1) ∧ z2 = z2 ∨ a2 = true ∧ ∃ a6, ?k5 a6 z1 z2 ∧ (z0 = a6 ∧ z1 = z1) ∧ z2 = z2)
-    [solve]   ↪ k2: σ̂ references a cyclic κ — deferring to PA
-    [solve_fixpoint] --- PA on cyclic κ's [k4, k0, k3, k5, k2] ---
-    [solve_fixpoint]   PA sol for k4 = z1 ≤ z0 ∧ z1 ≤ z2
-    [solve_fixpoint]   PA sol for k0 = z1 ≤ z0 ∧ z1 ≤ z2
-    [solve_fixpoint]   PA sol for k3 = z1 ≤ z0 ∧ z1 ≤ z2
-    [solve_fixpoint]   PA sol for k5 = z1 ≤ z0 ∧ z1 ≤ z2
-    [solve_fixpoint]   PA sol for k2 = z1 ≤ z0 ∧ z1 ≤ z2
+        (a2 = false ∧ (z0 = z1 ∧ z1 = z1) ∧ z2 = z2 ∨
+          a2 = true ∧
+            ∃ a6,
+              (∃ a2,
+                  z1 < z2 ∧
+                    a2 = true ∧ ((a6 = z1 ∧ z1 = z1) ∧ z2 = z2 ∨ ∃ a8, ?k4 a8 z1 z2 ∧ (a6 = a8 ∧ z1 = z1) ∧ z2 = z2)) ∧
+                (z0 = a6 ∧ z1 = z1) ∧ z2 = z2)
+    [solve]   lam = fun z0 z1 z2 =>
+      ∃ a2,
+        z1 < z2 ∧
+          (a2 = false ∧ (z0 = z1 ∧ z1 = z1) ∧ z2 = z2 ∨
+            a2 = true ∧
+              ∃ a6,
+                (∃ a2,
+                    z1 < z2 ∧
+                      a2 = true ∧ ((a6 = z1 ∧ z1 = z1) ∧ z2 = z2 ∨ ∃ a8, ?k4 a8 z1 z2 ∧ (a6 = a8 ∧ z1 = z1) ∧ z2 = z2)) ∧
+                  (z0 = a6 ∧ z1 = z1) ∧ z2 = z2)
+    [solve_fixpoint] --- PA on cyclic κ's [k4] ---
+    [solve_fixpoint]   PA sol for k4 = (((((z1 ≤ z2 - 1 ∧ z1 < z2) ∧ z1 ≤ z0) ∧ z1 ≤ z2) ∧ z0 ≥ z1) ∧ z2 ≥ z1) ∧ z2 > z1
+    [fixpoint] PA sol for k4 := (((((z1 ≤ z2 - 1 ∧ z1 < z2) ∧ z1 ≤ z0) ∧ z1 ≤ z2) ∧ z0 ≥ z1) ∧ z2 ≥ z1) ∧ z2 > z1
+    /Users/petros/Documents/UCSD/Work/lean-fixpoint/Benchmarks/Liquid-fixpoint/comment.lean:59:2: warning: aesop: failed to prove the goal after exhaustive search.
 [10/47] Building: constant.lean ... OK
     [solve_fixpoint] closed by: aesop
     [solve_fixpoint] Acyclic κ: []
@@ -560,10 +597,6 @@
 [38/47] Building: scrape02.lean ... OK
     [solve_fixpoint] closed by: grind
     [solve_fixpoint] closed by: grind
-    [solve_fixpoint] closed by: aesop
-    [solve_fixpoint] closed by: aesop
-    [solve_fixpoint] closed by: aesop
-    [solve_fixpoint] closed by: aesop
     [solve_fixpoint] closed by: grind
     [solve_fixpoint] closed by: grind
     [solve_fixpoint] closed by: grind
@@ -583,11 +616,7 @@
     [solve_fixpoint] closed by: aesop
     [solve_fixpoint] closed by: grind
     [solve_fixpoint] closed by: grind
-    [solve_fixpoint] closed by: grind
     [solve_fixpoint] closed by: aesop
-    [solve_fixpoint] closed by: aesop
-    [solve_fixpoint] closed by: aesop
-    [solve_fixpoint] closed by: grind
     [solve_fixpoint] Acyclic κ: [k0, k4]
     [solve_fixpoint] Cyclic κ:  [k5, k1, k2, k3]
     [solve] --- k0 ---
@@ -604,8 +633,18 @@
               ∃ _a20 a24 a25 a26,
                 ?k5 a24 z4 z5 a7 a25 a26 ∧
                   ∃ a27 a28 a29, ((((z0 = a24 ∧ z1 = a27) ∧ z2 = a28) ∧ z3 = a29) ∧ z4 = z4) ∧ z5 = z5
-    [solve]   ↪ k4: σ̂ references a cyclic κ — deferring to PA
-    [solve_fixpoint] --- PA on cyclic κ's [k5, k1, k2, k3, k4] ---
+    [solve]   lam = fun z0 z1 z2 z3 z4 z5 =>
+      (∃ a4,
+          (∃ a1, f_get_mode z4 a1 = Adt0.mkadt0_0 ∧ (a4 = a1 ∧ z4 = z4) ∧ z5 = z5) ∧
+            ∃ a5 a6, ((((z0 = a4 ∧ z1 = a5) ∧ z2 = a6) ∧ z3 = z5) ∧ z4 = z4) ∧ z5 = z5) ∨
+        ∃ a7 _a8 a9 a10,
+          (?k1 a7 a9 a10 z4 z5 ∧ ?k2 a9 a10 z4 z5 ∧ ?k3 a10 z4 z5) ∧
+            ∃ _a16 a17 a18 a19,
+              ?k5 a17 z4 z5 a7 a18 a19 ∧
+                ∃ _a20 a24 a25 a26,
+                  ?k5 a24 z4 z5 a7 a25 a26 ∧
+                    ∃ a27 a28 a29, ((((z0 = a24 ∧ z1 = a27) ∧ z2 = a28) ∧ z3 = a29) ∧ z4 = z4) ∧ z5 = z5
+    [solve_fixpoint] --- PA on cyclic κ's [k5, k1, k2, k3] ---
     [solve_fixpoint]   PA sol for k5 = ((((f_get_mode z1 z0 = Adt0.mkadt0_0 ∧ f_get_mode z1 z2 = Adt0.mkadt0_0) ∧ f_get_mode z1 z3 = Adt0.mkadt0_0) ∧
           f_get_mode z1 z4 = Adt0.mkadt0_0) ∧
         f_get_mode z1 z5 = Adt0.mkadt0_0) ∧
@@ -615,9 +654,6 @@
       z4 = 0
     [solve_fixpoint]   PA sol for k2 = ((f_get_mode z2 z0 = Adt0.mkadt0_0 ∧ f_get_mode z2 z1 = Adt0.mkadt0_0) ∧ f_get_mode z2 z3 = Adt0.mkadt0_0) ∧ z3 = 0
     [solve_fixpoint]   PA sol for k3 = (f_get_mode z1 z0 = Adt0.mkadt0_0 ∧ f_get_mode z1 z2 = Adt0.mkadt0_0) ∧ z2 = 0
-    [solve_fixpoint]   PA sol for k4 = (((f_get_mode z4 z0 = Adt0.mkadt0_0 ∧ f_get_mode z4 z1 = Adt0.mkadt0_0) ∧ f_get_mode z4 z2 = Adt0.mkadt0_0) ∧
-        f_get_mode z4 z3 = Adt0.mkadt0_0) ∧
-      f_get_mode z4 z5 = Adt0.mkadt0_0
 [39/47] Building: scrape03.lean ... OK
     /Users/petros/Documents/UCSD/Work/lean-fixpoint/Benchmarks/Liquid-fixpoint/scrape03.lean:34:10: warning: unused variable `a2`
     
