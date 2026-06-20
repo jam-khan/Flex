@@ -61,7 +61,17 @@ partial def collectKAppArgs (κ : KVar) (e : Expr) : List (Array Expr) :=
 
     This tolerates binders that appear at multiple positions within a single
     κ-app (common in FluxRS-generated VCs where the same value is passed both
-    as a base param and as a `.elems`/`.len` accessor target). -/
+    as a base param and as a `.elems`/`.len` accessor target). The fallback is
+    restricted to that single-κ-app case: with several κ-apps (e.g. a
+    hypothesis-position use of κ alongside its actual defining/head-position
+    clause), an outer binder can legitimately fill a slot at one occurrence
+    and be absent — or differ — at another (the defining clause may use a
+    *different* outer variable, like a loop's "next" state, at the same
+    position). Folding the binder there is unsound: it silently rewrites that
+    *other* occurrence's variable wherever it appears in σ̂ (including inside
+    embedded guards unrelated to κ's own args), producing an ill-typed proof
+    that only the kernel catches. So with multiple κ-apps, "no universal
+    position" must leave the binder unfolded (`none`), not guess. -/
 def findOuterBinderToParam (κ : KVar) (binderFvar : FVarId) (body : Expr) : Option Nat :=
   let kArgsList := collectKAppArgs κ body
   let perCall : List (List Nat) := kArgsList.map fun args =>
@@ -73,8 +83,13 @@ def findOuterBinderToParam (κ : KVar) (binderFvar : FVarId) (body : Expr) : Opt
   match universal with
   | i :: _ => some i
   | []     =>
-    -- No universal position: fall back to last bare occurrence overall.
-    perCall.flatten.foldl (fun _ i => some i) (none : Option Nat)
+    match perCall with
+    | [single] =>
+      -- Single κ-app: fall back to its last bare occurrence (legacy behavior).
+      single.foldl (fun _ i => some i) (none : Option Nat)
+    | _ =>
+      -- Multiple κ-apps disagreeing: unsound to guess — leave unfolded.
+      none
 
 /-- Split κ-vars into (acyclic, cyclic). The acyclic list is topologically
     sorted so dependency sinks (no κ-deps) appear first — required so each
