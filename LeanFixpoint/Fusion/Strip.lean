@@ -91,6 +91,30 @@ def findOuterBinderToParam (κ : KVar) (binderFvar : FVarId) (body : Expr) : Opt
       -- Multiple κ-apps disagreeing: unsound to guess — leave unfolded.
       none
 
+/-- Struct-projection analog of `findOuterBinderToParam`. When a struct-typed
+    scope binder `x` reaches κ only through projections (`Foo.field x`), `x`
+    itself never appears as a κ-argument, so `findOuterBinderToParam` returns
+    `none` and the descent stalls at `x` (leaking `x` plus every binder below
+    it as `∃`). This finds the `(projExpr, slot)` pairs where a projection of
+    `x` fills a slot in EVERY κ-app, so those projections fold to κ-params and
+    `x` can be dropped.
+
+    A slot qualifies iff every κ-app carries the *same* expression there and
+    that expression is an application whose final argument is exactly `.fvar x`
+    (e.g. `@Foo.field _ _ x`). Returns `[]` when no projection is universal. -/
+def findOuterBinderProjFolds (κ : KVar) (binderFvar : FVarId) (body : Expr) :
+    List (Expr × Nat) :=
+  let kArgsList := collectKAppArgs κ body
+  match kArgsList with
+  | []         => []
+  | first :: _ =>
+    (List.range first.size).filterMap fun i =>
+      let argi := first[i]!
+      let isProjOfX := argi.isApp && argi.appArg! == .fvar binderFvar
+                       && argi.getAppFn.isConst
+      if isProjOfX && kArgsList.all (fun args => args[i]? == some argi)
+      then some (argi, i) else none
+
 /-- Split κ-vars into (acyclic, cyclic). The acyclic list is topologically
     sorted so dependency sinks (no κ-deps) appear first — required so each
     κ's sol is built only after its dependencies have been eliminated.
