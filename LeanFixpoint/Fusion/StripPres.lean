@@ -27,7 +27,7 @@ structure ScopedSolPres where
 partial def exprSolScopedPres (κ : KVar) (e : Expr) : KM ScopedSolPres :=
   goStrip κ e [] 0 0 0
 where
-  goStrip (κ : KVar) (e : Expr) (acc : List (FVarId × Name))
+  goStrip (κ : KVar) (e : Expr) (acc : List (Expr × Name))
       (nB nG nOr : Nat) : KM ScopedSolPres := do
     -- ∧ routing: descend the unique κ-branch; κ in both ⇒ LCA, stop here.
     if let some (l, r) := e.and? then
@@ -50,30 +50,46 @@ where
           if domSort.isProp then
             goStrip κ body acc nB (nG + 1) nOr
           else
-            -- A binder ranging over a sort (`∀ _ : Prop`/`Type`) is NOT a numeric
-            -- κ-param, even though `domSort.isProp` is false (its domain-sort is
-            -- `Type`, not `Prop`). Folding it into a param corrupts any guard that
-            -- mentions it (`¬a'₁` → `¬z2`), breaking the σ̂↔proof mirror when a
-            -- sibling clause pins the slot to a literal. Keep it as a σ̂ ∃-binder.
-            let foldAt := if dom.isSort then none
+            -- 2a: a Prop κ-arg (`dom = Sort 0`) at a *universal* slot folds — its
+            -- slot equality carries the constraint (e.g. `z2 = True`), giving the
+            -- tight solution. `findOuterBinderToParam` returns `some` only when the
+            -- binder fills that slot in *every* κ-app, so the old worry ("a sibling
+            -- clause pins the slot to a literal") already yields `none` (not
+            -- universal) and stays an ∃-binder. Type-and-higher sort binders
+            -- (`Sort ≥ 1`) remain blocked.
+            let foldAt := if dom.isSort && dom != (.sort .zero) then none
                           else findOuterBinderToParam κ fvar.fvarId! body
             match foldAt with
             | some i =>
-              goStrip κ body (acc ++ [(fvar.fvarId!, κ.params[i]!)]) (nB + 1) nG nOr
+              goStrip κ body (acc ++ [(fvar, κ.params[i]!)]) (nB + 1) nG nOr
             | none =>
-              -- stop-strip: re-close fvar; this binder stays below the LCA.
-              let bodyClosed := body.abstract #[fvar]
-              let cPrime := Expr.forallE e.bindingName! dom bodyClosed e.bindingInfo!
-              finalize κ cPrime acc nB nG nOr
+              -- 2b: a struct-typed scope binder reaches κ only via projections
+              -- (`Foo.field x`), so the bare-fvar check above misses it. Fold the
+              -- projections to κ-params and DROP the binder — but only when every
+              -- occurrence of `fvar` sits inside a recorded projection (else
+              -- dropping it would dangle a bare reference).
+              let projFolds := findOuterBinderProjFolds κ fvar.fvarId! body
+              let bodyNoProj := projFolds.foldl
+                (fun b (pe, _) => b.replace (fun s => if s == pe then some (mkConst ``True) else none))
+                body
+              if !projFolds.isEmpty && !bodyNoProj.containsFVar fvar.fvarId! then
+                let acc' := acc ++ projFolds.map (fun (pe, i) => (pe, κ.params[i]!))
+                goStrip κ body acc' (nB + 1) nG nOr
+              else
+                -- stop-strip: re-close fvar; this binder stays below the LCA.
+                let bodyClosed := body.abstract #[fvar]
+                let cPrime := Expr.forallE e.bindingName! dom bodyClosed e.bindingInfo!
+                finalize κ cPrime acc nB nG nOr
     else
       finalize κ e acc nB nG nOr
 
-  finalize (κ : KVar) (cPrime : Expr) (acc : List (FVarId × Name))
+  finalize (κ : KVar) (cPrime : Expr) (acc : List (Expr × Name))
       (nB nG nOr : Nat) : KM ScopedSolPres := do
     let sol0 ← exprSol1Pres κ cPrime
-    -- substitute each prefix fvar → synthetic κ-param fvar (cf. Strip.lean:142-147)
-    let sol := acc.foldl
-      (fun s (fvarId, paramName) =>
-        s.replaceFVar (.fvar fvarId) (.fvar (FVarId.mk paramName)))
-      sol0
+    -- Substitute each recorded scope-expr → synthetic κ-param fvar. Entries are
+    -- bare fvars (`fvar`) or struct projections (`Foo.field x`); one simultaneous
+    -- `Expr.replace` pass matches whichever occurs (cf. Strip.lean).
+    let sol := sol0.replace fun sub =>
+      acc.findSome? fun (pe, paramName) =>
+        if sub == pe then some (.fvar (FVarId.mk paramName)) else none
     return { sol := sol, nBinders := nB, nGuards := nG, nOr := nOr }

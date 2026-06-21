@@ -140,5 +140,37 @@ def SparseImpl__0__New := ∃ k0 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3
 def pf : SparseImpl__0__New := by
   unfold SparseImpl__0__New
   fusion
-  all_goals sorry
+  refine ⟨fun a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 => a0 = a2 ∧ a1 = a2 ∧ a4 = a6,
+          fun a0 a1 a2 a3 a4 a5 a6 a7 => a0 = a3 ∧ a1 = a3 ∧ a2 = a4 ∧ a5 = a6 ∧ 0 ≤ a4 ∧ a4 ≤ a6,
+          fun b0 b1 b2 b3 b4 b5 b6 b7 b8 b9 b10 b11 b12 b13 b14 b15 b16 => b0 < b7,
+          fun b0 b1 b2 b3 b4 b5 b6 b7 b8 b9 b10 b11 b12 b13 b14 b15 b16 => b0 ≤ b3, ?_⟩
+  intro rows cols hrows hcols hrows2
+  refine ⟨by grind, ?_⟩
+  intro nnz col row val iter hk0 r0 hr0
+  obtain ⟨e0, e1, e2, e3, e4, e5⟩ := hk0
+  obtain ⟨hr0a, hr0b⟩ := hr0
+  refine ⟨?_, ?_⟩
+  · intro hexit hrowpos
+    refine ⟨?_, e1, ?_, ?_⟩
+    · intro a7 h7; grind
+    · intro a8 h8; grind
+    · grind
+  · intro hcont a9 ha9 ha9pos hrowpos
+    refine ⟨⟨e0, e1, rfl⟩, ?_, ?_, ?_⟩
+    · intro a11 h11; grind
+    · intro a12 h12; grind
+    · intro nnz1 col1 val1 iter1 hk5 r1 hr1
+      obtain ⟨f0, f1, f2⟩ := hk5
+      obtain ⟨hr1a, hr1b⟩ := hr1
+      refine ⟨?_, ?_⟩
+      · intro hiexit; grind
+      · intro hicont a20 ha20 ha20pos
+        refine ⟨by grind, ?_⟩
+        intro a22 hr22 ha22pos
+        refine ⟨by grind, ?_⟩
+        intro a23 nnz2 col2 val2 hri
+        refine ⟨?_, ?_, ?_⟩
+        · grind
+        · intro a32 h32; grind
+        · intro a33 h33; grind
 end F
