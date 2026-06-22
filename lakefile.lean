@@ -13,7 +13,7 @@ require aesop from git
 -- Mathlib is needed by the handful of Liquid-fixpoint benchmarks that use
 -- `Set`/`Finset`. Run `lake exe cache get` after `lake update` to download
 -- prebuilt oleans instead of compiling from scratch.
---require mathlib from git
+-- require mathlib from git
 --  "https://github.com/leanprover-community/mathlib4" @ "251d9c0ff4b58979698a7ec9f4ac58a92b95c01f"
 
 @[default_target]
