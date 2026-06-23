@@ -61,7 +61,17 @@ partial def collectKAppArgs (κ : KVar) (e : Expr) : List (Array Expr) :=
 
     This tolerates binders that appear at multiple positions within a single
     κ-app (common in FluxRS-generated VCs where the same value is passed both
-    as a base param and as a `.elems`/`.len` accessor target). -/
+    as a base param and as a `.elems`/`.len` accessor target). The fallback is
+    restricted to that single-κ-app case: with several κ-apps (e.g. a
+    hypothesis-position use of κ alongside its actual defining/head-position
+    clause), an outer binder can legitimately fill a slot at one occurrence
+    and be absent — or differ — at another (the defining clause may use a
+    *different* outer variable, like a loop's "next" state, at the same
+    position). Folding the binder there is unsound: it silently rewrites that
+    *other* occurrence's variable wherever it appears in σ̂ (including inside
+    embedded guards unrelated to κ's own args), producing an ill-typed proof
+    that only the kernel catches. So with multiple κ-apps, "no universal
+    position" must leave the binder unfolded (`none`), not guess. -/
 def findOuterBinderToParam (κ : KVar) (binderFvar : FVarId) (body : Expr) : Option Nat :=
   let kArgsList := collectKAppArgs κ body
   let perCall : List (List Nat) := kArgsList.map fun args =>
@@ -73,8 +83,37 @@ def findOuterBinderToParam (κ : KVar) (binderFvar : FVarId) (body : Expr) : Opt
   match universal with
   | i :: _ => some i
   | []     =>
-    -- No universal position: fall back to last bare occurrence overall.
-    perCall.flatten.foldl (fun _ i => some i) (none : Option Nat)
+    match perCall with
+    | [single] =>
+      -- Single κ-app: fall back to its last bare occurrence (legacy behavior).
+      single.foldl (fun _ i => some i) (none : Option Nat)
+    | _ =>
+      -- Multiple κ-apps disagreeing: unsound to guess — leave unfolded.
+      none
+
+/-- Struct-projection analog of `findOuterBinderToParam`. When a struct-typed
+    scope binder `x` reaches κ only through projections (`Foo.field x`), `x`
+    itself never appears as a κ-argument, so `findOuterBinderToParam` returns
+    `none` and the descent stalls at `x` (leaking `x` plus every binder below
+    it as `∃`). This finds the `(projExpr, slot)` pairs where a projection of
+    `x` fills a slot in EVERY κ-app, so those projections fold to κ-params and
+    `x` can be dropped.
+
+    A slot qualifies iff every κ-app carries the *same* expression there and
+    that expression is an application whose final argument is exactly `.fvar x`
+    (e.g. `@Foo.field _ _ x`). Returns `[]` when no projection is universal. -/
+def findOuterBinderProjFolds (κ : KVar) (binderFvar : FVarId) (body : Expr) :
+    List (Expr × Nat) :=
+  let kArgsList := collectKAppArgs κ body
+  match kArgsList with
+  | []         => []
+  | first :: _ =>
+    (List.range first.size).filterMap fun i =>
+      let argi := first[i]!
+      let isProjOfX := argi.isApp && argi.appArg! == .fvar binderFvar
+                       && argi.getAppFn.isConst
+      if isProjOfX && kArgsList.all (fun args => args[i]? == some argi)
+      then some (argi, i) else none
 
 /-- Split κ-vars into (acyclic, cyclic). The acyclic list is topologically
     sorted so dependency sinks (no κ-deps) appear first — required so each
