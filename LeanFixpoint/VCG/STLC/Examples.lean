@@ -57,7 +57,7 @@ def ex1Exp : Exp := .iconst 5
 def ex1Ty  : Ty  := Pos
 
 example (κ : KEnv) : topVC κ [] ex1Exp ex1Ty := by
-  simp only [topVC, check, synth, sub, ex1Exp, ex1Ty, Pos, prim,
+  simp only [topVC, check, synth, sub, ex1Exp, ex1Ty, Pos, prim, Constraint.interp,
              Refinement.interp, Formula.interp, Term.interp, REnv.get]
   solve_fixpoint
 
@@ -90,6 +90,7 @@ example (κ : KEnv) : topVC κ [] ex3Exp ex3Ty := by
   Here the macro is sorry-tainted via `check_sound` (Stage 13). -/
 
 attribute [simp] check synth sub EVar.fresh implyBind prim self Refinement.interp Formula.interp TEnv.dom
+attribute [simp] Constraint.interp Formula.substI Formula.substB Term.substI Term.substB
 attribute [simp] Term.interp REnv.get Exp.openVar Ty.openVar Exp.fv Refinement.fv Formula.fv Term.fv Ty.fv
 attribute [simp] Refinement.openBVar Formula.openBVar Term.openBVar nuName String.length EVar.maxLen
 attribute [simp] List.lookup TEnv.tyNamed TEnv.tyFv Ty.named Formula.named
@@ -105,7 +106,7 @@ example :
   under_exists =>
     apply check_sound
     simp ; rfl
-    simp
+    simp [CEntail]
   intro_kenv
   simp [mkKEnv, liftK1]
   solve_fixpoint
@@ -120,7 +121,7 @@ example :
     under_exists =>
       apply check_sound
       simp ; rfl
-      simp
+      simp [CEntail]
     intro_kenv
     simp [mkKEnv, List.lookup, liftK2]
     solve_fixpoint
@@ -206,7 +207,7 @@ example :
   under_exists =>
     apply check_sound
     simp ; rfl
-    simp
+    simp [CEntail]
   intro_kenv
   simp [mkKEnv, liftK1]
   solve_fixpoint

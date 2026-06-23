@@ -1804,6 +1804,232 @@ theorem Formula.interp_substB_const (κ : KEnv) (φ : Formula)
          Sigma.mk b (Term.interp (ρ.update .bool x bv) t)
     rw [Term.interp_substB_const t x bv ρ]
 
+/-! ### 13b. Substituting a free variable (the ν→x rename) under interp
+
+  `substI z (.fvar .int x)` renames `z` to `x`. Under interp this is the same as
+  updating `z`'s slot with `x`'s current value. Capture-avoidance for the bound
+  variable `x` is the hypothesis `x ∉ φ.named`. Used by the deep-constraint
+  `implyBind` bridge. -/
+
+theorem Term.interp_substI_fvar {b : Base} (t : Term b) (z x : EVar) (ρ : REnv) :
+    Term.interp ρ (t.substI z (.fvar .int x)) =
+      Term.interp (ρ.update .int z (ρ.ints x)) t := by
+  induction t with
+  | const b c => rfl
+  | bvar bv j => cases bv <;> rfl
+  | fvar bv y =>
+    cases bv with
+    | int =>
+      simp only [Term.substI]
+      by_cases hy : y = z
+      · subst hy; simp [Term.interp]
+      · simp only [if_neg hy, Term.interp]
+        rw [REnv.get_update_other_key .int ρ z y (ρ.ints x) (fun e => hy e.symm)]
+    | bool => simp only [Term.substI, Term.interp]
+  | add t₁ t₂ ih₁ ih₂ => simp only [Term.substI, Term.interp]; rw [ih₁, ih₂]
+  | not t ih => simp only [Term.substI, Term.interp]; rw [ih]
+  | and t₁ t₂ ih₁ ih₂ => simp only [Term.substI, Term.interp]; rw [ih₁, ih₂]
+
+theorem Term.interp_substB_fvar {b : Base} (t : Term b) (z x : EVar) (ρ : REnv) :
+    Term.interp ρ (t.substB z (.fvar .bool x)) =
+      Term.interp (ρ.update .bool z (ρ.bools x)) t := by
+  induction t with
+  | const b c => rfl
+  | bvar bv j => cases bv <;> rfl
+  | fvar bv y =>
+    cases bv with
+    | int => simp only [Term.substB, Term.interp]
+    | bool =>
+      simp only [Term.substB]
+      by_cases hy : y = z
+      · subst hy; simp [Term.interp]
+      · simp only [if_neg hy, Term.interp]
+        rw [REnv.get_update_other_key .bool ρ z y (ρ.bools x) (fun e => hy e.symm)]
+  | add t₁ t₂ ih₁ ih₂ => simp only [Term.substB, Term.interp]; rw [ih₁, ih₂]
+  | not t ih => simp only [Term.substB, Term.interp]; rw [ih]
+  | and t₁ t₂ ih₁ ih₂ => simp only [Term.substB, Term.interp]; rw [ih₁, ih₂]
+
+theorem Formula.interp_substI_fvar (κ : KEnv) (φ : Formula) (z x : EVar) (ρ : REnv)
+    (hx : x ∉ φ.named) :
+    Formula.interp κ ρ (φ.substI z (.fvar .int x)) ↔
+      Formula.interp κ (ρ.update .int z (ρ.ints x)) φ := by
+  induction φ generalizing ρ with
+  | tt => simp [Formula.substI, Formula.interp]
+  | ff => simp [Formula.substI, Formula.interp]
+  | eqI t₁ t₂ =>
+    simp only [Formula.substI, Formula.interp]
+    rw [Term.interp_substI_fvar t₁ z x ρ, Term.interp_substI_fvar t₂ z x ρ]
+  | eqB t₁ t₂ =>
+    simp only [Formula.substI, Formula.interp]
+    rw [Term.interp_update_int_of_bool t₁ z (ρ.ints x) ρ,
+        Term.interp_update_int_of_bool t₂ z (ρ.ints x) ρ]
+  | leqI t₁ t₂ =>
+    simp only [Formula.substI, Formula.interp]
+    rw [Term.interp_substI_fvar t₁ z x ρ, Term.interp_substI_fvar t₂ z x ρ]
+  | and φ₁ φ₂ ih₁ ih₂ =>
+    simp only [Formula.named, List.mem_append, not_or] at hx
+    simp only [Formula.substI, Formula.interp]
+    exact and_congr (ih₁ ρ hx.1) (ih₂ ρ hx.2)
+  | or φ₁ φ₂ ih₁ ih₂ =>
+    simp only [Formula.named, List.mem_append, not_or] at hx
+    simp only [Formula.substI, Formula.interp]
+    exact or_congr (ih₁ ρ hx.1) (ih₂ ρ hx.2)
+  | not φ ih =>
+    simp only [Formula.named] at hx
+    simp only [Formula.substI, Formula.interp]
+    exact not_congr (ih ρ hx)
+  | imp φ₁ φ₂ ih₁ ih₂ =>
+    simp only [Formula.named, List.mem_append, not_or] at hx
+    simp only [Formula.substI, Formula.interp]
+    exact imp_congr (ih₁ ρ hx.1) (ih₂ ρ hx.2)
+  | exI y φ ih =>
+    simp only [Formula.named, List.mem_cons, not_or] at hx
+    obtain ⟨hxy, hx'⟩ := hx
+    have hv : ∀ n', (ρ.update .int y n').ints x = ρ.ints x := fun n' => by
+      simp [Ne.symm hxy]
+    simp only [Formula.substI]
+    by_cases hzy : z = y
+    · subst hzy
+      simp only [Formula.interp]
+      refine exists_congr (fun n' => ?_)
+      rw [REnv.update_override_int]
+    · simp only [if_neg hzy, Formula.interp]
+      refine exists_congr (fun n' => ?_)
+      rw [ih (ρ.update .int y n') hx', hv n',
+          REnv.update_comm_int_int ρ y z n' (ρ.ints x) (Ne.symm hzy)]
+  | exB y φ ih =>
+    simp only [Formula.named, List.mem_cons, not_or] at hx
+    obtain ⟨_, hx'⟩ := hx
+    simp only [Formula.substI, Formula.interp]
+    refine exists_congr (fun b => ?_)
+    rw [ih (ρ.update .bool y b) hx',
+        (REnv.update_comm_int_bool ρ z y (ρ.ints x) b).symm]
+  | allI y φ ih =>
+    simp only [Formula.named, List.mem_cons, not_or] at hx
+    obtain ⟨hxy, hx'⟩ := hx
+    have hv : ∀ n', (ρ.update .int y n').ints x = ρ.ints x := fun n' => by
+      simp [Ne.symm hxy]
+    simp only [Formula.substI]
+    by_cases hzy : z = y
+    · subst hzy
+      simp only [Formula.interp]
+      refine forall_congr' (fun n' => ?_)
+      rw [REnv.update_override_int]
+    · simp only [if_neg hzy, Formula.interp]
+      refine forall_congr' (fun n' => ?_)
+      rw [ih (ρ.update .int y n') hx', hv n',
+          REnv.update_comm_int_int ρ y z n' (ρ.ints x) (Ne.symm hzy)]
+  | allB y φ ih =>
+    simp only [Formula.named, List.mem_cons, not_or] at hx
+    obtain ⟨_, hx'⟩ := hx
+    simp only [Formula.substI, Formula.interp]
+    refine forall_congr' (fun b => ?_)
+    rw [ih (ρ.update .bool y b) hx',
+        (REnv.update_comm_int_bool ρ z y (ρ.ints x) b).symm]
+  | kapp kname args =>
+    simp only [Formula.named] at hx
+    show Formula.interp κ ρ (.kapp kname _) ↔
+         Formula.interp κ (ρ.update .int z (ρ.ints x)) (.kapp kname args)
+    simp only [Formula.interp, List.map_map]
+    apply iff_of_eq
+    congr 1
+    apply List.map_congr_left
+    intro ⟨b, t⟩ _
+    show Sigma.mk b (Term.interp ρ (t.substI z (.fvar .int x))) =
+         Sigma.mk b (Term.interp (ρ.update .int z (ρ.ints x)) t)
+    rw [Term.interp_substI_fvar t z x ρ]
+
+theorem Formula.interp_substB_fvar (κ : KEnv) (φ : Formula) (z x : EVar) (ρ : REnv)
+    (hx : x ∉ φ.named) :
+    Formula.interp κ ρ (φ.substB z (.fvar .bool x)) ↔
+      Formula.interp κ (ρ.update .bool z (ρ.bools x)) φ := by
+  induction φ generalizing ρ with
+  | tt => simp [Formula.substB, Formula.interp]
+  | ff => simp [Formula.substB, Formula.interp]
+  | eqI t₁ t₂ =>
+    simp only [Formula.substB, Formula.interp]
+    rw [Term.interp_update_bool_of_int t₁ z (ρ.bools x) ρ,
+        Term.interp_update_bool_of_int t₂ z (ρ.bools x) ρ]
+  | eqB t₁ t₂ =>
+    simp only [Formula.substB, Formula.interp]
+    rw [Term.interp_substB_fvar t₁ z x ρ, Term.interp_substB_fvar t₂ z x ρ]
+  | leqI t₁ t₂ =>
+    simp only [Formula.substB, Formula.interp]
+    rw [Term.interp_update_bool_of_int t₁ z (ρ.bools x) ρ,
+        Term.interp_update_bool_of_int t₂ z (ρ.bools x) ρ]
+  | and φ₁ φ₂ ih₁ ih₂ =>
+    simp only [Formula.named, List.mem_append, not_or] at hx
+    simp only [Formula.substB, Formula.interp]
+    exact and_congr (ih₁ ρ hx.1) (ih₂ ρ hx.2)
+  | or φ₁ φ₂ ih₁ ih₂ =>
+    simp only [Formula.named, List.mem_append, not_or] at hx
+    simp only [Formula.substB, Formula.interp]
+    exact or_congr (ih₁ ρ hx.1) (ih₂ ρ hx.2)
+  | not φ ih =>
+    simp only [Formula.named] at hx
+    simp only [Formula.substB, Formula.interp]
+    exact not_congr (ih ρ hx)
+  | imp φ₁ φ₂ ih₁ ih₂ =>
+    simp only [Formula.named, List.mem_append, not_or] at hx
+    simp only [Formula.substB, Formula.interp]
+    exact imp_congr (ih₁ ρ hx.1) (ih₂ ρ hx.2)
+  | exI y φ ih =>
+    simp only [Formula.named, List.mem_cons, not_or] at hx
+    obtain ⟨_, hx'⟩ := hx
+    simp only [Formula.substB, Formula.interp]
+    refine exists_congr (fun n' => ?_)
+    rw [ih (ρ.update .int y n') hx',
+        REnv.update_comm_int_bool ρ y z n' (ρ.bools x)]
+  | exB y φ ih =>
+    simp only [Formula.named, List.mem_cons, not_or] at hx
+    obtain ⟨hxy, hx'⟩ := hx
+    have hv : ∀ b, (ρ.update .bool y b).bools x = ρ.bools x := fun b => by
+      simp [Ne.symm hxy]
+    simp only [Formula.substB]
+    by_cases hzy : z = y
+    · subst hzy
+      simp only [Formula.interp]
+      refine exists_congr (fun b => ?_)
+      rw [REnv.update_override_bool]
+    · simp only [if_neg hzy, Formula.interp]
+      refine exists_congr (fun b => ?_)
+      rw [ih (ρ.update .bool y b) hx', hv b,
+          REnv.update_comm_bool_bool ρ y z b (ρ.bools x) (Ne.symm hzy)]
+  | allI y φ ih =>
+    simp only [Formula.named, List.mem_cons, not_or] at hx
+    obtain ⟨_, hx'⟩ := hx
+    simp only [Formula.substB, Formula.interp]
+    refine forall_congr' (fun n' => ?_)
+    rw [ih (ρ.update .int y n') hx',
+        REnv.update_comm_int_bool ρ y z n' (ρ.bools x)]
+  | allB y φ ih =>
+    simp only [Formula.named, List.mem_cons, not_or] at hx
+    obtain ⟨hxy, hx'⟩ := hx
+    have hv : ∀ b, (ρ.update .bool y b).bools x = ρ.bools x := fun b => by
+      simp [Ne.symm hxy]
+    simp only [Formula.substB]
+    by_cases hzy : z = y
+    · subst hzy
+      simp only [Formula.interp]
+      refine forall_congr' (fun b => ?_)
+      rw [REnv.update_override_bool]
+    · simp only [if_neg hzy, Formula.interp]
+      refine forall_congr' (fun b => ?_)
+      rw [ih (ρ.update .bool y b) hx', hv b,
+          REnv.update_comm_bool_bool ρ y z b (ρ.bools x) (Ne.symm hzy)]
+  | kapp kname args =>
+    simp only [Formula.named] at hx
+    show Formula.interp κ ρ (.kapp kname _) ↔
+         Formula.interp κ (ρ.update .bool z (ρ.bools x)) (.kapp kname args)
+    simp only [Formula.interp, List.map_map]
+    apply iff_of_eq
+    congr 1
+    apply List.map_congr_left
+    intro ⟨b, t⟩ _
+    show Sigma.mk b (Term.interp ρ (t.substB z (.fvar .bool x))) =
+         Sigma.mk b (Term.interp (ρ.update .bool z (ρ.bools x)) t)
+    rw [Term.interp_substB_fvar t z x ρ]
+
 /-! ## 14. Refinement keystone lemmas
 
   These connect syntactic substitution into a refinement (`substI`/`substB`)
