@@ -125,6 +125,15 @@ example :
     simp [mkKEnv, List.lookup, liftK2]
     solve_fixpoint
 
+example :
+  ∃ κ : KEnv,
+    topVC κ []  (.letin (.iconst 99) (.app (.ann exId (ty_k "k")) (.bvar 0)))
+    Pos := by
+  simp [topVC]
+  intro_kenv
+  simp [mkKEnv, List.lookup, liftK1]
+  solve_fixpoint
+
 -- /-! ## Example 3 again: prove `topVC` without solver -/
 
 example (κ : KEnv) : topVC κ [] ex3Exp ex3Ty := by
