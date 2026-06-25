@@ -76,30 +76,30 @@ mutual
         match Γ.lookup x, Γ.lookup y with
         | some (.refine .int _), some (.refine .int _) =>
             some ((fun _ _ => True),
-              .refine .bool ⟨.and
+              .refine .bool (.fmla (.and
                 (.imp (.eqB (.fvar .bool nuName) (.const .bool true))
                       (.leqI (.fvar .int x) (.fvar .int y)))
                 (.imp (.leqI (.fvar .int x) (.fvar .int y))
-                      (.eqB (.fvar .bool nuName) (.const .bool true)))⟩)
+                      (.eqB (.fvar .bool nuName) (.const .bool true))))))
         | _, _ => none
     | .add (.fvar x) (.fvar y) =>
         match Γ.lookup x, Γ.lookup y with
         | some (.refine .int _), some (.refine .int _) =>
             some ((fun _ _ => True),
-              .refine .int ⟨.eqI (.fvar .int nuName)
-                                 (.add (.fvar .int x) (.fvar .int y))⟩)
+              .refine .int (.fmla (.eqI (.fvar .int nuName)
+                                 (.add (.fvar .int x) (.fvar .int y)))))
         | _, _ => none
     | .not (.fvar x) =>
         match Γ.lookup x with
         | some (.refine .bool _) =>
             some ((fun _ _ => True),
-              .refine .bool ⟨.eqB (.fvar .bool nuName) (.not (.fvar .bool x))⟩)
+              .refine .bool (.fmla (.eqB (.fvar .bool nuName) (.not (.fvar .bool x)))))
         | _ => none
     | .and (.fvar x) (.fvar y) =>
         match Γ.lookup x, Γ.lookup y with
         | some (.refine .bool _), some (.refine .bool _) =>
             some ((fun _ _ => True),
-              .refine .bool ⟨.eqB (.fvar .bool nuName) (.and (.fvar .bool x) (.fvar .bool y))⟩)
+              .refine .bool (.fmla (.eqB (.fvar .bool nuName) (.and (.fvar .bool x) (.fvar .bool y)))))
         | _, _ => none
     | _ => none
   termination_by e => 2 * e.skel
@@ -132,17 +132,24 @@ mutual
             if x = nuName then none
             else
               match Γ.lookup x with
-              | some (.refine .bool r) =>
-                  let r_true  : Ty := .refine .bool ⟨.and r.fmla
-                    (.eqB (.fvar .bool nuName) (.const .bool true))⟩
-                  let r_false : Ty := .refine .bool ⟨.and r.fmla
-                    (.eqB (.fvar .bool nuName) (.const .bool false))⟩
-                  match check ((x, r_true) :: Γ) e₁ t,
-                        check ((x, r_false) :: Γ) e₂ t with
+              | some (.refine .bool _) =>
+                  -- Fresh guard variable `y` (standard `if`-rule): keep `x : {ν|r}` in
+                  -- scope and add the path condition `x = true/false` via a fresh
+                  -- binding whose refinement mentions `x` free. This preserves `r`
+                  -- in each branch without conjoining into the (atomic) refinement.
+                  let y := EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
+                                        ++ e₁.fv ++ e₂.fv ++ t.fv ++ Ty.named t
+                                        ++ [x, nuName])
+                  let r_true  : Ty := .refine .bool (.fmla
+                    (.eqB (.fvar .bool x) (.const .bool true)))
+                  let r_false : Ty := .refine .bool (.fmla
+                    (.eqB (.fvar .bool x) (.const .bool false)))
+                  match check ((y, r_true) :: Γ) e₁ t,
+                        check ((y, r_false) :: Γ) e₂ t with
                   | some c₁, some c₂ =>
                       some (fun κ ρ =>
-                        implyBind x r_true  c₁ κ ρ ∧
-                        implyBind x r_false c₂ κ ρ)
+                        implyBind y r_true  c₁ κ ρ ∧
+                        implyBind y r_false c₂ κ ρ)
                   | _, _ => none
               | _ => none
         | _ => none

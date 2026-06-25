@@ -111,14 +111,19 @@ inductive Formula where
   | exB   : EVar → Formula → Formula   -- ∃ x : Bool. φ
   | allI  : EVar → Formula → Formula   -- ∀ x : Int.  φ
   | allB  : EVar → Formula → Formula   -- ∀ x : Bool. φ
-  | kapp  : EVar → List (Σ b : Base, Term b) → Formula
-       -- κ(t₁, …, tₙ) — uninterpreted predicate symbol, solved by `solve_fixpoint`
 
-/-- A refinement: a `Formula` whose free occurrences of `nuName` denote the
-    refined value. `Refinement.interp` (in `Substitution.lean`) substitutes
-    the value for `nuName` and interprets the resulting formula. -/
-structure Refinement (b : Base) where
-  fmla : Formula
+/-- A refinement, one stratification level *above* `Formula`: either a
+    kvar-FREE `Formula` (whose free `nuName` denotes the refined value), or a
+    single κ-application `κ(t₁, …, tₙ)`. Keeping κ here rather than inside
+    `Formula` makes a refinement *atomic* — a constraint XOR one positive κ
+    atom — so κ can never be negated/disjoined/nested. Every VC the generator
+    emits then has the shape `(⋀ refinement-hyps) → refinement-head`, i.e. it is
+    a Constrained Horn Clause by construction. `Refinement.interp` (in
+    `Substitution.lean`) is the only interpretation that needs the κ-assignment.
+    (The κ name is an `EVar`; see `KVar` below, defined to be `EVar`.) -/
+inductive Refinement (b : Base) where
+  | fmla : Formula → Refinement b
+  | kapp : EVar → List (Σ b : Base, Term b) → Refinement b
 
 /-! ## κ-assignments
 
