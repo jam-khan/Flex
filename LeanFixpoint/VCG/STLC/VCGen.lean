@@ -133,7 +133,7 @@ mutual
             else
               match Γ.lookup x with
               | some (.refine .bool _) =>
-                  -- Fresh guard variable `y` (Nico's rule): keep `x : {ν|r}` in
+                  -- Fresh guard variable `y` (standard `if`-rule): keep `x : {ν|r}` in
                   -- scope and add the path condition `x = true/false` via a fresh
                   -- binding whose refinement mentions `x` free. This preserves `r`
                   -- in each branch without conjoining into the (atomic) refinement.
