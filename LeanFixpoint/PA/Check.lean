@@ -48,6 +48,36 @@ def checkExprVC (prop : Expr) : TermElabM Bool := withSilencedMessages do
   catch _ =>
     return false
 
+-- Proof-RETURNING oracle (§5 `prove`/`Provable`). Same contract as
+-- `checkExprVC` — silence messages, run the tactic ladder, reject `sorry` —
+-- but on success returns the proof *term* (Some) instead of a Bool. The
+-- certifying PA glue (`walkPAProof`) calls this at each κ-head leaf to
+-- discharge every survivor conjunct `q[ρ](x̄)`, then `And.intro`s the proofs.
+--
+-- The goal here is the bare atom `q[ρ](x̄)`; its hypotheses Γ (the ∀-binders
+-- and guards) are already ambient fvars threaded in by the walk, so NO
+-- `intros` is needed. The tactic ladder MUST match `checkExprVC`'s so that
+-- any candidate that survived weakening re-proves at glue time (a superset
+-- ladder is sound; a weaker one could drop a survivor and break the bridge).
+def proveLeaf (goal : Expr) : TermElabM (Option Expr) := withSilencedMessages do
+  let mvar   ← mkFreshExprMVar (some goal) (kind := .syntheticOpaque)
+  let mvarId := mvar.mvarId!
+  try
+    let goals ← Tactic.run mvarId do
+      evalTactic (← `(tactic|
+        (first
+          | omega
+          | grind
+          | (constructor <;> grind))))
+    if !goals.isEmpty then return none
+    let proof ← instantiateMVars mvar
+    -- Reject `sorry` (silently inserted by `constructor <;> grind` for
+    -- unsolved subgoals) and any still-unassigned mvar.
+    if proof.hasSorry || proof.hasExprMVar then return none
+    return some proof
+  catch _ =>
+    return none
+
 -- Sat-guard for PA: returns `true` iff the LHS hypothesis of the
 -- implication-shaped `propWithFalseConclusion` is contradictory — i.e.
 -- the same clause but with the conclusion replaced by `False` is provable.
