@@ -76,30 +76,30 @@ mutual
         match Γ.lookup x, Γ.lookup y with
         | some (.refine .int _), some (.refine .int _) =>
             some ((fun _ _ => True),
-              .refine .bool ⟨.and
+              .refine .bool (.fmla (.and
                 (.imp (.eqB (.fvar .bool nuName) (.const .bool true))
                       (.leqI (.fvar .int x) (.fvar .int y)))
                 (.imp (.leqI (.fvar .int x) (.fvar .int y))
-                      (.eqB (.fvar .bool nuName) (.const .bool true)))⟩)
+                      (.eqB (.fvar .bool nuName) (.const .bool true))))))
         | _, _ => none
     | .add (.fvar x) (.fvar y) =>
         match Γ.lookup x, Γ.lookup y with
         | some (.refine .int _), some (.refine .int _) =>
             some ((fun _ _ => True),
-              .refine .int ⟨.eqI (.fvar .int nuName)
-                                 (.add (.fvar .int x) (.fvar .int y))⟩)
+              .refine .int (.fmla (.eqI (.fvar .int nuName)
+                                 (.add (.fvar .int x) (.fvar .int y)))))
         | _, _ => none
     | .not (.fvar x) =>
         match Γ.lookup x with
         | some (.refine .bool _) =>
             some ((fun _ _ => True),
-              .refine .bool ⟨.eqB (.fvar .bool nuName) (.not (.fvar .bool x))⟩)
+              .refine .bool (.fmla (.eqB (.fvar .bool nuName) (.not (.fvar .bool x)))))
         | _ => none
     | .and (.fvar x) (.fvar y) =>
         match Γ.lookup x, Γ.lookup y with
         | some (.refine .bool _), some (.refine .bool _) =>
             some ((fun _ _ => True),
-              .refine .bool ⟨.eqB (.fvar .bool nuName) (.and (.fvar .bool x) (.fvar .bool y))⟩)
+              .refine .bool (.fmla (.eqB (.fvar .bool nuName) (.and (.fvar .bool x) (.fvar .bool y)))))
         | _, _ => none
     | _ => none
   termination_by e => 2 * e.skel
@@ -132,11 +132,11 @@ mutual
             if x = nuName then none
             else
               match Γ.lookup x with
-              | some (.refine .bool r) =>
-                  let r_true  : Ty := .refine .bool ⟨.and r.fmla
-                    (.eqB (.fvar .bool nuName) (.const .bool true))⟩
-                  let r_false : Ty := .refine .bool ⟨.and r.fmla
-                    (.eqB (.fvar .bool nuName) (.const .bool false))⟩
+              | some (.refine .bool _) =>
+                  let r_true  : Ty := .refine .bool (.fmla
+                    (.eqB (.fvar .bool nuName) (.const .bool true)))
+                  let r_false : Ty := .refine .bool (.fmla
+                    (.eqB (.fvar .bool nuName) (.const .bool false)))
                   match check ((x, r_true) :: Γ) e₁ t,
                         check ((x, r_false) :: Γ) e₂ t with
                   | some c₁, some c₂ =>

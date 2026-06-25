@@ -38,23 +38,17 @@ theorem sub_sound (κ : KEnv) (Γ : TEnv) (s t : Ty) (c : Constraint) :
   match s, t with
   | .refine .int r1, .refine .int r2 =>
     simp_all [sub]
-    apply Subtyp.refine
-    simp [Refinement.subImp, Formula.interp, Refinement.interp] at *
-    intro ρ hm n hf
-    have := hent ρ hm
-    rw [←hsub] at this
-    apply this
-    assumption
+    rw [← hsub] at hent
+    exact Subtyp.refine hent
   | .refine .bool r1, .refine .bool r2 =>
     simp_all [sub]
+    rw [← hsub] at hent
     apply Subtyp.refine
-    simp [Refinement.subImp, Formula.interp, Refinement.interp] at *
-    intro ρ hm
-    have h := hent ρ hm ; rw [←hsub] at h
-    obtain ⟨hl, hr⟩ := h
-    and_intros
-    · apply hl
-    · apply hr
+    intro ρ hm ν hpre
+    have hb := hent ρ hm
+    cases ν
+    · exact hb.1 hpre
+    · exact hb.2 hpre
   | .arrow s1 t1, .arrow s2 t2 =>
     simp_all [sub]
     -- use `set` so `w` stays opaque, preventing whnf blowup
@@ -247,42 +241,29 @@ mutual
       obtain ⟨r, hr⟩ : ∃ r, List.lookup cn Γ = some (.refine .bool r) := by grind
       simp_all
       obtain ⟨c₁, c₂, hc₁, hc₂⟩ : ∃ c₁ c₂,
-          (check ((cn, Ty.refine Base.bool { fmla := r.fmla.and (Formula.eqB (Term.fvar Base.bool nuName) (Term.const Base.bool true)) }) :: Γ) bt t = some c₁) ∧
-          (check ((cn, Ty.refine Base.bool { fmla := r.fmla.and (Formula.eqB (Term.fvar Base.bool nuName) (Term.const Base.bool false)) }) :: Γ) bf t = some c₂) := by
+          (check ((cn, Ty.refine Base.bool (.fmla (Formula.eqB (Term.fvar Base.bool nuName) (Term.const Base.bool true)))) :: Γ) bt t = some c₁) ∧
+          (check ((cn, Ty.refine Base.bool (.fmla (Formula.eqB (Term.fvar Base.bool nuName) (Term.const Base.bool false)))) :: Γ) bf t = some c₂) := by
         grind
       simp_all
-      apply Check.ite
-      assumption
+      rw [← hcheck.2] at hent
+      apply Check.ite hr
       · exact hcheck.1
-      apply check_sound _ _ _ _ _ hc₁
-      intro ρ hm
-      rw [←hcheck.2] at hent
-      have := hent ρ hm.2
-      simp_all
-      by_cases h : (ρ.bools cn) = false
-      · simp at h ; rw [h] at hm
-        have := (hent ρ hm.2).1.1 hm.1
-        have h' : (fun y => !decide (cn = y) && ρ.bools y) = ρ.bools := by grind
-        rw [h'] at this ; simp_all
-      · simp at h ; rw [h] at hm
-        have := (hent ρ hm.2).1.2 hm.1
-        have h' : (fun y => decide (cn = y) || ρ.bools y) = ρ.bools := by grind
-        rw [h'] at this ; simp_all
-
-      apply check_sound _ _ _ _ _ hc₂
-      intro ρ hm
-      rw [←hcheck.2] at hent
-      have := hent ρ hm.2
-      simp_all
-      by_cases h : (ρ.bools cn) = false
-      · simp at h ; rw [h] at hm
-        have := (hent ρ hm.2).2.1 hm.1
-        have h' : (fun y => !decide (cn = y) && ρ.bools y) = ρ.bools := by grind
-        rw [h'] at this ; simp_all
-      · simp at h ; rw [h] at hm
-        have := (hent ρ hm.2).2.2 hm.1
-        have h' : (fun y => decide (cn = y) || ρ.bools y) = ρ.bools := by grind
-        rw [h'] at this ; simp_all
+      · apply check_sound _ _ _ _ _ hc₁
+        apply Entail.ext
+        intro ρ hm
+        have hconj := (hent ρ hm).1
+        intro v hv
+        cases v
+        · simpa [REnv.update] using hconj.1 hv
+        · simpa [REnv.update] using hconj.2 hv
+      · apply check_sound _ _ _ _ _ hc₂
+        apply Entail.ext
+        intro ρ hm
+        have hconj := (hent ρ hm).2
+        intro v hv
+        cases v
+        · simpa [REnv.update] using hconj.1 hv
+        · simpa [REnv.update] using hconj.2 hv
     | .lam e =>
       match t with
       | .refine _ r =>
@@ -532,27 +513,18 @@ mutual
       rename_i x e₁ e₂ r
       simp only [Exp.WFBVars] at hE
       obtain ⟨_, hE1, hE2⟩ := hE
-      -- Get WFBVars of the original (x, .refine .bool r) binding.
-      have hr_wfb : Ty.WFBVars (.refine .bool r) := hΓ.lookup hlk
-      -- The strengthened refinement is WFBVars: `r.fmla.and (.eqB ν const)` has no
-      -- bvars at any level (r.fmla has none by hr_wfb; the conjunct has only fvars
-      -- and consts).
+      -- The branch guard `{ν | ν = const}` is kvar-free with no bvars, so it is
+      -- WFBVars outright (no need for the original binding's WFBVars).
       have hstr_wfb : ∀ (const : Bool), Ty.WFBVars (.refine .bool
-          ⟨.and r.fmla (.eqB (.fvar .bool nuName) (.const .bool const))⟩) := by
+          (.fmla (.eqB (.fvar .bool nuName) (.const .bool const)))) := by
         intro const
-        simp only [Ty.WFBVars, Ty.WFBVarCtx, Formula.hasBVar, Term.hasBVar]
-        intro b k hbv
-        -- hbv : Formula.hasBVar b k r.fmla ∨ False ∨ False
-        simp only [or_false] at hbv
-        -- hbv : Formula.hasBVar b k r.fmla
-        simp only [Ty.WFBVars, Ty.WFBVarCtx] at hr_wfb
-        exact hr_wfb b k hbv
+        simp [Ty.WFBVars, Ty.WFBVarCtx, Refinement.hasBVar, Formula.hasBVar, Term.hasBVar]
       -- Extended TEnv.WFBVars for true / false branches.
       have hΓ1 : TEnv.WFBVars ((x, .refine .bool
-          ⟨.and r.fmla (.eqB (.fvar .bool nuName) (.const .bool true))⟩) :: Γ) :=
+          (.fmla (.eqB (.fvar .bool nuName) (.const .bool true)))) :: Γ) :=
         hΓ.cons (hstr_wfb true) hxν
       have hΓ2 : TEnv.WFBVars ((x, .refine .bool
-          ⟨.and r.fmla (.eqB (.fvar .bool nuName) (.const .bool false))⟩) :: Γ) :=
+          (.fmla (.eqB (.fvar .bool nuName) (.const .bool false)))) :: Γ) :=
         hΓ.cons (hstr_wfb false) hxν
       have hht1 := check_to_hastype hΓ1 hE1 ht hck1
       have hht2 := check_to_hastype hΓ2 hE2 ht hck2

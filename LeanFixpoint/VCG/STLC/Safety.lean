@@ -243,36 +243,63 @@ private theorem REnv.extendBy_comm (s s' : Ty) (ρ : REnv) (x z : EVar) (va va' 
   · exact (REnv.update_int_int_comm ρ x z hxz n n').symm
   · exact (REnv.update_bool_bool_comm ρ x z hxz bv bv').symm
 
-/-- Helper: updating ρ at a fresh x (x ∉ r.fmla.fv, x ∉ r.fmla.named, x ≠ nuName)
+/-- Helper: updating ρ at a fresh x (x ∉ r.rawfv, x ∉ r.named, x ≠ nuName)
     does not change Refinement.interp. -/
 private theorem Refinement.interp_extendBy_fresh {κ : KEnv} {b : Base} (r : Refinement b)
     (s : Ty) (x : EVar) (va : Val) (ρ : REnv)
-    (hx : x ∉ r.fmla.fv) (hxn : x ∉ r.fmla.named) (hxν : x ≠ nuName)
+    (hx : x ∉ Refinement.rawfv r) (hxn : x ∉ Refinement.named r) (hxν : x ≠ nuName)
     {w : b.interp} :
     Refinement.interp κ r ρ w ↔ Refinement.interp κ r (REnv.extendBy s ρ x va) w := by
-  simp only [Refinement.interp]
-  -- extendBy either updates .int x, .bool x, or is identity
-  rcases s with (_ | _ | _) | _ <;> rcases va with n | bv | _
-  all_goals simp only [REnv.extendBy]
-  · -- s = .refine .int _, va = .iconst n: extendBy = ρ.update .int x n
-    have hcomm : (ρ.update .int x n).update b nuName w =
-                 (ρ.update b nuName w).update .int x n := by
-      cases b with
-      | int  => exact (REnv.update_int_int_comm ρ nuName x hxν.symm w n).symm
-      | bool => exact (REnv.update_int_bool_comm ρ x nuName n w).symm
-    rw [hcomm]
-    have :=  Formula.interp_update_fresh_int κ r.fmla x n (ρ.update b nuName w) hx hxn
-    grind
-    -- exact Formula.interp_update_fresh_int κ r.fmla x n (ρ.update b nuName w) hx hxn
-  · -- s = .refine .int _, va = .bconst bv: extendBy = ρ (mismatch)
-    have :=  Formula.interp_update_fresh_bool κ r.fmla x bv (ρ.update b nuName w) hx hxn
-    have hcomm : (ρ.update .bool x bv).update b nuName w =
-                 (ρ.update b nuName w).update .bool x bv:= by
-      cases b with
-      | int => rw [REnv.update_int_bool_comm]
-      | bool => rw [REnv.update_bool_bool_comm] ; grind
-    rw [hcomm]
-    assumption
+  cases r with
+  | fmla φ =>
+    simp only [Refinement.rawfv, Refinement.named] at hx hxn
+    simp only [Refinement.interp]
+    rcases s with (_ | _ | _) | _ <;> rcases va with n | bv | _
+    all_goals simp only [REnv.extendBy]
+    · have hcomm : (ρ.update .int x n).update b nuName w =
+                   (ρ.update b nuName w).update .int x n := by
+        cases b with
+        | int  => exact (REnv.update_int_int_comm ρ nuName x hxν.symm w n).symm
+        | bool => exact (REnv.update_int_bool_comm ρ x nuName n w).symm
+      rw [hcomm]
+      have := Formula.interp_update_fresh_int φ x n (ρ.update b nuName w) hx hxn
+      grind
+    · have := Formula.interp_update_fresh_bool φ x bv (ρ.update b nuName w) hx hxn
+      have hcomm : (ρ.update .bool x bv).update b nuName w =
+                   (ρ.update b nuName w).update .bool x bv := by
+        cases b with
+        | int => rw [REnv.update_int_bool_comm]
+        | bool => rw [REnv.update_bool_bool_comm] ; grind
+      rw [hcomm]
+      assumption
+  | kapp kn args =>
+    have hargs : ∀ a ∈ args, x ∉ Term.fv a.2 := fun a ha hm =>
+      hx (by simp only [Refinement.rawfv, List.mem_flatMap]; exact ⟨a, ha, hm⟩)
+    simp only [Refinement.interp]
+    rcases s with (_ | _ | _) | _ <;> rcases va with n | bv | _
+    all_goals simp only [REnv.extendBy]
+    · -- update .int x n
+      apply Iff.of_eq; congr 1
+      apply List.map_congr_left
+      intro a ha
+      have hcomm : (ρ.update .int x n).update b nuName w =
+                   (ρ.update b nuName w).update .int x n := by
+        cases b with
+        | int  => exact (REnv.update_int_int_comm ρ nuName x hxν.symm w n).symm
+        | bool => exact (REnv.update_int_bool_comm ρ x nuName n w).symm
+      rw [hcomm]; congr 1
+      exact (Term.interp_update_fresh_int a.2 x n (ρ.update b nuName w) (hargs a ha)).symm
+    · -- update .bool x bv
+      apply Iff.of_eq; congr 1
+      apply List.map_congr_left
+      intro a ha
+      have hcomm : (ρ.update .bool x bv).update b nuName w =
+                   (ρ.update b nuName w).update .bool x bv := by
+        cases b with
+        | int => rw [REnv.update_int_bool_comm]
+        | bool => rw [REnv.update_bool_bool_comm] ; grind
+      rw [hcomm]; congr 1
+      exact (Term.interp_update_fresh_bool a.2 x bv (ρ.update b nuName w) (hargs a ha)).symm
 
 /-- Combined Iff proved by strong induction on `t.skel`.
     Derives both `extendBy_fresh` and `of_extendBy_fresh` as corollaries. -/
@@ -287,7 +314,7 @@ private theorem TyDenote.extendBy_fresh_iff_aux (n : Nat) :
     match t with
     | .refine b r =>
       have hx' := Refinement.fv_filter_of_ne_nu r x hx hxν
-      have hxn' : x ∉ r.fmla.named := by simpa [Ty.named] using hxn
+      have hxn' : x ∉ Refinement.named r := by simpa [Ty.named] using hxn
       cases b <;> simp only [TyDenote] <;> constructor
       · intro ⟨m, hvm, hp⟩; exact ⟨m, hvm, (Refinement.interp_extendBy_fresh r s x va ρ hx' hxn' hxν).mp hp⟩
       · intro ⟨m, hvm, hp⟩; exact ⟨m, hvm, (Refinement.interp_extendBy_fresh r s x va ρ hx' hxn' hxν).mpr hp⟩
@@ -299,7 +326,7 @@ private theorem TyDenote.extendBy_fresh_iff_aux (n : Nat) :
     match t with
     | .refine b r =>
       have hx' := Refinement.fv_filter_of_ne_nu r x hx hxν
-      have hxn' : x ∉ r.fmla.named := by simpa [Ty.named] using hxn
+      have hxn' : x ∉ Refinement.named r := by simpa [Ty.named] using hxn
       cases b <;> simp only [TyDenote] <;> constructor
       · intro ⟨m, hvm, hp⟩; exact ⟨m, hvm, (Refinement.interp_extendBy_fresh r s x va ρ hx' hxn' hxν).mp hp⟩
       · intro ⟨m, hvm, hp⟩; exact ⟨m, hvm, (Refinement.interp_extendBy_fresh r s x va ρ hx' hxn' hxν).mpr hp⟩
@@ -355,17 +382,17 @@ theorem TyDenote.extendBy_fresh {κ : KEnv} {t : Ty} {ρ : REnv} {v : Val}
       simp only [TyDenote] at h ⊢
       obtain ⟨n, hvn, hp⟩ := h
       refine ⟨n, hvn, ?_⟩
-      have hx' : x ∉ r.fmla.fv :=
+      have hx' : x ∉ Refinement.rawfv r :=
         Refinement.fv_filter_of_ne_nu r x hx hxν
-      have hxn' : x ∉ r.fmla.named := by simpa [Ty.named] using hxn
+      have hxn' : x ∉ Refinement.named r := by simpa [Ty.named] using hxn
       exact (Refinement.interp_extendBy_fresh r s x va ρ hx' hxn' hxν).mp hp
     | bool =>
       simp only [TyDenote] at h ⊢
       obtain ⟨bv, hvb, hp⟩ := h
       refine ⟨bv, hvb, ?_⟩
-      have hx' : x ∉ r.fmla.fv :=
+      have hx' : x ∉ Refinement.rawfv r :=
         Refinement.fv_filter_of_ne_nu r x hx hxν
-      have hxn' : x ∉ r.fmla.named := by simpa [Ty.named] using hxn
+      have hxn' : x ∉ Refinement.named r := by simpa [Ty.named] using hxn
       exact (Refinement.interp_extendBy_fresh r s x va ρ hx' hxn' hxν).mp hp
   | arrow s' t' =>
     exact (TyDenote.extendBy_fresh_iff_aux (Ty.arrow s' t').skel κ (.arrow s' t') (by omega) ρ v s x va hx hxn hxν).mp h
@@ -392,137 +419,58 @@ private theorem TyDenote.substBV_iff_aux (n : Nat) :
     cases t <;> simp at hsk
     rename_i b r
     intro s x ρ va v hxf hxn hxnn hwfb htd
-      -- WF: at level 0, all BVars have base = s.optBase
     simp only [Ty.WFBVarCtx] at hwfb
-    -- fv/named hypotheses
     simp only [Ty.fv, Ty.named] at hxf hxn
-    -- x ∉ r.fmla.fv and x ∉ r.fmla.named
-    have hx_rfv : x ∉ r.fmla.fv := by
-      intro hm
-      exact hxf (List.mem_filter.mpr ⟨hm, by simp [hxnn]⟩)
-    -- openBVar for wrong base is noop (via WFBVarCtx)
-    -- Key: (r.openBVar .int 0 x).openBVar .bool 0 x = r.openBVar .int 0 x
-    --      when no .bool BVars at level 0 in r.fmla (by WF)
+    have hx_rfv : x ∉ Refinement.rawfv r := Refinement.fv_filter_of_ne_nu r x hxf hxnn
     cases va with
     | iconst n =>
-      -- s must be .refine .int r' for TyDenote κ s ρ (.iconst n) to hold
-      -- extendBy s ρ x (.iconst n): if s = .refine .int _, this is ρ.update .int x n; else ρ
       cases s with
-      | arrow s_d s_c =>
-        simp [TyDenote] at htd
+      | arrow s_d s_c => simp [TyDenote] at htd
       | refine sb r' =>
         cases sb with
         | int =>
-          -- s = .refine .int r', s.optBase = some .int
-          -- extendBy (.refine .int r') ρ x (.iconst n) = ρ.update .int x n
           simp only [Ty.optBase] at hwfb
-          simp only [Ty.substBV_aux, REnv.extendBy, Ty.openVar, Refinement.openBVar]
-          -- openBVar .bool 0 x is noop (WF: only .int BVars at level 0)
-          have hno_bool : ¬Formula.hasBVar .bool j (Formula.openBVar Base.int j x r.fmla) := by
-            intro hbv
-            grind [Formula.hasBVar_openBVar_other]
-
-          rw [Formula.openBVar_noop _ .bool j x hno_bool]
-          -- Now need: TyDenote κ (.refine b (r.substBV .int 0 n)) ρ v ↔
-          --           TyDenote κ (.refine b (r.openBVar .int 0 x)) (ρ.update .int x n) v
-          cases b with
-          | int =>
-            simp only [TyDenote]
-            constructor
-            · rintro ⟨n', rfl, hi⟩
-              refine ⟨n', rfl, ?_⟩
-              simp only [Refinement.interp, Refinement.substBV] at hi ⊢
-              rw [Formula.interp_substBV κ r.fmla .int j n x (ρ.update .int nuName n')
-                    (by simp [hx_rfv]) hxn] at hi
-              rwa [REnv.update_comm_int_int _ _ _ _ _ (Ne.symm hxnn)] at hi
-            · rintro ⟨n', rfl, hi⟩
-              refine ⟨n', rfl, ?_⟩
-              simp only [Refinement.interp, Refinement.substBV]
-              rw [Formula.interp_substBV κ r.fmla .int j n x (ρ.update .int nuName n')
-                    (by simp [hx_rfv]) hxn]
-              rwa [REnv.update_comm_int_int _ _ _ _ _ (Ne.symm hxnn)]
-          | bool =>
-            simp only [TyDenote]
-            constructor
-            · rintro ⟨bv, rfl, hi⟩
-              refine ⟨bv, rfl, ?_⟩
-              simp only [Refinement.interp, Refinement.substBV] at hi ⊢
-              rw [Formula.interp_substBV κ r.fmla .int j n x (ρ.update .bool nuName bv)
-                    (by simp [hx_rfv]) hxn] at hi
-              rwa [REnv.update_comm_int_bool]
-            · rintro ⟨bv, rfl, hi⟩
-              refine ⟨bv, rfl, ?_⟩
-              simp only [Refinement.interp, Refinement.substBV] at hi ⊢
-              rw [Formula.interp_substBV κ r.fmla .int j n x (ρ.update .bool nuName bv)
-                    (by simp [hx_rfv]) hxn]
-              rwa [REnv.update_comm_int_bool] at hi
-        | bool =>
-          simp [TyDenote] at htd
+          simp only [Ty.substBV_aux, REnv.extendBy, Ty.openVar]
+          -- inner `.bool` opening is a no-op (WF: only `.int` BVars at this level)
+          rw [Refinement.openBVar_noop (r.openBVar .int j x) .bool j x (by
+                intro hbv
+                rw [Refinement.hasBVar_openBVar_other r .bool .int j j x (Or.inl (by decide))] at hbv
+                exact absurd (hwfb .bool j hbv) (by simp))]
+          cases b <;> simp only [TyDenote] <;>
+            exact ⟨fun ⟨m, hm, h⟩ =>
+                     ⟨m, hm, (Refinement.interp_substBV κ r .int j n x ρ hx_rfv hxn hxnn).mp h⟩,
+                   fun ⟨m, hm, h⟩ =>
+                     ⟨m, hm, (Refinement.interp_substBV κ r .int j n x ρ hx_rfv hxn hxnn).mpr h⟩⟩
+        | bool => simp [TyDenote] at htd
     | bconst bv =>
       cases s with
-      | arrow s_d s_c =>
-        simp [TyDenote] at htd
+      | arrow s_d s_c => simp [TyDenote] at htd
       | refine sb r' =>
         cases sb with
         | bool =>
           simp only [Ty.optBase] at hwfb
-          simp only [Ty.substBV_aux, REnv.extendBy, Ty.openVar, Refinement.openBVar]
-          have hno_int : ¬Formula.hasBVar .int j r.fmla := by
-            intro hbv; exact absurd (hwfb .int j hbv) (by simp)
-          rw [Formula.openBVar_noop r.fmla .int j x hno_int]
-          cases b with
-          | bool =>
-            simp only [TyDenote]
-            constructor
-            · rintro ⟨bv', rfl, hi⟩
-              refine ⟨bv', rfl, ?_⟩
-              simp only [Refinement.interp, Refinement.substBV] at hi ⊢
-              rw [Formula.interp_substBV κ r.fmla .bool j bv x (ρ.update .bool nuName bv')
-                    (by simp [hx_rfv]) hxn] at hi
-              rwa [REnv.update_comm_bool_bool _ _ _ _ _ (Ne.symm hxnn)] at hi
-            · rintro ⟨bv', rfl, hi⟩
-              refine ⟨bv', rfl, ?_⟩
-              simp only [Refinement.interp, Refinement.substBV]
-              rw [Formula.interp_substBV κ r.fmla .bool j bv x (ρ.update .bool nuName bv')
-                    (by simp [hx_rfv]) hxn]
-              rwa [REnv.update_comm_bool_bool _ _ _ _ _ (Ne.symm hxnn)]
-          | int =>
-            simp only [TyDenote]
-            constructor
-            · rintro ⟨n', rfl, hi⟩
-              refine ⟨n', rfl, ?_⟩
-              simp only [Refinement.interp, Refinement.substBV] at hi ⊢
-              rw [Formula.interp_substBV κ r.fmla .bool j bv x (ρ.update .int nuName n')
-                    (by simp [hx_rfv]) hxn] at hi
-              rwa [(REnv.update_comm_int_bool _ _ _ _ _).symm] at hi
-            · rintro ⟨n', rfl, hi⟩
-              refine ⟨n', rfl, ?_⟩
-              simp only [Refinement.interp, Refinement.substBV]
-              rw [Formula.interp_substBV κ r.fmla .bool j bv x (ρ.update .int nuName n')
-                    (by simp [hx_rfv]) hxn]
-              rwa [(REnv.update_comm_int_bool _ _ _ _ _).symm]
-        | int =>
-          simp [TyDenote] at htd
+          simp only [Ty.substBV_aux, REnv.extendBy, Ty.openVar]
+          rw [Refinement.openBVar_noop r .int j x (by
+                intro hbv; exact absurd (hwfb .int j hbv) (by simp))]
+          cases b <;> simp only [TyDenote] <;>
+            exact ⟨fun ⟨m, hm, h⟩ =>
+                     ⟨m, hm, (Refinement.interp_substBV κ r .bool j bv x ρ hx_rfv hxn hxnn).mp h⟩,
+                   fun ⟨m, hm, h⟩ =>
+                     ⟨m, hm, (Refinement.interp_substBV κ r .bool j bv x ρ hx_rfv hxn hxnn).mpr h⟩⟩
+        | int => simp [TyDenote] at htd
     | clos body =>
-      -- va = .clos body, extendBy _ ρ x (.clos body) = ρ always
-      -- substBV_aux 0 (.clos body) (.refine b r) = .refine b r
-      simp only [Ty.substBV_aux, REnv.extendBy, Ty.openVar, Refinement.openBVar]
+      simp only [Ty.substBV_aux, REnv.extendBy, Ty.openVar]
       cases s with
       | arrow s_d s_c =>
         simp only [Ty.optBase] at hwfb
-        have hno_int : ¬Formula.hasBVar .int j r.fmla := by
-          intro hbv; exact absurd (hwfb .int j hbv) (by simp)
-        have hno_bool : ¬Formula.hasBVar .bool j r.fmla := by
-          intro hbv; exact absurd (hwfb .bool j hbv) (by simp)
-        rw [Formula.openBVar_noop r.fmla .int j x hno_int,
-            Formula.openBVar_noop r.fmla .bool j x hno_bool]
+        rw [Refinement.openBVar_noop r .int j x (by
+              intro hbv; exact absurd (hwfb .int j hbv) (by simp)),
+            Refinement.openBVar_noop r .bool j x (by
+              intro hbv; exact absurd (hwfb .bool j hbv) (by simp))]
       | refine sb r' =>
-        -- TyDenote κ (.refine sb r') ρ (.clos body) = False
         cases sb with
-        | int =>
-          simp only [TyDenote] at htd; obtain ⟨_, h, _⟩ := htd; simp at h
-        | bool =>
-          simp only [TyDenote] at htd; obtain ⟨_, h, _⟩ := htd; simp at h
+        | int  => simp only [TyDenote] at htd; obtain ⟨_, h, _⟩ := htd; simp at h
+        | bool => simp only [TyDenote] at htd; obtain ⟨_, h, _⟩ := htd; simp at h
   | succ n ih =>
     intro j κ t hsk s x ρ va v hxf hxn hxν hwfb htd
     -- If t.skel ≤ n, delegate directly to IH
@@ -762,8 +710,8 @@ private theorem ModelsEnv.extendBy_fresh_aux {κ : KEnv} {Γ : TEnv} {ρ : REnv}
       obtain ⟨hhead, htail⟩ := hm
       refine ⟨?_, ih htail hz_dom.2 hz_fv.2 hz_named.2⟩
       have hzy : z ≠ y := hz_dom.1
-      have hz_rfv : z ∉ r.fmla.fv := Refinement.fv_filter_of_ne_nu r z hz_fv.1 hzν
-      have hz_rnamed : z ∉ r.fmla.named := by simpa [Ty.named] using hz_named.1
+      have hz_rfv : z ∉ Refinement.rawfv r := Refinement.fv_filter_of_ne_nu r z hz_fv.1 hzν
+      have hz_rnamed : z ∉ Refinement.named r := by simpa [Ty.named] using hz_named.1
       have hget : REnv.get b (REnv.extendBy s ρ z va) y = REnv.get b ρ y := by
         cases b with
         | int  => exact REnv.extendBy_ints_other s ρ z y va hzy
@@ -788,8 +736,8 @@ private theorem ModelsEnv.extendBy_cons {κ : KEnv} {Γ : TEnv} {ρ : REnv}
   | refine b r =>
     simp only [ModelsEnv]
     refine ⟨?_, htail⟩
-    have hz_rfv : z ∉ r.fmla.fv := Refinement.fv_filter_of_ne_nu r z hz_s2fv hzν
-    have hz_rnamed : z ∉ r.fmla.named := by simpa [Ty.named] using hz_s2named
+    have hz_rfv : z ∉ Refinement.rawfv r := Refinement.fv_filter_of_ne_nu r z hz_s2fv hzν
+    have hz_rnamed : z ∉ Refinement.named r := by simpa [Ty.named] using hz_s2named
     cases b with
     | int =>
       simp only [TyDenote] at htd_va
@@ -815,15 +763,11 @@ theorem subtyp_sound {κ Γ s t} (hsub : Subtyp κ Γ s t)
       | int =>
         simp only [TyDenote] at hs ⊢
         obtain ⟨n, hvn, hp₁⟩ := hs
-        have hf : Formula.interp _ ρ (Refinement.subImp r₁ r₂) := hent ρ hΓ
-        simp only [Refinement.subImp, Formula.interp] at hf
-        exact ⟨n, hvn, hf n hp₁⟩
+        exact ⟨n, hvn, hent ρ hΓ n hp₁⟩
       | bool =>
         simp only [TyDenote] at hs ⊢
         obtain ⟨bv, hvb, hp₁⟩ := hs
-        have hf : Formula.interp _ ρ (Refinement.subImp r₁ r₂) := hent ρ hΓ
-        simp only [Refinement.subImp, Formula.interp] at hf
-        exact ⟨bv, hvb, hf bv hp₁⟩
+        exact ⟨bv, hvb, hent ρ hΓ bv hp₁⟩
   | arrow hdom hfresh hcodom ih_hdom ih_hcodom =>
     rename_i Γ' s₁ t₁ s₂ t₂ x
     obtain ⟨hWF_s1, hWF_st1⟩ := hWF_s
@@ -884,28 +828,18 @@ theorem hastype_fundamental {κ Γ e t} (h : Hastype κ Γ e t) :
             cases b with
             | int  =>
                 simp only [TyDenote] at hv
-                obtain ⟨n, hvn, hp⟩ := hv
+                obtain ⟨n, hvn, _⟩ := hv
                 simp only [self, TyDenote]
                 refine ⟨n, hvn, ?_⟩
-                simp only [Refinement.interp, Formula.interp, Term.interp,
-                           REnv.get, REnv.update, hint n hvn]
-                refine ⟨?_, ?_⟩
-                · -- Show: Formula.interp κ ρ' r.fmla where ρ' is ρ updated at nuName.
-                  -- We have hp : Refinement.interp κ r ρ n; unfold same.
-                  show Formula.interp _ (ρ.update .int nuName n) r.fmla
-                  exact hp
-                · simp
+                simp [Refinement.interp, Formula.interp, Term.interp,
+                      REnv.get, hint n hvn]
             | bool =>
                 simp only [TyDenote] at hv
-                obtain ⟨bv, hvb, hp⟩ := hv
+                obtain ⟨bv, hvb, _⟩ := hv
                 simp only [self, TyDenote]
                 refine ⟨bv, hvb, ?_⟩
-                simp only [Refinement.interp, Formula.interp, Term.interp,
-                           REnv.get, REnv.update, hbool bv hvb]
-                refine ⟨?_, ?_⟩
-                · show Formula.interp _ (ρ.update .bool nuName bv) r.fmla
-                  exact hp
-                · simp
+                simp [Refinement.interp, Formula.interp, Term.interp,
+                      REnv.get, hbool bv hvb]
         | arrow _ _ =>
             simp only [self]
             exact hv
@@ -1129,27 +1063,26 @@ theorem hastype_fundamental {κ Γ e t} (h : Hastype κ Γ e t) :
       intro γ ρ hE
       obtain ⟨vx, hlkγx, htd_x, hcl_x, _, hbool_x⟩ := EnvAgrees.lookup_some hE hlk
       simp only [TyDenote] at htd_x
-      obtain ⟨bx, hvxeq, hp⟩ := htd_x
+      obtain ⟨bx, hvxeq, _⟩ := htd_x
       subst hvxeq
       have hρx : ρ.bools x = bx := hbool_x bx rfl
       have hγcl := EnvAgrees.allClosed hE
       have hxfv := Exp.substEnv_var_lookup x γ (.bconst bx) hlkγx hcl_x hγcl
       simp only [Val.toExp] at hxfv
-      -- helper to build TyDenote for strengthened x binding
+      -- helper to build TyDenote for the (kvar-free) guard binding for x
       let r_true : Refinement .bool :=
-        ⟨.and r.fmla (.eqB (.fvar .bool nuName) (.const .bool true))⟩
+        .fmla (.eqB (.fvar .bool nuName) (.const .bool true))
       let r_false : Refinement .bool :=
-        ⟨.and r.fmla (.eqB (.fvar .bool nuName) (.const .bool false))⟩
+        .fmla (.eqB (.fvar .bool nuName) (.const .bool false))
       cases bx with
       | true =>
         -- Extended EnvAgrees for e₁ branch
         have hE₁ : EnvAgrees κ ((x, .refine .bool r_true) :: Γ) ((x, .bconst true) :: γ) ρ := by
           refine ⟨rfl, hE, ?_, fun n h => by simp at h, fun b h => ?_⟩
-          · -- TyDenote for strengthened x at true
+          · -- TyDenote for the guard at true
             simp only [TyDenote, r_true]
             refine ⟨true, rfl, ?_⟩
-            simp only [Refinement.interp, Formula.interp, Term.interp, REnv.get, REnv.update]
-            exact ⟨hp, by simp⟩
+            simp [Refinement.interp, Formula.interp, Term.interp, REnv.get]
           · cases h; exact hρx
         obtain ⟨vr, hbs_vr, htd_vr⟩ := ih_e₁ hE₁
         -- substEnv ((x,.bconst true)::γ) e₁ = substEnv γ e₁ (x already in γ at true)
@@ -1164,8 +1097,7 @@ theorem hastype_fundamental {κ Γ e t} (h : Hastype κ Γ e t) :
           refine ⟨rfl, hE, ?_, fun n h => by simp at h, fun b h => ?_⟩
           · simp only [TyDenote, r_false]
             refine ⟨false, rfl, ?_⟩
-            simp only [Refinement.interp, Formula.interp, Term.interp, REnv.get, REnv.update]
-            exact ⟨hp, by simp⟩
+            simp [Refinement.interp, Formula.interp, Term.interp, REnv.get]
           · cases h; exact hρx
         obtain ⟨vr, hbs_vr, htd_vr⟩ := ih_e₂ hE₂
         have hred₂ := Exp.substEnv_cons_redundant e₂ γ x (.bconst false) hlkγx hγcl

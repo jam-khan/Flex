@@ -9,10 +9,10 @@ open STLC
   `κ : KEnv` (the interpretation of uninterpreted predicate symbols). The
   user typically writes `∃ κ : KEnv, Entail κ ...` and lets the solver pick.
 
-  Two forms:
-  - `Entail κ Γ c` : `c : REnv → Prop` — VCGen-produced `Constraint`s.
-  - `EntailF κ Γ φ` : `φ : Formula` — used by `Subtyp.refine` (constraint has
-    a syntactic form, with a universal over ν via `Formula.allI` / `allB`).
+  `Entail κ Γ c` (with `c : REnv → Prop`) is the entailment used by
+  VCGen-produced `Constraint`s. Refinement subtyping is expressed semantically
+  (see `Subtyp.refine` in `Typing.lean`), so no `Formula`-form entailment is
+  needed now that κ lives at the `Refinement` level.
 -/
 
 /-- A model for Γ under κ-assignment: every refined binding is satisfied at
@@ -29,11 +29,6 @@ def ModelsEnv (κ : KEnv) : REnv → TEnv → Prop
 @[simp]
 def Entail (κ : KEnv) (Γ : TEnv) (c : REnv → Prop) : Prop :=
   ∀ ρ, ModelsEnv κ ρ Γ → c ρ
-
-/-- Formula-form entailment. -/
-@[simp]
-def EntailF (κ : KEnv) (Γ : TEnv) (φ : Formula) : Prop :=
-  Entail κ Γ (fun ρ => Formula.interp κ ρ φ)
 
 /-- Updating slot `x` with its current value is the identity. -/
 @[simp]

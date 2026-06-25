@@ -21,9 +21,13 @@ open STLC
 /-! ## Subtyping  κ; Γ ⊢ s <: t -/
 
 inductive Subtyp : KEnv → TEnv → Ty → Ty → Prop where
-  /-- SUB-BASE:  `κ; Γ ⊢ ∀ν. r₁(ν) → r₂(ν)`  ⟹  `κ; Γ ⊢ {ν:b|r₁} <: {ν:b|r₂}` -/
+  /-- SUB-BASE: `κ; Γ ⊢ ∀ν. r₁(ν) → r₂(ν)`  ⟹  `κ; Γ ⊢ {ν:b|r₁} <: {ν:b|r₂}`.
+      Stated *semantically* over `Refinement.interp` (matching what the
+      algorithmic `sub` produces), so it works uniformly whether `r₁`/`r₂` are
+      formulas or κ-applications. -/
   | refine {κ Γ b r₁ r₂} :
-      EntailF κ Γ (Refinement.subImp r₁ r₂) →
+      Entail κ Γ (fun ρ => ∀ ν : b.interp,
+        Refinement.interp κ r₁ ρ ν → Refinement.interp κ r₂ ρ ν) →
       Subtyp κ Γ (.refine b r₁) (.refine b r₂)
 
   /-- SUB-FUN (explicit witness): contravariant input, covariant output. -/
@@ -66,29 +70,29 @@ mutual
         Γ.lookup x = some (.refine .int r₁) →
         Γ.lookup y = some (.refine .int r₂) →
         Synth κ Γ (.leq (.fvar x) (.fvar y))
-          (.refine .bool ⟨.and
+          (.refine .bool (.fmla (.and
             (.imp (.eqB (.fvar .bool nuName) (.const .bool true))
                   (.leqI (.fvar .int x) (.fvar .int y)))
             (.imp (.leqI (.fvar .int x) (.fvar .int y))
-                  (.eqB (.fvar .bool nuName) (.const .bool true)))⟩)
+                  (.eqB (.fvar .bool nuName) (.const .bool true))))))
 
     | add_var {κ Γ x y r₁ r₂} :
         Γ.lookup x = some (.refine .int r₁) →
         Γ.lookup y = some (.refine .int r₂) →
         Synth κ Γ (.add (.fvar x) (.fvar y))
-          (.refine .int ⟨.eqI (.fvar .int nuName)
-                              (.add (.fvar .int x) (.fvar .int y))⟩)
+          (.refine .int (.fmla (.eqI (.fvar .int nuName)
+                              (.add (.fvar .int x) (.fvar .int y)))))
 
     | not_var {κ Γ x r} :
         Γ.lookup x = some (.refine .bool r) →
         Synth κ Γ (.not (.fvar x))
-          (.refine .bool ⟨.eqB (.fvar .bool nuName) (.not (.fvar .bool x))⟩)
+          (.refine .bool (.fmla (.eqB (.fvar .bool nuName) (.not (.fvar .bool x)))))
 
     | and_var {κ Γ x y rx ry} :
         Γ.lookup x = some (.refine .bool rx) →
         Γ.lookup y = some (.refine .bool ry) →
         Synth κ Γ (.and (.fvar x) (.fvar y))
-          (.refine .bool ⟨.eqB (.fvar .bool nuName) (.and (.fvar .bool x) (.fvar .bool y))⟩)
+          (.refine .bool (.fmla (.eqB (.fvar .bool nuName) (.and (.fvar .bool x) (.fvar .bool y)))))
 
   -- κ; Γ ⊢ e ⇐ t : "e checks against type t under κ"
   inductive Check : KEnv → TEnv → Exp → Ty → Prop where
@@ -115,9 +119,9 @@ mutual
     | ite {κ Γ x e₁ e₂ r t} :
         Γ.lookup x = some (.refine .bool r) →
         x ≠ nuName →
-        Check κ ((x, .refine .bool ⟨.and r.fmla
-                  (.eqB (.fvar .bool nuName) (.const .bool true))⟩) :: Γ) e₁ t →
-        Check κ ((x, .refine .bool ⟨.and r.fmla
-                  (.eqB (.fvar .bool nuName) (.const .bool false))⟩) :: Γ) e₂ t →
+        Check κ ((x, .refine .bool (.fmla
+                  (.eqB (.fvar .bool nuName) (.const .bool true)))) :: Γ) e₁ t →
+        Check κ ((x, .refine .bool (.fmla
+                  (.eqB (.fvar .bool nuName) (.const .bool false)))) :: Γ) e₂ t →
         Check κ Γ (.ite (.fvar x) e₁ e₂) t
 end
