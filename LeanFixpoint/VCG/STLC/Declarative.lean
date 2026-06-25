@@ -72,14 +72,16 @@ inductive Hastype : KEnv → TEnv → Exp → Ty → Prop where
       x ≠ nuName → y ≠ nuName →
       Hastype κ Γ (.and (.fvar x) (.fvar y))
         (.refine .bool (.fmla (.eqB (.fvar .bool nuName) (.and (.fvar .bool x) (.fvar .bool y)))))
-  | ite {κ Γ x e₁ e₂ r t} :
+  | ite {κ Γ x y e₁ e₂ r t} :
       Γ.lookup x = some (.refine .bool r) →
       x ≠ nuName →
+      y ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
+          ++ e₁.fv ++ e₂.fv ++ t.fv ++ Ty.named t ++ [x, nuName] →
       Ty.WFBVars t →
-      Hastype κ ((x, .refine .bool (.fmla
-                (.eqB (.fvar .bool nuName) (.const .bool true)))) :: Γ) e₁ t →
-      Hastype κ ((x, .refine .bool (.fmla
-                (.eqB (.fvar .bool nuName) (.const .bool false)))) :: Γ) e₂ t →
+      Hastype κ ((y, .refine .bool (.fmla
+                (.eqB (.fvar .bool x) (.const .bool true)))) :: Γ) e₁ t →
+      Hastype κ ((y, .refine .bool (.fmla
+                (.eqB (.fvar .bool x) (.const .bool false)))) :: Γ) e₂ t →
       Hastype κ Γ (.ite (.fvar x) e₁ e₂) t
 
 /-- For fvar typing, the variable must appear in the context. -/
@@ -175,7 +177,7 @@ theorem Hastype.lc_at {κ Γ e t} (_h : Hastype κ Γ e t) : Exp.lc_at 0 e := by
   | leq_var => simp [Exp.lc_at]
   | not_var => simp [Exp.lc_at]
   | and_var => simp [Exp.lc_at]
-  | ite _ _ _ _ _ ih₁ ih₂ => simp only [Exp.lc_at]; exact ⟨trivial, ih₁, ih₂⟩
+  | ite _ _ _ _ _ _ ih₁ ih₂ => simp only [Exp.lc_at]; exact ⟨trivial, ih₁, ih₂⟩
 
 /-- WFBVars of `self x t`: `self` is the singleton `{ν | ν = x}` (kvar-free, no
     BVars), so it is `WFBVars` outright — independent of `t`. -/
@@ -233,4 +235,4 @@ theorem Hastype.wf_bvars {κ Γ e t} (h : Hastype κ Γ e t) : Ty.WFBVars t := b
   | leq_var => exact Ty.WFBVars_leq_result _ _
   | not_var => exact Ty.WFBVars_not_result _
   | and_var => exact Ty.WFBVars_and_result _ _
-  | ite _ _ hwf _ _ _ _ => exact hwf
+  | ite _ _ _ hwf _ _ _ _ => exact hwf

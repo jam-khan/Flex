@@ -116,12 +116,14 @@ mutual
         Check κ ((x, s) :: Γ) (e₂.openVar 0 x) t →
         Check κ Γ (.letin e₁ e₂) t
 
-    | ite {κ Γ x e₁ e₂ r t} :
+    | ite {κ Γ x y e₁ e₂ r t} :
         Γ.lookup x = some (.refine .bool r) →
         x ≠ nuName →
-        Check κ ((x, .refine .bool (.fmla
-                  (.eqB (.fvar .bool nuName) (.const .bool true)))) :: Γ) e₁ t →
-        Check κ ((x, .refine .bool (.fmla
-                  (.eqB (.fvar .bool nuName) (.const .bool false)))) :: Γ) e₂ t →
+        y ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
+            ++ e₁.fv ++ e₂.fv ++ t.fv ++ Ty.named t ++ [x, nuName] →
+        Check κ ((y, .refine .bool (.fmla
+                  (.eqB (.fvar .bool x) (.const .bool true)))) :: Γ) e₁ t →
+        Check κ ((y, .refine .bool (.fmla
+                  (.eqB (.fvar .bool x) (.const .bool false)))) :: Γ) e₂ t →
         Check κ Γ (.ite (.fvar x) e₁ e₂) t
 end

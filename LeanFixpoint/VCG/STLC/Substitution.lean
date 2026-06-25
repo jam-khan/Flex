@@ -2685,6 +2685,32 @@ theorem Exp.substEnv_cons_redundant (e : Exp) (γ : List (EVar × Val)) (x : EVa
     rw [←ih1 γ x va hlk hγcl, ←ih2 γ x va hlk hγcl, ←ih3 γ x va hlk hγcl]
     simp [Exp.subst, substEnv]
 
+/-- Substituting a variable that does not occur free is the identity. -/
+theorem Exp.subst_fresh (x : EVar) (u e : Exp) (h : x ∉ e.fv) :
+    Exp.subst x u e = e := by
+  induction e with
+  | bvar _ | iconst _ | bconst _ => rfl
+  | fvar y =>
+    simp only [Exp.fv, List.mem_singleton] at h
+    simp only [Exp.subst, if_neg (fun hyx : y = x => h hyx.symm)]
+  | lam e ih | not e ih | ann e _ ih =>
+    simp only [Exp.fv] at h
+    simp only [Exp.subst, ih h]
+  | letin e₁ e₂ ih1 ih2 | app e₁ e₂ ih1 ih2 | and e₁ e₂ ih1 ih2
+  | leq e₁ e₂ ih1 ih2 | add e₁ e₂ ih1 ih2 =>
+    simp only [Exp.fv, List.mem_append, not_or] at h
+    simp only [Exp.subst, ih1 h.1, ih2 h.2]
+  | ite e₀ e₁ e₂ ih0 ih1 ih2 =>
+    simp only [Exp.fv, List.mem_append, not_or] at h
+    simp only [Exp.subst, ih0 h.1.1, ih1 h.1.2, ih2 h.2]
+
+/-- Extending the substitution environment with a binding for a variable that
+    does not occur free in `e` leaves `substEnv` unchanged. -/
+theorem Exp.substEnv_cons_fresh (e : Exp) (γ : List (EVar × Val)) (y : EVar) (v : Val)
+    (h : y ∉ e.fv) :
+    Exp.substEnv ((y, v) :: γ) e = Exp.substEnv γ e := by
+  simp only [Exp.substEnv, Exp.subst_fresh y v.toExp e h]
+
 /-! ## 20. Formula.interp rename: interpretation is invariant under renaming the opened variable -/
 
 /-- Term-level rename: when φ has no free occurrences of x or y (both fresh),

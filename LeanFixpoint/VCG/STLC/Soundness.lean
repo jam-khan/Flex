@@ -241,14 +241,21 @@ mutual
       obtain ⟨r, hr⟩ : ∃ r, List.lookup cn Γ = some (.refine .bool r) := by grind
       simp_all
       obtain ⟨c₁, c₂, hc₁, hc₂⟩ : ∃ c₁ c₂,
-          (check ((cn, Ty.refine Base.bool (.fmla (Formula.eqB (Term.fvar Base.bool nuName) (Term.const Base.bool true)))) :: Γ) bt t = some c₁) ∧
-          (check ((cn, Ty.refine Base.bool (.fmla (Formula.eqB (Term.fvar Base.bool nuName) (Term.const Base.bool false)))) :: Γ) bf t = some c₂) := by
+          (check ((EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
+                    ++ bt.fv ++ bf.fv ++ t.fv ++ Ty.named t ++ [cn, nuName]),
+                   Ty.refine Base.bool (.fmla (Formula.eqB (Term.fvar Base.bool cn) (Term.const Base.bool true)))) :: Γ) bt t = some c₁) ∧
+          (check ((EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
+                    ++ bt.fv ++ bf.fv ++ t.fv ++ Ty.named t ++ [cn, nuName]),
+                   Ty.refine Base.bool (.fmla (Formula.eqB (Term.fvar Base.bool cn) (Term.const Base.bool false)))) :: Γ) bf t = some c₂) := by
         grind
       simp_all
       rw [← hcheck.2] at hent
-      apply Check.ite hr
-      · exact hcheck.1
-      · apply check_sound _ _ _ _ _ hc₁
+      -- `y` is the fresh guard; freshness discharges by `EVar.fresh_not_mem`. The
+      -- guard refinement reads `cn` (not `ν`), so the branch obligation is exactly
+      -- the matching conjunct of `hent` — no case split on `v` needed.
+      refine Check.ite hr hcheck.1 (EVar.fresh_not_mem _) ?_ ?_
+      · simp only [List.append_assoc]
+        apply check_sound _ _ _ _ _ hc₁
         apply Entail.ext
         intro ρ hm
         have hconj := (hent ρ hm).1
@@ -256,7 +263,8 @@ mutual
         cases v
         · simpa [REnv.update] using hconj.1 hv
         · simpa [REnv.update] using hconj.2 hv
-      · apply check_sound _ _ _ _ _ hc₂
+      · simp only [List.append_assoc]
+        apply check_sound _ _ _ _ _ hc₂
         apply Entail.ext
         intro ρ hm
         have hconj := (hent ρ hm).2
@@ -509,26 +517,28 @@ mutual
       have hE_ext : Exp.WFBVars (e₂.openVar 0 x) :=
         (Exp.WFBVars_openVar e₂ 0 x).mpr hE.2
       exact .letin ht hht1 hfresh (check_to_hastype hΓ_ext hE_ext ht hck)
-    | .ite hlk hxν hck1 hck2 =>
-      rename_i x e₁ e₂ r
+    | .ite hlk hxν hfresh hck1 hck2 =>
+      rename_i x y e₁ e₂ r
       simp only [Exp.WFBVars] at hE
       obtain ⟨_, hE1, hE2⟩ := hE
-      -- The branch guard `{ν | ν = const}` is kvar-free with no bvars, so it is
-      -- WFBVars outright (no need for the original binding's WFBVars).
+      have hyν : y ≠ nuName := by
+        intro he; subst he; exact hfresh (by simp)
+      -- The branch guard `{ν | x = const}` references `x` free and is kvar-free
+      -- with no bvars, so it is WFBVars outright.
       have hstr_wfb : ∀ (const : Bool), Ty.WFBVars (.refine .bool
-          (.fmla (.eqB (.fvar .bool nuName) (.const .bool const)))) := by
+          (.fmla (.eqB (.fvar .bool x) (.const .bool const)))) := by
         intro const
         simp [Ty.WFBVars, Ty.WFBVarCtx, Refinement.hasBVar, Formula.hasBVar, Term.hasBVar]
-      -- Extended TEnv.WFBVars for true / false branches.
-      have hΓ1 : TEnv.WFBVars ((x, .refine .bool
-          (.fmla (.eqB (.fvar .bool nuName) (.const .bool true)))) :: Γ) :=
-        hΓ.cons (hstr_wfb true) hxν
-      have hΓ2 : TEnv.WFBVars ((x, .refine .bool
-          (.fmla (.eqB (.fvar .bool nuName) (.const .bool false)))) :: Γ) :=
-        hΓ.cons (hstr_wfb false) hxν
+      -- Extended TEnv.WFBVars for the fresh-guard true / false branches.
+      have hΓ1 : TEnv.WFBVars ((y, .refine .bool
+          (.fmla (.eqB (.fvar .bool x) (.const .bool true)))) :: Γ) :=
+        hΓ.cons (hstr_wfb true) hyν
+      have hΓ2 : TEnv.WFBVars ((y, .refine .bool
+          (.fmla (.eqB (.fvar .bool x) (.const .bool false)))) :: Γ) :=
+        hΓ.cons (hstr_wfb false) hyν
       have hht1 := check_to_hastype hΓ1 hE1 ht hck1
       have hht2 := check_to_hastype hΓ2 hE2 ht hck2
-      exact .ite hlk hxν ht hht1 hht2
+      exact .ite hlk hxν hfresh ht hht1 hht2
 end
 
 theorem synth_decl_sound (κ : KEnv) (Γ : TEnv) (e : Exp) (c : Constraint) (t : Ty)

@@ -133,16 +133,23 @@ mutual
             else
               match Γ.lookup x with
               | some (.refine .bool _) =>
+                  -- Fresh guard variable `y` (Nico's rule): keep `x : {ν|r}` in
+                  -- scope and add the path condition `x = true/false` via a fresh
+                  -- binding whose refinement mentions `x` free. This preserves `r`
+                  -- in each branch without conjoining into the (atomic) refinement.
+                  let y := EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
+                                        ++ e₁.fv ++ e₂.fv ++ t.fv ++ Ty.named t
+                                        ++ [x, nuName])
                   let r_true  : Ty := .refine .bool (.fmla
-                    (.eqB (.fvar .bool nuName) (.const .bool true)))
+                    (.eqB (.fvar .bool x) (.const .bool true)))
                   let r_false : Ty := .refine .bool (.fmla
-                    (.eqB (.fvar .bool nuName) (.const .bool false)))
-                  match check ((x, r_true) :: Γ) e₁ t,
-                        check ((x, r_false) :: Γ) e₂ t with
+                    (.eqB (.fvar .bool x) (.const .bool false)))
+                  match check ((y, r_true) :: Γ) e₁ t,
+                        check ((y, r_false) :: Γ) e₂ t with
                   | some c₁, some c₂ =>
                       some (fun κ ρ =>
-                        implyBind x r_true  c₁ κ ρ ∧
-                        implyBind x r_false c₂ κ ρ)
+                        implyBind y r_true  c₁ κ ρ ∧
+                        implyBind y r_false c₂ κ ρ)
                   | _, _ => none
               | _ => none
         | _ => none

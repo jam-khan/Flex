@@ -1058,8 +1058,8 @@ theorem hastype_fundamental {κ Γ e t} (h : Hastype κ Γ e t) :
         TyDenote.of_extendBy_fresh s' x v₁ hxt hxtn hxν htd_vr
       rw [Exp.substEnv_letin]
       exact ⟨vr, BigStep.letin hbs₁ hbs₂, htd_vr_ρ⟩
-  | ite hlk hxν _ h₁ h₂ ih_e₁ ih_e₂ =>
-      rename_i Γ x e₁ e₂ r t _
+  | ite hlk hxν hfresh _ h₁ h₂ ih_e₁ ih_e₂ =>
+      rename_i Γ x y e₁ e₂ r t _
       intro γ ρ hE
       obtain ⟨vx, hlkγx, htd_x, hcl_x, _, hbool_x⟩ := EnvAgrees.lookup_some hE hlk
       simp only [TyDenote] at htd_x
@@ -1069,39 +1069,45 @@ theorem hastype_fundamental {κ Γ e t} (h : Hastype κ Γ e t) :
       have hγcl := EnvAgrees.allClosed hE
       have hxfv := Exp.substEnv_var_lookup x γ (.bconst bx) hlkγx hcl_x hγcl
       simp only [Val.toExp] at hxfv
-      -- helper to build TyDenote for the (kvar-free) guard binding for x
+      -- `nuName ≠ x` lets the guard refinement (which reads `x`) simplify.
+      have hνx : (nuName == x) = false := by
+        simp only [beq_eq_false_iff_ne]; exact fun he => hxν he.symm
+      -- `y` (the fresh guard) is not free in either branch.
+      have hy_e₁ : y ∉ e₁.fv := fun hm => hfresh (by simp [hm])
+      have hy_e₂ : y ∉ e₂.fv := fun hm => hfresh (by simp [hm])
+      -- Fresh-guard refinements read `x` free (not ν); `y`'s own value is irrelevant.
       let r_true : Refinement .bool :=
-        .fmla (.eqB (.fvar .bool nuName) (.const .bool true))
+        .fmla (.eqB (.fvar .bool x) (.const .bool true))
       let r_false : Refinement .bool :=
-        .fmla (.eqB (.fvar .bool nuName) (.const .bool false))
+        .fmla (.eqB (.fvar .bool x) (.const .bool false))
       cases bx with
       | true =>
-        -- Extended EnvAgrees for e₁ branch
-        have hE₁ : EnvAgrees κ ((x, .refine .bool r_true) :: Γ) ((x, .bconst true) :: γ) ρ := by
+        -- Extended EnvAgrees for e₁ branch: bind fresh `y`, keep `x : {ν|r}` intact.
+        have hE₁ : EnvAgrees κ ((y, .refine .bool r_true) :: Γ)
+            ((y, .bconst (ρ.bools y)) :: γ) ρ := by
           refine ⟨rfl, hE, ?_, fun n h => by simp at h, fun b h => ?_⟩
-          · -- TyDenote for the guard at true
+          · -- TyDenote for the guard: reduces to `ρ.bools x = true` (= hρx)
             simp only [TyDenote, r_true]
-            refine ⟨true, rfl, ?_⟩
-            simp [Refinement.interp, Formula.interp, Term.interp, REnv.get]
-          · cases h; exact hρx
+            refine ⟨ρ.bools y, rfl, ?_⟩
+            simp [Refinement.interp, Formula.interp, Term.interp, REnv.get, hνx, hρx]
+          · injection h
         obtain ⟨vr, hbs_vr, htd_vr⟩ := ih_e₁ hE₁
-        -- substEnv ((x,.bconst true)::γ) e₁ = substEnv γ e₁ (x already in γ at true)
-        have hred₁ := Exp.substEnv_cons_redundant e₁ γ x (.bconst true) hlkγx hγcl
-        rw [hred₁] at hbs_vr
+        -- substEnv ((y,·)::γ) e₁ = substEnv γ e₁ since `y ∉ e₁.fv`
+        rw [Exp.substEnv_cons_fresh e₁ γ y (.bconst (ρ.bools y)) hy_e₁] at hbs_vr
         refine ⟨vr, ?_, htd_vr⟩
         rw [Exp.substEnv_ite, hxfv]
         exact BigStep.ite_t BigStep.bconst hbs_vr
       | false =>
-        -- Extended EnvAgrees for e₂ branch
-        have hE₂ : EnvAgrees κ ((x, .refine .bool r_false) :: Γ) ((x, .bconst false) :: γ) ρ := by
+        -- Extended EnvAgrees for e₂ branch: bind fresh `y`, keep `x : {ν|r}` intact.
+        have hE₂ : EnvAgrees κ ((y, .refine .bool r_false) :: Γ)
+            ((y, .bconst (ρ.bools y)) :: γ) ρ := by
           refine ⟨rfl, hE, ?_, fun n h => by simp at h, fun b h => ?_⟩
           · simp only [TyDenote, r_false]
-            refine ⟨false, rfl, ?_⟩
-            simp [Refinement.interp, Formula.interp, Term.interp, REnv.get]
-          · cases h; exact hρx
+            refine ⟨ρ.bools y, rfl, ?_⟩
+            simp [Refinement.interp, Formula.interp, Term.interp, REnv.get, hνx, hρx]
+          · injection h
         obtain ⟨vr, hbs_vr, htd_vr⟩ := ih_e₂ hE₂
-        have hred₂ := Exp.substEnv_cons_redundant e₂ γ x (.bconst false) hlkγx hγcl
-        rw [hred₂] at hbs_vr
+        rw [Exp.substEnv_cons_fresh e₂ γ y (.bconst (ρ.bools y)) hy_e₂] at hbs_vr
         refine ⟨vr, ?_, htd_vr⟩
         rw [Exp.substEnv_ite, hxfv]
         exact BigStep.ite_f BigStep.bconst hbs_vr
