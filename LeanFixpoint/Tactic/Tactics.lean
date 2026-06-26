@@ -8,3 +8,4 @@ import LeanFixpoint.Tactic.Tactics.Fusion
 import LeanFixpoint.Tactic.Tactics.Fixpoint
 import LeanFixpoint.Tactic.Tactics.Sol1
 import LeanFixpoint.Tactic.Tactics.SolveFixpointCombo
+import LeanFixpoint.Tactic.Tactics.PaCert
