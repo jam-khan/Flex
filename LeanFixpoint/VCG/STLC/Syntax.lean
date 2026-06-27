@@ -89,7 +89,8 @@ inductive Term : Base → Type where
   | not   : Term .bool → Term .bool
   | and   : Term .bool → Term .bool → Term .bool
 -- NOTE: no cross-base constructors (e.g. `leq : Term .int → Term .int → Term .bool`).
--- They would break `Term.interp_update_diff_base`. Cross-base relations go in
+-- Keeping each `Term` homogeneous in its base means an `REnv` update at one base
+-- can never affect a term of another base. Cross-base relations go in
 -- `Formula` (e.g. `Formula.leqI`).
 
 /-- First-order formulas over `Term`s.
