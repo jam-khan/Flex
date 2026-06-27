@@ -260,7 +260,7 @@ private theorem Refinement.interp_extendBy_fresh {κ : KEnv} {b : Base} (r : Ref
                    (ρ.update b nuName w).update .int x n := by
         cases b with
         | int  => exact (REnv.update_int_int_comm ρ nuName x hxν.symm w n).symm
-        | bool => exact (REnv.update_int_bool_comm ρ x nuName n w).symm
+        | bool => exact (REnv.update_int_bool_comm ρ x nuName n w hxν).symm
       rw [hcomm]
       have := Formula.interp_update_fresh_int φ x n (ρ.update b nuName w) hx hxn
       grind
@@ -268,7 +268,7 @@ private theorem Refinement.interp_extendBy_fresh {κ : KEnv} {b : Base} (r : Ref
       have hcomm : (ρ.update .bool x bv).update b nuName w =
                    (ρ.update b nuName w).update .bool x bv := by
         cases b with
-        | int => rw [REnv.update_int_bool_comm]
+        | int => rw [REnv.update_int_bool_comm ρ nuName x w bv (Ne.symm hxν)]
         | bool => rw [REnv.update_bool_bool_comm] ; grind
       rw [hcomm]
       assumption
@@ -286,7 +286,7 @@ private theorem Refinement.interp_extendBy_fresh {κ : KEnv} {b : Base} (r : Ref
                    (ρ.update b nuName w).update .int x n := by
         cases b with
         | int  => exact (REnv.update_int_int_comm ρ nuName x hxν.symm w n).symm
-        | bool => exact (REnv.update_int_bool_comm ρ x nuName n w).symm
+        | bool => exact (REnv.update_int_bool_comm ρ x nuName n w hxν).symm
       rw [hcomm]; congr 1
       exact (Term.interp_update_fresh_int a.2 x n (ρ.update b nuName w) (hargs a ha)).symm
     · -- update .bool x bv
@@ -296,7 +296,7 @@ private theorem Refinement.interp_extendBy_fresh {κ : KEnv} {b : Base} (r : Ref
       have hcomm : (ρ.update .bool x bv).update b nuName w =
                    (ρ.update b nuName w).update .bool x bv := by
         cases b with
-        | int => rw [REnv.update_int_bool_comm]
+        | int => rw [REnv.update_int_bool_comm ρ nuName x w bv (Ne.symm hxν)]
         | bool => rw [REnv.update_bool_bool_comm] ; grind
       rw [hcomm]; congr 1
       exact (Term.interp_update_fresh_bool a.2 x bv (ρ.update b nuName w) (hargs a ha)).symm

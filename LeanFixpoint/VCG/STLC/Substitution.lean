@@ -1511,7 +1511,8 @@ theorem REnv.update_comm_bool_bool (ρ : REnv) (x₁ x₂ : EVar) (w₁ w₂ : B
       have hy₂' : (x₂ == y) = false := by simp [hy₂]
       simp [hy₁', hy₂']
 
-theorem REnv.update_comm_int_bool (ρ : REnv) (x₁ x₂ : EVar) (w₁ : Int) (w₂ : Bool) :
+theorem REnv.update_comm_int_bool (ρ : REnv) (x₁ x₂ : EVar) (w₁ : Int) (w₂ : Bool)
+    (h : x₁ ≠ x₂) :
     (ρ.update .int x₁ w₁).update .bool x₂ w₂
       = (ρ.update .bool x₂ w₂).update .int x₁ w₁ := by
   apply REnv.ext <;> rfl
@@ -2790,11 +2791,11 @@ theorem Formula.interp_update_fresh_int (φ : Formula)
     constructor
     · intro ⟨b, hb⟩
       refine ⟨b, ?_⟩
-      rw [← REnv.update_comm_int_bool ρ x y w b]
+      rw [← REnv.update_comm_int_bool ρ x y w b hxy]
       grind
     · intro ⟨b, hb⟩
       refine ⟨b, ?_⟩
-      rw [← REnv.update_comm_int_bool ρ x y w b] at hb
+      rw [← REnv.update_comm_int_bool ρ x y w b hxy] at hb
       grind
   | allI y φ ih =>
     simp only [Formula.fv, Formula.named] at hfv hnamed
@@ -2818,10 +2819,10 @@ theorem Formula.interp_update_fresh_int (φ : Formula)
       intro hmem; exact hfv (List.mem_filter.mpr ⟨hmem, by simp [hxy]⟩)
     constructor
     · intro h b
-      rw [← REnv.update_comm_int_bool ρ x y w b]
+      rw [← REnv.update_comm_int_bool ρ x y w b hxy]
       exact (ih (ρ.update .bool y b) hxf hxn).mp (h b)
     · intro h b
-      exact (ih (ρ.update .bool y b) hxf hxn).mpr (REnv.update_comm_int_bool ρ x y w b ▸ (h b))
+      exact (ih (ρ.update .bool y b) hxf hxn).mpr (REnv.update_comm_int_bool ρ x y w b hxy ▸ (h b))
 
 theorem Formula.interp_update_fresh_bool (φ : Formula)
     (x : EVar) (w : Bool) (ρ : REnv)
@@ -2875,11 +2876,11 @@ theorem Formula.interp_update_fresh_bool (φ : Formula)
     constructor
     · intro ⟨n, hn⟩
       refine ⟨n, ?_⟩
-      rw [← REnv.update_comm_int_bool ρ y x n w]
+      rw [← REnv.update_comm_int_bool ρ y x n w (Ne.symm hxy)]
       exact (ih (ρ.update .int y n) hxf hxn).mp hn
     · intro ⟨n, hn⟩
       refine ⟨n, ?_⟩
-      rw [← REnv.update_comm_int_bool ρ y x n w] at hn
+      rw [← REnv.update_comm_int_bool ρ y x n w (Ne.symm hxy)] at hn
       exact (ih (ρ.update .int y n) hxf hxn).mpr hn
   | exB y φ ih =>
     simp only [Formula.fv, Formula.named] at hfv hnamed
@@ -2906,10 +2907,10 @@ theorem Formula.interp_update_fresh_bool (φ : Formula)
       intro hmem; exact hfv (List.mem_filter.mpr ⟨hmem, by simp [hxy]⟩)
     constructor
     · intro h n
-      rw [← REnv.update_comm_int_bool ρ y x n w]
+      rw [← REnv.update_comm_int_bool ρ y x n w (Ne.symm hxy)]
       exact (ih (ρ.update .int y n) hxf hxn).mp (h n)
     · intro h n
-      exact (ih (ρ.update .int y n) hxf hxn).mpr (REnv.update_comm_int_bool ρ y x n w ▸ (h n))
+      exact (ih (ρ.update .int y n) hxf hxn).mpr (REnv.update_comm_int_bool ρ y x n w (Ne.symm hxy) ▸ (h n))
   | allB y φ ih =>
     simp only [Formula.fv, Formula.named] at hfv hnamed
     simp only [Formula.interp]
@@ -2950,7 +2951,8 @@ theorem REnv.update_bool_bool_comm (ρ : REnv) (x y : EVar) (hxy : x ≠ y)
     by_cases hzx : x = z <;> by_cases hzy : y = z <;>
       simp_all
 
-theorem REnv.update_int_bool_comm (ρ : REnv) (x y : EVar) (m : Int) (n : Bool) :
+theorem REnv.update_int_bool_comm (ρ : REnv) (x y : EVar) (m : Int) (n : Bool)
+    (h : x ≠ y) :
     (ρ.update .int x m).update .bool y n = (ρ.update .bool y n).update .int x m := by
   apply REnv.ext <;> rfl
 
@@ -3233,8 +3235,8 @@ private theorem REnv.update_comm_gen (ρ : REnv) (b : Base) (x : EVar) (v : b.in
     (ρ.update b x v).update b' y w = (ρ.update b' y w).update b x v := by
   cases b <;> cases b'
   · exact REnv.update_comm_int_int ρ x y v w hxy
-  · exact REnv.update_comm_int_bool ρ x y v w
-  · exact (REnv.update_comm_int_bool ρ y x w v).symm
+  · exact REnv.update_comm_int_bool ρ x y v w hxy
+  · exact (REnv.update_comm_int_bool ρ y x w v (Ne.symm hxy)).symm
   · exact REnv.update_comm_bool_bool ρ x y v w hxy
 
 theorem Formula.interp_substBV (φ : Formula) (b : Base) (k : Nat)
@@ -3864,7 +3866,7 @@ theorem Formula.interp_replaceFVar (φ : Formula) (x y : EVar) (ρ : REnv)
     have hB : (ρ.update .int z n).bools y = ρ.bools y := by simp
     rw [hI, hB,
         REnv.update_comm_int_int ρ z x n (ρ.ints y) hzx,
-        REnv.update_comm_int_bool (ρ.update .int x (ρ.ints y)) z x n (ρ.bools y)]
+        REnv.update_comm_int_bool (ρ.update .int x (ρ.ints y)) z x n (ρ.bools y) hzx]
   | exB z φ ih =>
     simp only [Formula.named, List.mem_cons, not_or] at hxn hyn
     have hzx : z ≠ x := fun h => hxn.1 h.symm
@@ -3876,7 +3878,7 @@ theorem Formula.interp_replaceFVar (φ : Formula) (x y : EVar) (ρ : REnv)
     have hB : (ρ.update .bool z bv).bools y = ρ.bools y := by
       simp; intro h; exact (hzy h).elim
     rw [hI, hB,
-        ← REnv.update_comm_int_bool ρ x z (ρ.ints y) bv,
+        ← REnv.update_comm_int_bool ρ x z (ρ.ints y) bv (Ne.symm hzx),
         REnv.update_comm_bool_bool (ρ.update .int x (ρ.ints y)) z x bv (ρ.bools y) hzx]
   | allI z φ ih =>
     simp only [Formula.named, List.mem_cons, not_or] at hxn hyn
@@ -3890,7 +3892,7 @@ theorem Formula.interp_replaceFVar (φ : Formula) (x y : EVar) (ρ : REnv)
     have hB : (ρ.update .int z n).bools y = ρ.bools y := by simp
     rw [hI, hB,
         REnv.update_comm_int_int ρ z x n (ρ.ints y) hzx,
-        REnv.update_comm_int_bool (ρ.update .int x (ρ.ints y)) z x n (ρ.bools y)]
+        REnv.update_comm_int_bool (ρ.update .int x (ρ.ints y)) z x n (ρ.bools y) hzx]
   | allB z φ ih =>
     simp only [Formula.named, List.mem_cons, not_or] at hxn hyn
     have hzx : z ≠ x := fun h => hxn.1 h.symm
@@ -3902,7 +3904,7 @@ theorem Formula.interp_replaceFVar (φ : Formula) (x y : EVar) (ρ : REnv)
     have hB : (ρ.update .bool z bv).bools y = ρ.bools y := by
       simp; intro h; exact (hzy h).elim
     rw [hI, hB,
-        ← REnv.update_comm_int_bool ρ x z (ρ.ints y) bv,
+        ← REnv.update_comm_int_bool ρ x z (ρ.ints y) bv (Ne.symm hzx),
         REnv.update_comm_bool_bool (ρ.update .int x (ρ.ints y)) z x bv (ρ.bools y) hzx]
 
 end STLC
