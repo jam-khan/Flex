@@ -88,15 +88,15 @@ theorem sub_sound (κ : KEnv) (Γ : TEnv) (s t : Ty) (c : Constraint) :
     · apply sub_sound κ ((w, s2) :: Γ) _ _ c₂ hc₂
       intro ρ hm
       have hΓρ : ModelsEnv κ ρ Γ := by
-        cases s2 with | refine _ _ => exact hm.2 | arrow _ _ => exact hm
+        cases s2 with | refine _ _ => exact hm.2.2 | arrow _ _ => exact hm
       -- use ▸ so implyBind stays folded until we need it
       rw [←hsub] at hent
       have hcρ : c₁ κ ρ ∧ implyBind w s2 c₂ κ ρ := by grind [hent ρ hΓρ]
       simp only [implyBind] at hcρ
       cases s2 with
       | refine b r =>
-        have h := hcρ.2 (REnv.get b ρ w) hm.1
-        rw [REnv.update_self] at h ; exact h
+        have h := hcρ.2 (REnv.get b ρ w) hm.2.1
+        rw [REnv.update_self b ρ w hm.1] at h ; exact h
       | arrow _ _ => exact hcρ.2
     · apply sub_sound κ Γ s2 s1 c₁ hc₁
       intro ρ hm
@@ -304,16 +304,16 @@ mutual
           intro ρ hmρ
           have hΓρ : ModelsEnv κ ρ Γ := by
             cases s1 with
-            | refine _ _ => exact hmρ.2
+            | refine _ _ => exact hmρ.2.2
             | arrow _ _  => exact hmρ
           have hcρ : c κ ρ := hent ρ hΓρ
           rw [← hcheck] at hcρ
           simp only [implyBind] at hcρ
           cases s1 with
           | refine b r =>
-            have hsat : Refinement.interp κ r ρ (REnv.get b ρ x₀) := hmρ.1
+            have hsat : Refinement.interp κ r ρ (REnv.get b ρ x₀) := hmρ.2.1
             have h := hcρ (REnv.get b ρ x₀) hsat
-            rw [REnv.update_self] at h
+            rw [REnv.update_self b ρ x₀ hmρ.1] at h
             exact h
           | arrow _ _ => exact hcρ
         have hfresh₀ : x₀ ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ ++
@@ -353,7 +353,7 @@ mutual
         intro ρ hmρ
         have hΓρ : ModelsEnv κ ρ Γ := by
           cases s with
-          | refine _ _ => exact hmρ.2
+          | refine _ _ => exact hmρ.2.2
           | arrow _ _  => exact hmρ
         have hcρ : c κ ρ := hent ρ hΓρ
         rw [← hcheck] at hcρ
@@ -363,9 +363,9 @@ mutual
         simp only [implyBind] at himply
         cases s with
         | refine b r =>
-          have hsat : Refinement.interp κ r ρ (REnv.get b ρ x₀) := hmρ.1
+          have hsat : Refinement.interp κ r ρ (REnv.get b ρ x₀) := hmρ.2.1
           have h := himply (REnv.get b ρ x₀) hsat
-          rw [REnv.update_self] at h
+          rw [REnv.update_self b ρ x₀ hmρ.1] at h
           exact h
         | arrow _ _ => exact himply
       have hfresh₀ : x₀ ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ ++

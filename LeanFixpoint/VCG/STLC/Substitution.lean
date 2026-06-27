@@ -1467,79 +1467,66 @@ def EVar.fresh (L : List EVar) : EVar :=
 
 /-! ## 10. REnv helpers -/
 
+/-- Updating cell `x` leaves a *different* cell `y` untouched — for any bases,
+    since `update` only writes cell `x`. -/
+theorem REnv.map_update_other (b : Base) (ρ : REnv) (x : EVar) (v : b.interp)
+    {y : EVar} (h : x ≠ y) : (ρ.update b x v).map y = ρ.map y := by
+  have hxy : (x == y) = false := by simp [h]
+  simp [hxy]
+
+@[simp] theorem REnv.map_update_self (b : Base) (ρ : REnv) (x : EVar) (v : b.interp) :
+    (ρ.update b x v).map x = Val.inj b v := by
+  simp
+
+@[simp] theorem REnv.get_update_same (b : Base) (ρ : REnv) (x : EVar) (v : b.interp) :
+    REnv.get b (ρ.update b x v) x = v := by
+  cases b <;> simp [REnv.get]
+
 theorem REnv.get_update_other_key (b : Base) (ρ : REnv) (x y : EVar) (w : b.interp)
     (h : x ≠ y) :
     REnv.get b (ρ.update b x w) y = REnv.get b ρ y := by
-  cases b <;> simp [REnv.get] <;>
-    intro hxy <;> exact absurd hxy h
+  have hxy : (x == y) = false := by simp [h]
+  simp [hxy]
+
+/-- Cross-base version: updating cell `x` at base `b` does not affect a read of a
+    *different* cell `y` at any base `b'`. -/
+theorem REnv.get_update_other (b b' : Base) (ρ : REnv) (x y : EVar) (w : b.interp)
+    (h : x ≠ y) :
+    REnv.get b' (ρ.update b x w) y = REnv.get b' ρ y := by
+  have hxy : (x == y) = false := by simp [h]
+  simp [hxy]
 
 theorem REnv.update_comm_int_int (ρ : REnv) (x₁ x₂ : EVar) (w₁ w₂ : Int) (h : x₁ ≠ x₂) :
     (ρ.update .int x₁ w₁).update .int x₂ w₂
       = (ρ.update .int x₂ w₂).update .int x₁ w₁ := by
-  apply REnv.ext
-  · funext y
-    show _ = _
-    by_cases hy₁ : x₁ = y <;> by_cases hy₂ : x₂ = y
-    · subst hy₁; subst hy₂; exact absurd rfl h
-    · have hy₂' : (x₂ == y) = false := by simp [hy₂]
-      have hy₁' : (x₁ == y) = true  := by subst hy₁; simp
-      simp [hy₁', hy₂']
-    · have hy₁' : (x₁ == y) = false := by simp [hy₁]
-      have hy₂' : (x₂ == y) = true  := by subst hy₂; simp
-      simp [hy₁', hy₂']
-    · have hy₁' : (x₁ == y) = false := by simp [hy₁]
-      have hy₂' : (x₂ == y) = false := by simp [hy₂]
-      simp [hy₁', hy₂']
-  · rfl
+  apply REnv.ext; funext y
+  by_cases hy₁ : x₁ = y <;> by_cases hy₂ : x₂ = y <;>
+    simp_all
 
 theorem REnv.update_comm_bool_bool (ρ : REnv) (x₁ x₂ : EVar) (w₁ w₂ : Bool) (h : x₁ ≠ x₂) :
     (ρ.update .bool x₁ w₁).update .bool x₂ w₂
       = (ρ.update .bool x₂ w₂).update .bool x₁ w₁ := by
-  apply REnv.ext
-  · rfl
-  · funext y
-    show _ = _
-    by_cases hy₁ : x₁ = y <;> by_cases hy₂ : x₂ = y
-    · subst hy₁; subst hy₂; exact absurd rfl h
-    · have hy₂' : (x₂ == y) = false := by simp [hy₂]
-      have hy₁' : (x₁ == y) = true  := by subst hy₁; simp
-      simp [hy₁', hy₂']
-    · have hy₁' : (x₁ == y) = false := by simp [hy₁]
-      have hy₂' : (x₂ == y) = true  := by subst hy₂; simp
-      simp [hy₁', hy₂']
-    · have hy₁' : (x₁ == y) = false := by simp [hy₁]
-      have hy₂' : (x₂ == y) = false := by simp [hy₂]
-      simp [hy₁', hy₂']
+  apply REnv.ext; funext y
+  by_cases hy₁ : x₁ = y <;> by_cases hy₂ : x₂ = y <;>
+    simp_all
 
 theorem REnv.update_comm_int_bool (ρ : REnv) (x₁ x₂ : EVar) (w₁ : Int) (w₂ : Bool)
     (h : x₁ ≠ x₂) :
     (ρ.update .int x₁ w₁).update .bool x₂ w₂
       = (ρ.update .bool x₂ w₂).update .int x₁ w₁ := by
-  apply REnv.ext <;> rfl
+  apply REnv.ext; funext y
+  by_cases hy₁ : x₁ = y <;> by_cases hy₂ : x₂ = y <;>
+    simp_all
 
 theorem REnv.update_override_int (ρ : REnv) (x : EVar) (w₁ w₂ : Int) :
     (ρ.update .int x w₁).update .int x w₂ = ρ.update .int x w₂ := by
-  apply REnv.ext
-  · funext y
-    show _ = _
-    by_cases hy : x = y
-    · have hy' : (x == y) = true := by subst hy; simp
-      simp [hy']
-    · have hy' : (x == y) = false := by simp [hy]
-      simp [hy']
-  · rfl
+  apply REnv.ext; funext y
+  by_cases hy : x = y <;> simp_all
 
 theorem REnv.update_override_bool (ρ : REnv) (x : EVar) (w₁ w₂ : Bool) :
     (ρ.update .bool x w₁).update .bool x w₂ = ρ.update .bool x w₂ := by
-  apply REnv.ext
-  · rfl
-  · funext y
-    show _ = _
-    by_cases hy : x = y
-    · have hy' : (x == y) = true := by subst hy; simp
-      simp [hy']
-    · have hy' : (x == y) = false := by simp [hy]
-      simp [hy']
+  apply REnv.ext; funext y
+  by_cases hy : x = y <;> simp_all
 
 /-! ## 11. EVar.fresh proof -/
 
@@ -1588,6 +1575,7 @@ theorem Term.interp_update_fresh_int {b : Base} (t : Term b)
       exact REnv.get_update_other_key .int ρ x y w hy
     | bool =>
       simp only [Term.interp]
+      exact REnv.get_update_other .int .bool ρ x y w hy
   | add t₁ t₂ ih₁ ih₂ =>
     simp only [Term.interp]
     have h₁ : x ∉ t₁.fv := fun hin => h (by simp [Term.fv]; left; exact hin)
@@ -1613,6 +1601,7 @@ theorem Term.interp_update_fresh_bool {b : Base} (t : Term b)
     cases bv with
     | int  =>
       simp only [Term.interp]
+      exact REnv.get_update_other .bool .int ρ x y w hy
     | bool =>
       simp only [Term.interp]
       exact REnv.get_update_other_key .bool ρ x y w hy
@@ -1892,25 +1881,19 @@ theorem Exp.substEnv_var_lookup
 
 /-! ## 16. REnv update idempotence -/
 
-theorem REnv.update_idem_int (ρ : REnv) (x : EVar) (n : Int) (h : ρ.ints x = n) :
+theorem REnv.update_idem_int (ρ : REnv) (x : EVar) (n : Int) (h : ρ.map x = .iconst n) :
     ρ.update .int x n = ρ := by
-  apply REnv.ext
-  · funext y
-    simp only
-    by_cases hxy : x = y
-    · subst hxy; simp; exact h.symm
-    · simp [hxy]
-  · rfl
+  apply REnv.ext; funext y
+  by_cases hxy : x = y
+  · subst hxy; simpa using h.symm
+  · simp [hxy]
 
-theorem REnv.update_idem_bool (ρ : REnv) (x : EVar) (b : Bool) (h : ρ.bools x = b) :
+theorem REnv.update_idem_bool (ρ : REnv) (x : EVar) (b : Bool) (h : ρ.map x = .bconst b) :
     ρ.update .bool x b = ρ := by
-  apply REnv.ext
-  · rfl
-  · funext y
-    simp only
-    by_cases hxy : x = y
-    · subst hxy; simp; exact h.symm
-    · simp [hxy]
+  apply REnv.ext; funext y
+  by_cases hxy : x = y
+  · subst hxy; simpa using h.symm
+  · simp [hxy]
 
 /-! ## 17. Exp.subst_openVar (standard LN lemma) -/
 
@@ -2518,6 +2501,46 @@ private theorem Term.interp_openBVar_rename {b' : Base} (t : Term b') (b : Base)
     have hy₂ : y ∉ t₂.fv := fun h => hy (by simp [Term.fv]; grind)
     rw [ih₁ hx₁ hy₁, ih₂ hx₂ hy₂]
 
+/-- Updating ρ and ρ' at a binder name `x'` (distinct from the renamed `x`/`y`)
+    preserves the four ρ/ρ'-agreement conditions used by `interp_openBVar_rename`.
+    Shared by the `allI`/`allB`/`exI`/`exB` cases. -/
+private theorem REnv.cond_update (b' : Base) (x' : EVar) (v : b'.interp)
+    {ρ ρ' : REnv} {x y : EVar} (hx : x ≠ x') (hy : y ≠ x')
+    (hvi : ρ.ints x = ρ'.ints y) (hvb : ρ.bools x = ρ'.bools y)
+    (hoi : ∀ z, z ≠ x → z ≠ y → ρ.ints z = ρ'.ints z)
+    (hob : ∀ z, z ≠ x → z ≠ y → ρ.bools z = ρ'.bools z) :
+    ((ρ.update b' x' v).ints x = (ρ'.update b' x' v).ints y) ∧
+    ((ρ.update b' x' v).bools x = (ρ'.update b' x' v).bools y) ∧
+    (∀ z, z ≠ x → z ≠ y → (ρ.update b' x' v).ints z = (ρ'.update b' x' v).ints z) ∧
+    (∀ z, z ≠ x → z ≠ y → (ρ.update b' x' v).bools z = (ρ'.update b' x' v).bools z) := by
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · rw [show (ρ.update b' x' v).ints x = ρ.ints x from
+          REnv.get_update_other b' .int ρ x' x v (Ne.symm hx),
+        show (ρ'.update b' x' v).ints y = ρ'.ints y from
+          REnv.get_update_other b' .int ρ' x' y v (Ne.symm hy)]
+    exact hvi
+  · rw [show (ρ.update b' x' v).bools x = ρ.bools x from
+          REnv.get_update_other b' .bool ρ x' x v (Ne.symm hx),
+        show (ρ'.update b' x' v).bools y = ρ'.bools y from
+          REnv.get_update_other b' .bool ρ' x' y v (Ne.symm hy)]
+    exact hvb
+  · intro z hnx hnz
+    by_cases hzx' : x' = z
+    · subst hzx'; cases b' <;> simp
+    · rw [show (ρ.update b' x' v).ints z = ρ.ints z from
+            REnv.get_update_other b' .int ρ x' z v hzx',
+          show (ρ'.update b' x' v).ints z = ρ'.ints z from
+            REnv.get_update_other b' .int ρ' x' z v hzx']
+      exact hoi z hnx hnz
+  · intro z hnx hnz
+    by_cases hzx' : x' = z
+    · subst hzx'; cases b' <;> simp
+    · rw [show (ρ.update b' x' v).bools z = ρ.bools z from
+            REnv.get_update_other b' .bool ρ x' z v hzx',
+          show (ρ'.update b' x' v).bools z = ρ'.bools z from
+            REnv.get_update_other b' .bool ρ' x' z v hzx']
+      exact hob z hnx hnz
+
 /-- Rename the opened variable from x to y in Formula.interp, when both x and y
     are fresh for φ (not in φ.fv). x, y are expression-level fresh names
     that don't coincide with φ's named quantifier binders. The named-quantifier
@@ -2624,47 +2647,17 @@ theorem Formula.interp_openBVar_rename (φ : Formula) (b : Base) (k : Nat)
     simp only [Formula.fv] at hx' hy'
     simp [Formula.named] at hxn' hyn'
     simp only [Formula.openBVar, Formula.interp]
+    have xf : x ∉ φ.fv := by grind
+    have yf : y ∉ φ.fv := by grind
     constructor
     · intro hf n
-      -- x ≠ x' and y ≠ x' come from hxn'.1 and hyn'.1
-      have xf : x ∉ φ.fv := by grind
-      have yf : y ∉ φ.fv := by grind
-      -- Conditions for IH applied to updated envs
-      have hvi' : (ρ.update .int x' n).ints x = (ρ'.update .int x' n).ints y := by
-        simp only
-        simp [beq_eq_false_iff_ne.mpr (Ne.symm hxn'.1),
-              beq_eq_false_iff_ne.mpr (Ne.symm hyn'.1), hvi]
-      have hvb' : (ρ.update .int x' n).bools x = (ρ'.update .int x' n).bools y := by
-        simp [hvb]
-      have hoi' : ∀ z, z ≠ x → z ≠ y → (ρ.update .int x' n).ints z = (ρ'.update .int x' n).ints z := by
-        intro z hnx hnz
-        simp only
-        by_cases hzx' : x' = z
-        · subst hzx'; simp
-        · simp [beq_eq_false_iff_ne.mpr hzx', hoi z hnx hnz]
-      have hob' : ∀ z, z ≠ x → z ≠ y → (ρ.update .int x' n).bools z = (ρ'.update .int x' n).bools z := by
-        intro z hnx hnz; simp [hob z hnx hnz]
+      obtain ⟨hvi', hvb', hoi', hob'⟩ :=
+        REnv.cond_update .int x' n hxn'.1 hyn'.1 hvi hvb hoi hob
       exact (ih (ρ.update .int x' n) (ρ'.update .int x' n) xf yf hxn'.2 hyn'.2
                 hvi' hvb' hoi' hob').mp (hf n)
     · intro hf n
-      -- x ≠ x' and y ≠ x' come from hxn'.1 and hyn'.1
-      have xf : x ∉ φ.fv := by grind
-      have yf : y ∉ φ.fv := by grind
-      -- Conditions for IH applied to updated envs
-      have hvi' : (ρ.update .int x' n).ints x = (ρ'.update .int x' n).ints y := by
-        simp only
-        simp [beq_eq_false_iff_ne.mpr (Ne.symm hxn'.1),
-              beq_eq_false_iff_ne.mpr (Ne.symm hyn'.1), hvi]
-      have hvb' : (ρ.update .int x' n).bools x = (ρ'.update .int x' n).bools y := by
-        simp [hvb]
-      have hoi' : ∀ z, z ≠ x → z ≠ y → (ρ.update .int x' n).ints z = (ρ'.update .int x' n).ints z := by
-        intro z hnx hnz
-        simp only
-        by_cases hzx' : x' = z
-        · subst hzx'; simp
-        · simp [beq_eq_false_iff_ne.mpr hzx', hoi z hnx hnz]
-      have hob' : ∀ z, z ≠ x → z ≠ y → (ρ.update .int x' n).bools z = (ρ'.update .int x' n).bools z := by
-        intro z hnx hnz; simp [hob z hnx hnz]
+      obtain ⟨hvi', hvb', hoi', hob'⟩ :=
+        REnv.cond_update .int x' n hxn'.1 hyn'.1 hvi hvb hoi hob
       exact (ih (ρ.update .int x' n) (ρ'.update .int x' n) xf yf hxn'.2 hyn'.2
                 hvi' hvb' hoi' hob').mpr (hf n)
   | allB x' φ ih =>
@@ -2672,49 +2665,19 @@ theorem Formula.interp_openBVar_rename (φ : Formula) (b : Base) (k : Nat)
     simp only [Formula.fv] at hx' hy'
     simp [Formula.named] at hxn' hyn'
     simp only [Formula.openBVar, Formula.interp]
+    have xf : x ∉ φ.fv := by grind
+    have yf : y ∉ φ.fv := by grind
     constructor
-    · intro hf b
-      -- x ≠ x' and y ≠ x' come from hxn'.1 and hyn'.1
-      have xf : x ∉ φ.fv := by grind
-      have yf : y ∉ φ.fv := by grind
-      -- Conditions for IH applied to updated envs
-      have hvi' : (ρ.update .bool x' b).bools x = (ρ'.update .bool x' b).bools y := by
-        simp only
-        simp [beq_eq_false_iff_ne.mpr (Ne.symm hxn'.1),
-              beq_eq_false_iff_ne.mpr (Ne.symm hyn'.1), hvb]
-      have hvb' : (ρ.update .bool x' b).ints x = (ρ'.update .bool x' b).ints y := by
-        simp [hvi]
-      have hoi' : ∀ z, z ≠ x → z ≠ y → (ρ.update .bool x' b).bools z = (ρ'.update .bool x' b).bools z := by
-        intro z hnx hnz
-        simp only
-        by_cases hzx' : x' = z
-        · subst hzx'; simp
-        · simp [beq_eq_false_iff_ne.mpr hzx', hob z hnx hnz]
-      have hob' : ∀ z, z ≠ x → z ≠ y → (ρ.update .bool x' b).ints z = (ρ'.update .bool x' b).ints z := by
-        intro z hnx hnz; simp [hoi z hnx hnz]
-      exact (ih (ρ.update .bool x' b) (ρ'.update .bool x' b) xf yf hxn'.2 hyn'.2
-                hvb' hvi' hob' hoi').mp (hf b)
-    · intro hf n
-      -- x ≠ x' and y ≠ x' come from hxn'.1 and hyn'.1
-      have xf : x ∉ φ.fv := by grind
-      have yf : y ∉ φ.fv := by grind
-      -- Conditions for IH applied to updated envs
-      have hvi' : (ρ.update .bool x' n).bools x = (ρ'.update .bool x' n).bools y := by
-        simp only
-        simp [beq_eq_false_iff_ne.mpr (Ne.symm hxn'.1),
-              beq_eq_false_iff_ne.mpr (Ne.symm hyn'.1), hvb]
-      have hvb' : (ρ.update .bool x' n).ints x = (ρ'.update .bool x' n).ints y := by
-        simp [hvi]
-      have hoi' : ∀ z, z ≠ x → z ≠ y → (ρ.update .bool x' n).bools z = (ρ'.update .bool x' n).bools z := by
-        intro z hnx hnz
-        simp only
-        by_cases hzx' : x' = z
-        · subst hzx'; simp
-        · simp [beq_eq_false_iff_ne.mpr hzx', hob z hnx hnz]
-      have hob' : ∀ z, z ≠ x → z ≠ y → (ρ.update .bool x' n).ints z = (ρ'.update .bool x' n).ints z := by
-        intro z hnx hnz; simp [hoi z hnx hnz]
-      exact (ih (ρ.update .bool x' n) (ρ'.update .bool x' n) xf yf hxn'.2 hyn'.2
-                hvb' hvi' hob' hoi').mpr (hf n)
+    · intro hf c
+      obtain ⟨hvi', hvb', hoi', hob'⟩ :=
+        REnv.cond_update .bool x' c hxn'.1 hyn'.1 hvi hvb hoi hob
+      exact (ih (ρ.update .bool x' c) (ρ'.update .bool x' c) xf yf hxn'.2 hyn'.2
+                hvi' hvb' hoi' hob').mp (hf c)
+    · intro hf c
+      obtain ⟨hvi', hvb', hoi', hob'⟩ :=
+        REnv.cond_update .bool x' c hxn'.1 hyn'.1 hvi hvb hoi hob
+      exact (ih (ρ.update .bool x' c) (ρ'.update .bool x' c) xf yf hxn'.2 hyn'.2
+                hvi' hvb' hoi' hob').mpr (hf c)
 /-! ## 20. Formula.interp freshness under env updates
 
   When `x ∉ fv φ` AND `x ∉ named φ` (i.e. x is not used as a binder in φ),
@@ -2791,12 +2754,12 @@ theorem Formula.interp_update_fresh_int (φ : Formula)
     constructor
     · intro ⟨b, hb⟩
       refine ⟨b, ?_⟩
-      rw [← REnv.update_comm_int_bool ρ x y w b hxy]
-      grind
+      rw [REnv.update_comm_int_bool ρ x y w b hxy]
+      exact (ih (ρ.update .bool y b) hxf hxn).mp hb
     · intro ⟨b, hb⟩
       refine ⟨b, ?_⟩
-      rw [← REnv.update_comm_int_bool ρ x y w b hxy] at hb
-      grind
+      rw [REnv.update_comm_int_bool ρ x y w b hxy] at hb
+      exact (ih (ρ.update .bool y b) hxf hxn).mpr hb
   | allI y φ ih =>
     simp only [Formula.fv, Formula.named] at hfv hnamed
     simp only [Formula.interp]
@@ -2819,7 +2782,7 @@ theorem Formula.interp_update_fresh_int (φ : Formula)
       intro hmem; exact hfv (List.mem_filter.mpr ⟨hmem, by simp [hxy]⟩)
     constructor
     · intro h b
-      rw [← REnv.update_comm_int_bool ρ x y w b hxy]
+      rw [REnv.update_comm_int_bool ρ x y w b hxy]
       exact (ih (ρ.update .bool y b) hxf hxn).mp (h b)
     · intro h b
       exact (ih (ρ.update .bool y b) hxf hxn).mpr (REnv.update_comm_int_bool ρ x y w b hxy ▸ (h b))
@@ -2934,27 +2897,23 @@ theorem Formula.interp_update_fresh_bool (φ : Formula)
 theorem REnv.update_int_int_comm (ρ : REnv) (x y : EVar) (hxy : x ≠ y)
     (m n : Int) :
     (ρ.update .int x m).update .int y n = (ρ.update .int y n).update .int x m := by
-  apply REnv.ext
-  · funext z
-    simp
-    by_cases hzx : x = z <;> by_cases hzy : y = z <;>
-      simp_all
-  · rfl
+  apply REnv.ext; funext z
+  by_cases hzx : x = z <;> by_cases hzy : y = z <;>
+    simp_all
 
 theorem REnv.update_bool_bool_comm (ρ : REnv) (x y : EVar) (hxy : x ≠ y)
     (m n : Bool) :
     (ρ.update .bool x m).update .bool y n = (ρ.update .bool y n).update .bool x m := by
-  apply REnv.ext
-  · rfl
-  · funext z
-    simp
-    by_cases hzx : x = z <;> by_cases hzy : y = z <;>
-      simp_all
+  apply REnv.ext; funext z
+  by_cases hzx : x = z <;> by_cases hzy : y = z <;>
+    simp_all
 
 theorem REnv.update_int_bool_comm (ρ : REnv) (x y : EVar) (m : Int) (n : Bool)
     (h : x ≠ y) :
     (ρ.update .int x m).update .bool y n = (ρ.update .bool y n).update .int x m := by
-  apply REnv.ext <;> rfl
+  apply REnv.ext; funext z
+  by_cases hzx : x = z <;> by_cases hzy : y = z <;>
+    simp_all
 
 /-- Raw (unfiltered) free variables of a refinement; `Refinement.fv` is this with
     the reserved `ν` removed. (Replaces the old `r.fmla.fv` now that `Refinement`
@@ -3811,21 +3770,56 @@ theorem Ty.openVar_replace (k : Nat) (x y : EVar) (t : Ty)
     simp [Ty.openVar, Ty.replaceFVar,
           ihs k hx.1 hxn.1, iht (k + 1) hx.2 hxn.2]
 
-/-! ## Rename keystone: interpretation -/
+/-! ## Rename keystone: interpretation
+
+  Under the single-map `REnv`, renaming `x → y` corresponds to copying `y`'s
+  (single) cell into `x` with the Val-level `write`. (The old two-field version
+  set `x`'s int- and bool-slots independently to `y`'s; that has no single-map
+  analogue, since one cell cannot hold both an `Int` and a `Bool` at once.) -/
+
+theorem REnv.write_self (ρ : REnv) (x : EVar) (v : Val) : (ρ.write x v).map x = v := by
+  simp
+
+theorem REnv.write_other (ρ : REnv) (x : EVar) (v : Val) {y : EVar} (h : x ≠ y) :
+    (ρ.write x v).map y = ρ.map y := by
+  have hxy : (x == y) = false := by simp [h]
+  simp [hxy]
+
+theorem REnv.get_write_self (b : Base) (ρ : REnv) (x : EVar) (v : Val) :
+    REnv.get b (ρ.write x v) x = v.proj b := by
+  simp [REnv.get, REnv.lookup]
+
+theorem REnv.get_write_other (b : Base) (ρ : REnv) (x : EVar) (v : Val) {y : EVar}
+    (h : x ≠ y) : REnv.get b (ρ.write x v) y = REnv.get b ρ y := by
+  have hxy : (x == y) = false := by simp [h]
+  simp [REnv.get, REnv.lookup, hxy]
+
+/-- `write` at `x` commutes with `update` at a different key `z`. -/
+theorem REnv.write_update_comm (b : Base) (ρ : REnv) (z : EVar) (n : b.interp)
+    (x : EVar) (v : Val) (h : x ≠ z) :
+    (ρ.update b z n).write x v = (ρ.write x v).update b z n := by
+  apply REnv.ext; funext w
+  by_cases hxw : x = w <;> by_cases hzw : z = w <;>
+    simp_all
+
+theorem REnv.lookup_update_other (b : Base) (ρ : REnv) (z : EVar) (n : b.interp)
+    {y : EVar} (h : z ≠ y) : (ρ.update b z n).lookup y = ρ.lookup y :=
+  REnv.map_update_other b ρ z n h
 
 /-- Interpretation of a term after renaming `x → y` equals interpretation under
-    an environment where `x`'s slots are set to `y`'s slot values. -/
+    the environment with `y`'s cell copied into `x`. -/
 theorem Term.interp_replaceFVar {b : Base} (t : Term b) (x y : EVar) (ρ : REnv) :
     Term.interp ρ (t.replaceFVar x y) =
-    Term.interp ((ρ.update .int x (ρ.ints y)).update .bool x (ρ.bools y)) t := by
+    Term.interp (ρ.write x (ρ.lookup y)) t := by
   induction t with
   | const _ _  => simp [Term.replaceFVar, Term.interp]
   | bvar b' _  => cases b' <;> simp [Term.replaceFVar, Term.interp]
   | fvar b' z  =>
-    cases b' <;> by_cases hzx : z = x <;>
-      (first | (subst hzx; simp [Term.replaceFVar, Term.interp, REnv.get])
-             | (simp [Term.replaceFVar, Term.interp, REnv.get, hzx];
-                intro h; exact (hzx h.symm).elim))
+    by_cases hzx : z = x
+    · subst hzx
+      simp [Term.replaceFVar, Term.interp, REnv.get, REnv.lookup]
+    · simp only [Term.replaceFVar, Term.interp, if_neg hzx]
+      exact (REnv.get_write_other b' ρ x (ρ.lookup y) (Ne.symm hzx)).symm
   | add t₁ t₂ ih₁ ih₂ => simp [Term.replaceFVar, Term.interp, ih₁, ih₂]
   | not t ih          => simp [Term.replaceFVar, Term.interp, ih]
   | and t₁ t₂ ih₁ ih₂ => simp [Term.replaceFVar, Term.interp, ih₁, ih₂]
@@ -3833,7 +3827,7 @@ theorem Term.interp_replaceFVar {b : Base} (t : Term b) (x y : EVar) (ρ : REnv)
 theorem Formula.interp_replaceFVar (φ : Formula) (x y : EVar) (ρ : REnv)
     (hxn : x ∉ φ.named) (hyn : y ∉ φ.named) :
     Formula.interp ρ (φ.replaceFVar x y) ↔
-    Formula.interp ((ρ.update .int x (ρ.ints y)).update .bool x (ρ.bools y)) φ := by
+    Formula.interp (ρ.write x (ρ.lookup y)) φ := by
   induction φ generalizing ρ with
   | tt | ff => simp [Formula.replaceFVar, Formula.interp]
   | eqI t₁ t₂ | eqB t₁ t₂ | leqI t₁ t₂ =>
@@ -3860,51 +3854,35 @@ theorem Formula.interp_replaceFVar (φ : Formula) (x y : EVar) (ρ : REnv)
     have hzy : z ≠ y := fun h => hyn.1 h.symm
     simp only [Formula.replaceFVar, if_neg hzx, Formula.interp]
     refine exists_congr (fun n => ?_)
-    rw [ih (ρ.update .int z n) hxn.2 hyn.2]
-    have hI : (ρ.update .int z n).ints y = ρ.ints y := by
-      simp; intro h; exact (hzy h).elim
-    have hB : (ρ.update .int z n).bools y = ρ.bools y := by simp
-    rw [hI, hB,
-        REnv.update_comm_int_int ρ z x n (ρ.ints y) hzx,
-        REnv.update_comm_int_bool (ρ.update .int x (ρ.ints y)) z x n (ρ.bools y) hzx]
+    rw [ih (ρ.update .int z n) hxn.2 hyn.2,
+        REnv.lookup_update_other .int ρ z n hzy,
+        REnv.write_update_comm .int ρ z n x (ρ.lookup y) (Ne.symm hzx)]
   | exB z φ ih =>
     simp only [Formula.named, List.mem_cons, not_or] at hxn hyn
     have hzx : z ≠ x := fun h => hxn.1 h.symm
     have hzy : z ≠ y := fun h => hyn.1 h.symm
     simp only [Formula.replaceFVar, if_neg hzx, Formula.interp]
     refine exists_congr (fun bv => ?_)
-    rw [ih (ρ.update .bool z bv) hxn.2 hyn.2]
-    have hI : (ρ.update .bool z bv).ints y = ρ.ints y := by simp
-    have hB : (ρ.update .bool z bv).bools y = ρ.bools y := by
-      simp; intro h; exact (hzy h).elim
-    rw [hI, hB,
-        ← REnv.update_comm_int_bool ρ x z (ρ.ints y) bv (Ne.symm hzx),
-        REnv.update_comm_bool_bool (ρ.update .int x (ρ.ints y)) z x bv (ρ.bools y) hzx]
+    rw [ih (ρ.update .bool z bv) hxn.2 hyn.2,
+        REnv.lookup_update_other .bool ρ z bv hzy,
+        REnv.write_update_comm .bool ρ z bv x (ρ.lookup y) (Ne.symm hzx)]
   | allI z φ ih =>
     simp only [Formula.named, List.mem_cons, not_or] at hxn hyn
     have hzx : z ≠ x := fun h => hxn.1 h.symm
     have hzy : z ≠ y := fun h => hyn.1 h.symm
     simp only [Formula.replaceFVar, if_neg hzx, Formula.interp]
     refine forall_congr' (fun n => ?_)
-    rw [ih (ρ.update .int z n) hxn.2 hyn.2]
-    have hI : (ρ.update .int z n).ints y = ρ.ints y := by
-      simp; intro h; exact (hzy h).elim
-    have hB : (ρ.update .int z n).bools y = ρ.bools y := by simp
-    rw [hI, hB,
-        REnv.update_comm_int_int ρ z x n (ρ.ints y) hzx,
-        REnv.update_comm_int_bool (ρ.update .int x (ρ.ints y)) z x n (ρ.bools y) hzx]
+    rw [ih (ρ.update .int z n) hxn.2 hyn.2,
+        REnv.lookup_update_other .int ρ z n hzy,
+        REnv.write_update_comm .int ρ z n x (ρ.lookup y) (Ne.symm hzx)]
   | allB z φ ih =>
     simp only [Formula.named, List.mem_cons, not_or] at hxn hyn
     have hzx : z ≠ x := fun h => hxn.1 h.symm
     have hzy : z ≠ y := fun h => hyn.1 h.symm
     simp only [Formula.replaceFVar, if_neg hzx, Formula.interp]
     refine forall_congr' (fun bv => ?_)
-    rw [ih (ρ.update .bool z bv) hxn.2 hyn.2]
-    have hI : (ρ.update .bool z bv).ints y = ρ.ints y := by simp
-    have hB : (ρ.update .bool z bv).bools y = ρ.bools y := by
-      simp; intro h; exact (hzy h).elim
-    rw [hI, hB,
-        ← REnv.update_comm_int_bool ρ x z (ρ.ints y) bv (Ne.symm hzx),
-        REnv.update_comm_bool_bool (ρ.update .int x (ρ.ints y)) z x bv (ρ.bools y) hzx]
+    rw [ih (ρ.update .bool z bv) hxn.2 hyn.2,
+        REnv.lookup_update_other .bool ρ z bv hzy,
+        REnv.write_update_comm .bool ρ z bv x (ρ.lookup y) (Ne.symm hzx)]
 
 end STLC
