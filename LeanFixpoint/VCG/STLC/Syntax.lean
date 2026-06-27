@@ -257,7 +257,6 @@ def REnv.update (b : Base) (ρ : REnv) (x : EVar) (v : b.interp) : REnv :=
   ρ.write x (Val.inj b v)
 
 /-- Derived accessors mirroring the old two-field layout. -/
-@[simp, reducible] def REnv.ints  (ρ : REnv) (x : EVar) : Int  := REnv.get .int  ρ x
 @[simp, reducible] def REnv.bools (ρ : REnv) (x : EVar) : Bool := REnv.get .bool ρ x
 
 /-- The cell for `x` stores a value of base `b`. Holds for every slot bound at
