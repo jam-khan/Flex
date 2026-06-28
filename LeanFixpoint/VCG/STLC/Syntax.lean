@@ -116,30 +116,6 @@ abbrev KVar : Type := EVar
     base-typed argument list. -/
 abbrev KEnv : Type := KVar → List (Σ b : Base, b.interp) → Prop
 
-/-! ## KEnv construction helpers
-
-  `liftK1` / `liftK2` lift curried predicates into the heterogeneous-list form
-  expected by `KEnv`. `mkKEnv` builds a `KEnv` from a finite name→predicate
-  list, defaulting to `True` for unmentioned keys. `exists_kenv_curried` is
-  the sufficiency lemma used by the `intro_kenv` tactic to replace
-  `∃ κ : KEnv, P κ` with individual curried existentials. -/
-
-def liftK1 (p : Int → Prop) : List (Σ b : Base, b.interp) → Prop
-  | [⟨.int, v⟩] => p v
-  | _            => True
-
-def liftK2 (p : Int → Int → Prop) : List (Σ b : Base, b.interp) → Prop
-  | [⟨.int, x⟩, ⟨.int, y⟩] => p x y
-  | _                        => True
-
-def mkKEnv (ks : List (KVar × (List (Σ b : Base, b.interp) → Prop))) : KEnv :=
-  fun name => (ks.lookup name).getD (fun _ => True)
-
-theorem exists_kenv_curried {P : KEnv → Prop}
-    (ks : List (KVar × (List (Σ b : Base, b.interp) → Prop)))
-    (h : P (mkKEnv ks)) : ∃ κ : KEnv, P κ :=
-  ⟨mkKEnv ks, h⟩
-
 /-! ## Types — locally nameless
 
   `arrow s t`: the codomain `t` is a *body* with `BVar 0` representing the
@@ -222,9 +198,6 @@ def Exp.lc_at : Nat → Exp → Prop
   | k, .leq e₁ e₂     => e₁.lc_at k ∧ e₂.lc_at k
   | k, .ite e₀ e₁ e₂  => e₀.lc_at k ∧ e₁.lc_at k ∧ e₂.lc_at k
   | k, .add e₁ e₂     => e₁.lc_at k ∧ e₂.lc_at k
-
-abbrev Exp.lc : Exp → Prop := Exp.lc_at 0
-
 
 /-- A `Val` is closed when its `toExp` is locally closed (note: the closure
     body is required `lc_at 1` since `BVar 0` is the parameter). -/
