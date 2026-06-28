@@ -71,28 +71,28 @@ mutual
         Γ.lookup y = some (.refine .int r₂) →
         Synth κ Γ (.leq (.fvar x) (.fvar y))
           (.refine .bool (.fmla (.and
-            (.imp (.eqB (.fvar .bool nuName) (.const .bool true))
+            (.imp (.eq .bool (.fvar .bool nuName) (.const .bool true))
                   (.leqI (.fvar .int x) (.fvar .int y)))
             (.imp (.leqI (.fvar .int x) (.fvar .int y))
-                  (.eqB (.fvar .bool nuName) (.const .bool true))))))
+                  (.eq .bool (.fvar .bool nuName) (.const .bool true))))))
 
     | add_var {κ Γ x y r₁ r₂} :
         Γ.lookup x = some (.refine .int r₁) →
         Γ.lookup y = some (.refine .int r₂) →
         Synth κ Γ (.add (.fvar x) (.fvar y))
-          (.refine .int (.fmla (.eqI (.fvar .int nuName)
+          (.refine .int (.fmla (.eq .int (.fvar .int nuName)
                               (.add (.fvar .int x) (.fvar .int y)))))
 
     | not_var {κ Γ x r} :
         Γ.lookup x = some (.refine .bool r) →
         Synth κ Γ (.not (.fvar x))
-          (.refine .bool (.fmla (.eqB (.fvar .bool nuName) (.not (.fvar .bool x)))))
+          (.refine .bool (.fmla (.eq .bool (.fvar .bool nuName) (.not (.fvar .bool x)))))
 
     | and_var {κ Γ x y rx ry} :
         Γ.lookup x = some (.refine .bool rx) →
         Γ.lookup y = some (.refine .bool ry) →
         Synth κ Γ (.and (.fvar x) (.fvar y))
-          (.refine .bool (.fmla (.eqB (.fvar .bool nuName) (.and (.fvar .bool x) (.fvar .bool y)))))
+          (.refine .bool (.fmla (.eq .bool (.fvar .bool nuName) (.and (.fvar .bool x) (.fvar .bool y)))))
 
   -- κ; Γ ⊢ e ⇐ t : "e checks against type t under κ"
   inductive Check : KEnv → TEnv → Exp → Ty → Prop where
@@ -122,8 +122,8 @@ mutual
         y ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
             ++ e₁.fv ++ e₂.fv ++ t.fv ++ Ty.named t ++ [x, nuName] →
         Check κ ((y, .refine .bool (.fmla
-                  (.eqB (.fvar .bool x) (.const .bool true)))) :: Γ) e₁ t →
+                  (.eq .bool (.fvar .bool x) (.const .bool true)))) :: Γ) e₁ t →
         Check κ ((y, .refine .bool (.fmla
-                  (.eqB (.fvar .bool x) (.const .bool false)))) :: Γ) e₂ t →
+                  (.eq .bool (.fvar .bool x) (.const .bool false)))) :: Γ) e₂ t →
         Check κ Γ (.ite (.fvar x) e₁ e₂) t
 end

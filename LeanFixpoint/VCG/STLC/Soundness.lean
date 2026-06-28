@@ -243,10 +243,10 @@ mutual
       obtain ⟨c₁, c₂, hc₁, hc₂⟩ : ∃ c₁ c₂,
           (check ((EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
                     ++ bt.fv ++ bf.fv ++ t.fv ++ Ty.named t ++ [cn, nuName]),
-                   Ty.refine Base.bool (.fmla (Formula.eqB (Term.fvar Base.bool cn) (Term.const Base.bool true)))) :: Γ) bt t = some c₁) ∧
+                   Ty.refine Base.bool (.fmla (.eq .bool (.fvar .bool cn) (.const .bool true)))) :: Γ) bt t = some c₁) ∧
           (check ((EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
                     ++ bt.fv ++ bf.fv ++ t.fv ++ Ty.named t ++ [cn, nuName]),
-                   Ty.refine Base.bool (.fmla (Formula.eqB (Term.fvar Base.bool cn) (Term.const Base.bool false)))) :: Γ) bf t = some c₂) := by
+                   Ty.refine .bool (.fmla (.eq .bool (.fvar .bool cn) (.const .bool false)))) :: Γ) bf t = some c₂) := by
         grind
       simp_all
       rw [← hcheck.2] at hent
@@ -526,15 +526,15 @@ mutual
       -- The branch guard `{ν | x = const}` references `x` free and is kvar-free
       -- with no bvars, so it is WFBVars outright.
       have hstr_wfb : ∀ (const : Bool), Ty.WFBVars (.refine .bool
-          (.fmla (.eqB (.fvar .bool x) (.const .bool const)))) := by
+          (.fmla (.eq .bool (.fvar .bool x) (.const .bool const)))) := by
         intro const
         simp [Ty.WFBVars, Ty.WFBVarCtx, Refinement.hasBVar, Formula.hasBVar, Term.hasBVar]
       -- Extended TEnv.WFBVars for the fresh-guard true / false branches.
       have hΓ1 : TEnv.WFBVars ((y, .refine .bool
-          (.fmla (.eqB (.fvar .bool x) (.const .bool true)))) :: Γ) :=
+          (.fmla (.eq .bool (.fvar .bool x) (.const .bool true)))) :: Γ) :=
         hΓ.cons (hstr_wfb true) hyν
       have hΓ2 : TEnv.WFBVars ((y, .refine .bool
-          (.fmla (.eqB (.fvar .bool x) (.const .bool false)))) :: Γ) :=
+          (.fmla (.eq .bool (.fvar .bool x) (.const .bool false)))) :: Γ) :=
         hΓ.cons (hstr_wfb false) hyν
       have hht1 := check_to_hastype hΓ1 hE1 ht hck1
       have hht2 := check_to_hastype hΓ2 hE2 ht hck2

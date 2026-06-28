@@ -1,6 +1,7 @@
 import LeanFixpoint.VCG.STLC.Semantics
 import LeanFixpoint.VCG.STLC.Declarative
 import LeanFixpoint.VCG.STLC.Soundness
+import LeanFixpoint.VCG.STLC.Model
 
 open STLC
 
@@ -38,33 +39,6 @@ private theorem mem_TEnv_dom {Γ : TEnv} {x : EVar} {t : Ty} (h : (x, t) ∈ Γ)
 
 end STLC
 
-/-! ## Logical relation: ⟦τ⟧ as a predicate on values, κ-indexed and parameterized by γ.
-
-  - **Refinement bases**: `v` is `.iconst n` / `.bconst b` and the deep refinement
-    holds at that value under the supplied κ-assignment.
-  - **Arrow**: `v` is a locally-closed closure (`.clos body` with body `lc_at 1`),
-    and *for some cofinite set* `L` of names, every fresh `x ∉ L` works as an
-    opener for the codomain. The cofinite shape is the canonical LN logical
-    relation form (cf. Charguéraud's POPLMark-Reloaded notes) — it gives the
-    consumers of the LR (`subtyp_sound`/`hastype_fundamental`) the freedom to
-    pick whichever name they need via the `TyDenote.rename` lemma.
-
-  Termination: structural by `Ty.skel`. Both recursive positions on the arrow
-  case (`s` and `t.openVar 0 x`) decrease via `Ty.skel_openVar`. -/
-def TyDenote : KEnv → Ty → REnv → Val → Prop
-  | κ, .refine .int  r, γ, v => ∃ n : Int,  v = .iconst n ∧ Refinement.interp κ r γ n
-  | κ, .refine .bool r, γ, v => ∃ b : Bool, v = .bconst b ∧ Refinement.interp κ r γ b
-  | κ, .arrow s t,      γ, v =>
-      ∃ body, v = .clos body ∧
-        Val.lc (.clos body) ∧ Val.closed (.clos body) ∧
-        ∀ va, TyDenote κ s γ va →
-          ∃ vr, BigStep (body.openVal 0 va) vr ∧
-                TyDenote κ (t.substBV va) γ vr
-termination_by _ t _ _ => t.skel
-decreasing_by
-  all_goals simp_wf
-  · omega
-  · omega
 
 /-- Every value in the denotation is closed (no free names). The refinement
     cases follow from `Val.fv` of `iconst`/`bconst` being empty; the arrow
@@ -892,9 +866,9 @@ theorem hastype_fundamental {κ Γ e t} (h : Hastype κ Γ e t) :
       have hy_e₂ : y ∉ e₂.fv := fun hm => hfresh (by simp [hm])
       -- Fresh-guard refinements read `x` free (not ν); `y`'s own value is irrelevant.
       let r_true : Refinement .bool :=
-        .fmla (.eqB (.fvar .bool x) (.const .bool true))
+        .fmla (.eq .bool (.fvar .bool x) (.const .bool true))
       let r_false : Refinement .bool :=
-        .fmla (.eqB (.fvar .bool x) (.const .bool false))
+        .fmla (.eq .bool (.fvar .bool x) (.const .bool false))
       -- Freshness facts for `y` (all from `hfresh`).
       have hy_dom : y ∉ TEnv.dom Γ := fun hm => hfresh (by simp [hm])
       have hy_tyfv : y ∉ TEnv.tyFv Γ := fun hm => hfresh (by simp [hm])
