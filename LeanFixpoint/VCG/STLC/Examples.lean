@@ -72,7 +72,7 @@ example (κ : KEnv) : topVC κ [] ex2Exp ex2Ty := by
         Refinement.interp, Formula.interp, Term.interp, REnv.get,
         Exp.openVar, Ty.openVar, Refinement.openBVar, Formula.openBVar,
         Term.openBVar]
-  intro ρ v hv v' h; rw [h (by decide)]; exact hv
+  intro γ v hv v' h; rw [h (by decide)]; exact hv
 
 /-! ## Example 3: `let z = 5 in z ⇐ Pos` -/
 
@@ -83,7 +83,7 @@ example (κ : KEnv) : topVC κ [] ex3Exp ex3Ty := by
   simp [topVC, check, synth, sub, implyBind, ex3Exp, ex3Ty, Pos, prim, self,
         Refinement.interp, Formula.interp, Term.interp, REnv.get,
         Exp.openVar, Refinement.named]
-  intro ρ v h; rw [h (by decide)]; omega
+  intro γ v h; rw [h (by decide)]; omega
 
 /-! ## κ-example with `ty_k`: `let z = 99 in (λx. x : IntK k → IntK k) z ⇐ Pos`
 

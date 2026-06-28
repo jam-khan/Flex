@@ -239,31 +239,31 @@ def Val.inj : (b : Base) → b.interp → Val
 
 /-- Val-level (lossless) lookup. -/
 @[simp, reducible]
-def REnv.lookup (ρ : REnv) (x : EVar) : Val := ρ.map x
+def REnv.lookup (γ : REnv) (x : EVar) : Val := γ.map x
 
-/-- Val-level (lossless) update: `write ρ x (lookup ρ x) = ρ` unconditionally. -/
+/-- Val-level (lossless) update: `write γ x (lookup γ x) = γ` unconditionally. -/
 @[simp, reducible]
-def REnv.write (ρ : REnv) (x : EVar) (v : Val) : REnv :=
-  ⟨fun y => if x == y then v else ρ.map y⟩
+def REnv.write (γ : REnv) (x : EVar) (v : Val) : REnv :=
+  ⟨fun y => if x == y then v else γ.map y⟩
 
-/-- Look up the `b`-typed value of variable `x` in `ρ` (base-indexed view). -/
+/-- Look up the `b`-typed value of variable `x` in `γ` (base-indexed view). -/
 @[simp, reducible]
-def REnv.get (b : Base) (ρ : REnv) (x : EVar) : b.interp :=
-  (ρ.lookup x).proj b
+def REnv.get (b : Base) (γ : REnv) (x : EVar) : b.interp :=
+  (γ.lookup x).proj b
 
-/-- Update the `b`-typed slot for `x` in `ρ` to `v` (base-indexed view). -/
+/-- Update the `b`-typed slot for `x` in `γ` to `v` (base-indexed view). -/
 @[simp, reducible]
-def REnv.update (b : Base) (ρ : REnv) (x : EVar) (v : b.interp) : REnv :=
-  ρ.write x (Val.inj b v)
+def REnv.update (b : Base) (γ : REnv) (x : EVar) (v : b.interp) : REnv :=
+  γ.write x (Val.inj b v)
 
 /-- Derived accessors mirroring the old two-field layout. -/
-@[simp, reducible] def REnv.bools (ρ : REnv) (x : EVar) : Bool := REnv.get .bool ρ x
+@[simp, reducible] def REnv.bools (γ : REnv) (x : EVar) : Bool := REnv.get .bool γ x
 
 /-- The cell for `x` stores a value of base `b`. Holds for every slot bound at
     base `b` in a well-typed model; needed to know `update b _ x (get b _ x)`
     round-trips. -/
-def REnv.HasBase (ρ : REnv) (x : EVar) : Base → Prop
-  | .int  => ∃ n, ρ.map x = .iconst n
-  | .bool => ∃ c, ρ.map x = .bconst c
+def REnv.HasBase (γ : REnv) (x : EVar) : Base → Prop
+  | .int  => ∃ n, γ.map x = .iconst n
+  | .bool => ∃ c, γ.map x = .bconst c
 
 end STLC

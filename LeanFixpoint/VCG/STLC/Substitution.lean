@@ -6,7 +6,7 @@ import LeanFixpoint.VCG.STLC.Syntax
 
   1. **Term** — `fv`, `openBVar`, `substI`, `substB`, `lc_at`, `interp`.
   2. **Formula** — same operations + `interp` (handles named existentials).
-  3. **Refinement** — wraps Formula; ν stored as a slot of `ρ` at `nuName`.
+  3. **Refinement** — wraps Formula; ν stored as a slot of `γ` at `nuName`.
   4. **Ty** — `fv`, `openVar` (base-tagged), `substI`, `substB`, `lc_at`.
   5. **Val** — locally-nameless closures (body has `BVar 0`).
   6. **Exp** — `fv`, `openVar`, `openExp`, `openVal`, `close`, `subst`, `lc_at`.
@@ -87,18 +87,18 @@ def Term.lc_at : Nat → {b : Base} → Term b → Prop
   | k, _, .not t       => Term.lc_at k t
   | k, _, .and t₁ t₂   => Term.lc_at k t₁ ∧ Term.lc_at k t₂
 
-/-- Interpret a term in `ρ`. Free vars resolve via `REnv.get`; ν is the value
+/-- Interpret a term in `γ`. Free vars resolve via `REnv.get`; ν is the value
     at slot `nuName`. `BVar`s should be eliminated by opening before `interp`
     is called; on an un-opened `BVar` we return the type's default value. -/
-def Term.interp (ρ : REnv) : {b : Base} → Term b → b.interp
+def Term.interp (γ : REnv) : {b : Base} → Term b → b.interp
   | _, .const _ c   => c
   | _, .bvar b _    => match b with
                        | .int  => (0 : Int)
                        | .bool => false
-  | _, .fvar b x    => REnv.get b ρ x
-  | _, .add t₁ t₂   => Term.interp ρ t₁ + Term.interp ρ t₂
-  | _, .not t       => !Term.interp ρ t
-  | _, .and t₁ t₂   => Term.interp ρ t₁ && Term.interp ρ t₂
+  | _, .fvar b x    => REnv.get b γ x
+  | _, .add t₁ t₂   => Term.interp γ t₁ + Term.interp γ t₂
+  | _, .not t       => !Term.interp γ t
+  | _, .and t₁ t₂   => Term.interp γ t₁ && Term.interp γ t₂
 
 /-! ## 2. Formula operations -/
 
@@ -230,23 +230,23 @@ def Formula.lc_at : Nat → Formula → Prop
   | k, .allI _ φ    => φ.lc_at k
   | k, .allB _ φ    => φ.lc_at k
 
-/-- Interpret a (now κ-free) formula in `ρ`. Named existentials extend `ρ` at the
+/-- Interpret a (now κ-free) formula in `γ`. Named existentials extend `γ` at the
     bound name. No κ-assignment is needed: κ-applications live one level up, in
     `Refinement`, so only `Refinement.interp` consults the κ-assignment. -/
-def Formula.interp (ρ : REnv) : Formula → Prop
+def Formula.interp (γ : REnv) : Formula → Prop
   | .tt           => True
   | .ff           => False
-  | .eqI t₁ t₂    => Term.interp ρ t₁ = Term.interp ρ t₂
-  | .eqB t₁ t₂    => Term.interp ρ t₁ = Term.interp ρ t₂
-  | .leqI t₁ t₂   => Term.interp ρ t₁ ≤ Term.interp ρ t₂
-  | .and φ₁ φ₂    => Formula.interp ρ φ₁ ∧ Formula.interp ρ φ₂
-  | .or φ₁ φ₂     => Formula.interp ρ φ₁ ∨ Formula.interp ρ φ₂
-  | .not φ        => ¬ Formula.interp ρ φ
-  | .imp φ₁ φ₂    => Formula.interp ρ φ₁ → Formula.interp ρ φ₂
-  | .exI x φ      => ∃ n : Int,  Formula.interp (ρ.update .int  x n) φ
-  | .exB x φ      => ∃ b : Bool, Formula.interp (ρ.update .bool x b) φ
-  | .allI x φ     => ∀ n : Int,  Formula.interp (ρ.update .int  x n) φ
-  | .allB x φ     => ∀ b : Bool, Formula.interp (ρ.update .bool x b) φ
+  | .eqI t₁ t₂    => Term.interp γ t₁ = Term.interp γ t₂
+  | .eqB t₁ t₂    => Term.interp γ t₁ = Term.interp γ t₂
+  | .leqI t₁ t₂   => Term.interp γ t₁ ≤ Term.interp γ t₂
+  | .and φ₁ φ₂    => Formula.interp γ φ₁ ∧ Formula.interp γ φ₂
+  | .or φ₁ φ₂     => Formula.interp γ φ₁ ∨ Formula.interp γ φ₂
+  | .not φ        => ¬ Formula.interp γ φ
+  | .imp φ₁ φ₂    => Formula.interp γ φ₁ → Formula.interp γ φ₂
+  | .exI x φ      => ∃ n : Int,  Formula.interp (γ.update .int  x n) φ
+  | .exB x φ      => ∃ b : Bool, Formula.interp (γ.update .bool x b) φ
+  | .allI x φ     => ∀ n : Int,  Formula.interp (γ.update .int  x n) φ
+  | .allB x φ     => ∀ b : Bool, Formula.interp (γ.update .bool x b) φ
 
 /-! ## 3. Refinement operations -/
 
@@ -293,25 +293,25 @@ def Refinement.named {b : Base} (r : Refinement b) : List EVar :=
   | .fmla φ   => φ.named
   | .kapp _ _ => []
 
-/-- Interpret a refinement at value ν under κ-assignment: extend ρ at `nuName`
+/-- Interpret a refinement at value ν under κ-assignment: extend γ at `nuName`
     with ν, then either interpret the formula or apply κ. This is the *only*
     interpretation that consults the κ-assignment. -/
 def Refinement.interp (κ : KEnv) {b : Base} (r : Refinement b)
-    (ρ : REnv) (ν : b.interp) : Prop :=
+    (γ : REnv) (ν : b.interp) : Prop :=
   match r with
-  | .fmla φ       => Formula.interp (ρ.update b nuName ν) φ
+  | .fmla φ       => Formula.interp (γ.update b nuName ν) φ
   | .kapp kn args =>
-      κ kn (args.map (fun a => ⟨a.1, Term.interp (ρ.update b nuName ν) a.2⟩))
+      κ kn (args.map (fun a => ⟨a.1, Term.interp (γ.update b nuName ν) a.2⟩))
 
-/-- Denotation of a refinement at κ-assignment κ and env ρ: the predicate on
+/-- Denotation of a refinement at κ-assignment κ and env γ: the predicate on
     `b.interp` defining which values satisfy it. Alias for
-    `Refinement.interp κ r ρ` (point-free). -/
-def Refinement.den (κ : KEnv) {b : Base} (r : Refinement b) (ρ : REnv) :
+    `Refinement.interp κ r γ` (point-free). -/
+def Refinement.den (κ : KEnv) {b : Base} (r : Refinement b) (γ : REnv) :
     b.interp → Prop :=
-  fun ν => r.interp κ ρ ν
+  fun ν => r.interp κ γ ν
 
 @[simp] theorem Refinement.den_apply (κ : KEnv) {b : Base} (r : Refinement b)
-    (ρ : REnv) (ν : b.interp) : r.den κ ρ ν ↔ r.interp κ ρ ν := Iff.rfl
+    (γ : REnv) (ν : b.interp) : r.den κ γ ν ↔ r.interp κ γ ν := Iff.rfl
 
 /-- Refinement type for an integer constant: `{ν : Int | ν = n}`. -/
 @[simp] def prim (n : Int) : Ty :=
@@ -1431,28 +1431,25 @@ def TEnv.tyNamed : TEnv → List EVar
 
 /-! ## 8. Closing substitution (for big-step / fundamental lemma) -/
 
-/-- Closing substitution driven by the runtime environment `ρ`. Since `ρ` is a
+/-- Closing substitution driven by the runtime environment `γ`. Since `γ` is a
     *total* function `EVar → Val`, this is a structural *simultaneous* value
-    substitution: every free name `x` is replaced by `(ρ.map x).toExp`. No domain
+    substitution: every free name `x` is replaced by `(γ.map x).toExp`. No domain
     is needed — on a well-typed term every free name is bound in the model, and
-    the `iconst 0` default never occurs at a name that is actually read.
-
-    This is exactly the merge of the old list-based closing substitution `γ` with
-    the refinement environment `ρ`: `ρ` *is* `γ`. -/
-def Exp.substEnv (ρ : REnv) : Exp → Exp
+    the `iconst 0` default never occurs at a name that is actually read.-/
+def Exp.substEnv (γ : REnv) : Exp → Exp
   | .bvar j       => .bvar j
-  | .fvar x       => (ρ.map x).toExp
+  | .fvar x       => (γ.map x).toExp
   | .iconst n     => .iconst n
   | .bconst b     => .bconst b
-  | .lam body     => .lam (Exp.substEnv ρ body)
-  | .letin e₁ e₂  => .letin (Exp.substEnv ρ e₁) (Exp.substEnv ρ e₂)
-  | .app e₁ e₂    => .app (Exp.substEnv ρ e₁) (Exp.substEnv ρ e₂)
-  | .ann e t      => .ann (Exp.substEnv ρ e) t
-  | .add e₁ e₂    => .add (Exp.substEnv ρ e₁) (Exp.substEnv ρ e₂)
-  | .leq e₁ e₂    => .leq (Exp.substEnv ρ e₁) (Exp.substEnv ρ e₂)
-  | .not e        => .not (Exp.substEnv ρ e)
-  | .and e₁ e₂    => .and (Exp.substEnv ρ e₁) (Exp.substEnv ρ e₂)
-  | .ite e₀ e₁ e₂ => .ite (Exp.substEnv ρ e₀) (Exp.substEnv ρ e₁) (Exp.substEnv ρ e₂)
+  | .lam body     => .lam (Exp.substEnv γ body)
+  | .letin e₁ e₂  => .letin (Exp.substEnv γ e₁) (Exp.substEnv γ e₂)
+  | .app e₁ e₂    => .app (Exp.substEnv γ e₁) (Exp.substEnv γ e₂)
+  | .ann e t      => .ann (Exp.substEnv γ e) t
+  | .add e₁ e₂    => .add (Exp.substEnv γ e₁) (Exp.substEnv γ e₂)
+  | .leq e₁ e₂    => .leq (Exp.substEnv γ e₁) (Exp.substEnv γ e₂)
+  | .not e        => .not (Exp.substEnv γ e)
+  | .and e₁ e₂    => .and (Exp.substEnv γ e₁) (Exp.substEnv γ e₂)
+  | .ite e₀ e₁ e₂ => .ite (Exp.substEnv γ e₀) (Exp.substEnv γ e₁) (Exp.substEnv γ e₂)
 
 /-! ## 9. Freshness helper
 
@@ -1470,13 +1467,13 @@ def EVar.fresh (L : List EVar) : EVar :=
 
 /-- Updating cell `x` leaves a *different* cell `y` untouched — for any bases,
     since `update` only writes cell `x`. -/
-theorem REnv.map_update_other (b : Base) (ρ : REnv) (x : EVar) (v : b.interp)
-    {y : EVar} (h : x ≠ y) : (ρ.update b x v).map y = ρ.map y := by
+theorem REnv.map_update_other (b : Base) (γ : REnv) (x : EVar) (v : b.interp)
+    {y : EVar} (h : x ≠ y) : (γ.update b x v).map y = γ.map y := by
   have hxy : (x == y) = false := by simp [h]
   simp [hxy]
 
-@[simp] theorem REnv.get_update_same (b : Base) (ρ : REnv) (x : EVar) (v : b.interp) :
-    REnv.get b (ρ.update b x v) x = v := by
+@[simp] theorem REnv.get_update_same (b : Base) (γ : REnv) (x : EVar) (v : b.interp) :
+    REnv.get b (γ.update b x v) x = v := by
   cases b <;> simp [REnv.get]
 
 /-! ## 11. EVar.fresh proof -/
@@ -1516,56 +1513,56 @@ def EVar.freshWith (L : List EVar) : { x : EVar // x ∉ L } :=
   `simp` set continue to fire by name. -/
 
 @[simp]
-theorem Exp.substEnv_fvar (ρ : REnv) (x : EVar) :
-    Exp.substEnv ρ (.fvar x) = (ρ.map x).toExp := rfl
+theorem Exp.substEnv_fvar (γ : REnv) (x : EVar) :
+    Exp.substEnv γ (.fvar x) = (γ.map x).toExp := rfl
 
 @[simp]
-theorem Exp.substEnv_iconst (ρ : REnv) (n : Int) :
-    Exp.substEnv ρ (.iconst n) = .iconst n := rfl
+theorem Exp.substEnv_iconst (γ : REnv) (n : Int) :
+    Exp.substEnv γ (.iconst n) = .iconst n := rfl
 
 @[simp]
-theorem Exp.substEnv_bconst (ρ : REnv) (b : Bool) :
-    Exp.substEnv ρ (.bconst b) = .bconst b := rfl
+theorem Exp.substEnv_bconst (γ : REnv) (b : Bool) :
+    Exp.substEnv γ (.bconst b) = .bconst b := rfl
 
 @[simp]
-theorem Exp.substEnv_bvar (ρ : REnv) (j : Nat) :
-    Exp.substEnv ρ (.bvar j) = .bvar j := rfl
+theorem Exp.substEnv_bvar (γ : REnv) (j : Nat) :
+    Exp.substEnv γ (.bvar j) = .bvar j := rfl
 
 @[simp]
-theorem Exp.substEnv_lam (ρ : REnv) (body : Exp) :
-    Exp.substEnv ρ (.lam body) = .lam (Exp.substEnv ρ body) := rfl
+theorem Exp.substEnv_lam (γ : REnv) (body : Exp) :
+    Exp.substEnv γ (.lam body) = .lam (Exp.substEnv γ body) := rfl
 
 @[simp]
-theorem Exp.substEnv_letin (ρ : REnv) (e₁ e₂ : Exp) :
-    Exp.substEnv ρ (.letin e₁ e₂) = .letin (Exp.substEnv ρ e₁) (Exp.substEnv ρ e₂) := rfl
+theorem Exp.substEnv_letin (γ : REnv) (e₁ e₂ : Exp) :
+    Exp.substEnv γ (.letin e₁ e₂) = .letin (Exp.substEnv γ e₁) (Exp.substEnv γ e₂) := rfl
 
 @[simp]
-theorem Exp.substEnv_app (ρ : REnv) (e₁ e₂ : Exp) :
-    Exp.substEnv ρ (.app e₁ e₂) = .app (Exp.substEnv ρ e₁) (Exp.substEnv ρ e₂) := rfl
+theorem Exp.substEnv_app (γ : REnv) (e₁ e₂ : Exp) :
+    Exp.substEnv γ (.app e₁ e₂) = .app (Exp.substEnv γ e₁) (Exp.substEnv γ e₂) := rfl
 
 @[simp]
-theorem Exp.substEnv_ann (ρ : REnv) (e : Exp) (t : Ty) :
-    Exp.substEnv ρ (.ann e t) = .ann (Exp.substEnv ρ e) t := rfl
+theorem Exp.substEnv_ann (γ : REnv) (e : Exp) (t : Ty) :
+    Exp.substEnv γ (.ann e t) = .ann (Exp.substEnv γ e) t := rfl
 
 @[simp]
-theorem Exp.substEnv_add (ρ : REnv) (e₁ e₂ : Exp) :
-    Exp.substEnv ρ (.add e₁ e₂) = .add (Exp.substEnv ρ e₁) (Exp.substEnv ρ e₂) := rfl
+theorem Exp.substEnv_add (γ : REnv) (e₁ e₂ : Exp) :
+    Exp.substEnv γ (.add e₁ e₂) = .add (Exp.substEnv γ e₁) (Exp.substEnv γ e₂) := rfl
 
 @[simp]
-theorem Exp.substEnv_leq (ρ : REnv) (e₁ e₂ : Exp) :
-    Exp.substEnv ρ (.leq e₁ e₂) = .leq (Exp.substEnv ρ e₁) (Exp.substEnv ρ e₂) := rfl
+theorem Exp.substEnv_leq (γ : REnv) (e₁ e₂ : Exp) :
+    Exp.substEnv γ (.leq e₁ e₂) = .leq (Exp.substEnv γ e₁) (Exp.substEnv γ e₂) := rfl
 
 @[simp]
-theorem Exp.substEnv_not (ρ : REnv) (e : Exp) :
-    Exp.substEnv ρ (.not e) = .not (Exp.substEnv ρ e) := rfl
+theorem Exp.substEnv_not (γ : REnv) (e : Exp) :
+    Exp.substEnv γ (.not e) = .not (Exp.substEnv γ e) := rfl
 
 @[simp]
-theorem Exp.substEnv_and (ρ : REnv) (e₁ e₂ : Exp) :
-    Exp.substEnv ρ (.and e₁ e₂) = .and (Exp.substEnv ρ e₁) (Exp.substEnv ρ e₂) := rfl
+theorem Exp.substEnv_and (γ : REnv) (e₁ e₂ : Exp) :
+    Exp.substEnv γ (.and e₁ e₂) = .and (Exp.substEnv γ e₁) (Exp.substEnv γ e₂) := rfl
 
 @[simp]
-theorem Exp.substEnv_ite (ρ : REnv) (e₀ e₁ e₂ : Exp) :
-    Exp.substEnv ρ (.ite e₀ e₁ e₂) = .ite (Exp.substEnv ρ e₀) (Exp.substEnv ρ e₁) (Exp.substEnv ρ e₂) := rfl
+theorem Exp.substEnv_ite (γ : REnv) (e₀ e₁ e₂ : Exp) :
+    Exp.substEnv γ (.ite e₀ e₁ e₂) = .ite (Exp.substEnv γ e₀) (Exp.substEnv γ e₁) (Exp.substEnv γ e₂) := rfl
 
 /-- An expression with no free variables is invariant under any substitution.
     `Exp.subst x u e` substitutes `u` for `x` in `e`; when `e.fv = []`,
@@ -1615,8 +1612,8 @@ theorem Exp.subst_closed (x : EVar) (u e : Exp) (he : e.fv = []) :
     rw [ih₁ he.1, ih₂ he.2]
 
 /-- A closed expression is fixed under the closing substitution. -/
-theorem Exp.substEnv_closed (ρ : REnv) (e : Exp) (he : e.fv = []) :
-    Exp.substEnv ρ e = e := by
+theorem Exp.substEnv_closed (γ : REnv) (e : Exp) (he : e.fv = []) :
+    Exp.substEnv γ e = e := by
   induction e with
   | bvar _ | iconst _ | bconst _ => rfl
   | fvar y => simp [Exp.fv] at he
@@ -1655,11 +1652,11 @@ theorem Val.toExp_lc_at_zero {v : Val} (h : Val.lc v) : Exp.lc_at 0 v.toExp := b
     simp only [Val.toExp, Exp.lc_at]
     exact h
 
-/-- If every free name of `e` is mapped to a closed value by `ρ`, then the
+/-- If every free name of `e` is mapped to a closed value by `γ`, then the
     closing substitution produces a closed expression. -/
-theorem Exp.substEnv_fv_nil (ρ : REnv) (e : Exp)
-    (hcl : ∀ z ∈ e.fv, Val.closed (ρ.map z)) :
-    (Exp.substEnv ρ e).fv = [] := by
+theorem Exp.substEnv_fv_nil (γ : REnv) (e : Exp)
+    (hcl : ∀ z ∈ e.fv, Val.closed (γ.map z)) :
+    (Exp.substEnv γ e).fv = [] := by
   induction e with
   | bvar _ | iconst _ | bconst _ => rfl
   | fvar x => exact Val.toExp_closed_of_closed (hcl x (by simp [Exp.fv]))
@@ -1997,33 +1994,33 @@ theorem Exp.subst_lc_at (y : EVar) (u e : Exp) (k : Nat)
   | add _ _ ih₁ ih₂ =>
     simp_all [Exp.subst, Exp.lc_at]
 
-theorem Exp.substEnv_lc_at (ρ : REnv) (e : Exp) (k : Nat)
-    (hρ : ∀ z ∈ e.fv, Val.lc (ρ.map z)) (hlc_e : e.lc_at k) :
-    (e.substEnv ρ).lc_at k := by
+theorem Exp.substEnv_lc_at (γ : REnv) (e : Exp) (k : Nat)
+    (hγ : ∀ z ∈ e.fv, Val.lc (γ.map z)) (hlc_e : e.lc_at k) :
+    (e.substEnv γ).lc_at k := by
   induction e generalizing k with
   | bvar j => simpa [Exp.substEnv] using hlc_e
   | iconst _ | bconst _ => trivial
   | fvar x =>
-    exact Exp.lc_at_mono _ (Nat.zero_le k) (Val.toExp_lc_at_zero (hρ x (by simp [Exp.fv])))
+    exact Exp.lc_at_mono _ (Nat.zero_le k) (Val.toExp_lc_at_zero (hγ x (by simp [Exp.fv])))
   | lam body ih =>
-    exact ih (k+1) (fun z hz => hρ z (by simpa [Exp.fv] using hz)) hlc_e
+    exact ih (k+1) (fun z hz => hγ z (by simpa [Exp.fv] using hz)) hlc_e
   | ann e t ih =>
-    exact ih k (fun z hz => hρ z (by simpa [Exp.fv] using hz)) hlc_e
+    exact ih k (fun z hz => hγ z (by simpa [Exp.fv] using hz)) hlc_e
   | not e ih =>
-    exact ih k (fun z hz => hρ z (by simpa [Exp.fv] using hz)) hlc_e
+    exact ih k (fun z hz => hγ z (by simpa [Exp.fv] using hz)) hlc_e
   | letin e₁ e₂ ih₁ ih₂ =>
     obtain ⟨h₁, h₂⟩ := hlc_e
-    exact ⟨ih₁ k (fun z hz => hρ z (by simp [Exp.fv, hz])) h₁,
-           ih₂ (k+1) (fun z hz => hρ z (by simp [Exp.fv, hz])) h₂⟩
+    exact ⟨ih₁ k (fun z hz => hγ z (by simp [Exp.fv, hz])) h₁,
+           ih₂ (k+1) (fun z hz => hγ z (by simp [Exp.fv, hz])) h₂⟩
   | app e₁ e₂ ih₁ ih₂ | and e₁ e₂ ih₁ ih₂ | leq e₁ e₂ ih₁ ih₂ | add e₁ e₂ ih₁ ih₂ =>
     obtain ⟨h₁, h₂⟩ := hlc_e
-    exact ⟨ih₁ k (fun z hz => hρ z (by simp [Exp.fv, hz])) h₁,
-           ih₂ k (fun z hz => hρ z (by simp [Exp.fv, hz])) h₂⟩
+    exact ⟨ih₁ k (fun z hz => hγ z (by simp [Exp.fv, hz])) h₁,
+           ih₂ k (fun z hz => hγ z (by simp [Exp.fv, hz])) h₂⟩
   | ite e₀ e₁ e₂ ih₀ ih₁ ih₂ =>
     obtain ⟨h₀, h₁, h₂⟩ := hlc_e
-    exact ⟨ih₀ k (fun z hz => hρ z (by simp [Exp.fv, hz])) h₀,
-           ih₁ k (fun z hz => hρ z (by simp [Exp.fv, hz])) h₁,
-           ih₂ k (fun z hz => hρ z (by simp [Exp.fv, hz])) h₂⟩
+    exact ⟨ih₀ k (fun z hz => hγ z (by simp [Exp.fv, hz])) h₀,
+           ih₁ k (fun z hz => hγ z (by simp [Exp.fv, hz])) h₁,
+           ih₂ k (fun z hz => hγ z (by simp [Exp.fv, hz])) h₂⟩
 
 /-! ## 18. substEnv-openVar commutation -/
 
@@ -2066,27 +2063,27 @@ theorem Exp.subst_openVar_comm (e : Exp) (k : Nat) (x y : EVar) (u : Exp)
 
 /-! ## 19. substEnv-openVal: key lemma for lam/letin cases -/
 
-theorem REnv.write_self (ρ : REnv) (x : EVar) (v : Val) : (ρ.write x v).map x = v := by
+theorem REnv.write_self (γ : REnv) (x : EVar) (v : Val) : (γ.write x v).map x = v := by
   simp
 
-theorem REnv.write_other (ρ : REnv) (x : EVar) (v : Val) {y : EVar} (h : x ≠ y) :
-    (ρ.write x v).map y = ρ.map y := by
+theorem REnv.write_other (γ : REnv) (x : EVar) (v : Val) {y : EVar} (h : x ≠ y) :
+    (γ.write x v).map y = γ.map y := by
   have hxy : (x == y) = false := by simp [h]
   simp [hxy]
 
 /-- Writing a cell's current value back is the identity (no `HasBase` needed,
     since `write` is lossless). Drives the simplified `app` case of the
     fundamental lemma. -/
-theorem REnv.write_idem (ρ : REnv) (x : EVar) : ρ.write x (ρ.map x) = ρ := by
+theorem REnv.write_idem (γ : REnv) (x : EVar) : γ.write x (γ.map x) = γ := by
   apply REnv.ext; funext y
   by_cases hxy : x = y
   · subst hxy; simp
   · simp [hxy]
 
-/-- The closing substitution depends only on `ρ` over the free names of `e`. -/
-theorem Exp.substEnv_congr (e : Exp) (ρ₁ ρ₂ : REnv)
-    (h : ∀ z ∈ e.fv, ρ₁.map z = ρ₂.map z) :
-    Exp.substEnv ρ₁ e = Exp.substEnv ρ₂ e := by
+/-- The closing substitution depends only on `γ` over the free names of `e`. -/
+theorem Exp.substEnv_congr (e : Exp) (γ₁ γ₂ : REnv)
+    (h : ∀ z ∈ e.fv, γ₁.map z = γ₂.map z) :
+    Exp.substEnv γ₁ e = Exp.substEnv γ₂ e := by
   induction e with
   | bvar _ | iconst _ | bconst _ => rfl
   | fvar x => simp only [Exp.substEnv, h x (by simp [Exp.fv])]
@@ -2103,23 +2100,23 @@ theorem Exp.substEnv_congr (e : Exp) (ρ₁ ρ₂ : REnv)
       ih₁ fun z hz => h z (by simp [Exp.fv, hz]),
       ih₂ fun z hz => h z (by simp [Exp.fv, hz])]
 
-/-- Extending `ρ` at a name `y` not free in `e` does not change `substEnv`. The
+/-- Extending `γ` at a name `y` not free in `e` does not change `substEnv`. The
     single-env analogue of the old `substEnv_cons_fresh`. -/
-theorem Exp.substEnv_write_fresh (e : Exp) (ρ : REnv) (y : EVar) (v : Val)
+theorem Exp.substEnv_write_fresh (e : Exp) (γ : REnv) (y : EVar) (v : Val)
     (h : y ∉ e.fv) :
-    Exp.substEnv (ρ.write y v) e = Exp.substEnv ρ e := by
+    Exp.substEnv (γ.write y v) e = Exp.substEnv γ e := by
   apply Exp.substEnv_congr
   intro z hz
-  exact REnv.write_other ρ y v (by rintro rfl; exact h hz)
+  exact REnv.write_other γ y v (by rintro rfl; exact h hz)
 
 /-- Key lemma for the lam/letin cases: opening the binder with a fresh `z` and
-    then closing under `ρ.write z va` equals closing the body under `ρ` and then
+    then closing under `γ.write z va` equals closing the body under `γ` and then
     plugging `va` into the bound position. The merged single-env analogue of the
     old `substEnv_cons_openVar`. -/
-theorem Exp.substEnv_write_openVar (e : Exp) (ρ : REnv) (va : Val) (z : EVar) (k : Nat)
-    (hz_fv : z ∉ e.fv) (hρ : ∀ w ∈ e.fv, Val.lc (ρ.map w)) :
-    Exp.substEnv (ρ.write z va) (Exp.openVar k z e) =
-      Exp.openExp k va.toExp (Exp.substEnv ρ e) := by
+theorem Exp.substEnv_write_openVar (e : Exp) (γ : REnv) (va : Val) (z : EVar) (k : Nat)
+    (hz_fv : z ∉ e.fv) (hγ : ∀ w ∈ e.fv, Val.lc (γ.map w)) :
+    Exp.substEnv (γ.write z va) (Exp.openVar k z e) =
+      Exp.openExp k va.toExp (Exp.substEnv γ e) := by
   induction e generalizing k with
   | bvar j =>
     by_cases hjk : j = k
@@ -2128,40 +2125,40 @@ theorem Exp.substEnv_write_openVar (e : Exp) (ρ : REnv) (va : Val) (z : EVar) (
   | iconst _ | bconst _ => rfl
   | fvar y =>
     have hyz : z ≠ y := fun he => hz_fv (by simp [Exp.fv, he])
-    show Exp.substEnv (ρ.write z va) (.fvar y) = Exp.openExp k va.toExp ((ρ.map y).toExp)
-    rw [Exp.substEnv_fvar, REnv.write_other ρ z va hyz]
+    show Exp.substEnv (γ.write z va) (.fvar y) = Exp.openExp k va.toExp ((γ.map y).toExp)
+    rw [Exp.substEnv_fvar, REnv.write_other γ z va hyz]
     exact (Exp.openExp_of_lc_at _ k va.toExp
       (Exp.lc_at_mono _ (Nat.zero_le k)
-        (Val.toExp_lc_at_zero (hρ y (by simp [Exp.fv]))))).symm
+        (Val.toExp_lc_at_zero (hγ y (by simp [Exp.fv]))))).symm
   | lam e ih =>
     simp only [Exp.openVar, Exp.substEnv, Exp.openExp]
     rw [ih (k+1) (by simpa [Exp.fv] using hz_fv)
-        (fun w hw => hρ w (by simpa [Exp.fv] using hw))]
+        (fun w hw => hγ w (by simpa [Exp.fv] using hw))]
   | ann e t ih =>
     simp only [Exp.openVar, Exp.substEnv, Exp.openExp]
     rw [ih k (by simpa [Exp.fv] using hz_fv)
-        (fun w hw => hρ w (by simpa [Exp.fv] using hw))]
+        (fun w hw => hγ w (by simpa [Exp.fv] using hw))]
   | not e ih =>
     simp only [Exp.openVar, Exp.substEnv, Exp.openExp]
     rw [ih k (by simpa [Exp.fv] using hz_fv)
-        (fun w hw => hρ w (by simpa [Exp.fv] using hw))]
+        (fun w hw => hγ w (by simpa [Exp.fv] using hw))]
   | letin e₁ e₂ ih₁ ih₂ =>
     simp only [Exp.fv, List.mem_append, not_or] at hz_fv
     simp only [Exp.openVar, Exp.substEnv, Exp.openExp,
-      ih₁ k hz_fv.1 (fun w hw => hρ w (by simp [Exp.fv, hw])),
-      ih₂ (k+1) hz_fv.2 (fun w hw => hρ w (by simp [Exp.fv, hw]))]
+      ih₁ k hz_fv.1 (fun w hw => hγ w (by simp [Exp.fv, hw])),
+      ih₂ (k+1) hz_fv.2 (fun w hw => hγ w (by simp [Exp.fv, hw]))]
   | app e₁ e₂ ih₁ ih₂ | and e₁ e₂ ih₁ ih₂ | leq e₁ e₂ ih₁ ih₂ | add e₁ e₂ ih₁ ih₂ =>
     simp only [Exp.fv, List.mem_append, not_or] at hz_fv
     simp only [Exp.openVar, Exp.substEnv, Exp.openExp,
-      ih₁ k hz_fv.1 (fun w hw => hρ w (by simp [Exp.fv, hw])),
-      ih₂ k hz_fv.2 (fun w hw => hρ w (by simp [Exp.fv, hw]))]
+      ih₁ k hz_fv.1 (fun w hw => hγ w (by simp [Exp.fv, hw])),
+      ih₂ k hz_fv.2 (fun w hw => hγ w (by simp [Exp.fv, hw]))]
   | ite e₀ e₁ e₂ ih₀ ih₁ ih₂ =>
     simp only [Exp.fv, List.mem_append, not_or] at hz_fv
     obtain ⟨⟨hz₀, hz₁⟩, hz₂⟩ := hz_fv
     simp only [Exp.openVar, Exp.substEnv, Exp.openExp,
-      ih₀ k hz₀ (fun w hw => hρ w (by simp [Exp.fv, hw])),
-      ih₁ k hz₁ (fun w hw => hρ w (by simp [Exp.fv, hw])),
-      ih₂ k hz₂ (fun w hw => hρ w (by simp [Exp.fv, hw]))]
+      ih₀ k hz₀ (fun w hw => hγ w (by simp [Exp.fv, hw])),
+      ih₁ k hz₁ (fun w hw => hγ w (by simp [Exp.fv, hw])),
+      ih₂ k hz₂ (fun w hw => hγ w (by simp [Exp.fv, hw]))]
 
 /-- Substituting a variable that does not occur free is the identity. -/
 theorem Exp.subst_fresh (x : EVar) (u e : Exp) (h : x ∉ e.fv) :
@@ -2422,9 +2419,9 @@ theorem Ty.named_openVar_not_mem (t : Ty) (k : Nat) (z x : EVar)
 /-! ## 21. Formula.interp_substBV: substBV is the semantic analog of openBVar+update -/
 
 private theorem Term.interp_substBV_eq {b'' : Base} (t : Term b'') (b : Base) (k : Nat)
-    (v : b.interp) (x : EVar) (ρ : REnv)
+    (v : b.interp) (x : EVar) (γ : REnv)
     (hx : x ∉ t.fv) :
-    Term.interp ρ (Term.substBV b k v t) = Term.interp (ρ.update b x v) (t.openBVar b k x) := by
+    Term.interp γ (Term.substBV b k v t) = Term.interp (γ.update b x v) (t.openBVar b k x) := by
   induction t with
   | const b' c => simp [Term.substBV, Term.openBVar, Term.interp]
   | bvar b' j =>
@@ -2456,67 +2453,67 @@ private theorem Term.interp_substBV_eq {b'' : Base} (t : Term b'') (b : Base) (k
     simp [Term.substBV, Term.openBVar, Term.interp,
           ih₁ (fun h => hx (Or.inl h)), ih₂ (fun h => hx (Or.inr h))]
 
-private theorem REnv.update_comm_gen (ρ : REnv) (b : Base) (x : EVar) (v : b.interp)
+private theorem REnv.update_comm_gen (γ : REnv) (b : Base) (x : EVar) (v : b.interp)
     (b' : Base) (y : EVar) (w : b'.interp) (hxy : x ≠ y) :
-    (ρ.update b x v).update b' y w = (ρ.update b' y w).update b x v := by
+    (γ.update b x v).update b' y w = (γ.update b' y w).update b x v := by
   apply REnv.ext; funext z
   cases b <;> cases b' <;>
     by_cases hxz : x = z <;> by_cases hyz : y = z <;>
     simp_all
 
 theorem Formula.interp_substBV (φ : Formula) (b : Base) (k : Nat)
-    (v : b.interp) (x : EVar) (ρ : REnv)
+    (v : b.interp) (x : EVar) (γ : REnv)
     (hx : x ∉ φ.fv) (hxn : x ∉ φ.named) :
-    Formula.interp ρ (φ.substBV b k v) ↔
-    Formula.interp (ρ.update b x v) (φ.openBVar b k x) := by
+    Formula.interp γ (φ.substBV b k v) ↔
+    Formula.interp (γ.update b x v) (φ.openBVar b k x) := by
   have not_mem_l : ∀ (a : EVar) (l₁ l₂ : List EVar), a ∉ l₁ ++ l₂ → a ∉ l₁ :=
     fun a l₁ l₂ hh ha => hh (List.mem_append.mpr (Or.inl ha))
   have not_mem_r : ∀ (a : EVar) (l₁ l₂ : List EVar), a ∉ l₁ ++ l₂ → a ∉ l₂ :=
     fun a l₁ l₂ hh ha => hh (List.mem_append.mpr (Or.inr ha))
-  revert hx hxn ρ
+  revert hx hxn γ
   induction φ with
   | tt => intros; simp [Formula.substBV, Formula.openBVar, Formula.interp]
   | ff => intros; simp [Formula.substBV, Formula.openBVar, Formula.interp]
   | eqI t₁ t₂ =>
-    intro ρ hx _
+    intro γ hx _
     simp only [Formula.fv] at hx
     simp only [Formula.substBV, Formula.openBVar, Formula.interp]
-    rw [Term.interp_substBV_eq t₁ b k v x ρ (not_mem_l _ _ _ hx),
-        Term.interp_substBV_eq t₂ b k v x ρ (not_mem_r _ _ _ hx)]
+    rw [Term.interp_substBV_eq t₁ b k v x γ (not_mem_l _ _ _ hx),
+        Term.interp_substBV_eq t₂ b k v x γ (not_mem_r _ _ _ hx)]
   | eqB t₁ t₂ =>
-    intro ρ hx _
+    intro γ hx _
     simp only [Formula.fv] at hx
     simp only [Formula.substBV, Formula.openBVar, Formula.interp]
-    rw [Term.interp_substBV_eq t₁ b k v x ρ (not_mem_l _ _ _ hx),
-        Term.interp_substBV_eq t₂ b k v x ρ (not_mem_r _ _ _ hx)]
+    rw [Term.interp_substBV_eq t₁ b k v x γ (not_mem_l _ _ _ hx),
+        Term.interp_substBV_eq t₂ b k v x γ (not_mem_r _ _ _ hx)]
   | leqI t₁ t₂ =>
-    intro ρ hx _
+    intro γ hx _
     simp only [Formula.fv] at hx
     simp only [Formula.substBV, Formula.openBVar, Formula.interp]
-    rw [Term.interp_substBV_eq t₁ b k v x ρ (not_mem_l _ _ _ hx),
-        Term.interp_substBV_eq t₂ b k v x ρ (not_mem_r _ _ _ hx)]
+    rw [Term.interp_substBV_eq t₁ b k v x γ (not_mem_l _ _ _ hx),
+        Term.interp_substBV_eq t₂ b k v x γ (not_mem_r _ _ _ hx)]
   | and φ₁ φ₂ ih₁ ih₂ =>
-    intro ρ hx hxn
+    intro γ hx hxn
     simp only [Formula.fv, Formula.named, List.mem_append, not_or] at hx hxn
     simp only [Formula.substBV, Formula.openBVar, Formula.interp]
-    exact and_congr (ih₁ ρ hx.1 hxn.1) (ih₂ ρ hx.2 hxn.2)
+    exact and_congr (ih₁ γ hx.1 hxn.1) (ih₂ γ hx.2 hxn.2)
   | or φ₁ φ₂ ih₁ ih₂ =>
-    intro ρ hx hxn
+    intro γ hx hxn
     simp only [Formula.fv, Formula.named, List.mem_append, not_or] at hx hxn
     simp only [Formula.substBV, Formula.openBVar, Formula.interp]
-    exact or_congr (ih₁ ρ hx.1 hxn.1) (ih₂ ρ hx.2 hxn.2)
+    exact or_congr (ih₁ γ hx.1 hxn.1) (ih₂ γ hx.2 hxn.2)
   | not φ ih =>
-    intro ρ hx hxn
+    intro γ hx hxn
     simp only [Formula.fv, Formula.named] at hx hxn
     simp only [Formula.substBV, Formula.openBVar, Formula.interp]
-    exact not_congr (ih ρ hx hxn)
+    exact not_congr (ih γ hx hxn)
   | imp φ₁ φ₂ ih₁ ih₂ =>
-    intro ρ hx hxn
+    intro γ hx hxn
     simp only [Formula.fv, Formula.named, List.mem_append, not_or] at hx hxn
     simp only [Formula.substBV, Formula.openBVar, Formula.interp]
-    exact imp_congr (ih₁ ρ hx.1 hxn.1) (ih₂ ρ hx.2 hxn.2)
+    exact imp_congr (ih₁ γ hx.1 hxn.1) (ih₂ γ hx.2 hxn.2)
   | exI y φ ih =>
-    intro ρ hx hxn
+    intro γ hx hxn
     simp only [Formula.fv, List.mem_filter, not_and] at hx
     simp only [Formula.named, List.mem_cons, not_or] at hxn
     have hxφfv : x ∉ φ.fv := by grind
@@ -2524,15 +2521,15 @@ theorem Formula.interp_substBV (φ : Formula) (b : Base) (k : Nat)
     constructor
     · rintro ⟨n, hn⟩
       refine ⟨n, ?_⟩
-      have h := (ih (ρ.update .int y n) hxφfv hxn.2).mp hn
-      rwa [← REnv.update_comm_gen ρ b x v .int y n hxn.1] at h
+      have h := (ih (γ.update .int y n) hxφfv hxn.2).mp hn
+      rwa [← REnv.update_comm_gen γ b x v .int y n hxn.1] at h
     · rintro ⟨n, hn⟩
       refine ⟨n, ?_⟩
-      apply (ih (ρ.update .int y n) hxφfv hxn.2).mpr
-      rw [← REnv.update_comm_gen ρ b x v .int y n hxn.1]
+      apply (ih (γ.update .int y n) hxφfv hxn.2).mpr
+      rw [← REnv.update_comm_gen γ b x v .int y n hxn.1]
       exact hn
   | exB y φ ih =>
-    intro ρ hx hxn
+    intro γ hx hxn
     simp only [Formula.fv, List.mem_filter, not_and] at hx
     simp only [Formula.named, List.mem_cons, not_or] at hxn
     have hxφfv : x ∉ φ.fv := by grind
@@ -2540,40 +2537,40 @@ theorem Formula.interp_substBV (φ : Formula) (b : Base) (k : Nat)
     constructor
     · rintro ⟨bv, hbv⟩
       refine ⟨bv, ?_⟩
-      have h := (ih (ρ.update .bool y bv) hxφfv hxn.2).mp hbv
-      rwa [← REnv.update_comm_gen ρ b x v .bool y bv hxn.1] at h
+      have h := (ih (γ.update .bool y bv) hxφfv hxn.2).mp hbv
+      rwa [← REnv.update_comm_gen γ b x v .bool y bv hxn.1] at h
     · rintro ⟨bv, hbv⟩
       refine ⟨bv, ?_⟩
-      apply (ih (ρ.update .bool y bv) hxφfv hxn.2).mpr
-      rw [← REnv.update_comm_gen ρ b x v .bool y bv hxn.1]
+      apply (ih (γ.update .bool y bv) hxφfv hxn.2).mpr
+      rw [← REnv.update_comm_gen γ b x v .bool y bv hxn.1]
       exact hbv
   | allI y φ ih =>
-    intro ρ hx hxn
+    intro γ hx hxn
     simp only [Formula.fv, List.mem_filter, not_and] at hx
     simp only [Formula.named, List.mem_cons, not_or] at hxn
     have hxφfv : x ∉ φ.fv := by grind
     simp only [Formula.substBV, Formula.openBVar, Formula.interp]
     constructor
     · intro hf n
-      have h := (ih (ρ.update .int y n) hxφfv hxn.2).mp (hf n)
-      rwa [← REnv.update_comm_gen ρ b x v .int y n hxn.1] at h
+      have h := (ih (γ.update .int y n) hxφfv hxn.2).mp (hf n)
+      rwa [← REnv.update_comm_gen γ b x v .int y n hxn.1] at h
     · intro hf n
-      apply (ih (ρ.update .int y n) hxφfv hxn.2).mpr
-      rw [← REnv.update_comm_gen ρ b x v .int y n hxn.1]
+      apply (ih (γ.update .int y n) hxφfv hxn.2).mpr
+      rw [← REnv.update_comm_gen γ b x v .int y n hxn.1]
       exact hf n
   | allB y φ ih =>
-    intro ρ hx hxn
+    intro γ hx hxn
     simp only [Formula.fv, List.mem_filter, not_and] at hx
     simp only [Formula.named, List.mem_cons, not_or] at hxn
     have hxφfv : x ∉ φ.fv := by grind
     simp only [Formula.substBV, Formula.openBVar, Formula.interp]
     constructor
     · intro hf bv
-      have h := (ih (ρ.update .bool y bv) hxφfv hxn.2).mp (hf bv)
-      rwa [← REnv.update_comm_gen ρ b x v .bool y bv hxn.1] at h
+      have h := (ih (γ.update .bool y bv) hxφfv hxn.2).mp (hf bv)
+      rwa [← REnv.update_comm_gen γ b x v .bool y bv hxn.1] at h
     · intro hf bv
-      apply (ih (ρ.update .bool y bv) hxφfv hxn.2).mpr
-      rw [← REnv.update_comm_gen ρ b x v .bool y bv hxn.1]
+      apply (ih (γ.update .bool y bv) hxφfv hxn.2).mpr
+      rw [← REnv.update_comm_gen γ b x v .bool y bv hxn.1]
       exact hf bv
 
 /-- Refinement-level `interp_substBV`: substituting a bound value equals opening
@@ -2581,16 +2578,16 @@ theorem Formula.interp_substBV (φ : Formula) (b : Base) (k : Nat)
     `Refinement.openBVar`). Both constructors reduce to the `Term`/`Formula`
     versions plus a `nuName`/`x` update commutation. -/
 theorem Refinement.interp_substBV (κ : KEnv) {b' : Base} (r : Refinement b') (b : Base)
-    (k : Nat) (v : b.interp) (x : EVar) (ρ : REnv) {w : b'.interp}
+    (k : Nat) (v : b.interp) (x : EVar) (γ : REnv) {w : b'.interp}
     (hx : x ∉ Refinement.rawfv r) (hxn : x ∉ Refinement.named r) (hxν : x ≠ nuName) :
-    Refinement.interp κ (r.substBV b k v) ρ w ↔
-    Refinement.interp κ (r.openBVar b k x) (ρ.update b x v) w := by
+    Refinement.interp κ (r.substBV b k v) γ w ↔
+    Refinement.interp κ (r.openBVar b k x) (γ.update b x v) w := by
   cases r with
   | fmla φ =>
     simp only [Refinement.rawfv, Refinement.named] at hx hxn
     simp only [Refinement.interp, Refinement.substBV, Refinement.openBVar]
-    rw [Formula.interp_substBV φ b k v x (ρ.update b' nuName w) hx hxn,
-        REnv.update_comm_gen ρ b' nuName w b x v hxν.symm]
+    rw [Formula.interp_substBV φ b k v x (γ.update b' nuName w) hx hxn,
+        REnv.update_comm_gen γ b' nuName w b x v hxν.symm]
   | kapp kn args =>
     simp only [Refinement.interp, Refinement.substBV, Refinement.openBVar]
     apply Iff.of_eq
@@ -2602,8 +2599,8 @@ theorem Refinement.interp_substBV (κ : KEnv) {b' : Base} (r : Refinement b') (b
       hx (by simp only [Refinement.rawfv, List.mem_flatMap]; exact ⟨a, ha, hm⟩)
     simp only [Function.comp]
     congr 1
-    rw [Term.interp_substBV_eq a.2 b k v x (ρ.update b' nuName w) hxa,
-        REnv.update_comm_gen ρ b' nuName w b x v hxν.symm]
+    rw [Term.interp_substBV_eq a.2 b k v x (γ.update b' nuName w) hxa,
+        REnv.update_comm_gen γ b' nuName w b x v hxν.symm]
 
 /-! ## 22. substBV preserves fv/named subsets -/
 
@@ -3043,32 +3040,32 @@ theorem Ty.openVar_replace (k : Nat) (x y : EVar) (t : Ty)
   set `x`'s int- and bool-slots independently to `y`'s; that has no single-map
   analogue, since one cell cannot hold both an `Int` and a `Bool` at once.) -/
 
-theorem REnv.get_write_self (b : Base) (ρ : REnv) (x : EVar) (v : Val) :
-    REnv.get b (ρ.write x v) x = v.proj b := by
+theorem REnv.get_write_self (b : Base) (γ : REnv) (x : EVar) (v : Val) :
+    REnv.get b (γ.write x v) x = v.proj b := by
   simp [REnv.get, REnv.lookup]
 
-theorem REnv.get_write_other (b : Base) (ρ : REnv) (x : EVar) (v : Val) {y : EVar}
-    (h : x ≠ y) : REnv.get b (ρ.write x v) y = REnv.get b ρ y := by
+theorem REnv.get_write_other (b : Base) (γ : REnv) (x : EVar) (v : Val) {y : EVar}
+    (h : x ≠ y) : REnv.get b (γ.write x v) y = REnv.get b γ y := by
   have hxy : (x == y) = false := by simp [h]
   simp [REnv.get, REnv.lookup, hxy]
 
 /-- `write` at `x` commutes with `update` at a different key `z`. -/
-theorem REnv.write_update_comm (b : Base) (ρ : REnv) (z : EVar) (n : b.interp)
+theorem REnv.write_update_comm (b : Base) (γ : REnv) (z : EVar) (n : b.interp)
     (x : EVar) (v : Val) (h : x ≠ z) :
-    (ρ.update b z n).write x v = (ρ.write x v).update b z n := by
+    (γ.update b z n).write x v = (γ.write x v).update b z n := by
   apply REnv.ext; funext w
   by_cases hxw : x = w <;> by_cases hzw : z = w <;>
     simp_all
 
-theorem REnv.lookup_update_other (b : Base) (ρ : REnv) (z : EVar) (n : b.interp)
-    {y : EVar} (h : z ≠ y) : (ρ.update b z n).lookup y = ρ.lookup y :=
-  REnv.map_update_other b ρ z n h
+theorem REnv.lookup_update_other (b : Base) (γ : REnv) (z : EVar) (n : b.interp)
+    {y : EVar} (h : z ≠ y) : (γ.update b z n).lookup y = γ.lookup y :=
+  REnv.map_update_other b γ z n h
 
 /-- Interpretation of a term after renaming `x → y` equals interpretation under
     the environment with `y`'s cell copied into `x`. -/
-theorem Term.interp_replaceFVar {b : Base} (t : Term b) (x y : EVar) (ρ : REnv) :
-    Term.interp ρ (t.replaceFVar x y) =
-    Term.interp (ρ.write x (ρ.lookup y)) t := by
+theorem Term.interp_replaceFVar {b : Base} (t : Term b) (x y : EVar) (γ : REnv) :
+    Term.interp γ (t.replaceFVar x y) =
+    Term.interp (γ.write x (γ.lookup y)) t := by
   induction t with
   | const _ _  => simp [Term.replaceFVar, Term.interp]
   | bvar b' _  => cases b' <;> simp [Term.replaceFVar, Term.interp]
@@ -3077,88 +3074,88 @@ theorem Term.interp_replaceFVar {b : Base} (t : Term b) (x y : EVar) (ρ : REnv)
     · subst hzx
       simp [Term.replaceFVar, Term.interp, REnv.get, REnv.lookup]
     · simp only [Term.replaceFVar, Term.interp, if_neg hzx]
-      exact (REnv.get_write_other b' ρ x (ρ.lookup y) (Ne.symm hzx)).symm
+      exact (REnv.get_write_other b' γ x (γ.lookup y) (Ne.symm hzx)).symm
   | add t₁ t₂ ih₁ ih₂ => simp [Term.replaceFVar, Term.interp, ih₁, ih₂]
   | not t ih          => simp [Term.replaceFVar, Term.interp, ih]
   | and t₁ t₂ ih₁ ih₂ => simp [Term.replaceFVar, Term.interp, ih₁, ih₂]
 
-theorem Formula.interp_replaceFVar (φ : Formula) (x y : EVar) (ρ : REnv)
+theorem Formula.interp_replaceFVar (φ : Formula) (x y : EVar) (γ : REnv)
     (hxn : x ∉ φ.named) (hyn : y ∉ φ.named) :
-    Formula.interp ρ (φ.replaceFVar x y) ↔
-    Formula.interp (ρ.write x (ρ.lookup y)) φ := by
-  induction φ generalizing ρ with
+    Formula.interp γ (φ.replaceFVar x y) ↔
+    Formula.interp (γ.write x (γ.lookup y)) φ := by
+  induction φ generalizing γ with
   | tt | ff => simp [Formula.replaceFVar, Formula.interp]
   | eqI t₁ t₂ | eqB t₁ t₂ | leqI t₁ t₂ =>
     simp only [Formula.replaceFVar, Formula.interp,
-               Term.interp_replaceFVar t₁ x y ρ, Term.interp_replaceFVar t₂ x y ρ]
+               Term.interp_replaceFVar t₁ x y γ, Term.interp_replaceFVar t₂ x y γ]
   | and φ₁ φ₂ ih₁ ih₂ =>
     simp only [Formula.named, List.mem_append, not_or] at hxn hyn
     simp [Formula.replaceFVar, Formula.interp,
-          ih₁ ρ hxn.1 hyn.1, ih₂ ρ hxn.2 hyn.2]
+          ih₁ γ hxn.1 hyn.1, ih₂ γ hxn.2 hyn.2]
   | or φ₁ φ₂ ih₁ ih₂ =>
     simp only [Formula.named, List.mem_append, not_or] at hxn hyn
     simp [Formula.replaceFVar, Formula.interp,
-          ih₁ ρ hxn.1 hyn.1, ih₂ ρ hxn.2 hyn.2]
+          ih₁ γ hxn.1 hyn.1, ih₂ γ hxn.2 hyn.2]
   | imp φ₁ φ₂ ih₁ ih₂ =>
     simp only [Formula.named, List.mem_append, not_or] at hxn hyn
     simp [Formula.replaceFVar, Formula.interp,
-          ih₁ ρ hxn.1 hyn.1, ih₂ ρ hxn.2 hyn.2]
+          ih₁ γ hxn.1 hyn.1, ih₂ γ hxn.2 hyn.2]
   | not φ ih =>
     simp only [Formula.named] at hxn hyn
-    simp [Formula.replaceFVar, Formula.interp, ih ρ hxn hyn]
+    simp [Formula.replaceFVar, Formula.interp, ih γ hxn hyn]
   | exI z φ ih =>
     simp only [Formula.named, List.mem_cons, not_or] at hxn hyn
     have hzx : z ≠ x := fun h => hxn.1 h.symm
     have hzy : z ≠ y := fun h => hyn.1 h.symm
     simp only [Formula.replaceFVar, if_neg hzx, Formula.interp]
     refine exists_congr (fun n => ?_)
-    rw [ih (ρ.update .int z n) hxn.2 hyn.2,
-        REnv.lookup_update_other .int ρ z n hzy,
-        REnv.write_update_comm .int ρ z n x (ρ.lookup y) (Ne.symm hzx)]
+    rw [ih (γ.update .int z n) hxn.2 hyn.2,
+        REnv.lookup_update_other .int γ z n hzy,
+        REnv.write_update_comm .int γ z n x (γ.lookup y) (Ne.symm hzx)]
   | exB z φ ih =>
     simp only [Formula.named, List.mem_cons, not_or] at hxn hyn
     have hzx : z ≠ x := fun h => hxn.1 h.symm
     have hzy : z ≠ y := fun h => hyn.1 h.symm
     simp only [Formula.replaceFVar, if_neg hzx, Formula.interp]
     refine exists_congr (fun bv => ?_)
-    rw [ih (ρ.update .bool z bv) hxn.2 hyn.2,
-        REnv.lookup_update_other .bool ρ z bv hzy,
-        REnv.write_update_comm .bool ρ z bv x (ρ.lookup y) (Ne.symm hzx)]
+    rw [ih (γ.update .bool z bv) hxn.2 hyn.2,
+        REnv.lookup_update_other .bool γ z bv hzy,
+        REnv.write_update_comm .bool γ z bv x (γ.lookup y) (Ne.symm hzx)]
   | allI z φ ih =>
     simp only [Formula.named, List.mem_cons, not_or] at hxn hyn
     have hzx : z ≠ x := fun h => hxn.1 h.symm
     have hzy : z ≠ y := fun h => hyn.1 h.symm
     simp only [Formula.replaceFVar, if_neg hzx, Formula.interp]
     refine forall_congr' (fun n => ?_)
-    rw [ih (ρ.update .int z n) hxn.2 hyn.2,
-        REnv.lookup_update_other .int ρ z n hzy,
-        REnv.write_update_comm .int ρ z n x (ρ.lookup y) (Ne.symm hzx)]
+    rw [ih (γ.update .int z n) hxn.2 hyn.2,
+        REnv.lookup_update_other .int γ z n hzy,
+        REnv.write_update_comm .int γ z n x (γ.lookup y) (Ne.symm hzx)]
   | allB z φ ih =>
     simp only [Formula.named, List.mem_cons, not_or] at hxn hyn
     have hzx : z ≠ x := fun h => hxn.1 h.symm
     have hzy : z ≠ y := fun h => hyn.1 h.symm
     simp only [Formula.replaceFVar, if_neg hzx, Formula.interp]
     refine forall_congr' (fun bv => ?_)
-    rw [ih (ρ.update .bool z bv) hxn.2 hyn.2,
-        REnv.lookup_update_other .bool ρ z bv hzy,
-        REnv.write_update_comm .bool ρ z bv x (ρ.lookup y) (Ne.symm hzx)]
+    rw [ih (γ.update .bool z bv) hxn.2 hyn.2,
+        REnv.lookup_update_other .bool γ z bv hzy,
+        REnv.write_update_comm .bool γ z bv x (γ.lookup y) (Ne.symm hzx)]
 
 /-! ## write-at-fresh-variable invariance of interpretation
 
   Writing *any* `Val` at a name not occurring in a term/formula leaves its
   interpretation unchanged. Generalizes `interp_update_fresh_*` to arbitrary
   written values (incl. closures) — needed because the merged extension
-  `ρ.write`.write may store a closure at a fresh higher-order binder. -/
+  `γ.write`.write may store a closure at a fresh higher-order binder. -/
 
 theorem Term.interp_write_fresh {b : Base} (t : Term b)
-    (x : EVar) (v : Val) (ρ : REnv) (h : x ∉ t.fv) :
-    Term.interp (ρ.write x v) t = Term.interp ρ t := by
+    (x : EVar) (v : Val) (γ : REnv) (h : x ∉ t.fv) :
+    Term.interp (γ.write x v) t = Term.interp γ t := by
   induction t with
   | const _ _ => rfl
   | bvar bv _ => cases bv <;> rfl
   | fvar bv y =>
     have hxy : x ≠ y := fun he => h (by subst he; simp [Term.fv])
-    exact REnv.get_write_other bv ρ x v hxy
+    exact REnv.get_write_other bv γ x v hxy
   | add t₁ t₂ ih₁ ih₂ =>
     simp only [Term.fv, List.mem_append, not_or] at h
     simp only [Term.interp, ih₁ h.1, ih₂ h.2]
@@ -3168,21 +3165,21 @@ theorem Term.interp_write_fresh {b : Base} (t : Term b)
     simp only [Term.interp, ih₁ h.1, ih₂ h.2]
 
 theorem Formula.interp_write_fresh (φ : Formula)
-    (x : EVar) (v : Val) (ρ : REnv)
+    (x : EVar) (v : Val) (γ : REnv)
     (hfv : x ∉ φ.fv) (hnamed : x ∉ φ.named) :
-    Formula.interp (ρ.write x v) φ ↔ Formula.interp ρ φ := by
+    Formula.interp (γ.write x v) φ ↔ Formula.interp γ φ := by
   have not_mem_l : ∀ (a : EVar) (l₁ l₂ : List EVar), a ∉ l₁ ++ l₂ → a ∉ l₁ :=
     fun a l₁ l₂ hh ha => hh (List.mem_append.mpr (Or.inl ha))
   have not_mem_r : ∀ (a : EVar) (l₁ l₂ : List EVar), a ∉ l₁ ++ l₂ → a ∉ l₂ :=
     fun a l₁ l₂ hh ha => hh (List.mem_append.mpr (Or.inr ha))
-  induction φ generalizing ρ with
+  induction φ generalizing γ with
   | tt => simp [Formula.interp]
   | ff => simp [Formula.interp]
   | eqI t₁ t₂ | eqB t₁ t₂ | leqI t₁ t₂ =>
     simp only [Formula.fv] at hfv
     simp only [Formula.interp,
-      Term.interp_write_fresh t₁ x v ρ (not_mem_l _ _ _ hfv),
-      Term.interp_write_fresh t₂ x v ρ (not_mem_r _ _ _ hfv)]
+      Term.interp_write_fresh t₁ x v γ (not_mem_l _ _ _ hfv),
+      Term.interp_write_fresh t₂ x v γ (not_mem_r _ _ _ hfv)]
   | and φ₁ φ₂ ih₁ ih₂ | or φ₁ φ₂ ih₁ ih₂ | imp φ₁ φ₂ ih₁ ih₂ =>
     simp only [Formula.fv, Formula.named] at hfv hnamed
     simp only [Formula.interp]
@@ -3190,7 +3187,7 @@ theorem Formula.interp_write_fresh (φ : Formula)
   | not φ ih =>
     simp only [Formula.fv, Formula.named] at hfv hnamed
     simp only [Formula.interp]
-    exact not_congr (ih ρ hfv hnamed)
+    exact not_congr (ih γ hfv hnamed)
   | exI y φ ih =>
     simp only [Formula.fv, Formula.named] at hfv hnamed
     simp only [Formula.interp]
@@ -3198,8 +3195,8 @@ theorem Formula.interp_write_fresh (φ : Formula)
     have hxn : x ∉ φ.named := fun h => hnamed (List.mem_cons.mpr (Or.inr h))
     have hxf : x ∉ φ.fv := fun hmem => hfv (List.mem_filter.mpr ⟨hmem, by simp [hxy]⟩)
     refine exists_congr (fun n => ?_)
-    rw [← REnv.write_update_comm .int ρ y n x v hxy]
-    exact ih (ρ.update .int y n) hxf hxn
+    rw [← REnv.write_update_comm .int γ y n x v hxy]
+    exact ih (γ.update .int y n) hxf hxn
   | exB y φ ih =>
     simp only [Formula.fv, Formula.named] at hfv hnamed
     simp only [Formula.interp]
@@ -3207,8 +3204,8 @@ theorem Formula.interp_write_fresh (φ : Formula)
     have hxn : x ∉ φ.named := fun h => hnamed (List.mem_cons.mpr (Or.inr h))
     have hxf : x ∉ φ.fv := fun hmem => hfv (List.mem_filter.mpr ⟨hmem, by simp [hxy]⟩)
     refine exists_congr (fun b => ?_)
-    rw [← REnv.write_update_comm .bool ρ y b x v hxy]
-    exact ih (ρ.update .bool y b) hxf hxn
+    rw [← REnv.write_update_comm .bool γ y b x v hxy]
+    exact ih (γ.update .bool y b) hxf hxn
   | allI y φ ih =>
     simp only [Formula.fv, Formula.named] at hfv hnamed
     simp only [Formula.interp]
@@ -3216,8 +3213,8 @@ theorem Formula.interp_write_fresh (φ : Formula)
     have hxn : x ∉ φ.named := fun h => hnamed (List.mem_cons.mpr (Or.inr h))
     have hxf : x ∉ φ.fv := fun hmem => hfv (List.mem_filter.mpr ⟨hmem, by simp [hxy]⟩)
     refine forall_congr' (fun n => ?_)
-    rw [← REnv.write_update_comm .int ρ y n x v hxy]
-    exact ih (ρ.update .int y n) hxf hxn
+    rw [← REnv.write_update_comm .int γ y n x v hxy]
+    exact ih (γ.update .int y n) hxf hxn
   | allB y φ ih =>
     simp only [Formula.fv, Formula.named] at hfv hnamed
     simp only [Formula.interp]
@@ -3225,7 +3222,7 @@ theorem Formula.interp_write_fresh (φ : Formula)
     have hxn : x ∉ φ.named := fun h => hnamed (List.mem_cons.mpr (Or.inr h))
     have hxf : x ∉ φ.fv := fun hmem => hfv (List.mem_filter.mpr ⟨hmem, by simp [hxy]⟩)
     refine forall_congr' (fun b => ?_)
-    rw [← REnv.write_update_comm .bool ρ y b x v hxy]
-    exact ih (ρ.update .bool y b) hxf hxn
+    rw [← REnv.write_update_comm .bool γ y b x v hxy]
+    exact ih (γ.update .bool y b) hxf hxn
 
 end STLC
