@@ -1475,59 +1475,9 @@ theorem REnv.map_update_other (b : Base) (ρ : REnv) (x : EVar) (v : b.interp)
   have hxy : (x == y) = false := by simp [h]
   simp [hxy]
 
-@[simp] theorem REnv.map_update_self (b : Base) (ρ : REnv) (x : EVar) (v : b.interp) :
-    (ρ.update b x v).map x = Val.inj b v := by
-  simp
-
 @[simp] theorem REnv.get_update_same (b : Base) (ρ : REnv) (x : EVar) (v : b.interp) :
     REnv.get b (ρ.update b x v) x = v := by
   cases b <;> simp [REnv.get]
-
-theorem REnv.get_update_other_key (b : Base) (ρ : REnv) (x y : EVar) (w : b.interp)
-    (h : x ≠ y) :
-    REnv.get b (ρ.update b x w) y = REnv.get b ρ y := by
-  have hxy : (x == y) = false := by simp [h]
-  simp [hxy]
-
-/-- Cross-base version: updating cell `x` at base `b` does not affect a read of a
-    *different* cell `y` at any base `b'`. -/
-theorem REnv.get_update_other (b b' : Base) (ρ : REnv) (x y : EVar) (w : b.interp)
-    (h : x ≠ y) :
-    REnv.get b' (ρ.update b x w) y = REnv.get b' ρ y := by
-  have hxy : (x == y) = false := by simp [h]
-  simp [hxy]
-
-theorem REnv.update_comm_int_int (ρ : REnv) (x₁ x₂ : EVar) (w₁ w₂ : Int) (h : x₁ ≠ x₂) :
-    (ρ.update .int x₁ w₁).update .int x₂ w₂
-      = (ρ.update .int x₂ w₂).update .int x₁ w₁ := by
-  apply REnv.ext; funext y
-  by_cases hy₁ : x₁ = y <;> by_cases hy₂ : x₂ = y <;>
-    simp_all
-
-theorem REnv.update_comm_bool_bool (ρ : REnv) (x₁ x₂ : EVar) (w₁ w₂ : Bool) (h : x₁ ≠ x₂) :
-    (ρ.update .bool x₁ w₁).update .bool x₂ w₂
-      = (ρ.update .bool x₂ w₂).update .bool x₁ w₁ := by
-  apply REnv.ext; funext y
-  by_cases hy₁ : x₁ = y <;> by_cases hy₂ : x₂ = y <;>
-    simp_all
-
-theorem REnv.update_comm_int_bool (ρ : REnv) (x₁ x₂ : EVar) (w₁ : Int) (w₂ : Bool)
-    (h : x₁ ≠ x₂) :
-    (ρ.update .int x₁ w₁).update .bool x₂ w₂
-      = (ρ.update .bool x₂ w₂).update .int x₁ w₁ := by
-  apply REnv.ext; funext y
-  by_cases hy₁ : x₁ = y <;> by_cases hy₂ : x₂ = y <;>
-    simp_all
-
-theorem REnv.update_override_int (ρ : REnv) (x : EVar) (w₁ w₂ : Int) :
-    (ρ.update .int x w₁).update .int x w₂ = ρ.update .int x w₂ := by
-  apply REnv.ext; funext y
-  by_cases hy : x = y <;> simp_all
-
-theorem REnv.update_override_bool (ρ : REnv) (x : EVar) (w₁ w₂ : Bool) :
-    (ρ.update .bool x w₁).update .bool x w₂ = ρ.update .bool x w₂ := by
-  apply REnv.ext; funext y
-  by_cases hy : x = y <;> simp_all
 
 /-! ## 11. EVar.fresh proof -/
 
@@ -1558,66 +1508,6 @@ theorem EVar.fresh_not_mem (L : List EVar) : EVar.fresh L ∉ L := by
     `obtain ⟨x, hx⟩ := EVar.freshWith (Γ.fv ∪ ...)`. -/
 def EVar.freshWith (L : List EVar) : { x : EVar // x ∉ L } :=
   ⟨EVar.fresh L, EVar.fresh_not_mem L⟩
-
-/-! ## 12. Term freshness lemmas -/
-
-theorem Term.interp_update_fresh_int {b : Base} (t : Term b)
-    (x : EVar) (w : Int) (ρ : REnv) (h : x ∉ t.fv) :
-    Term.interp (ρ.update .int x w) t = Term.interp ρ t := by
-  induction t with
-  | const _ _ => rfl
-  | bvar bv _ => cases bv <;> rfl
-  | fvar bv y =>
-    have hy : x ≠ y := by
-      intro he; subst he; exact h (by simp [Term.fv])
-    cases bv with
-    | int  =>
-      simp only [Term.interp]
-      exact REnv.get_update_other_key .int ρ x y w hy
-    | bool =>
-      simp only [Term.interp]
-      exact REnv.get_update_other .int .bool ρ x y w hy
-  | add t₁ t₂ ih₁ ih₂ =>
-    simp only [Term.interp]
-    have h₁ : x ∉ t₁.fv := fun hin => h (by simp [Term.fv]; left; exact hin)
-    have h₂ : x ∉ t₂.fv := fun hin => h (by simp [Term.fv]; right; exact hin)
-    rw [ih₁ h₁, ih₂ h₂]
-  | not t ih =>
-    simp only [Term.interp]; rw [ih h]
-  | and t₁ t₂ ih₁ ih₂ =>
-    simp only [Term.interp]
-    have h₁ : x ∉ t₁.fv := fun hin => h (by simp [Term.fv]; left; exact hin)
-    have h₂ : x ∉ t₂.fv := fun hin => h (by simp [Term.fv]; right; exact hin)
-    rw [ih₁ h₁, ih₂ h₂]
-
-theorem Term.interp_update_fresh_bool {b : Base} (t : Term b)
-    (x : EVar) (w : Bool) (ρ : REnv) (h : x ∉ t.fv) :
-    Term.interp (ρ.update .bool x w) t = Term.interp ρ t := by
-  induction t with
-  | const _ _ => rfl
-  | bvar bv _ => cases bv <;> rfl
-  | fvar bv y =>
-    have hy : x ≠ y := by
-      intro he; subst he; exact h (by simp [Term.fv])
-    cases bv with
-    | int  =>
-      simp only [Term.interp]
-      exact REnv.get_update_other .bool .int ρ x y w hy
-    | bool =>
-      simp only [Term.interp]
-      exact REnv.get_update_other_key .bool ρ x y w hy
-  | add t₁ t₂ ih₁ ih₂ =>
-    simp only [Term.interp]
-    have h₁ : x ∉ t₁.fv := fun hin => h (by simp [Term.fv]; left; exact hin)
-    have h₂ : x ∉ t₂.fv := fun hin => h (by simp [Term.fv]; right; exact hin)
-    rw [ih₁ h₁, ih₂ h₂]
-  | not t ih =>
-    simp only [Term.interp]; rw [ih h]
-  | and t₁ t₂ ih₁ ih₂ =>
-    simp only [Term.interp]
-    have h₁ : x ∉ t₁.fv := fun hin => h (by simp [Term.fv]; left; exact hin)
-    have h₂ : x ∉ t₂.fv := fun hin => h (by simp [Term.fv]; right; exact hin)
-    rw [ih₁ h₁, ih₂ h₂]
 
 /-! ## 15. `Exp.substEnv` push-through lemmas
 
@@ -1786,22 +1676,6 @@ theorem Exp.substEnv_fv_nil (ρ : REnv) (e : Exp)
     exact ⟨⟨ih₀ fun z hz => hcl z (by simp [Exp.fv, hz]),
             ih₁ fun z hz => hcl z (by simp [Exp.fv, hz])⟩,
            ih₂ fun z hz => hcl z (by simp [Exp.fv, hz])⟩
-
-/-! ## 16. REnv update idempotence -/
-
-theorem REnv.update_idem_int (ρ : REnv) (x : EVar) (n : Int) (h : ρ.map x = .iconst n) :
-    ρ.update .int x n = ρ := by
-  apply REnv.ext; funext y
-  by_cases hxy : x = y
-  · subst hxy; simpa using h.symm
-  · simp [hxy]
-
-theorem REnv.update_idem_bool (ρ : REnv) (x : EVar) (b : Bool) (h : ρ.map x = .bconst b) :
-    ρ.update .bool x b = ρ := by
-  apply REnv.ext; funext y
-  by_cases hxy : x = y
-  · subst hxy; simpa using h.symm
-  · simp [hxy]
 
 /-! ## 17. Exp.subst_openVar (standard LN lemma) -/
 
@@ -2308,243 +2182,6 @@ theorem Exp.subst_fresh (x : EVar) (u e : Exp) (h : x ∉ e.fv) :
     simp only [Exp.fv, List.mem_append, not_or] at h
     simp only [Exp.subst, ih0 h.1.1, ih1 h.1.2, ih2 h.2]
 
-/-! ## 20. Formula.interp freshness under env updates
-
-  When `x ∉ fv φ` AND `x ∉ named φ` (i.e. x is not used as a binder in φ),
-  updating ρ at x does not affect `Formula.interp ρ φ`. -/
-
-theorem Formula.interp_update_fresh_int (φ : Formula)
-    (x : EVar) (w : Int) (ρ : REnv)
-    (hfv : x ∉ φ.fv) (hnamed : x ∉ φ.named) :
-    Formula.interp ρ φ ↔ Formula.interp (ρ.update .int x w) φ := by
-  have not_mem_l : ∀ (a : EVar) (l₁ l₂ : List EVar), a ∉ l₁ ++ l₂ → a ∉ l₁ :=
-    fun a l₁ l₂ hh ha => hh (List.mem_append.mpr (Or.inl ha))
-  have not_mem_r : ∀ (a : EVar) (l₁ l₂ : List EVar), a ∉ l₁ ++ l₂ → a ∉ l₂ :=
-    fun a l₁ l₂ hh ha => hh (List.mem_append.mpr (Or.inr ha))
-  induction φ generalizing ρ with
-  | tt => simp [Formula.interp]
-  | ff => simp [Formula.interp]
-  | eqI t₁ t₂ =>
-    simp only [Formula.fv] at hfv
-    simp only [Formula.interp]
-    rw [Term.interp_update_fresh_int t₁ x w ρ (not_mem_l _ _ _ hfv),
-        Term.interp_update_fresh_int t₂ x w ρ (not_mem_r _ _ _ hfv)]
-  | eqB t₁ t₂ =>
-    simp only [Formula.fv] at hfv
-    simp only [Formula.interp]
-    rw [Term.interp_update_fresh_int t₁ x w ρ (not_mem_l _ _ _ hfv),
-        Term.interp_update_fresh_int t₂ x w ρ (not_mem_r _ _ _ hfv)]
-  | leqI t₁ t₂ =>
-    simp only [Formula.fv] at hfv
-    simp only [Formula.interp]
-    rw [Term.interp_update_fresh_int t₁ x w ρ (not_mem_l _ _ _ hfv),
-        Term.interp_update_fresh_int t₂ x w ρ (not_mem_r _ _ _ hfv)]
-  | and φ₁ φ₂ ih₁ ih₂ =>
-    simp only [Formula.fv, Formula.named] at hfv hnamed
-    simp only [Formula.interp]
-    grind
-  | or φ₁ φ₂ ih₁ ih₂ =>
-    simp only [Formula.fv, Formula.named] at hfv hnamed
-    simp only [Formula.interp]
-    grind
-  | not φ ih =>
-    simp only [Formula.fv, Formula.named] at hfv hnamed
-    simp only [Formula.interp]
-    grind
-  | imp φ₁ φ₂ ih₁ ih₂ =>
-    simp only [Formula.fv, Formula.named] at hfv hnamed
-    simp only [Formula.interp]
-    grind
-  | exI y φ ih =>
-    simp only [Formula.fv, Formula.named] at hfv hnamed
-    simp only [Formula.interp]
-    -- x ≠ y because x ∉ named (exI y φ) = y :: named φ
-    have hxy : x ≠ y := fun h => hnamed (List.mem_cons.mpr (Or.inl h))
-    have hxn : x ∉ φ.named := fun h => hnamed (List.mem_cons.mpr (Or.inr h))
-    -- x ∉ fv φ: since x ≠ y and x ∉ filter (≠ y) (fv φ), we get x ∉ fv φ
-    have hxf : x ∉ φ.fv := by
-      intro hmem
-      exact hfv (List.mem_filter.mpr ⟨hmem, by simp [hxy]⟩)
-    constructor
-    · intro ⟨n, hn⟩
-      refine ⟨n, ?_⟩
-      rw [← REnv.update_comm_int_int ρ y x n w (Ne.symm hxy)]
-      grind
-    · intro ⟨n, hn⟩
-      refine ⟨n, ?_⟩
-      rw [← REnv.update_comm_int_int ρ y x n w (Ne.symm hxy)] at hn
-      grind
-  | exB y φ ih =>
-    simp only [Formula.fv, Formula.named] at hfv hnamed
-    simp only [Formula.interp]
-    have hxy : x ≠ y := fun h => hnamed (List.mem_cons.mpr (Or.inl h))
-    have hxn : x ∉ φ.named := fun h => hnamed (List.mem_cons.mpr (Or.inr h))
-    have hxf : x ∉ φ.fv := by
-      intro hmem; exact hfv (List.mem_filter.mpr ⟨hmem, by simp [hxy]⟩)
-    constructor
-    · intro ⟨b, hb⟩
-      refine ⟨b, ?_⟩
-      rw [REnv.update_comm_int_bool ρ x y w b hxy]
-      exact (ih (ρ.update .bool y b) hxf hxn).mp hb
-    · intro ⟨b, hb⟩
-      refine ⟨b, ?_⟩
-      rw [REnv.update_comm_int_bool ρ x y w b hxy] at hb
-      exact (ih (ρ.update .bool y b) hxf hxn).mpr hb
-  | allI y φ ih =>
-    simp only [Formula.fv, Formula.named] at hfv hnamed
-    simp only [Formula.interp]
-    have hxy : x ≠ y := fun h => hnamed (List.mem_cons.mpr (Or.inl h))
-    have hxn : x ∉ φ.named := fun h => hnamed (List.mem_cons.mpr (Or.inr h))
-    have hxf : x ∉ φ.fv := by
-      intro hmem; exact hfv (List.mem_filter.mpr ⟨hmem, by simp [hxy]⟩)
-    constructor
-    · intro h n
-      rw [← REnv.update_comm_int_int ρ y x n w (Ne.symm hxy)]
-      exact (ih (ρ.update .int y n) hxf hxn ).mp (h n)
-    · intro h n
-      exact (ih (ρ.update .int y n) hxf hxn ).mpr (REnv.update_comm_int_int ρ y x n w (Ne.symm hxy) ▸ (h n))
-  | allB y φ ih =>
-    simp only [Formula.fv, Formula.named] at hfv hnamed
-    simp only [Formula.interp]
-    have hxy : x ≠ y := fun h => hnamed (List.mem_cons.mpr (Or.inl h))
-    have hxn : x ∉ φ.named := fun h => hnamed (List.mem_cons.mpr (Or.inr h))
-    have hxf : x ∉ φ.fv := by
-      intro hmem; exact hfv (List.mem_filter.mpr ⟨hmem, by simp [hxy]⟩)
-    constructor
-    · intro h b
-      rw [REnv.update_comm_int_bool ρ x y w b hxy]
-      exact (ih (ρ.update .bool y b) hxf hxn).mp (h b)
-    · intro h b
-      exact (ih (ρ.update .bool y b) hxf hxn).mpr (REnv.update_comm_int_bool ρ x y w b hxy ▸ (h b))
-
-theorem Formula.interp_update_fresh_bool (φ : Formula)
-    (x : EVar) (w : Bool) (ρ : REnv)
-    (hfv : x ∉ φ.fv) (hnamed : x ∉ φ.named) :
-    Formula.interp ρ φ ↔ Formula.interp (ρ.update .bool x w) φ := by
-  have not_mem_l : ∀ (a : EVar) (l₁ l₂ : List EVar), a ∉ l₁ ++ l₂ → a ∉ l₁ :=
-    fun a l₁ l₂ hh ha => hh (List.mem_append.mpr (Or.inl ha))
-  have not_mem_r : ∀ (a : EVar) (l₁ l₂ : List EVar), a ∉ l₁ ++ l₂ → a ∉ l₂ :=
-    fun a l₁ l₂ hh ha => hh (List.mem_append.mpr (Or.inr ha))
-  induction φ generalizing ρ with
-  | tt => simp [Formula.interp]
-  | ff => simp [Formula.interp]
-  | eqI t₁ t₂ =>
-    simp only [Formula.fv] at hfv
-    simp only [Formula.interp]
-    rw [Term.interp_update_fresh_bool t₁ x w ρ (not_mem_l _ _ _ hfv),
-        Term.interp_update_fresh_bool t₂ x w ρ (not_mem_r _ _ _ hfv)]
-  | eqB t₁ t₂ =>
-    simp only [Formula.fv] at hfv
-    simp only [Formula.interp]
-    rw [Term.interp_update_fresh_bool t₁ x w ρ (not_mem_l _ _ _ hfv),
-        Term.interp_update_fresh_bool t₂ x w ρ (not_mem_r _ _ _ hfv)]
-  | leqI t₁ t₂ =>
-    simp only [Formula.fv] at hfv
-    simp only [Formula.interp]
-    rw [Term.interp_update_fresh_bool t₁ x w ρ (not_mem_l _ _ _ hfv),
-        Term.interp_update_fresh_bool t₂ x w ρ (not_mem_r _ _ _ hfv)]
-  | and φ₁ φ₂ ih₁ ih₂ =>
-    simp only [Formula.fv, Formula.named] at hfv hnamed
-    simp only [Formula.interp]
-    grind
-  | or φ₁ φ₂ ih₁ ih₂ =>
-    simp only [Formula.fv, Formula.named] at hfv hnamed
-    simp only [Formula.interp]
-    grind
-  | not φ ih =>
-    simp only [Formula.fv, Formula.named] at hfv hnamed
-    simp only [Formula.interp]
-    exact not_congr (ih ρ hfv hnamed)
-  | imp φ₁ φ₂ ih₁ ih₂ =>
-    simp only [Formula.fv, Formula.named] at hfv hnamed
-    simp only [Formula.interp]
-    grind
-  | exI y φ ih =>
-    simp only [Formula.fv, Formula.named] at hfv hnamed
-    simp only [Formula.interp]
-    have hxy : x ≠ y := fun h => hnamed (List.mem_cons.mpr (Or.inl h))
-    have hxn : x ∉ φ.named := fun h => hnamed (List.mem_cons.mpr (Or.inr h))
-    have hxf : x ∉ φ.fv := by
-      intro hmem; exact hfv (List.mem_filter.mpr ⟨hmem, by simp [hxy]⟩)
-    constructor
-    · intro ⟨n, hn⟩
-      refine ⟨n, ?_⟩
-      rw [← REnv.update_comm_int_bool ρ y x n w (Ne.symm hxy)]
-      exact (ih (ρ.update .int y n) hxf hxn).mp hn
-    · intro ⟨n, hn⟩
-      refine ⟨n, ?_⟩
-      rw [← REnv.update_comm_int_bool ρ y x n w (Ne.symm hxy)] at hn
-      exact (ih (ρ.update .int y n) hxf hxn).mpr hn
-  | exB y φ ih =>
-    simp only [Formula.fv, Formula.named] at hfv hnamed
-    simp only [Formula.interp]
-    have hxy : x ≠ y := fun h => hnamed (List.mem_cons.mpr (Or.inl h))
-    have hxn : x ∉ φ.named := fun h => hnamed (List.mem_cons.mpr (Or.inr h))
-    have hxf : x ∉ φ.fv := by
-      intro hmem; exact hfv (List.mem_filter.mpr ⟨hmem, by simp [hxy]⟩)
-    constructor
-    · intro ⟨b, hb⟩
-      refine ⟨b, ?_⟩
-      rw [← REnv.update_comm_bool_bool ρ y x b w (Ne.symm hxy)]
-      exact (ih (ρ.update .bool y b) hxf hxn).mp hb
-    · intro ⟨b, hb⟩
-      refine ⟨b, ?_⟩
-      rw [← REnv.update_comm_bool_bool ρ y x b w (Ne.symm hxy)] at hb
-      exact (ih (ρ.update .bool y b) hxf hxn).mpr hb
-  | allI y φ ih =>
-    simp only [Formula.fv, Formula.named] at hfv hnamed
-    simp only [Formula.interp]
-    have hxy : x ≠ y := fun h => hnamed (List.mem_cons.mpr (Or.inl h))
-    have hxn : x ∉ φ.named := fun h => hnamed (List.mem_cons.mpr (Or.inr h))
-    have hxf : x ∉ φ.fv := by
-      intro hmem; exact hfv (List.mem_filter.mpr ⟨hmem, by simp [hxy]⟩)
-    constructor
-    · intro h n
-      rw [← REnv.update_comm_int_bool ρ y x n w (Ne.symm hxy)]
-      exact (ih (ρ.update .int y n) hxf hxn).mp (h n)
-    · intro h n
-      exact (ih (ρ.update .int y n) hxf hxn).mpr (REnv.update_comm_int_bool ρ y x n w (Ne.symm hxy) ▸ (h n))
-  | allB y φ ih =>
-    simp only [Formula.fv, Formula.named] at hfv hnamed
-    simp only [Formula.interp]
-    have hxy : x ≠ y := fun h => hnamed (List.mem_cons.mpr (Or.inl h))
-    have hxn : x ∉ φ.named := fun h => hnamed (List.mem_cons.mpr (Or.inr h))
-    have hxf : x ∉ φ.fv := by
-      intro hmem; exact hfv (List.mem_filter.mpr ⟨hmem, by simp [hxy]⟩)
-    constructor
-    · intro h b
-      rw [← REnv.update_comm_bool_bool ρ y x b w (Ne.symm hxy)]
-      exact (ih (ρ.update .bool y b) hxf hxn).mp (h b)
-    · intro h b
-      have hb := h b
-      rw [← REnv.update_comm_bool_bool ρ y x b w (Ne.symm hxy)] at hb
-      exact (ih (ρ.update .bool y b) hxf hxn).mpr hb
-
-/-! ## REnv update commutativity
-  These lemmas let us reorder two independent updates to `REnv`.
-  Proofs by `REnv.ext` + pointwise function extensionality. -/
-
-theorem REnv.update_int_int_comm (ρ : REnv) (x y : EVar) (hxy : x ≠ y)
-    (m n : Int) :
-    (ρ.update .int x m).update .int y n = (ρ.update .int y n).update .int x m := by
-  apply REnv.ext; funext z
-  by_cases hzx : x = z <;> by_cases hzy : y = z <;>
-    simp_all
-
-theorem REnv.update_bool_bool_comm (ρ : REnv) (x y : EVar) (hxy : x ≠ y)
-    (m n : Bool) :
-    (ρ.update .bool x m).update .bool y n = (ρ.update .bool y n).update .bool x m := by
-  apply REnv.ext; funext z
-  by_cases hzx : x = z <;> by_cases hzy : y = z <;>
-    simp_all
-
-theorem REnv.update_int_bool_comm (ρ : REnv) (x y : EVar) (m : Int) (n : Bool)
-    (h : x ≠ y) :
-    (ρ.update .int x m).update .bool y n = (ρ.update .bool y n).update .int x m := by
-  apply REnv.ext; funext z
-  by_cases hzx : x = z <;> by_cases hzy : y = z <;>
-    simp_all
-
 /-- Raw (unfiltered) free variables of a refinement; `Refinement.fv` is this with
     the reserved `ν` removed. (Replaces the old `r.fmla.fv` now that `Refinement`
     is an enum: for a κ-application it is the union of the argument terms' fvs.) -/
@@ -2822,11 +2459,10 @@ private theorem Term.interp_substBV_eq {b'' : Base} (t : Term b'') (b : Base) (k
 private theorem REnv.update_comm_gen (ρ : REnv) (b : Base) (x : EVar) (v : b.interp)
     (b' : Base) (y : EVar) (w : b'.interp) (hxy : x ≠ y) :
     (ρ.update b x v).update b' y w = (ρ.update b' y w).update b x v := by
-  cases b <;> cases b'
-  · exact REnv.update_comm_int_int ρ x y v w hxy
-  · exact REnv.update_comm_int_bool ρ x y v w hxy
-  · exact (REnv.update_comm_int_bool ρ y x w v (Ne.symm hxy)).symm
-  · exact REnv.update_comm_bool_bool ρ x y v w hxy
+  apply REnv.ext; funext z
+  cases b <;> cases b' <;>
+    by_cases hxz : x = z <;> by_cases hyz : y = z <;>
+    simp_all
 
 theorem Formula.interp_substBV (φ : Formula) (b : Base) (k : Nat)
     (v : b.interp) (x : EVar) (ρ : REnv)
@@ -3512,7 +3148,7 @@ theorem Formula.interp_replaceFVar (φ : Formula) (x y : EVar) (ρ : REnv)
   Writing *any* `Val` at a name not occurring in a term/formula leaves its
   interpretation unchanged. Generalizes `interp_update_fresh_*` to arbitrary
   written values (incl. closures) — needed because the merged extension
-  `REnv.extendBy = ρ.write` may store a closure at a fresh higher-order binder. -/
+  `ρ.write`.write may store a closure at a fresh higher-order binder. -/
 
 theorem Term.interp_write_fresh {b : Base} (t : Term b)
     (x : EVar) (v : Val) (ρ : REnv) (h : x ∉ t.fv) :
