@@ -866,9 +866,9 @@ theorem hastype_fundamental {κ Γ e t} (h : Hastype κ Γ e t) :
       have hy_e₂ : y ∉ e₂.fv := fun hm => hfresh (by simp [hm])
       -- Fresh-guard refinements read `x` free (not ν); `y`'s own value is irrelevant.
       let r_true : Refinement .bool :=
-        .fmla (.eqB (.fvar .bool x) (.const .bool true))
+        .fmla (.eq .bool (.fvar .bool x) (.const .bool true))
       let r_false : Refinement .bool :=
-        .fmla (.eqB (.fvar .bool x) (.const .bool false))
+        .fmla (.eq .bool (.fvar .bool x) (.const .bool false))
       -- Freshness facts for `y` (all from `hfresh`).
       have hy_dom : y ∉ TEnv.dom Γ := fun hm => hfresh (by simp [hm])
       have hy_tyfv : y ∉ TEnv.tyFv Γ := fun hm => hfresh (by simp [hm])

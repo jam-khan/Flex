@@ -77,29 +77,29 @@ mutual
         | some (.refine .int _), some (.refine .int _) =>
             some ((fun _ _ => True),
               .refine .bool (.fmla (.and
-                (.imp (.eqB (.fvar .bool nuName) (.const .bool true))
+                (.imp (.eq .bool (.fvar .bool nuName) (.const .bool true))
                       (.leqI (.fvar .int x) (.fvar .int y)))
                 (.imp (.leqI (.fvar .int x) (.fvar .int y))
-                      (.eqB (.fvar .bool nuName) (.const .bool true))))))
+                      (.eq .bool (.fvar .bool nuName) (.const .bool true))))))
         | _, _ => none
     | .add (.fvar x) (.fvar y) =>
         match Γ.lookup x, Γ.lookup y with
         | some (.refine .int _), some (.refine .int _) =>
             some ((fun _ _ => True),
-              .refine .int (.fmla (.eqI (.fvar .int nuName)
+              .refine .int (.fmla (.eq .int (.fvar .int nuName)
                                  (.add (.fvar .int x) (.fvar .int y)))))
         | _, _ => none
     | .not (.fvar x) =>
         match Γ.lookup x with
         | some (.refine .bool _) =>
             some ((fun _ _ => True),
-              .refine .bool (.fmla (.eqB (.fvar .bool nuName) (.not (.fvar .bool x)))))
+              .refine .bool (.fmla (.eq .bool (.fvar .bool nuName) (.not (.fvar .bool x)))))
         | _ => none
     | .and (.fvar x) (.fvar y) =>
         match Γ.lookup x, Γ.lookup y with
         | some (.refine .bool _), some (.refine .bool _) =>
             some ((fun _ _ => True),
-              .refine .bool (.fmla (.eqB (.fvar .bool nuName) (.and (.fvar .bool x) (.fvar .bool y)))))
+              .refine .bool (.fmla (.eq .bool (.fvar .bool nuName) (.and (.fvar .bool x) (.fvar .bool y)))))
         | _, _ => none
     | _ => none
   termination_by e => 2 * e.skel
@@ -141,9 +141,9 @@ mutual
                                         ++ e₁.fv ++ e₂.fv ++ t.fv ++ Ty.named t
                                         ++ [x, nuName])
                   let r_true  : Ty := .refine .bool (.fmla
-                    (.eqB (.fvar .bool x) (.const .bool true)))
+                    (.eq .bool (.fvar .bool x) (.const .bool true)))
                   let r_false : Ty := .refine .bool (.fmla
-                    (.eqB (.fvar .bool x) (.const .bool false)))
+                    (.eq .bool (.fvar .bool x) (.const .bool false)))
                   match check ((y, r_true) :: Γ) e₁ t,
                         check ((y, r_false) :: Γ) e₂ t with
                   | some c₁, some c₂ =>

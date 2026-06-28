@@ -49,7 +49,7 @@ inductive Hastype : KEnv → TEnv → Exp → Ty → Prop where
       Γ.lookup y = some (.refine .int r₂) →
       x ≠ nuName → y ≠ nuName →
       Hastype κ Γ (.add (.fvar x) (.fvar y))
-        (.refine .int (.fmla (.eqI (.fvar .int nuName)
+        (.refine .int (.fmla (.eq .int (.fvar .int nuName)
                             (.add (.fvar .int x) (.fvar .int y)))))
   | leq_var {κ Γ x y r₁ r₂} :
       Γ.lookup x = some (.refine .int r₁) →
@@ -57,21 +57,21 @@ inductive Hastype : KEnv → TEnv → Exp → Ty → Prop where
       x ≠ nuName → y ≠ nuName →
       Hastype κ Γ (.leq (.fvar x) (.fvar y))
         (.refine .bool (.fmla (.and
-          (.imp (.eqB (.fvar .bool nuName) (.const .bool true))
+          (.imp (.eq .bool (.fvar .bool nuName) (.const .bool true))
                 (.leqI (.fvar .int x) (.fvar .int y)))
           (.imp (.leqI (.fvar .int x) (.fvar .int y))
-                (.eqB (.fvar .bool nuName) (.const .bool true))))))
+                (.eq .bool (.fvar .bool nuName) (.const .bool true))))))
   | not_var {κ Γ x r} :
       Γ.lookup x = some (.refine .bool r) →
       x ≠ nuName →
       Hastype κ Γ (.not (.fvar x))
-        (.refine .bool (.fmla (.eqB (.fvar .bool nuName) (.not (.fvar .bool x)))))
+        (.refine .bool (.fmla (.eq .bool (.fvar .bool nuName) (.not (.fvar .bool x)))))
   | and_var {κ Γ x y rx ry} :
       Γ.lookup x = some (.refine .bool rx) →
       Γ.lookup y = some (.refine .bool ry) →
       x ≠ nuName → y ≠ nuName →
       Hastype κ Γ (.and (.fvar x) (.fvar y))
-        (.refine .bool (.fmla (.eqB (.fvar .bool nuName) (.and (.fvar .bool x) (.fvar .bool y)))))
+        (.refine .bool (.fmla (.eq .bool (.fvar .bool nuName) (.and (.fvar .bool x) (.fvar .bool y)))))
   | ite {κ Γ x y e₁ e₂ r t} :
       Γ.lookup x = some (.refine .bool r) →
       x ≠ nuName →
@@ -79,9 +79,9 @@ inductive Hastype : KEnv → TEnv → Exp → Ty → Prop where
           ++ e₁.fv ++ e₂.fv ++ t.fv ++ Ty.named t ++ [x, nuName] →
       Ty.WFBVars t →
       Hastype κ ((y, .refine .bool (.fmla
-                (.eqB (.fvar .bool x) (.const .bool true)))) :: Γ) e₁ t →
+                (.eq .bool (.fvar .bool x) (.const .bool true)))) :: Γ) e₁ t →
       Hastype κ ((y, .refine .bool (.fmla
-                (.eqB (.fvar .bool x) (.const .bool false)))) :: Γ) e₂ t →
+                (.eq .bool (.fvar .bool x) (.const .bool false)))) :: Γ) e₂ t →
       Hastype κ Γ (.ite (.fvar x) e₁ e₂) t
 
 /-- For fvar typing, the variable must appear in the context. -/
@@ -197,24 +197,24 @@ theorem Ty.WFBVars_primBool (b : Bool) : Ty.WFBVars (primBool b) := by
 
 /-- WFBVars of the add_var result type. -/
 theorem Ty.WFBVars_add_result (x y : EVar) : Ty.WFBVars
-    (.refine .int (.fmla (.eqI (.fvar .int nuName) (.add (.fvar .int x) (.fvar .int y))))) := by
+    (.refine .int (.fmla (.eq .int (.fvar .int nuName) (.add (.fvar .int x) (.fvar .int y))))) := by
   simp [Ty.WFBVars, Ty.WFBVarCtx, Refinement.hasBVar, Formula.hasBVar, Term.hasBVar]
 
 /-- WFBVars of the leq_var result type. -/
 theorem Ty.WFBVars_leq_result (x y : EVar) : Ty.WFBVars
     (.refine .bool (.fmla (.and
-      (.imp (.eqB (.fvar .bool nuName) (.const .bool true)) (.leqI (.fvar .int x) (.fvar .int y)))
-      (.imp (.leqI (.fvar .int x) (.fvar .int y)) (.eqB (.fvar .bool nuName) (.const .bool true)))))) := by
+      (.imp (.eq .bool (.fvar .bool nuName) (.const .bool true)) (.leqI (.fvar .int x) (.fvar .int y)))
+      (.imp (.leqI (.fvar .int x) (.fvar .int y)) (.eq .bool (.fvar .bool nuName) (.const .bool true)))))) := by
   simp [Ty.WFBVars, Ty.WFBVarCtx, Refinement.hasBVar, Formula.hasBVar, Term.hasBVar]
 
 /-- WFBVars of the not_var result type. -/
 theorem Ty.WFBVars_not_result (x : EVar) : Ty.WFBVars
-    (.refine .bool (.fmla (.eqB (.fvar .bool nuName) (.not (.fvar .bool x))))) := by
+    (.refine .bool (.fmla (.eq .bool (.fvar .bool nuName) (.not (.fvar .bool x))))) := by
   simp [Ty.WFBVars, Ty.WFBVarCtx, Refinement.hasBVar, Formula.hasBVar, Term.hasBVar]
 
 /-- WFBVars of the and_var result type. -/
 theorem Ty.WFBVars_and_result (x y : EVar) : Ty.WFBVars
-    (.refine .bool (.fmla (.eqB (.fvar .bool nuName) (.and (.fvar .bool x) (.fvar .bool y))))) := by
+    (.refine .bool (.fmla (.eq .bool (.fvar .bool nuName) (.and (.fvar .bool x) (.fvar .bool y))))) := by
   simp [Ty.WFBVars, Ty.WFBVarCtx, Refinement.hasBVar, Formula.hasBVar, Term.hasBVar]
 
 /-- Every type produced by a Hastype derivation is WFBVars. -/

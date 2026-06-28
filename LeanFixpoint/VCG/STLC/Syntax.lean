@@ -79,8 +79,7 @@ inductive Term : Base → Type where
 inductive Formula where
   | tt    : Formula
   | ff    : Formula
-  | eqI   : Term .int  → Term .int  → Formula
-  | eqB   : Term .bool → Term .bool → Formula
+  | eq    : (b: Base) -> Term b  → Term b → Formula
   | leqI  : Term .int  → Term .int  → Formula
   | and   : Formula → Formula → Formula
   | or    : Formula → Formula → Formula
@@ -349,8 +348,7 @@ def Term.substBV (b' : Base) (k : Nat) (v : b'.interp) :
 def Formula.substBV (b : Base) (k : Nat) (v : b.interp) : Formula → Formula
   | .tt           => .tt
   | .ff           => .ff
-  | .eqI t₁ t₂    => .eqI (t₁.substBV b k v) (t₂.substBV b k v)
-  | .eqB t₁ t₂    => .eqB (t₁.substBV b k v) (t₂.substBV b k v)
+  | .eq b' t₁ t₂  => .eq b' (t₁.substBV b k v) (t₂.substBV b k v)
   | .leqI t₁ t₂   => .leqI (t₁.substBV b k v) (t₂.substBV b k v)
   | .and φ₁ φ₂    => .and (φ₁.substBV b k v) (φ₂.substBV b k v)
   | .or φ₁ φ₂     => .or (φ₁.substBV b k v) (φ₂.substBV b k v)

@@ -44,8 +44,7 @@ def Term.lc_at : Nat → {b : Base} → Term b → Prop
 def Formula.fv : Formula → List EVar
   | .tt           => []
   | .ff           => []
-  | .eqI t₁ t₂    => t₁.fv ++ t₂.fv
-  | .eqB t₁ t₂    => t₁.fv ++ t₂.fv
+  | .eq _ t₁ t₂   => t₁.fv ++ t₂.fv
   | .leqI t₁ t₂   => t₁.fv ++ t₂.fv
   | .and φ₁ φ₂    => Formula.fv φ₁ ++ Formula.fv φ₂
   | .or φ₁ φ₂     => Formula.fv φ₁ ++ Formula.fv φ₂
@@ -59,8 +58,7 @@ def Formula.fv : Formula → List EVar
 def Formula.named : Formula → List EVar
   | .tt           => []
   | .ff           => []
-  | .eqI _ _      => []
-  | .eqB _ _      => []
+  | .eq _ _ _     => []
   | .leqI _ _     => []
   | .and φ₁ φ₂    => φ₁.named ++ φ₂.named
   | .or φ₁ φ₂     => φ₁.named ++ φ₂.named
@@ -75,8 +73,7 @@ def Formula.named : Formula → List EVar
 def Formula.openBVar (b' : Base) (k : Nat) (x : EVar) : Formula → Formula
   | .tt           => .tt
   | .ff           => .ff
-  | .eqI t₁ t₂    => .eqI (t₁.openBVar b' k x) (t₂.openBVar b' k x)
-  | .eqB t₁ t₂    => .eqB (t₁.openBVar b' k x) (t₂.openBVar b' k x)
+  | .eq b t₁ t₂   => .eq b (t₁.openBVar b' k x) (t₂.openBVar b' k x)
   | .leqI t₁ t₂   => .leqI (t₁.openBVar b' k x) (t₂.openBVar b' k x)
   | .and φ₁ φ₂    => .and (φ₁.openBVar b' k x) (φ₂.openBVar b' k x)
   | .or φ₁ φ₂     => .or (φ₁.openBVar b' k x) (φ₂.openBVar b' k x)
@@ -92,8 +89,7 @@ def Formula.openBVar (b' : Base) (k : Nat) (x : EVar) : Formula → Formula
 def Formula.lc_at : Nat → Formula → Prop
   | _, .tt          => True
   | _, .ff          => True
-  | k, .eqI t₁ t₂   => t₁.lc_at k ∧ t₂.lc_at k
-  | k, .eqB t₁ t₂   => t₁.lc_at k ∧ t₂.lc_at k
+  | k, .eq _ t₁ t₂   => t₁.lc_at k ∧ t₂.lc_at k
   | k, .leqI t₁ t₂  => t₁.lc_at k ∧ t₂.lc_at k
   | k, .and φ₁ φ₂   => φ₁.lc_at k ∧ φ₂.lc_at k
   | k, .or φ₁ φ₂    => φ₁.lc_at k ∧ φ₂.lc_at k
@@ -132,11 +128,11 @@ def Refinement.named {b : Base} (r : Refinement b) : List EVar :=
 
 /-- Refinement type for an integer constant: `{ν : Int | ν = n}`. -/
 @[simp] def prim (n : Int) : Ty :=
-  .refine .int (.fmla (.eqI (.fvar .int nuName) (.const .int n)))
+  .refine .int (.fmla (.eq .int (.fvar .int nuName) (.const .int n)))
 
 /-- Refinement type for a boolean constant: `{ν : Bool | ν = b}`. -/
 @[simp] def primBool (b : Bool) : Ty :=
-  .refine .bool (.fmla (.eqB (.fvar .bool nuName) (.const .bool b)))
+  .refine .bool (.fmla (.eq .bool (.fvar .bool nuName) (.const .bool b)))
 
 /-- `self x t` is the *singleton* refinement `{ν | ν = x}` against the stored
     value of `x` (selfification). The variable's own refinement is recovered
@@ -144,9 +140,9 @@ def Refinement.named {b : Base} (r : Refinement b) : List EVar :=
     synthesized type kvar-free. For function types, returns `t` unchanged. -/
 @[simp] def self : EVar → Ty → Ty
   | x, .refine .int  _ => .refine .int  (.fmla
-      (.eqI (.fvar .int  nuName) (.fvar .int  x)))
+      (.eq .int (.fvar .int  nuName) (.fvar .int  x)))
   | x, .refine .bool _ => .refine .bool (.fmla
-      (.eqB (.fvar .bool nuName) (.fvar .bool x)))
+      (.eq .bool (.fvar .bool nuName) (.fvar .bool x)))
   | _, .arrow t1 t2    => .arrow t1 t2
 
 /-! ## 4. Ty operations (locally nameless)
@@ -222,7 +218,7 @@ private theorem Formula.substBV_comm (φ : Formula) (b : Base) (k : Nat) (v : b.
     Formula.substBV b' j w (Formula.substBV b k v φ) := by
   induction φ with
   | tt | ff => simp_all [substBV]
-  | eqI | eqB | leqI | and | not | or | imp | exI | exB | allI | allB =>
+  | eq | leqI | and | not | or | imp | exI | exB | allI | allB =>
     cases b <;> cases b' <;> grind [openBVar, substBV, Term.substBV_comm]
 
 /-- `Term.openBVar` at level j and `Term.substBV` at level k ≠ j commute. -/
@@ -245,7 +241,7 @@ private theorem Formula.openBVar_substBV_comm (φ : Formula)
     Formula.substBV b' k v (Formula.openBVar b j x φ) := by
   induction φ with
   | tt | ff => simp_all [openBVar, substBV]
-  | eqI | eqB | leqI | and | not | or | imp | exI | exB | allI | allB =>
+  | eq | leqI | and | not | or | imp | exI | exB | allI | allB =>
     cases b <;> cases b' <;> grind [openBVar, substBV, Term.openBVar_substBV_comm]
 
 /-- `Refinement.substBV` at different levels commute. -/
@@ -321,7 +317,7 @@ def Term.hasBVar (b : Base) (k : Nat) : {b' : Base} → Term b' → Prop
 /-- `Formula.hasBVar b k φ`: φ contains at least one `Term.bvar b k`. -/
 def Formula.hasBVar (b : Base) (k : Nat) : Formula → Prop
   | .tt | .ff => False
-  | .eqI t₁ t₂ | .eqB t₁ t₂ | .leqI t₁ t₂ =>
+  | .eq _ t₁ t₂ | .leqI t₁ t₂ =>
       Term.hasBVar b k t₁ ∨ Term.hasBVar b k t₂
   | .and φ₁ φ₂ | .or φ₁ φ₂ | .imp φ₁ φ₂ =>
       Formula.hasBVar b k φ₁ ∨ Formula.hasBVar b k φ₂
@@ -461,7 +457,7 @@ theorem Formula.openBVar_noop (φ : Formula) (b : Base) (k : Nat) (x : EVar)
     (h : ¬Formula.hasBVar b k φ) : φ.openBVar b k x = φ := by
   induction φ with
   | tt | ff => simp [Formula.openBVar]
-  | eqI t₁ t₂ | eqB t₁ t₂ | leqI t₁ t₂ =>
+  | eq _ t₁ t₂ | leqI t₁ t₂ =>
     simp [Formula.hasBVar] at h
     simp [Formula.openBVar, Term.openBVar_noop b k x _ h.1, Term.openBVar_noop b k x _ h.2]
   | and φ₁ φ₂ ih1 ih2 | or φ₁ φ₂ ih1 ih2 | imp φ₁ φ₂ ih1 ih2 =>
@@ -493,7 +489,7 @@ theorem Formula.substBV_noop (φ : Formula) (b : Base) (k : Nat) (v : b.interp)
     (h : ¬Formula.hasBVar b k φ) : φ.substBV b k v = φ := by
   induction φ with
   | tt | ff => simp [Formula.substBV]
-  | eqI t₁ t₂ | eqB t₁ t₂ | leqI t₁ t₂ =>
+  | eq _ t₁ t₂ | leqI t₁ t₂ =>
     simp [Formula.hasBVar] at h
     simp [Formula.substBV, Term.substBV_noop b k v _ h.1, Term.substBV_noop b k v _ h.2]
   | and φ₁ φ₂ ih1 ih2 | or φ₁ φ₂ ih1 ih2 | imp φ₁ φ₂ ih1 ih2 =>
@@ -546,7 +542,7 @@ theorem Formula.not_hasBVar_openBVar_same (φ : Formula) (b : Base) (k : Nat) (x
     ¬Formula.hasBVar b k (φ.openBVar b k x) := by
   induction φ with
   | tt | ff => simp [Formula.hasBVar, Formula.openBVar]
-  | eqI t₁ t₂ | eqB t₁ t₂ | leqI t₁ t₂ =>
+  | eq _ t₁ t₂ | leqI t₁ t₂ =>
     simp [Formula.hasBVar, Formula.openBVar, Term.not_hasBVar_openBVar_same]
   | and φ₁ φ₂ ih1 ih2 | or φ₁ φ₂ ih1 ih2 | imp φ₁ φ₂ ih1 ih2 =>
     simp [Formula.hasBVar, Formula.openBVar, ih1, ih2]
@@ -559,7 +555,7 @@ theorem Formula.hasBVar_openBVar_other (φ : Formula) (b b' : Base) (k j : Nat) 
     Formula.hasBVar b k (φ.openBVar b' j x) ↔ Formula.hasBVar b k φ := by
   induction φ with
   | tt | ff => simp [Formula.hasBVar, Formula.openBVar]
-  | eqI t₁ t₂ | eqB t₁ t₂ | leqI t₁ t₂ =>
+  | eq _ t₁ t₂ | leqI t₁ t₂ =>
     simp [Formula.hasBVar, Formula.openBVar,
           Term.hasBVar_openBVar_other _ b b' k j x hne]
   | and φ₁ φ₂ ih1 ih2 | or φ₁ φ₂ ih1 ih2 | imp φ₁ φ₂ ih1 ih2 =>
@@ -687,7 +683,7 @@ private theorem Formula.not_hasBVar_substBV_same (b : Base) (k : Nat) (v : b.int
     (φ : Formula) : ¬Formula.hasBVar b k (φ.substBV b k v) := by
   induction φ with
   | tt | ff => simp [Formula.hasBVar, Formula.substBV]
-  | eqI t₁ t₂ | eqB t₁ t₂ | leqI t₁ t₂ =>
+  | eq _ t₁ t₂ | leqI t₁ t₂ =>
     simp only [Formula.substBV, Formula.hasBVar, not_or]
     exact ⟨Term.not_hasBVar_substBV_same _ b k v, Term.not_hasBVar_substBV_same _ b k v⟩
   | and φ₁ φ₂ ih1 ih2 | or φ₁ φ₂ ih1 ih2 | imp φ₁ φ₂ ih1 ih2 =>
@@ -719,7 +715,7 @@ private theorem Formula.hasBVar_substBV_mono {b b' : Base} {k j : Nat} {v : b'.i
     {φ : Formula} (h : Formula.hasBVar b k (φ.substBV b' j v)) : Formula.hasBVar b k φ := by
   induction φ with
   | tt | ff => simp [Formula.hasBVar, Formula.substBV] at h
-  | eqI t₁ t₂ | eqB t₁ t₂ | leqI t₁ t₂ =>
+  | eq _ t₁ t₂ | leqI t₁ t₂ =>
     simp only [Formula.substBV, Formula.hasBVar] at h ⊢
     rcases h with h | h
     · left;  exact Term.hasBVar_substBV_mono _ b b' k j v h
@@ -1341,7 +1337,7 @@ theorem Formula.lc_at_mono (φ : Formula) {j k : Nat} (hjk : j ≤ k) (h : Formu
   induction φ generalizing j k with
   | tt => simp_all [lc_at]
   | ff => simp_all [lc_at]
-  | eqI t1 t2 | eqB t1 t2 =>
+  | eq _ t1 t2 =>
     simp_all [lc_at] ; and_intros
     exact Term.lc_at_mono t1 hjk h.1
     exact Term.lc_at_mono t2 hjk h.2
@@ -1549,7 +1545,7 @@ theorem Refinement.fv_filter_of_ne_nu {b : Base} (r : Refinement b) (x : EVar)
 private theorem Formula.named_openBVar_not_mem (φ : Formula) (b : Base) (k : Nat) (z x : EVar)
     (hx : x ∉ φ.named) (_hxz : x ≠ z) : x ∉ (φ.openBVar b k z).named := by
   induction φ with
-  | tt | ff | eqI _ _ | eqB _ _ | leqI _ _ => simp [Formula.openBVar, Formula.named]
+  | tt | ff | eq _ _ _ | leqI _ _ => simp [Formula.openBVar, Formula.named]
   | and φ₁ φ₂ ih₁ ih₂ | or φ₁ φ₂ ih₁ ih₂ | imp φ₁ φ₂ ih₁ ih₂ =>
     simp only [Formula.openBVar, Formula.named, List.mem_append, not_or] at *
     exact ⟨ih₁ hx.1, ih₂ hx.2⟩
@@ -1638,19 +1634,7 @@ theorem Formula.interp_substBV (φ : Formula) (b : Base) (k : Nat)
   induction φ with
   | tt => intros; simp [Formula.substBV, Formula.openBVar, Formula.interp]
   | ff => intros; simp [Formula.substBV, Formula.openBVar, Formula.interp]
-  | eqI t₁ t₂ =>
-    intro γ hx _
-    simp only [Formula.fv] at hx
-    simp only [Formula.substBV, Formula.openBVar, Formula.interp]
-    rw [Term.interp_substBV_eq t₁ b k v x γ (not_mem_l _ _ _ hx),
-        Term.interp_substBV_eq t₂ b k v x γ (not_mem_r _ _ _ hx)]
-  | eqB t₁ t₂ =>
-    intro γ hx _
-    simp only [Formula.fv] at hx
-    simp only [Formula.substBV, Formula.openBVar, Formula.interp]
-    rw [Term.interp_substBV_eq t₁ b k v x γ (not_mem_l _ _ _ hx),
-        Term.interp_substBV_eq t₂ b k v x γ (not_mem_r _ _ _ hx)]
-  | leqI t₁ t₂ =>
+  | eq _ t₁ t₂ | leqI t₁ t₂=>
     intro γ hx _
     simp only [Formula.fv] at hx
     simp only [Formula.substBV, Formula.openBVar, Formula.interp]
@@ -1793,7 +1777,7 @@ private theorem Formula.substBV_fv_not_mem (φ : Formula) (b : Base) (k : Nat)
     x ∉ (φ.substBV b k v).fv := by
   induction φ with
   | tt | ff => simp [Formula.substBV, Formula.fv]
-  | eqI t₁ t₂ | eqB t₁ t₂ | leqI t₁ t₂ =>
+  | eq _ t₁ t₂ | leqI t₁ t₂ =>
     simp only [Formula.substBV, Formula.fv, List.mem_append, not_or] at *
     exact ⟨Term.fv_substBV_not_mem _ b k v x hx.1,
            Term.fv_substBV_not_mem _ b k v x hx.2⟩
@@ -1838,7 +1822,7 @@ private theorem Formula.substBV_named_not_mem (φ : Formula) (b : Base) (k : Nat
     (v : b.interp) (x : EVar) (hx : x ∉ φ.named) :
     x ∉ (φ.substBV b k v).named := by
   induction φ with
-  | tt | ff | eqI _ _ | eqB _ _ | leqI _ _ => simp [Formula.substBV, Formula.named]
+  | tt | ff | eq _ _ _ | leqI _ _ => simp [Formula.substBV, Formula.named]
   | and φ₁ φ₂ ih1 ih2 | or φ₁ φ₂ ih1 ih2 | imp φ₁ φ₂ ih1 ih2 =>
     simp only [Formula.substBV, Formula.named, List.mem_append, not_or] at *
     exact ⟨ih1 hx.1, ih2 hx.2⟩
@@ -1950,7 +1934,7 @@ theorem Formula.interp_write_fresh (φ : Formula)
   induction φ generalizing γ with
   | tt => simp [Formula.interp]
   | ff => simp [Formula.interp]
-  | eqI t₁ t₂ | eqB t₁ t₂ | leqI t₁ t₂ =>
+  | eq _ t₁ t₂ | leqI t₁ t₂ =>
     simp only [Formula.fv] at hfv
     simp only [Formula.interp,
       Term.interp_write_fresh t₁ x v γ (not_mem_l _ _ _ hfv),
