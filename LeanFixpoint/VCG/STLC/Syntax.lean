@@ -1,4 +1,3 @@
-
 namespace STLC
 
 /-! # STLC Syntax (locally nameless + deeply embedded refinements)
@@ -187,6 +186,7 @@ def TEnv.dom : TEnv → List EVar
   | []          => []
   | (x, _) :: Γ => x :: TEnv.dom Γ
 
+
 /-! ## Runtime values
 
   Locally nameless closures: `clos body` carries an `Exp` body whose `BVar 0`
@@ -204,6 +204,58 @@ inductive Val where
   | .iconst n   => .iconst n
   | .bconst b   => .bconst b
   | .clos body  => .lam body
+
+
+/-- Locally closed at level `k`: every `bvar j` satisfies `j < k`.
+    `ann`'s embedded `Ty` must be `Ty.lc_at k` as well. -/
+def Exp.lc_at : Nat → Exp → Prop
+  | k, .bvar j        => j < k
+  | _, .fvar _        => True
+  | _, .iconst _      => True
+  | _, .bconst _      => True
+  | k, .lam body      => body.lc_at (k+1)
+  | k, .letin e₁ e₂   => e₁.lc_at k ∧ e₂.lc_at (k+1)
+  | k, .app e₁ e₂     => e₁.lc_at k ∧ e₂.lc_at k
+  | k, .ann e _       => e.lc_at k
+  | k, .and e₁ e₂     => e₁.lc_at k ∧ e₂.lc_at k
+  | k, .not e         => e.lc_at k
+  | k, .leq e₁ e₂     => e₁.lc_at k ∧ e₂.lc_at k
+  | k, .ite e₀ e₁ e₂  => e₀.lc_at k ∧ e₁.lc_at k ∧ e₂.lc_at k
+  | k, .add e₁ e₂     => e₁.lc_at k ∧ e₂.lc_at k
+
+abbrev Exp.lc : Exp → Prop := Exp.lc_at 0
+
+
+/-- A `Val` is closed when its `toExp` is locally closed (note: the closure
+    body is required `lc_at 1` since `BVar 0` is the parameter). -/
+def Val.lc (v : Val) : Prop :=
+  match v with
+  | Val.iconst _   => True
+  | Val.bconst _   => True
+  | Val.clos body  => body.lc_at 1
+
+
+/-! ## Substitution on expressions -/
+
+/-- Replace `bvar k` with expression `u` (capture-free if `u` is locally closed). -/
+def Exp.openExp (k : Nat) (u : Exp) (e : Exp) : Exp :=
+  match e with
+  | .bvar j        => if j = k then u else .bvar j
+  | .fvar y        => .fvar y
+  | .iconst n      => .iconst n
+  | .bconst b      => .bconst b
+  | .lam body      => .lam (Exp.openExp (k+1) u body)
+  | .letin e₁ e₂   => .letin (Exp.openExp k u e₁) (Exp.openExp (k+1) u e₂)
+  | .app e₁ e₂     => .app (Exp.openExp k u e₁) (Exp.openExp k u e₂)
+  | .ann e t       => .ann (Exp.openExp k u e) t
+  | .and e₁ e₂     => .and (Exp.openExp k u e₁) (Exp.openExp k u e₂)
+  | .not e         => .not (Exp.openExp k u e)
+  | .leq e₁ e₂     => .leq (Exp.openExp k u e₁) (Exp.openExp k u e₂)
+  | .ite e₀ e₁ e₂  => .ite (Exp.openExp k u e₀) (Exp.openExp k u e₁) (Exp.openExp k u e₂)
+  | .add e₁ e₂     => .add (Exp.openExp k u e₁) (Exp.openExp k u e₂)
+
+/-- Open `bvar k` with a value (via `Val.toExp`). Handy for big-step. -/
+def Exp.openVal (k : Nat) (v : Val) : Exp → Exp := Exp.openExp k v.toExp
 
 /-! ## Runtime environment
 
@@ -265,5 +317,102 @@ def REnv.update (b : Base) (γ : REnv) (x : EVar) (v : b.interp) : REnv :=
 def REnv.HasBase (γ : REnv) (x : EVar) : Base → Prop
   | .int  => ∃ n, γ.map x = .iconst n
   | .bool => ∃ c, γ.map x = .bconst c
+
+
+/-! ## 5b. Val operations (depend on Exp.* declared above) -/
+
+def Exp.fv : Exp → List EVar
+  | .bvar _        => []
+  | .fvar x        => [x]
+  | .iconst _      => []
+  | .bconst _      => []
+  | .lam body      => Exp.fv body
+  | .letin e₁ e₂   => Exp.fv e₁ ++ Exp.fv e₂
+  | .app e₁ e₂     => Exp.fv e₁ ++ Exp.fv e₂
+  | .ann e _       => Exp.fv e
+  | .and e₁ e₂     => Exp.fv e₁ ++ Exp.fv e₂
+  | .not e         => Exp.fv e
+  | .leq e₁ e₂     => Exp.fv e₁ ++ Exp.fv e₂
+  | .ite e₀ e₁ e₂  => Exp.fv e₀ ++ Exp.fv e₁ ++ Exp.fv e₂
+  | .add e₁ e₂     => Exp.fv e₁ ++ Exp.fv e₂
+
+def Val.fv (v : Val) : List EVar :=
+  match v with
+  | Val.iconst _   => []
+  | Val.bconst _   => []
+  | Val.clos body  => body.fv
+
+/-- A value is *closed* when it has no free names. For `iconst`/`bconst` this
+    is automatic; for `clos body` it says the body's free names are all bound
+    by the parameter. Separate from `Val.lc` (which constrains de Bruijn
+    indices, not free names). -/
+@[simp]
+def Val.closed (v : Val) : Prop := Val.fv v = []
+
+/-! ### Value substitution for bound variables (substBV)
+
+  `Term.substBV b' k v t` replaces `Term.bvar b' k` with `Term.const b' v` in `t`.
+  This is the semantic counterpart of `Term.openBVar b' k x`: instead of
+  substituting a fresh name, we substitute the concrete value directly.
+
+  `Ty.substBV va t` replaces the BVar at level 0 throughout `t` with the
+  value carried by `va` — mirroring how coq-SystemRF uses `tsubBV v_x t'`.
+  Level shifts by +1 inside each `arrow` binder, mirroring `Ty.openVar`. -/
+
+def Term.substBV (b' : Base) (k : Nat) (v : b'.interp) :
+    {b : Base} → Term b → Term b
+  | _, .const b c    => .const b c
+  | _, .bvar b j     =>
+      match b', b with
+      | .int,  .int  => if j = k then .const .int  v else .bvar .int  j
+      | .bool, .bool => if j = k then .const .bool v else .bvar .bool j
+      | .int,  .bool => .bvar .bool j
+      | .bool, .int  => .bvar .int  j
+  | _, .fvar b x     => .fvar b x
+  | _, .add t₁ t₂    => .add (Term.substBV b' k v t₁) (Term.substBV b' k v t₂)
+  | _, .not t        => .not (Term.substBV b' k v t)
+  | _, .and t₁ t₂    => .and (Term.substBV b' k v t₁) (Term.substBV b' k v t₂)
+
+def Formula.substBV (b : Base) (k : Nat) (v : b.interp) : Formula → Formula
+  | .tt           => .tt
+  | .ff           => .ff
+  | .eqI t₁ t₂    => .eqI (t₁.substBV b k v) (t₂.substBV b k v)
+  | .eqB t₁ t₂    => .eqB (t₁.substBV b k v) (t₂.substBV b k v)
+  | .leqI t₁ t₂   => .leqI (t₁.substBV b k v) (t₂.substBV b k v)
+  | .and φ₁ φ₂    => .and (φ₁.substBV b k v) (φ₂.substBV b k v)
+  | .or φ₁ φ₂     => .or (φ₁.substBV b k v) (φ₂.substBV b k v)
+  | .not φ        => .not (φ.substBV b k v)
+  | .imp φ₁ φ₂    => .imp (φ₁.substBV b k v) (φ₂.substBV b k v)
+  | .exI y φ      => .exI y (φ.substBV b k v)
+  | .exB y φ      => .exB y (φ.substBV b k v)
+  | .allI y φ     => .allI y (φ.substBV b k v)
+  | .allB y φ     => .allB y (φ.substBV b k v)
+
+def Refinement.substBV (b : Base) (k : Nat) (v : b.interp)
+    {b' : Base} (r : Refinement b') : Refinement b' :=
+  match r with
+  | .fmla φ       => .fmla (φ.substBV b k v)
+  | .kapp kn args => .kapp kn (args.map (fun a => ⟨a.1, Term.substBV b k v a.2⟩))
+
+/-- Substitute Val `va` for BVar 0 throughout type `t`.
+    `substBV_aux` tracks the de Bruijn level as we descend into arrows
+    (mirroring `Ty.openVar`'s level-shift in the codomain). -/
+def Ty.substBV_aux (k : Nat) (va : Val) : Ty → Ty
+  | .refine b r =>
+    match va with
+    | .iconst n  => .refine b (r.substBV .int  k n)
+    | .bconst bv => .refine b (r.substBV .bool k bv)
+    | .clos _    => .refine b r
+  | .arrow s t => .arrow (s.substBV_aux k va) (t.substBV_aux (k + 1) va)
+
+def Ty.substBV (va : Val) (t : Ty) : Ty := Ty.substBV_aux 0 va t
+
+/-- Structural skeleton of `Ty`: counts arrow nesting, ignoring refinement
+    bodies. Preserved by `openVar` / `openVarAt`. Used as a termination
+    measure for the algorithmic subtyping function in `VCGen.lean`. -/
+@[simp]
+def Ty.skel : Ty → Nat
+  | .refine _ _ => 0
+  | .arrow s t  => 1 + s.skel + t.skel
 
 end STLC

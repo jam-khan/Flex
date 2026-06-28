@@ -1,4 +1,5 @@
 import LeanFixpoint.VCG.STLC.Syntax
+import LeanFixpoint.VCG.STLC.Model
 
 /-! # Substitution, Opening, and Interpretation (locally nameless)
 
@@ -86,19 +87,6 @@ def Term.lc_at : Nat → {b : Base} → Term b → Prop
   | k, _, .add t₁ t₂   => Term.lc_at k t₁ ∧ Term.lc_at k t₂
   | k, _, .not t       => Term.lc_at k t
   | k, _, .and t₁ t₂   => Term.lc_at k t₁ ∧ Term.lc_at k t₂
-
-/-- Interpret a term in `γ`. Free vars resolve via `REnv.get`; ν is the value
-    at slot `nuName`. `BVar`s should be eliminated by opening before `interp`
-    is called; on an un-opened `BVar` we return the type's default value. -/
-def Term.interp (γ : REnv) : {b : Base} → Term b → b.interp
-  | _, .const _ c   => c
-  | _, .bvar b _    => match b with
-                       | .int  => (0 : Int)
-                       | .bool => false
-  | _, .fvar b x    => REnv.get b γ x
-  | _, .add t₁ t₂   => Term.interp γ t₁ + Term.interp γ t₂
-  | _, .not t       => !Term.interp γ t
-  | _, .and t₁ t₂   => Term.interp γ t₁ && Term.interp γ t₂
 
 /-! ## 2. Formula operations -/
 
@@ -230,24 +218,6 @@ def Formula.lc_at : Nat → Formula → Prop
   | k, .allI _ φ    => φ.lc_at k
   | k, .allB _ φ    => φ.lc_at k
 
-/-- Interpret a (now κ-free) formula in `γ`. Named existentials extend `γ` at the
-    bound name. No κ-assignment is needed: κ-applications live one level up, in
-    `Refinement`, so only `Refinement.interp` consults the κ-assignment. -/
-def Formula.interp (γ : REnv) : Formula → Prop
-  | .tt           => True
-  | .ff           => False
-  | .eqI t₁ t₂    => Term.interp γ t₁ = Term.interp γ t₂
-  | .eqB t₁ t₂    => Term.interp γ t₁ = Term.interp γ t₂
-  | .leqI t₁ t₂   => Term.interp γ t₁ ≤ Term.interp γ t₂
-  | .and φ₁ φ₂    => Formula.interp γ φ₁ ∧ Formula.interp γ φ₂
-  | .or φ₁ φ₂     => Formula.interp γ φ₁ ∨ Formula.interp γ φ₂
-  | .not φ        => ¬ Formula.interp γ φ
-  | .imp φ₁ φ₂    => Formula.interp γ φ₁ → Formula.interp γ φ₂
-  | .exI x φ      => ∃ n : Int,  Formula.interp (γ.update .int  x n) φ
-  | .exB x φ      => ∃ b : Bool, Formula.interp (γ.update .bool x b) φ
-  | .allI x φ     => ∀ n : Int,  Formula.interp (γ.update .int  x n) φ
-  | .allB x φ     => ∀ b : Bool, Formula.interp (γ.update .bool x b) φ
-
 /-! ## 3. Refinement operations -/
 
 /-- Free variables of a refinement: formula's fv minus `nuName` (ν is "bound"
@@ -292,26 +262,6 @@ def Refinement.named {b : Base} (r : Refinement b) : List EVar :=
   match r with
   | .fmla φ   => φ.named
   | .kapp _ _ => []
-
-/-- Interpret a refinement at value ν under κ-assignment: extend γ at `nuName`
-    with ν, then either interpret the formula or apply κ. This is the *only*
-    interpretation that consults the κ-assignment. -/
-def Refinement.interp (κ : KEnv) {b : Base} (r : Refinement b)
-    (γ : REnv) (ν : b.interp) : Prop :=
-  match r with
-  | .fmla φ       => Formula.interp (γ.update b nuName ν) φ
-  | .kapp kn args =>
-      κ kn (args.map (fun a => ⟨a.1, Term.interp (γ.update b nuName ν) a.2⟩))
-
-/-- Denotation of a refinement at κ-assignment κ and env γ: the predicate on
-    `b.interp` defining which values satisfy it. Alias for
-    `Refinement.interp κ r γ` (point-free). -/
-def Refinement.den (κ : KEnv) {b : Base} (r : Refinement b) (γ : REnv) :
-    b.interp → Prop :=
-  fun ν => r.interp κ γ ν
-
-@[simp] theorem Refinement.den_apply (κ : KEnv) {b : Base} (r : Refinement b)
-    (γ : REnv) (ν : b.interp) : r.den κ γ ν ↔ r.interp κ γ ν := Iff.rfl
 
 /-- Refinement type for an integer constant: `{ν : Int | ν = n}`. -/
 @[simp] def prim (n : Int) : Ty :=
@@ -383,14 +333,6 @@ def Ty.openVarAt (k : Nat) (b : Base) (x : EVar) : Ty → Ty
   | .refine b' r => .refine b' (r.openBVar b k x)
   | .arrow s t   => .arrow (s.openVarAt k b x) (t.openVarAt (k+1) b x)
 
-/-- Structural skeleton of `Ty`: counts arrow nesting, ignoring refinement
-    bodies. Preserved by `openVar` / `openVarAt`. Used as a termination
-    measure for the algorithmic subtyping function in `VCGen.lean`. -/
-@[simp]
-def Ty.skel : Ty → Nat
-  | .refine _ _ => 0
-  | .arrow s t  => 1 + s.skel + t.skel
-
 @[simp]
 theorem Ty.skel_openVar (k : Nat) (x : EVar) (t : Ty) :
     (t.openVar k x).skel = t.skel := by
@@ -420,72 +362,6 @@ def Ty.substI (x : EVar) (u : Term .int) : Ty → Ty
 def Ty.substB (x : EVar) (u : Term .bool) : Ty → Ty
   | .refine b r => .refine b (r.substB x u)
   | .arrow s t  => .arrow (s.substB x u) (t.substB x u)
-
-/-! ### Value substitution for bound variables (substBV)
-
-  `Term.substBV b' k v t` replaces `Term.bvar b' k` with `Term.const b' v` in `t`.
-  This is the semantic counterpart of `Term.openBVar b' k x`: instead of
-  substituting a fresh name, we substitute the concrete value directly.
-
-  `Ty.substBV va t` replaces the BVar at level 0 throughout `t` with the
-  value carried by `va` — mirroring how coq-SystemRF uses `tsubBV v_x t'`.
-  Level shifts by +1 inside each `arrow` binder, mirroring `Ty.openVar`. -/
-
-def Term.substBV (b' : Base) (k : Nat) (v : b'.interp) :
-    {b : Base} → Term b → Term b
-  | _, .const b c    => .const b c
-  | _, .bvar b j     =>
-      match b', b with
-      | .int,  .int  => if j = k then .const .int  v else .bvar .int  j
-      | .bool, .bool => if j = k then .const .bool v else .bvar .bool j
-      | .int,  .bool => .bvar .bool j
-      | .bool, .int  => .bvar .int  j
-  | _, .fvar b x     => .fvar b x
-  | _, .add t₁ t₂    => .add (Term.substBV b' k v t₁) (Term.substBV b' k v t₂)
-  | _, .not t        => .not (Term.substBV b' k v t)
-  | _, .and t₁ t₂    => .and (Term.substBV b' k v t₁) (Term.substBV b' k v t₂)
-
-def Formula.substBV (b : Base) (k : Nat) (v : b.interp) : Formula → Formula
-  | .tt           => .tt
-  | .ff           => .ff
-  | .eqI t₁ t₂    => .eqI (t₁.substBV b k v) (t₂.substBV b k v)
-  | .eqB t₁ t₂    => .eqB (t₁.substBV b k v) (t₂.substBV b k v)
-  | .leqI t₁ t₂   => .leqI (t₁.substBV b k v) (t₂.substBV b k v)
-  | .and φ₁ φ₂    => .and (φ₁.substBV b k v) (φ₂.substBV b k v)
-  | .or φ₁ φ₂     => .or (φ₁.substBV b k v) (φ₂.substBV b k v)
-  | .not φ        => .not (φ.substBV b k v)
-  | .imp φ₁ φ₂    => .imp (φ₁.substBV b k v) (φ₂.substBV b k v)
-  | .exI y φ      => .exI y (φ.substBV b k v)
-  | .exB y φ      => .exB y (φ.substBV b k v)
-  | .allI y φ     => .allI y (φ.substBV b k v)
-  | .allB y φ     => .allB y (φ.substBV b k v)
-
-def Refinement.substBV (b : Base) (k : Nat) (v : b.interp)
-    {b' : Base} (r : Refinement b') : Refinement b' :=
-  match r with
-  | .fmla φ       => .fmla (φ.substBV b k v)
-  | .kapp kn args => .kapp kn (args.map (fun a => ⟨a.1, Term.substBV b k v a.2⟩))
-
-/-- Substitute Val `va` for BVar 0 throughout type `t`.
-    `substBV_aux` tracks the de Bruijn level as we descend into arrows
-    (mirroring `Ty.openVar`'s level-shift in the codomain). -/
-def Ty.substBV_aux (k : Nat) (va : Val) : Ty → Ty
-  | .refine b r =>
-    match va with
-    | .iconst n  => .refine b (r.substBV .int  k n)
-    | .bconst bv => .refine b (r.substBV .bool k bv)
-    | .clos _    => .refine b r
-  | .arrow s t => .arrow (s.substBV_aux k va) (t.substBV_aux (k + 1) va)
-
-def Ty.substBV (va : Val) (t : Ty) : Ty := Ty.substBV_aux 0 va t
-
-@[simp]
-theorem Ty.skel_substBV (va : Val) (t : Ty) : (t.substBV va).skel = t.skel := by
-  simp only [Ty.substBV]
-  suffices h : ∀ k, (t.substBV_aux k va).skel = t.skel from h 0
-  induction t with
-  | refine b r => intro k; cases va <;> simp [Ty.substBV_aux, Ty.skel]
-  | arrow s t ihs iht => intro k; simp [Ty.substBV_aux, Ty.skel, ihs, iht]
 
 /-! ### Commutativity of substBV_aux at different levels
 
@@ -1253,21 +1129,6 @@ abbrev Ty.lc : Ty → Prop := Ty.lc_at 0
 
   (Val is declared in `Syntax.lean`; its operations follow below in §5b.) -/
 
-def Exp.fv : Exp → List EVar
-  | .bvar _        => []
-  | .fvar x        => [x]
-  | .iconst _      => []
-  | .bconst _      => []
-  | .lam body      => Exp.fv body
-  | .letin e₁ e₂   => Exp.fv e₁ ++ Exp.fv e₂
-  | .app e₁ e₂     => Exp.fv e₁ ++ Exp.fv e₂
-  | .ann e _       => Exp.fv e
-  | .and e₁ e₂     => Exp.fv e₁ ++ Exp.fv e₂
-  | .not e         => Exp.fv e
-  | .leq e₁ e₂     => Exp.fv e₁ ++ Exp.fv e₂
-  | .ite e₀ e₁ e₂  => Exp.fv e₀ ++ Exp.fv e₁ ++ Exp.fv e₂
-  | .add e₁ e₂     => Exp.fv e₁ ++ Exp.fv e₂
-
 /-- Replace `bvar k` with `fvar x` (used when entering a binder). -/
 def Exp.openVar (k : Nat) (x : EVar) : Exp → Exp
   | .bvar j        => if j = k then .fvar x else .bvar j
@@ -1283,23 +1144,6 @@ def Exp.openVar (k : Nat) (x : EVar) : Exp → Exp
   | .leq e₁ e₂     => .leq (e₁.openVar k x) (e₂.openVar k x)
   | .ite e₀ e₁ e₂  => .ite (e₀.openVar k x) (e₁.openVar k x) (e₂.openVar k x)
   | .add e₁ e₂     => .add (e₁.openVar k x) (e₂.openVar k x)
-
-/-- Replace `bvar k` with expression `u` (capture-free if `u` is locally closed). -/
-def Exp.openExp (k : Nat) (u : Exp) (e : Exp) : Exp :=
-  match e with
-  | .bvar j        => if j = k then u else .bvar j
-  | .fvar y        => .fvar y
-  | .iconst n      => .iconst n
-  | .bconst b      => .bconst b
-  | .lam body      => .lam (Exp.openExp (k+1) u body)
-  | .letin e₁ e₂   => .letin (Exp.openExp k u e₁) (Exp.openExp (k+1) u e₂)
-  | .app e₁ e₂     => .app (Exp.openExp k u e₁) (Exp.openExp k u e₂)
-  | .ann e t       => .ann (Exp.openExp k u e) t
-  | .and e₁ e₂     => .and (Exp.openExp k u e₁) (Exp.openExp k u e₂)
-  | .not e         => .not (Exp.openExp k u e)
-  | .leq e₁ e₂     => .leq (Exp.openExp k u e₁) (Exp.openExp k u e₂)
-  | .ite e₀ e₁ e₂  => .ite (Exp.openExp k u e₀) (Exp.openExp k u e₁) (Exp.openExp k u e₂)
-  | .add e₁ e₂     => .add (Exp.openExp k u e₁) (Exp.openExp k u e₂)
 
 /-- Close a free var `x` to `bvar k` (inverse of `openVar`). -/
 def Exp.close (k : Nat) (x : EVar) : Exp → Exp
@@ -1333,25 +1177,6 @@ def Exp.subst (x : EVar) (u : Exp) (e : Exp) : Exp :=
   | .leq e₁ e₂     => .leq (Exp.subst x u e₁) (Exp.subst x u e₂)
   | .ite e₀ e₁ e₂  => .ite (Exp.subst x u e₀) (Exp.subst x u e₁) (Exp.subst x u e₂)
   | .add e₁ e₂     => .add (Exp.subst x u e₁) (Exp.subst x u e₂)
-
-/-- Locally closed at level `k`: every `bvar j` satisfies `j < k`.
-    `ann`'s embedded `Ty` must be `Ty.lc_at k` as well. -/
-def Exp.lc_at : Nat → Exp → Prop
-  | k, .bvar j        => j < k
-  | _, .fvar _        => True
-  | _, .iconst _      => True
-  | _, .bconst _      => True
-  | k, .lam body      => body.lc_at (k+1)
-  | k, .letin e₁ e₂   => e₁.lc_at k ∧ e₂.lc_at (k+1)
-  | k, .app e₁ e₂     => e₁.lc_at k ∧ e₂.lc_at k
-  | k, .ann e _       => e.lc_at k
-  | k, .and e₁ e₂     => e₁.lc_at k ∧ e₂.lc_at k
-  | k, .not e         => e.lc_at k
-  | k, .leq e₁ e₂     => e₁.lc_at k ∧ e₂.lc_at k
-  | k, .ite e₀ e₁ e₂  => e₀.lc_at k ∧ e₁.lc_at k ∧ e₂.lc_at k
-  | k, .add e₁ e₂     => e₁.lc_at k ∧ e₂.lc_at k
-
-abbrev Exp.lc : Exp → Prop := Exp.lc_at 0
 
 /-- Structural skeleton size: counts constructor depth, ignoring leaf details
     (so `Exp.skel` is preserved under `openVar` / `subst`). Used as a
@@ -1389,25 +1214,6 @@ theorem Exp.skel_openVar (k : Nat) (x : EVar) (e : Exp) :
   | leq _ _ ih₁ ih₂    => simp [Exp.openVar, Exp.skel, ih₁, ih₂]
   | ite _ _ _ ih₀ ih₁ ih₂ => simp [Exp.openVar, Exp.skel, ih₀, ih₁, ih₂]
   | add _ _ ih₁ ih₂    => simp [Exp.openVar, Exp.skel, ih₁, ih₂]
-
-/-! ## 5b. Val operations (depend on Exp.* declared above) -/
-
-def Val.fv (v : Val) : List EVar :=
-  match v with
-  | Val.iconst _   => []
-  | Val.bconst _   => []
-  | Val.clos body  => body.fv
-
-/-- A `Val` is closed when its `toExp` is locally closed (note: the closure
-    body is required `lc_at 1` since `BVar 0` is the parameter). -/
-def Val.lc (v : Val) : Prop :=
-  match v with
-  | Val.iconst _   => True
-  | Val.bconst _   => True
-  | Val.clos body  => body.lc_at 1
-
-/-- Open `bvar k` with a value (via `Val.toExp`). Handy for big-step. -/
-def Exp.openVal (k : Nat) (v : Val) : Exp → Exp := Exp.openExp k v.toExp
 
 /-! ## 7. TEnv free variables
 
@@ -1627,13 +1433,6 @@ theorem Exp.substEnv_closed (γ : REnv) (e : Exp) (he : e.fv = []) :
   | ite e₀ e₁ e₂ ih₀ ih₁ ih₂ =>
     simp only [Exp.fv, List.append_eq_nil_iff] at he
     simp only [Exp.substEnv, ih₀ he.1.1, ih₁ he.1.2, ih₂ he.2]
-
-/-- A value is *closed* when it has no free names. For `iconst`/`bconst` this
-    is automatic; for `clos body` it says the body's free names are all bound
-    by the parameter. Separate from `Val.lc` (which constrains de Bruijn
-    indices, not free names). -/
-@[simp]
-def Val.closed (v : Val) : Prop := Val.fv v = []
 
 theorem Val.toExp_closed_of_closed {v : Val} (h : Val.closed v) : v.toExp.fv = [] := by
   cases v with
