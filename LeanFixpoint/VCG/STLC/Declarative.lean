@@ -15,24 +15,20 @@ inductive Hastype : KEnv → TEnv → Exp → Ty → Prop where
       Hastype κ Γ (.bconst b) (primBool b)
   | lam {κ Γ e s₁ s₂ x} :
       Ty.WFBVars (.arrow s₁ s₂) →
-      x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
-          ++ e.fv ++ s₁.fv ++ s₂.fv
-          ++ Ty.named s₁ ++ Ty.named s₂ ++ [nuName] →
+      x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ
+          ++ e.fv ++ s₁.fv ++ s₂.fv →
       Hastype κ ((x, s₁) :: Γ) (e.openVar 0 x) (s₂.openVar 0 x) →
       Hastype κ Γ (.lam e) (.arrow s₁ s₂)
   | app {κ Γ e₁ y s t} :
       Hastype κ Γ e₁ (.arrow s t) →
       Hastype κ Γ (.fvar y) s →
       y ∉ t.fv →
-      y ∉ Ty.named t →
-      y ≠ nuName →
       Hastype κ Γ (.app e₁ (.fvar y)) (t.openVar 0 y)
   | letin {κ Γ e₁ e₂ s t x} :
       Ty.WFBVars t →
       Hastype κ Γ e₁ s →
-      x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
-          ++ e₂.fv ++ s.fv ++ t.fv
-          ++ Ty.named s ++ Ty.named t ++ [nuName] →
+      x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ
+          ++ e₂.fv ++ s.fv ++ t.fv →
       Hastype κ ((x, s) :: Γ) (e₂.openVar 0 x) t →
       Hastype κ Γ (.letin e₁ e₂) t
   | ann {κ Γ e t} :
@@ -47,36 +43,31 @@ inductive Hastype : KEnv → TEnv → Exp → Ty → Prop where
   | add_var {κ Γ x y r₁ r₂} :
       Γ.lookup x = some (.refine .int r₁) →
       Γ.lookup y = some (.refine .int r₂) →
-      x ≠ nuName → y ≠ nuName →
       Hastype κ Γ (.add (.fvar x) (.fvar y))
-        (.refine .int (.fmla (.eq .int (.fvar .int nuName)
+        (.refine .int (.fmla (.eq .int (.bvar .int 0)
                             (.add (.fvar .int x) (.fvar .int y)))))
   | leq_var {κ Γ x y r₁ r₂} :
       Γ.lookup x = some (.refine .int r₁) →
       Γ.lookup y = some (.refine .int r₂) →
-      x ≠ nuName → y ≠ nuName →
       Hastype κ Γ (.leq (.fvar x) (.fvar y))
         (.refine .bool (.fmla (.and
-          (.imp (.eq .bool (.fvar .bool nuName) (.const .bool true))
+          (.imp (.eq .bool (.bvar .bool 0) (.const .bool true))
                 (.leqI (.fvar .int x) (.fvar .int y)))
           (.imp (.leqI (.fvar .int x) (.fvar .int y))
-                (.eq .bool (.fvar .bool nuName) (.const .bool true))))))
+                (.eq .bool (.bvar .bool 0) (.const .bool true))))))
   | not_var {κ Γ x r} :
       Γ.lookup x = some (.refine .bool r) →
-      x ≠ nuName →
       Hastype κ Γ (.not (.fvar x))
-        (.refine .bool (.fmla (.eq .bool (.fvar .bool nuName) (.not (.fvar .bool x)))))
+        (.refine .bool (.fmla (.eq .bool (.bvar .bool 0) (.not (.fvar .bool x)))))
   | and_var {κ Γ x y rx ry} :
       Γ.lookup x = some (.refine .bool rx) →
       Γ.lookup y = some (.refine .bool ry) →
-      x ≠ nuName → y ≠ nuName →
       Hastype κ Γ (.and (.fvar x) (.fvar y))
-        (.refine .bool (.fmla (.eq .bool (.fvar .bool nuName) (.and (.fvar .bool x) (.fvar .bool y)))))
+        (.refine .bool (.fmla (.eq .bool (.bvar .bool 0) (.and (.fvar .bool x) (.fvar .bool y)))))
   | ite {κ Γ x y e₁ e₂ r t} :
       Γ.lookup x = some (.refine .bool r) →
-      x ≠ nuName →
-      y ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
-          ++ e₁.fv ++ e₂.fv ++ t.fv ++ Ty.named t ++ [x, nuName] →
+      y ∉ TEnv.dom Γ ++ TEnv.tyFv Γ
+          ++ e₁.fv ++ e₂.fv ++ t.fv ++ [x] →
       Ty.WFBVars t →
       Hastype κ ((y, .refine .bool (.fmla
                 (.eq .bool (.fvar .bool x) (.const .bool true)))) :: Γ) e₁ t →
@@ -126,7 +117,7 @@ theorem Hastype.fv_subset {κ Γ e t} (_h : Hastype κ Γ e t) :
     simp [Exp.fv] at zf
   | @lam Γ' e s₁ s₂ x _ hfresh hbody ih =>
     simp [Exp.fv] at *
-    have hx_efv : x ∉ e.fv := hfresh.2.2.2.1
+    have hx_efv : x ∉ e.fv := hfresh.2.2.1
       -- simp only [List.mem_append, not_or] at hfresh; exact hfresh.2.1
     grind [EVar.not_free_in_open]
     -- obtain ⟨t', hzeq | foo⟩ := ih (EVar.fv_subset_fv_openVar hx_efv zf)
@@ -135,7 +126,7 @@ theorem Hastype.fv_subset {κ Γ e t} (_h : Hastype κ Γ e t) :
     simp [Exp.fv] at *
     rcases zf with hzf1 | hzf2
     · exact ih1 hzf1
-    · have hx_efv : x ∉ e₂.fv := hfresh.2.2.2.1
+    · have hx_efv : x ∉ e₂.fv := hfresh.2.2.1
         -- simp only [List.mem_append, not_or] at hfresh; exact hfresh.2.1
       grind [EVar.not_free_in_open]
       -- obtain ⟨t', hzeq | foo⟩ := ih2 (EVar.fv_subset_fv_openVar hx_efv hzf2)
@@ -145,7 +136,7 @@ theorem Hastype.fv_subset {κ Γ e t} (_h : Hastype κ Γ e t) :
     rcases zf
         <;> grind [List.lookup_eq_some_iff]
   | sub => grind
-  | @app Γ' e₁ y s t hht1 hht2 _hyfv _hynamed _hyν ih1 ih2 =>
+  | @app Γ' e₁ y s t hht1 hht2 _hyfv ih1 ih2 =>
     simp [Exp.fv] at zf
     rcases zf with hzf1 | hzf2
     · exact ih1 hzf1
@@ -166,7 +157,7 @@ theorem Hastype.lc_at {κ Γ e t} (_h : Hastype κ Γ e t) : Exp.lc_at 0 e := by
   | lam =>
       simp only [Exp.lc_at]
       grind [Exp.lc_at_of_openVar]
-  | app _ _ _ _ _ ih₁ ih₂ =>
+  | app _ _ _ ih₁ ih₂ =>
     simp only [Exp.lc_at]; exact ⟨ih₁, ih₂⟩
   | letin =>
     simp only [Exp.lc_at]
@@ -177,7 +168,7 @@ theorem Hastype.lc_at {κ Γ e t} (_h : Hastype κ Γ e t) : Exp.lc_at 0 e := by
   | leq_var => simp [Exp.lc_at]
   | not_var => simp [Exp.lc_at]
   | and_var => simp [Exp.lc_at]
-  | ite _ _ _ _ _ _ ih₁ ih₂ => simp only [Exp.lc_at]; exact ⟨trivial, ih₁, ih₂⟩
+  | ite _ _ _ _ _ ih₁ ih₂ => simp only [Exp.lc_at]; exact ⟨trivial, ih₁, ih₂⟩
 
 /-- WFBVars of `self x t`: `self` is the singleton `{ν | ν = x}` (kvar-free, no
     BVars), so it is `WFBVars` outright — independent of `t`. -/
@@ -197,24 +188,24 @@ theorem Ty.WFBVars_primBool (b : Bool) : Ty.WFBVars (primBool b) := by
 
 /-- WFBVars of the add_var result type. -/
 theorem Ty.WFBVars_add_result (x y : EVar) : Ty.WFBVars
-    (.refine .int (.fmla (.eq .int (.fvar .int nuName) (.add (.fvar .int x) (.fvar .int y))))) := by
+    (.refine .int (.fmla (.eq .int (.bvar .int 0) (.add (.fvar .int x) (.fvar .int y))))) := by
   simp [Ty.WFBVars, Ty.WFBVarCtx, Refinement.hasBVar, Formula.hasBVar, Term.hasBVar]
 
 /-- WFBVars of the leq_var result type. -/
 theorem Ty.WFBVars_leq_result (x y : EVar) : Ty.WFBVars
     (.refine .bool (.fmla (.and
-      (.imp (.eq .bool (.fvar .bool nuName) (.const .bool true)) (.leqI (.fvar .int x) (.fvar .int y)))
-      (.imp (.leqI (.fvar .int x) (.fvar .int y)) (.eq .bool (.fvar .bool nuName) (.const .bool true)))))) := by
+      (.imp (.eq .bool (.bvar .bool 0) (.const .bool true)) (.leqI (.fvar .int x) (.fvar .int y)))
+      (.imp (.leqI (.fvar .int x) (.fvar .int y)) (.eq .bool (.bvar .bool 0) (.const .bool true)))))) := by
   simp [Ty.WFBVars, Ty.WFBVarCtx, Refinement.hasBVar, Formula.hasBVar, Term.hasBVar]
 
 /-- WFBVars of the not_var result type. -/
 theorem Ty.WFBVars_not_result (x : EVar) : Ty.WFBVars
-    (.refine .bool (.fmla (.eq .bool (.fvar .bool nuName) (.not (.fvar .bool x))))) := by
+    (.refine .bool (.fmla (.eq .bool (.bvar .bool 0) (.not (.fvar .bool x))))) := by
   simp [Ty.WFBVars, Ty.WFBVarCtx, Refinement.hasBVar, Formula.hasBVar, Term.hasBVar]
 
 /-- WFBVars of the and_var result type. -/
 theorem Ty.WFBVars_and_result (x y : EVar) : Ty.WFBVars
-    (.refine .bool (.fmla (.eq .bool (.fvar .bool nuName) (.and (.fvar .bool x) (.fvar .bool y))))) := by
+    (.refine .bool (.fmla (.eq .bool (.bvar .bool 0) (.and (.fvar .bool x) (.fvar .bool y))))) := by
   simp [Ty.WFBVars, Ty.WFBVarCtx, Refinement.hasBVar, Formula.hasBVar, Term.hasBVar]
 
 /-- Every type produced by a Hastype derivation is WFBVars. -/
@@ -224,7 +215,7 @@ theorem Hastype.wf_bvars {κ Γ e t} (h : Hastype κ Γ e t) : Ty.WFBVars t := b
   | int_const  => exact Ty.WFBVars_prim _
   | bool_const => exact Ty.WFBVars_primBool _
   | lam _ hwf _ => grind
-  | app _ _ _ _ _ ih₁ _ =>
+  | app _ _ _ ih₁ _ =>
     -- ih₁ : WFBVars (.arrow s t), need WFBVars (t.openVar 0 y)
     simp only [Ty.WFBVars, Ty.WFBVarCtx] at ih₁
     exact Ty.WFBVarCtx_openVar_last _ [] _ _ ih₁.2
@@ -235,4 +226,4 @@ theorem Hastype.wf_bvars {κ Γ e t} (h : Hastype κ Γ e t) : Ty.WFBVars t := b
   | leq_var => exact Ty.WFBVars_leq_result _ _
   | not_var => exact Ty.WFBVars_not_result _
   | and_var => exact Ty.WFBVars_and_result _ _
-  | ite _ _ _ hwf _ _ _ _ => exact hwf
+  | ite _ _ hwf _ _ _ _ => exact hwf

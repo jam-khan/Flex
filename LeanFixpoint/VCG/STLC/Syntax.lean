@@ -6,7 +6,8 @@ namespace STLC
 
   1. **Variables, bases, runtime envs** — `EVar`, `Base`, `REnv`.
   2. **Deep-embedded refinement language** — `Term`, `Formula`, `Refinement`.
-     ν is a distinguished free name (`nuName`); no LN inside formulas.
+     Fully LN: ν, the `Formula` quantifiers, and the `Ty.arrow` binders are all
+     de Bruijn `BVar`s (ν is `BVar 0` of its refinement).
   3. **Types (LN)** — `Ty`. `arrow s t` carries no binder name; `t` is a body
      with `BVar 0` standing for the function argument.
   4. **Expressions (LN)** — `Exp`. Binding forms (`lam`, `letin`) carry no
@@ -38,27 +39,22 @@ def Base.interp : Base → Type
 /-! ## Deep-embedded refinement language
 
   The refinement-side DSL is a first-order language over `REnv` slots plus the
-  distinguished value ν. Refinements never nest ν, so we keep ν as a reserved
-  free name (`nuName`) rather than LN-binding it.
-
-  Existentials inside `Formula` are *named*, which is fine because they appear
-  only in derived refinements (e.g. `not_` / `and_`) and are well-scoped by
-  construction at every introduction site.
+  distinguished value ν. Everything binder-shaped is *locally nameless*: ν, the
+  `Formula` quantifiers, and the enclosing `Ty.arrow` binders are all de Bruijn
+  `BVar`s sharing one index space (innermost = 0). This keeps the whole
+  refinement layer capture-free with no reserved names.
 -/
-
-/-- Reserved name for ν, the value being refined. Never used as a regular
-    program variable. The base of ν is fixed by the enclosing `Refinement b`. -/
-def nuName : EVar := "ν"
 
 /-- Base-indexed first-order terms over `REnv` slots ∪ {ν} ∪ Ty-bound vars.
 
-    `Term.fvar b nuName` denotes ν of base `b`. Other `fvar` names refer to
-    slots in `REnv` (looked up with `REnv.get`).
+    `Term.bvar b k` is a de Bruijn index. Reading outward from an occurrence,
+    `k = 0` is the innermost enclosing binder: a `Formula` quantifier if the
+    occurrence sits under one, otherwise **ν** of the enclosing refinement;
+    further-out `k`s are the enclosing `Ty.arrow` binders. The base `b` must
+    match the binder's base; ill-base BVars in well-formed types never appear.
 
-    `Term.bvar b k` is a de Bruijn index referring to the k-th enclosing
-    `Ty.arrow` binder (k = 0 is the innermost). The base `b` must match the
-    binder's domain refinement base; ill-base BVars in well-formed types
-    never appear. -/
+    `Term.fvar b x` refers to an `REnv` slot named `x` (looked up with
+    `REnv.get`). ν is *never* an `fvar` — it is always `BVar`-bound. -/
 inductive Term : Base → Type where
   | const : (b : Base) → b.interp → Term b
   | bvar  : (b : Base) → Nat → Term b
@@ -73,9 +69,11 @@ inductive Term : Base → Type where
 
 /-- First-order formulas over `Term`s.
 
-    Logical connectives are explicit (no metalevel `Prop` mixing). Existentials
-    are named — each `exI x φ` / `exB x φ` binds `x` inside `φ`. Substitution
-    on Formula respects the binder (skips substitution into shadowed bodies). -/
+    Logical connectives are explicit (no metalevel `Prop` mixing). Quantifiers
+    are *locally nameless*: each `exI φ` / `exB φ` binds the de Bruijn `BVar 0`
+    inside `φ` (shifting all outer binders up by one). Together with ν (also a
+    `BVar`; see `Refinement` below) this means formulas contain no binder names
+    at all — substitution and opening are capture-free by construction. -/
 inductive Formula where
   | tt    : Formula
   | ff    : Formula
@@ -85,13 +83,13 @@ inductive Formula where
   | or    : Formula → Formula → Formula
   | not   : Formula → Formula
   | imp   : Formula → Formula → Formula
-  | exI   : EVar → Formula → Formula   -- ∃ x : Int.  φ
-  | exB   : EVar → Formula → Formula   -- ∃ x : Bool. φ
-  | allI  : EVar → Formula → Formula   -- ∀ x : Int.  φ
-  | allB  : EVar → Formula → Formula   -- ∀ x : Bool. φ
+  | exI   : Formula → Formula   -- ∃ (BVar 0 : Int).  φ
+  | exB   : Formula → Formula   -- ∃ (BVar 0 : Bool). φ
+  | allI  : Formula → Formula   -- ∀ (BVar 0 : Int).  φ
+  | allB  : Formula → Formula   -- ∀ (BVar 0 : Bool). φ
 
 /-- A refinement, one stratification level *above* `Formula`: either a
-    kvar-FREE `Formula` (whose free `nuName` denotes the refined value), or a
+    kvar-FREE `Formula` (whose `BVar 0`, i.e. ν, denotes the refined value), or a
     single κ-application `κ(t₁, …, tₙ)`. Keeping κ here rather than inside
     `Formula` makes a refinement *atomic* — a constraint XOR one positive κ
     atom — so κ can never be negated/disjoined/nested. Every VC the generator
@@ -231,20 +229,28 @@ def Exp.openVal (k : Nat) (v : Val) : Exp → Exp := Exp.openExp k v.toExp
 
 /-! ## Runtime environment
 
-  `REnv` is a single total map `EVar → Val`. The base-indexed `get`/`update`
-  used throughout the proofs are thin *views* over the lossless Val-level
-  `lookup`/`write`: `get` projects the stored `Val` down to `b.interp`
-  (defaulting on a tag mismatch, which never happens for a well-typed read),
-  and `update` injects a `b.interp` value back into a `Val`.
+  `REnv` bundles two things threaded as a single environment `γ`:
 
-  Because a single cell can no longer be int- and bool-typed at once, "read at
-  base `b` then write back" only round-trips when the cell actually holds a
-  base-`b` value — captured by `REnv.HasBase`. -/
+  * `map : EVar → Val` — the total name map for *free* variables. The
+    base-indexed `get`/`update` are thin views over the lossless Val-level
+    `lookup`/`write`: `get` projects the stored `Val` down to `b.interp`
+    (defaulting on a tag mismatch, never hit on a well-typed read), and
+    `update` injects a `b.interp` value back into a `Val`.
+  * `bv : List Val` — the de Bruijn stack for *bound* variables (ν and the
+    refinement-formula quantifier binders), innermost = index 0. `Term.interp`
+    resolves a `BVar k` through `bv[k]` exactly as it resolves an `fvar`
+    through `map`. `push` enters a binder; `getBV` reads one. Outside of
+    refinement interpretation `bv` is empty, and `write`/`update` preserve it.
+
+  Because a single `map` cell can no longer be int- and bool-typed at once,
+  "read at base `b` then write back" only round-trips when the cell actually
+  holds a base-`b` value — captured by `REnv.HasBase`. -/
 @[ext]
 structure REnv where
   map : EVar → Val
+  bv  : List Val := []
 
-@[simp] def REnv.empty : REnv := ⟨fun _ => .iconst 0⟩
+@[simp] def REnv.empty : REnv := ⟨fun _ => .iconst 0, []⟩
 
 /-- Project a stored `Val` to a base-typed value. The mismatch cases
     (`0`/`false`) are unreachable for well-typed reads. -/
@@ -265,10 +271,21 @@ def Val.inj : (b : Base) → b.interp → Val
 @[simp, reducible]
 def REnv.lookup (γ : REnv) (x : EVar) : Val := γ.map x
 
-/-- Val-level (lossless) update: `write γ x (lookup γ x) = γ` unconditionally. -/
+/-- Val-level (lossless) update of the name map: `write γ x (lookup γ x) = γ`
+    unconditionally. Preserves the de Bruijn stack `bv`. -/
 @[simp, reducible]
 def REnv.write (γ : REnv) (x : EVar) (v : Val) : REnv :=
-  ⟨fun y => if x == y then v else γ.map y⟩
+  ⟨fun y => if x == y then v else γ.map y, γ.bv⟩
+
+/-- Enter a binder: push value `v` as the new innermost de Bruijn slot (index 0),
+    shifting the existing stack up one. The name map is untouched. -/
+@[simp] def REnv.push (γ : REnv) (v : Val) : REnv := ⟨γ.map, v :: γ.bv⟩
+
+/-- Read the `b`-typed value of the de Bruijn `BVar k` from the stack. Out of
+    range (never on a well-formed read) defaults per base via `Val.proj`. -/
+@[simp, reducible]
+def REnv.getBV (b : Base) (γ : REnv) (k : Nat) : b.interp :=
+  Val.proj b (γ.bv[k]?.getD (.iconst 0))
 
 /-- Look up the `b`-typed value of variable `x` in `γ` (base-indexed view). -/
 @[simp, reducible]
@@ -354,10 +371,10 @@ def Formula.substBV (b : Base) (k : Nat) (v : b.interp) : Formula → Formula
   | .or φ₁ φ₂     => .or (φ₁.substBV b k v) (φ₂.substBV b k v)
   | .not φ        => .not (φ.substBV b k v)
   | .imp φ₁ φ₂    => .imp (φ₁.substBV b k v) (φ₂.substBV b k v)
-  | .exI y φ      => .exI y (φ.substBV b k v)
-  | .exB y φ      => .exB y (φ.substBV b k v)
-  | .allI y φ     => .allI y (φ.substBV b k v)
-  | .allB y φ     => .allB y (φ.substBV b k v)
+  | .exI φ        => .exI (φ.substBV b (k+1) v)
+  | .exB φ        => .exB (φ.substBV b (k+1) v)
+  | .allI φ       => .allI (φ.substBV b (k+1) v)
+  | .allB φ       => .allB (φ.substBV b (k+1) v)
 
 def Refinement.substBV (b : Base) (k : Nat) (v : b.interp)
     {b' : Base} (r : Refinement b') : Refinement b' :=
@@ -370,9 +387,10 @@ def Refinement.substBV (b : Base) (k : Nat) (v : b.interp)
     (mirroring `Ty.openVar`'s level-shift in the codomain). -/
 def Ty.substBV_aux (k : Nat) (va : Val) : Ty → Ty
   | .refine b r =>
+    -- ν occupies formula-level 0, so arrow binders live at level `k+1`.
     match va with
-    | .iconst n  => .refine b (r.substBV .int  k n)
-    | .bconst bv => .refine b (r.substBV .bool k bv)
+    | .iconst n  => .refine b (r.substBV .int  (k+1) n)
+    | .bconst bv => .refine b (r.substBV .bool (k+1) bv)
     | .clos _    => .refine b r
   | .arrow s t => .arrow (s.substBV_aux k va) (t.substBV_aux (k + 1) va)
 

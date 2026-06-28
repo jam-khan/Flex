@@ -3,22 +3,24 @@ import LeanFixpoint.VCG.STLC.Semantics
 
 namespace STLC
 
-/-- Interpret a term in `γ`. Free vars resolve via `REnv.get`; ν is the value
-    at slot `nuName`. `BVar`s should be eliminated by opening before `interp`
-    is called; on an un-opened `BVar` we return the type's default value. -/
+/-- Interpret a term under the single environment `γ`. `fvar` resolves through
+    the name map (`REnv.get`); `bvar` resolves through the de Bruijn stack
+    (`REnv.getBV`) — the values of ν and the enclosing quantifier/arrow binders
+    live there. Both kinds of variable go *through `γ`*; nothing is substituted
+    into the syntax. -/
 def Term.interp (γ : REnv) : {b : Base} → Term b → b.interp
   | _, .const _ c   => c
-  | _, .bvar b _    => match b with
-                       | .int  => (0 : Int)
-                       | .bool => false
+  | _, .bvar b k    => REnv.getBV b γ k
   | _, .fvar b x    => REnv.get b γ x
   | _, .add t₁ t₂   => Term.interp γ t₁ + Term.interp γ t₂
   | _, .not t       => !Term.interp γ t
   | _, .and t₁ t₂   => Term.interp γ t₁ && Term.interp γ t₂
 
-/-- Interpret a (now κ-free) formula in `γ`. Named existentials extend `γ` at the
-    bound name. No κ-assignment is needed: κ-applications live one level up, in
-    `Refinement`, so only `Refinement.interp` consults the κ-assignment. -/
+/-- Interpret a (now κ-free) formula under `γ`. Each quantifier binds `BVar 0`,
+    so it `push`es its witness value as the new innermost de Bruijn slot of `γ`
+    and recurses — the value goes *through the environment*, never substituted
+    into the syntax. No κ-assignment is needed: κ-applications live one level
+    up, in `Refinement`. -/
 def Formula.interp (γ : REnv) : Formula → Prop
   | .tt           => True
   | .ff           => False
@@ -28,20 +30,20 @@ def Formula.interp (γ : REnv) : Formula → Prop
   | .or φ₁ φ₂     => Formula.interp γ φ₁ ∨ Formula.interp γ φ₂
   | .not φ        => ¬ Formula.interp γ φ
   | .imp φ₁ φ₂    => Formula.interp γ φ₁ → Formula.interp γ φ₂
-  | .exI x φ      => ∃ n : Int,  Formula.interp (γ.update .int  x n) φ
-  | .exB x φ      => ∃ b : Bool, Formula.interp (γ.update .bool x b) φ
-  | .allI x φ     => ∀ n : Int,  Formula.interp (γ.update .int  x n) φ
-  | .allB x φ     => ∀ b : Bool, Formula.interp (γ.update .bool x b) φ
+  | .exI φ        => ∃ n : Int,  Formula.interp (γ.push (.iconst n)) φ
+  | .exB φ        => ∃ c : Bool, Formula.interp (γ.push (.bconst c)) φ
+  | .allI φ       => ∀ n : Int,  Formula.interp (γ.push (.iconst n)) φ
+  | .allB φ       => ∀ c : Bool, Formula.interp (γ.push (.bconst c)) φ
 
-/-- Interpret a refinement at value ν under κ-assignment: extend γ at `nuName`
-    with ν, then either interpret the formula or apply κ. This is the *only*
-    interpretation that consults the κ-assignment. -/
+/-- Interpret a refinement at value ν under κ-assignment: `push` ν as the
+    innermost de Bruijn slot (ν = `BVar 0`), then either interpret the formula
+    or apply κ. This is the *only* interpretation that consults the κ-assignment. -/
 def Refinement.interp (κ : KEnv) {b : Base} (r : Refinement b)
     (γ : REnv) (ν : b.interp) : Prop :=
   match r with
-  | .fmla φ       => Formula.interp (γ.update b nuName ν) φ
+  | .fmla φ       => Formula.interp (γ.push (Val.inj b ν)) φ
   | .kapp kn args =>
-      κ kn (args.map (fun a => ⟨a.1, Term.interp (γ.update b nuName ν) a.2⟩))
+      κ kn (args.map (fun a => ⟨a.1, Term.interp (γ.push (Val.inj b ν)) a.2⟩))
 
 
 /-- Helper lemma to prove termination of TyDenote -/

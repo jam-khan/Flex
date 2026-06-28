@@ -25,22 +25,22 @@ open STLC
 abbrev TT  : Ty := .refine .int (.fmla .tt)
 
 /-- `Pos = {ν : Int | 1 ≤ ν}` (integer `ν > 0`). -/
-abbrev Pos : Ty := .refine .int (.fmla (.leqI (.const .int 1) (.fvar .int nuName)))
+abbrev Pos : Ty := .refine .int (.fmla (.leqI (.const .int 1) (.bvar .int 0)))
 
 /-- `NatR = {ν : Int | 0 ≤ ν}`. -/
-def NatR : Ty := .refine .int (.fmla (.leqI (.const .int 0) (.fvar .int nuName)))
+def NatR : Ty := .refine .int (.fmla (.leqI (.const .int 0) (.bvar .int 0)))
 
 /-- `IntN n = {ν : Int | ν = n}`. -/
 abbrev IntN (n : Int) : Ty :=
-  .refine .int (.fmla (.eqI (.fvar .int nuName) (.const .int n)))
+  .refine .int (.fmla (.eqI (.bvar .int 0) (.const .int n)))
 
 /-- κ-refinement on int: `{ν : Int | k(ν)}` for κ-symbol `k`. -/
 abbrev IntK (k : STLC.KVar) : Ty :=
-  .refine .int (.kapp k [⟨.int, .fvar .int nuName⟩])
+  .refine .int (.kapp k [⟨.int, .bvar .int 0⟩])
 
 /-- κ-refinement on int referencing both an outer variable and ν: `{ν | k(x, ν)}`. -/
 abbrev IntR (k : STLC.KVar) : Ty :=
-  .refine .int (.kapp k [⟨.int, .bvar .int 0⟩, ⟨.int, .fvar .int nuName⟩])
+  .refine .int (.kapp k [⟨.int, .bvar .int 0⟩, ⟨.int, .bvar .int 0⟩])
 
 /-- Identity function under LN. -/
 abbrev exId : Exp := .lam (.bvar 0)
@@ -144,10 +144,10 @@ abbrev exGt : Exp :=
 abbrev tyGt : Ty :=
   .arrow TT (.arrow TT
     (.refine .bool (.fmla (.and
-      (.imp (.eqB (.fvar .bool nuName) (.const .bool true))
+      (.imp (.eqB (.bvar .bool 0) (.const .bool true))
             (.not (.leqI (.bvar .int 1) (.bvar .int 0))))
       (.imp (.not (.leqI (.bvar .int 1) (.bvar .int 0)))
-            (.eqB (.fvar .bool nuName) (.const .bool true)))))))
+            (.eqB (.bvar .bool 0) (.const .bool true)))))))
 
 example (κ : KEnv) : topVC κ [] exGt tyGt := by
   simp [topVC, exGt, tyGt]
@@ -168,12 +168,12 @@ abbrev exEq : Exp :=
 abbrev tyEq : Ty :=
   .arrow TT (.arrow TT
     (.refine .bool (.fmla (.and
-      (.imp (.eqB (.fvar .bool nuName) (.const .bool true))
+      (.imp (.eqB (.bvar .bool 0) (.const .bool true))
             (.and (.leqI (.bvar .int 1) (.bvar .int 0))
                   (.leqI (.bvar .int 0) (.bvar .int 1))))
       (.imp (.and (.leqI (.bvar .int 1) (.bvar .int 0))
                   (.leqI (.bvar .int 0) (.bvar .int 1)))
-            (.eqB (.fvar .bool nuName) (.const .bool true)))))))
+            (.eqB (.bvar .bool 0) (.const .bool true)))))))
 
 example (κ : KEnv) : topVC κ [] exEq tyEq := by
   simp [topVC, exEq, tyEq]
@@ -203,8 +203,8 @@ example :
                             (.arrow (IntK "k2") (IntK "k3"))))
                         (.bvar 1)) (.bvar 0))))
         (.refine .int (.fmla (.or
-          (.eqI (.fvar .int nuName) (.const .int 100))
-          (.eqI (.fvar .int nuName) (.const .int  99))))) := by
+          (.eqI (.bvar .int 0) (.const .int 100))
+          (.eqI (.bvar .int 0) (.const .int  99))))) := by
   under_exists =>
     apply check_sound
     simp ; rfl
@@ -261,6 +261,6 @@ example (κ : KEnv) (Γ : TEnv) (x y : EVar) (r₁ r₂ : Refinement .int)
     (hxν : x ≠ nuName)
     (hyν : y ≠ nuName):
     Hastype κ Γ (.add (.fvar x) (.fvar y))
-      (.refine .int (.fmla (.eqI (.fvar .int nuName)
+      (.refine .int (.fmla (.eqI (.bvar .int 0)
                           (.add (.fvar .int x) (.fvar .int y))))) := by
   apply Hastype.add_var <;> assumption

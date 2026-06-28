@@ -33,9 +33,8 @@ inductive Subtyp : KEnv → TEnv → Ty → Ty → Prop where
   /-- SUB-FUN (explicit witness): contravariant input, covariant output. -/
   | arrow {κ Γ s₁ t₁ s₂ t₂ x} :
       Subtyp κ Γ s₂ s₁ →
-      x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
-          ++ s₁.fv ++ s₂.fv ++ t₁.fv ++ t₂.fv
-          ++ Ty.named s₁ ++ Ty.named s₂ ++ Ty.named t₁ ++ Ty.named t₂ ++ [nuName] →
+      x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ
+          ++ s₁.fv ++ s₂.fv ++ t₁.fv ++ t₂.fv →
       Subtyp κ ((x, s₂) :: Γ) (t₁.openVar 0 x) (t₂.openVar 0 x) →
       Subtyp κ Γ (.arrow s₁ t₁) (.arrow s₂ t₂)
 
@@ -62,8 +61,6 @@ mutual
         Synth κ Γ e₁ (.arrow s t) →
         Check κ Γ (.fvar y) s        →
         y ∉ t.fv →
-        y ∉ Ty.named t →
-        y ≠ nuName →
         Synth κ Γ (.app e₁ (.fvar y)) (t.openVar 0 y)
 
     | leq_var {κ Γ x y r₁ r₂} :
@@ -71,28 +68,28 @@ mutual
         Γ.lookup y = some (.refine .int r₂) →
         Synth κ Γ (.leq (.fvar x) (.fvar y))
           (.refine .bool (.fmla (.and
-            (.imp (.eq .bool (.fvar .bool nuName) (.const .bool true))
+            (.imp (.eq .bool (.bvar .bool 0) (.const .bool true))
                   (.leqI (.fvar .int x) (.fvar .int y)))
             (.imp (.leqI (.fvar .int x) (.fvar .int y))
-                  (.eq .bool (.fvar .bool nuName) (.const .bool true))))))
+                  (.eq .bool (.bvar .bool 0) (.const .bool true))))))
 
     | add_var {κ Γ x y r₁ r₂} :
         Γ.lookup x = some (.refine .int r₁) →
         Γ.lookup y = some (.refine .int r₂) →
         Synth κ Γ (.add (.fvar x) (.fvar y))
-          (.refine .int (.fmla (.eq .int (.fvar .int nuName)
+          (.refine .int (.fmla (.eq .int (.bvar .int 0)
                               (.add (.fvar .int x) (.fvar .int y)))))
 
     | not_var {κ Γ x r} :
         Γ.lookup x = some (.refine .bool r) →
         Synth κ Γ (.not (.fvar x))
-          (.refine .bool (.fmla (.eq .bool (.fvar .bool nuName) (.not (.fvar .bool x)))))
+          (.refine .bool (.fmla (.eq .bool (.bvar .bool 0) (.not (.fvar .bool x)))))
 
     | and_var {κ Γ x y rx ry} :
         Γ.lookup x = some (.refine .bool rx) →
         Γ.lookup y = some (.refine .bool ry) →
         Synth κ Γ (.and (.fvar x) (.fvar y))
-          (.refine .bool (.fmla (.eq .bool (.fvar .bool nuName) (.and (.fvar .bool x) (.fvar .bool y)))))
+          (.refine .bool (.fmla (.eq .bool (.bvar .bool 0) (.and (.fvar .bool x) (.fvar .bool y)))))
 
   -- κ; Γ ⊢ e ⇐ t : "e checks against type t under κ"
   inductive Check : KEnv → TEnv → Exp → Ty → Prop where
@@ -102,25 +99,22 @@ mutual
         Check κ Γ e t
 
     | lam {κ Γ e s₁ s₂ x} :
-        x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
-            ++ e.fv ++ s₁.fv ++ s₂.fv
-            ++ Ty.named s₁ ++ Ty.named s₂ ++ [nuName] →
+        x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ
+            ++ e.fv ++ s₁.fv ++ s₂.fv →
         Check κ ((x, s₁) :: Γ) (e.openVar 0 x) (s₂.openVar 0 x) →
         Check κ Γ (.lam e) (.arrow s₁ s₂)
 
     | letin {κ Γ e₁ e₂ s t x} :
         Synth κ Γ e₁ s →
-        x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
-            ++ e₂.fv ++ s.fv ++ t.fv
-            ++ Ty.named s ++ Ty.named t ++ [nuName] →
+        x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ
+            ++ e₂.fv ++ s.fv ++ t.fv →
         Check κ ((x, s) :: Γ) (e₂.openVar 0 x) t →
         Check κ Γ (.letin e₁ e₂) t
 
     | ite {κ Γ x y e₁ e₂ r t} :
         Γ.lookup x = some (.refine .bool r) →
-        x ≠ nuName →
-        y ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
-            ++ e₁.fv ++ e₂.fv ++ t.fv ++ Ty.named t ++ [x, nuName] →
+        y ∉ TEnv.dom Γ ++ TEnv.tyFv Γ
+            ++ e₁.fv ++ e₂.fv ++ t.fv ++ [x] →
         Check κ ((y, .refine .bool (.fmla
                   (.eq .bool (.fvar .bool x) (.const .bool true)))) :: Γ) e₁ t →
         Check κ ((y, .refine .bool (.fmla
