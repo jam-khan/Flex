@@ -20,22 +20,22 @@ abbrev Constraint := KEnv → REnv → Prop
     quantification. -/
 @[simp, reducible]
 def implyBind (x : EVar) (t : Ty) (c : Constraint) : Constraint :=
-  fun κ ρ =>
+  fun κ γ =>
     match t with
     | .refine b r => ∀ v : b.interp,
-                       Refinement.interp κ r ρ v → c κ (REnv.update b ρ x v)
-    | .arrow _ _  => c κ ρ
+                       Refinement.interp κ r γ v → c κ (REnv.update b γ x v)
+    | .arrow _ _  => c κ γ
 
 /-- Algorithmic subtyping. Returns `none` on shape mismatch. Termination
     by `Ty.skel` (preserved under `openVar`). Takes `Γ` so the fresh name
     for the arrow case is picked away from the context domain. -/
 def sub (Γ : TEnv) : Ty → Ty → Option Constraint
   | .refine .int  r₁, .refine .int  r₂ =>
-      some (fun κ ρ => ∀ v : Int,
-              Refinement.interp κ r₁ ρ v → Refinement.interp κ r₂ ρ v)
+      some (fun κ γ => ∀ v : Int,
+              Refinement.interp κ r₁ γ v → Refinement.interp κ r₂ γ v)
   | .refine .bool r₁, .refine .bool r₂ =>
-      some (fun κ ρ => ∀ v : Bool,
-              Refinement.interp κ r₁ ρ v → Refinement.interp κ r₂ ρ v)
+      some (fun κ γ => ∀ v : Bool,
+              Refinement.interp κ r₁ γ v → Refinement.interp κ r₂ γ v)
   | .arrow s₁ t₁, .arrow s₂ t₂ =>
       let x := EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
                             ++ s₁.fv ++ s₂.fv ++ t₁.fv ++ t₂.fv
@@ -43,7 +43,7 @@ def sub (Γ : TEnv) : Ty → Ty → Option Constraint
                             ++ Ty.named t₁ ++ Ty.named t₂ ++ [nuName])
       match sub Γ s₂ s₁, sub ((x, s₂) :: Γ) (t₁.openVar 0 x) (t₂.openVar 0 x) with
       | some c₁, some c₂ =>
-          some (fun κ ρ => c₁ κ ρ ∧ implyBind x s₂ c₂ κ ρ)
+          some (fun κ γ => c₁ κ γ ∧ implyBind x s₂ c₂ κ γ)
       | _, _ => none
   | _, _ => none
 termination_by s t => s.skel + t.skel
@@ -69,7 +69,7 @@ mutual
             if y ∈ t.fv ∨ y ∈ Ty.named t ∨ y = nuName then none
             else
               match check Γ (.fvar y) s with
-              | some c' => some ((fun κ ρ => c κ ρ ∧ c' κ ρ), t.openVar 0 y)
+              | some c' => some ((fun κ γ => c κ γ ∧ c' κ γ), t.openVar 0 y)
               | none    => none
         | _ => none
     | .leq (.fvar x) (.fvar y) =>
@@ -122,7 +122,7 @@ mutual
                                   ++ Ty.named s ++ Ty.named t
                                   ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ ++ [nuName])
             match check ((x, s) :: Γ) (e₂.openVar 0 x) t with
-            | some c₂ => some (fun κ ρ => c₁ κ ρ ∧ implyBind x s c₂ κ ρ)
+            | some c₂ => some (fun κ γ => c₁ κ γ ∧ implyBind x s c₂ κ γ)
             | none    => none
         | none => none
     | .ite e₀ e₁ e₂, t =>
@@ -147,9 +147,9 @@ mutual
                   match check ((y, r_true) :: Γ) e₁ t,
                         check ((y, r_false) :: Γ) e₂ t with
                   | some c₁, some c₂ =>
-                      some (fun κ ρ =>
-                        implyBind y r_true  c₁ κ ρ ∧
-                        implyBind y r_false c₂ κ ρ)
+                      some (fun κ γ =>
+                        implyBind y r_true  c₁ κ γ ∧
+                        implyBind y r_false c₂ κ γ)
                   | _, _ => none
               | _ => none
         | _ => none
@@ -158,7 +158,7 @@ mutual
         match synth Γ e with
         | some (c, s) =>
             match sub Γ s t with
-            | some c' => some (fun κ ρ => c κ ρ ∧ c' κ ρ)
+            | some c' => some (fun κ γ => c κ γ ∧ c' κ γ)
             | none    => none
         | none => none
   termination_by e _ => 2 * e.skel + 1
@@ -171,5 +171,5 @@ end
 @[simp]
 def topVC (κ : KEnv) (Γ : TEnv) (e : Exp) (t : Ty) : Prop :=
   match check Γ e t with
-  | some c => ∀ ρ : REnv, c κ ρ
+  | some c => ∀ γ : REnv, c κ γ
   | none   => False

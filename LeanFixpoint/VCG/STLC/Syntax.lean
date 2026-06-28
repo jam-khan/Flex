@@ -33,29 +33,8 @@ def Base.interp : Base → Type
   | .int  => Int
   | .bool => Bool
 
-/-- Runtime environment: separate total maps for integer and boolean variables.
-    Keeping the two components apart means lookups always return a concrete type
-    (`Int` or `Bool`) without any `Val` wrapper or coercion. -/
-@[ext]
-structure REnv where
-  ints  : EVar → Int
-  bools : EVar → Bool
-
-@[simp] def REnv.empty : REnv := ⟨fun _ => 0, fun _ => false⟩
-
-/-- Look up the `b`-typed value of variable `x` in `ρ`. -/
-@[simp, reducible]
-def REnv.get (b : Base) (ρ : REnv) (x : EVar) : b.interp :=
-  match b with
-  | .int  => ρ.ints x
-  | .bool => ρ.bools x
-
-/-- Update the `b`-typed slot for `x` in `ρ` to `v`. -/
-@[simp, reducible]
-def REnv.update (b : Base) (ρ : REnv) (x : EVar) (v : b.interp) : REnv :=
-  match b with
-  | .int  => { ρ with ints  := fun y => if x == y then v else ρ.ints y }
-  | .bool => { ρ with bools := fun y => if x == y then v else ρ.bools y }
+-- `REnv` (the runtime environment) is a single `EVar → Val` map; it is defined
+-- *after* `Val` below, since its operations mention `Val`.
 
 /-! ## Deep-embedded refinement language
 
@@ -89,7 +68,8 @@ inductive Term : Base → Type where
   | not   : Term .bool → Term .bool
   | and   : Term .bool → Term .bool → Term .bool
 -- NOTE: no cross-base constructors (e.g. `leq : Term .int → Term .int → Term .bool`).
--- They would break `Term.interp_update_diff_base`. Cross-base relations go in
+-- Keeping each `Term` homogeneous in its base means an `REnv` update at one base
+-- can never affect a term of another base. Cross-base relations go in
 -- `Formula` (e.g. `Formula.leqI`).
 
 /-- First-order formulas over `Term`s.
@@ -224,5 +204,66 @@ inductive Val where
   | .iconst n   => .iconst n
   | .bconst b   => .bconst b
   | .clos body  => .lam body
+
+/-! ## Runtime environment
+
+  `REnv` is a single total map `EVar → Val`. The base-indexed `get`/`update`
+  used throughout the proofs are thin *views* over the lossless Val-level
+  `lookup`/`write`: `get` projects the stored `Val` down to `b.interp`
+  (defaulting on a tag mismatch, which never happens for a well-typed read),
+  and `update` injects a `b.interp` value back into a `Val`.
+
+  Because a single cell can no longer be int- and bool-typed at once, "read at
+  base `b` then write back" only round-trips when the cell actually holds a
+  base-`b` value — captured by `REnv.HasBase`. -/
+@[ext]
+structure REnv where
+  map : EVar → Val
+
+@[simp] def REnv.empty : REnv := ⟨fun _ => .iconst 0⟩
+
+/-- Project a stored `Val` to a base-typed value. The mismatch cases
+    (`0`/`false`) are unreachable for well-typed reads. -/
+@[simp, reducible]
+def Val.proj : (b : Base) → Val → b.interp
+  | .int,  .iconst n => n
+  | .bool, .bconst c => c
+  | .int,  _ => 0
+  | .bool, _ => false
+
+/-- Inject a base-typed value into `Val`. -/
+@[simp, reducible]
+def Val.inj : (b : Base) → b.interp → Val
+  | .int,  n => .iconst n
+  | .bool, c => .bconst c
+
+/-- Val-level (lossless) lookup. -/
+@[simp, reducible]
+def REnv.lookup (γ : REnv) (x : EVar) : Val := γ.map x
+
+/-- Val-level (lossless) update: `write γ x (lookup γ x) = γ` unconditionally. -/
+@[simp, reducible]
+def REnv.write (γ : REnv) (x : EVar) (v : Val) : REnv :=
+  ⟨fun y => if x == y then v else γ.map y⟩
+
+/-- Look up the `b`-typed value of variable `x` in `γ` (base-indexed view). -/
+@[simp, reducible]
+def REnv.get (b : Base) (γ : REnv) (x : EVar) : b.interp :=
+  (γ.lookup x).proj b
+
+/-- Update the `b`-typed slot for `x` in `γ` to `v` (base-indexed view). -/
+@[simp, reducible]
+def REnv.update (b : Base) (γ : REnv) (x : EVar) (v : b.interp) : REnv :=
+  γ.write x (Val.inj b v)
+
+/-- Derived accessors mirroring the old two-field layout. -/
+@[simp, reducible] def REnv.bools (γ : REnv) (x : EVar) : Bool := REnv.get .bool γ x
+
+/-- The cell for `x` stores a value of base `b`. Holds for every slot bound at
+    base `b` in a well-typed model; needed to know `update b _ x (get b _ x)`
+    round-trips. -/
+def REnv.HasBase (γ : REnv) (x : EVar) : Base → Prop
+  | .int  => ∃ n, γ.map x = .iconst n
+  | .bool => ∃ c, γ.map x = .bconst c
 
 end STLC

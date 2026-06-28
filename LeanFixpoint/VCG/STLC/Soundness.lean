@@ -44,8 +44,8 @@ theorem sub_sound (κ : KEnv) (Γ : TEnv) (s t : Ty) (c : Constraint) :
     simp_all [sub]
     rw [← hsub] at hent
     apply Subtyp.refine
-    intro ρ hm ν hpre
-    have hb := hent ρ hm
+    intro γ hm ν hpre
+    have hb := hent γ hm
     cases ν
     · exact hb.1 hpre
     · exact hb.2 hpre
@@ -74,7 +74,7 @@ theorem sub_sound (κ : KEnv) (Γ : TEnv) (s t : Ty) (c : Constraint) :
     -- avoid `simp at hsub` to keep implyBind folded
     rw [hc₁, hc₂] at hsub
     simp only [Option.some.injEq] at hsub
-    -- hsub : (fun κ ρ => c₁ κ ρ ∧ implyBind w s2 c₂ κ ρ) = c
+    -- hsub : (fun κ γ => c₁ κ γ ∧ implyBind w s2 c₂ κ γ) = c
     have hw : w ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
                 ++ s1.fv ++ s2.fv ++ t1.fv ++ t2.fv
                 ++ Ty.named s1 ++ Ty.named s2 ++ Ty.named t1 ++ Ty.named t2 ++ [nuName] := by
@@ -86,20 +86,20 @@ theorem sub_sound (κ : KEnv) (Γ : TEnv) (s t : Ty) (c : Constraint) :
                       (t1.fv ++ (t2.fv ++ (s1.named ++ (s2.named ++ (t1.named ++ (t2.named ++ [nuName])))))))))))]
     apply Subtyp.arrow (x := w) _ hw
     · apply sub_sound κ ((w, s2) :: Γ) _ _ c₂ hc₂
-      intro ρ hm
-      have hΓρ : ModelsEnv κ ρ Γ := by
-        cases s2 with | refine _ _ => exact hm.2 | arrow _ _ => exact hm
+      intro γ hm
+      have hΓγ : ModelsEnv κ γ Γ := by
+        cases s2 with | refine _ _ => exact hm.2.2 | arrow _ _ => exact hm
       -- use ▸ so implyBind stays folded until we need it
       rw [←hsub] at hent
-      have hcρ : c₁ κ ρ ∧ implyBind w s2 c₂ κ ρ := by grind [hent ρ hΓρ]
-      simp only [implyBind] at hcρ
+      have hcγ : c₁ κ γ ∧ implyBind w s2 c₂ κ γ := by grind [hent γ hΓγ]
+      simp only [implyBind] at hcγ
       cases s2 with
       | refine b r =>
-        have h := hcρ.2 (REnv.get b ρ w) hm.1
-        rw [REnv.update_self] at h ; exact h
-      | arrow _ _ => exact hcρ.2
+        have h := hcγ.2 (REnv.get b γ w) hm.2.1
+        rw [REnv.update_self b γ w hm.1] at h ; exact h
+      | arrow _ _ => exact hcγ.2
     · apply sub_sound κ Γ s2 s1 c₁ hc₁
-      intro ρ hm
+      intro γ hm
       rw [←hsub] at hent
       grind
   | .refine _ _ , .arrow _ _ | .arrow _ _, .refine _ _ | .refine .int _, .refine .bool _ | .refine .bool _, .refine .int _=>
@@ -151,8 +151,8 @@ mutual
       rw [← hteq]
       rw [← hceq] at hent
       exact Synth.app
-        (synth_sound κ Γ e1 c1 _ hse fun ρ hm => (hent ρ hm).1)
-        (check_sound κ Γ (.fvar y) s' c2 hy fun ρ hm => (hent ρ hm).2)
+        (synth_sound κ Γ e1 c1 _ hse fun γ hm => (hent γ hm).1)
+        (check_sound κ Γ (.fvar y) s' c2 hy fun γ hm => (hent γ hm).2)
         hyfv hyn hyν
     | .ann e1 t' =>
       simp_all [synth]
@@ -202,40 +202,40 @@ mutual
       simp_all
       obtain ⟨c₂, hc₂⟩ : ∃ c₂, sub Γ s' t = some c₂ := by grind
       simp_all ; rw [←hcheck] at hent
-      exact Check.sub (synth_sound κ Γ _ _ _ hc₁ fun ρ hm => (hent ρ hm).1)
-                      (sub_sound _ _ _ _ _ hc₂ fun ρ hm => (hent ρ hm).2)
+      exact Check.sub (synth_sound κ Γ _ _ _ hc₁ fun γ hm => (hent γ hm).1)
+                      (sub_sound _ _ _ _ _ hc₂ fun γ hm => (hent γ hm).2)
     | .fvar x =>
       simp_all [check]
       obtain ⟨c₁, s', hc₁⟩ : ∃ c₁ s, synth Γ (.fvar x) = some (c₁, s) := by grind
       simp_all
       obtain ⟨c₂, hc₂⟩ : ∃ c₂, sub Γ s' t = some c₂ := by grind
       simp_all ; rw [←hcheck] at hent
-      exact Check.sub (synth_sound κ Γ _ _ _ hc₁ fun ρ hm => (hent ρ hm).1)
-                      (sub_sound _ _ _ _ _ hc₂ fun ρ hm => (hent ρ hm).2)
+      exact Check.sub (synth_sound κ Γ _ _ _ hc₁ fun γ hm => (hent γ hm).1)
+                      (sub_sound _ _ _ _ _ hc₂ fun γ hm => (hent γ hm).2)
     | .iconst i =>
       simp_all [check]
       obtain ⟨c₁, s', hc₁⟩ : ∃ c₁ s, synth Γ (.iconst i) = some (c₁, s) := by grind
       simp_all
       obtain ⟨c₂, hc₂⟩ : ∃ c₂, sub Γ s' t = some c₂ := by grind
       simp_all ; rw [←hcheck] at hent
-      exact Check.sub (synth_sound κ Γ _ _ _ hc₁ fun ρ hm => (hent ρ hm).1)
-                      (sub_sound _ _ _ _ _ hc₂ fun ρ hm => (hent ρ hm).2)
+      exact Check.sub (synth_sound κ Γ _ _ _ hc₁ fun γ hm => (hent γ hm).1)
+                      (sub_sound _ _ _ _ _ hc₂ fun γ hm => (hent γ hm).2)
     | .bconst b =>
       simp_all [check]
       obtain ⟨c₁, s', hc₁⟩ : ∃ c₁ s, synth Γ (.bconst b) = some (c₁, s) := by grind
       simp_all
       obtain ⟨c₂, hc₂⟩ : ∃ c₂, sub Γ s' t = some c₂ := by grind
       simp_all ; rw [←hcheck] at hent
-      exact Check.sub (synth_sound κ Γ _ _ _ hc₁ fun ρ hm => (hent ρ hm).1)
-                      (sub_sound _ _ _ _ _ hc₂ fun ρ hm => (hent ρ hm).2)
+      exact Check.sub (synth_sound κ Γ _ _ _ hc₁ fun γ hm => (hent γ hm).1)
+                      (sub_sound _ _ _ _ _ hc₂ fun γ hm => (hent γ hm).2)
     | .add e1 e2 =>
       simp_all [check]
       obtain ⟨c₁, s', hc₁⟩ : ∃ c₁ s, synth Γ (.add e1 e2) = some (c₁, s) := by grind
       simp_all
       obtain ⟨c₂, hc₂⟩ : ∃ c₂, sub Γ s' t = some c₂ := by grind
       simp_all ; rw [←hcheck] at hent
-      exact Check.sub (synth_sound κ Γ _ _ _ hc₁ fun ρ hm => (hent ρ hm).1)
-                      (sub_sound _ _ _ _ _ hc₂ fun ρ hm => (hent ρ hm).2)
+      exact Check.sub (synth_sound κ Γ _ _ _ hc₁ fun γ hm => (hent γ hm).1)
+                      (sub_sound _ _ _ _ _ hc₂ fun γ hm => (hent γ hm).2)
     | .ite (.fvar cn) bt bf =>
       simp_all [check]
       obtain ⟨r, hr⟩ : ∃ r, List.lookup cn Γ = some (.refine .bool r) := by grind
@@ -257,8 +257,8 @@ mutual
       · simp only [List.append_assoc]
         apply check_sound _ _ _ _ _ hc₁
         apply Entail.ext
-        intro ρ hm
-        have hconj := (hent ρ hm).1
+        intro γ hm
+        have hconj := (hent γ hm).1
         intro v hv
         cases v
         · simpa [REnv.update] using hconj.1 hv
@@ -266,8 +266,8 @@ mutual
       · simp only [List.append_assoc]
         apply check_sound _ _ _ _ _ hc₂
         apply Entail.ext
-        intro ρ hm
-        have hconj := (hent ρ hm).2
+        intro γ hm
+        have hconj := (hent γ hm).2
         intro v hv
         cases v
         · simpa [REnv.update] using hconj.1 hv
@@ -301,21 +301,21 @@ mutual
         have hbody₀ :
             Check κ ((x₀, s1) :: Γ) (Exp.openVar 0 x₀ e) (Ty.openVar 0 x₀ t1) := by
           apply check_sound κ _ _ _ _ hc₁
-          intro ρ hmρ
-          have hΓρ : ModelsEnv κ ρ Γ := by
+          intro γ hmγ
+          have hΓγ : ModelsEnv κ γ Γ := by
             cases s1 with
-            | refine _ _ => exact hmρ.2
-            | arrow _ _  => exact hmρ
-          have hcρ : c κ ρ := hent ρ hΓρ
-          rw [← hcheck] at hcρ
-          simp only [implyBind] at hcρ
+            | refine _ _ => exact hmγ.2.2
+            | arrow _ _  => exact hmγ
+          have hcγ : c κ γ := hent γ hΓγ
+          rw [← hcheck] at hcγ
+          simp only [implyBind] at hcγ
           cases s1 with
           | refine b r =>
-            have hsat : Refinement.interp κ r ρ (REnv.get b ρ x₀) := hmρ.1
-            have h := hcρ (REnv.get b ρ x₀) hsat
-            rw [REnv.update_self] at h
+            have hsat : Refinement.interp κ r γ (REnv.get b γ x₀) := hmγ.2.1
+            have h := hcγ (REnv.get b γ x₀) hsat
+            rw [REnv.update_self b γ x₀ hmγ.1] at h
             exact h
-          | arrow _ _ => exact hcρ
+          | arrow _ _ => exact hcγ
         have hfresh₀ : x₀ ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ ++
                        e.fv ++ s1.fv ++ t1.fv ++ Ty.named s1 ++ Ty.named t1 ++ [nuName] := by
           have h := EVar.fresh_not_mem L₀
@@ -343,29 +343,29 @@ mutual
       -- 1. Synth at e1 via synth_sound.
       have hsy : Synth κ Γ e1 s := by
         apply synth_sound _ _ _ _ _ hsynth
-        intro ρ hρ
-        have := hent ρ hρ
+        intro γ hγ
+        have := hent γ hγ
         rw [←hcheck] at this
         exact this.1
       -- 2. Body Check at x₀ via check_sound.
       have hbody₀ : Check κ ((x₀, s) :: Γ) (Exp.openVar 0 x₀ e2) t := by
         apply check_sound _ _ _ _ _ hcheck₂
-        intro ρ hmρ
-        have hΓρ : ModelsEnv κ ρ Γ := by
+        intro γ hmγ
+        have hΓγ : ModelsEnv κ γ Γ := by
           cases s with
-          | refine _ _ => exact hmρ.2
-          | arrow _ _  => exact hmρ
-        have hcρ : c κ ρ := hent ρ hΓρ
-        rw [← hcheck] at hcρ
-        have himply : implyBind x₀ s c₂ κ ρ := by
-          have := hcρ.2
+          | refine _ _ => exact hmγ.2.2
+          | arrow _ _  => exact hmγ
+        have hcγ : c κ γ := hent γ hΓγ
+        rw [← hcheck] at hcγ
+        have himply : implyBind x₀ s c₂ κ γ := by
+          have := hcγ.2
           grind
         simp only [implyBind] at himply
         cases s with
         | refine b r =>
-          have hsat : Refinement.interp κ r ρ (REnv.get b ρ x₀) := hmρ.1
-          have h := himply (REnv.get b ρ x₀) hsat
-          rw [REnv.update_self] at h
+          have hsat : Refinement.interp κ r γ (REnv.get b γ x₀) := hmγ.2.1
+          have h := himply (REnv.get b γ x₀) hsat
+          rw [REnv.update_self b γ x₀ hmγ.1] at h
           exact h
         | arrow _ _ => exact himply
       have hfresh₀ : x₀ ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ ++
@@ -385,36 +385,36 @@ mutual
       obtain ⟨c₁, s, hc₁⟩ : ∃ c₁ s, synth Γ ((Exp.fvar x).leq (Exp.fvar y)) = some (c₁, s) := by grind
       obtain ⟨c₂, hc₂⟩ : ∃ c₂, sub Γ s t = some c₂ := by grind
       simp_all ; rw [←hcheck] at hent
-      exact Check.sub (synth_sound _ _ _ _ _ hc₁ fun ρ hm => (hent ρ hm).1)
-                      (sub_sound _ _ _ _ _ hc₂ fun ρ hm => (hent ρ hm).2)
+      exact Check.sub (synth_sound _ _ _ _ _ hc₁ fun γ hm => (hent γ hm).1)
+                      (sub_sound _ _ _ _ _ hc₂ fun γ hm => (hent γ hm).2)
     | .ann e t' =>
       simp_all [check]
       obtain ⟨c₁, s, hc₁⟩ : ∃ c₁ s, synth Γ (.ann e t') = some (c₁, s) := by grind
       obtain ⟨c₂, hc₂⟩ : ∃ c₂, sub Γ s t = some c₂ := by grind
       simp_all ; rw [←hcheck] at hent
-      exact Check.sub (synth_sound _ _ _ _ _ hc₁ fun ρ hm => (hent ρ hm).1)
-                      (sub_sound _ _ _ _ _ hc₂ fun ρ hm => (hent ρ hm).2)
+      exact Check.sub (synth_sound _ _ _ _ _ hc₁ fun γ hm => (hent γ hm).1)
+                      (sub_sound _ _ _ _ _ hc₂ fun γ hm => (hent γ hm).2)
     | .app e1 (.fvar y) =>
       simp_all [check]
       obtain ⟨c₁, s, hc₁⟩ : ∃ c₁ s, synth Γ (.app e1 (.fvar y)) = some (c₁, s) := by grind
       obtain ⟨c₂, hc₂⟩ : ∃ c₂, sub Γ s t = some c₂ := by grind
       simp_all ; rw [←hcheck] at hent
-      exact Check.sub (synth_sound _ _ _ _ _ hc₁ fun ρ hm => (hent ρ hm).1)
-                      (sub_sound _ _ _ _ _ hc₂ fun ρ hm => (hent ρ hm).2)
+      exact Check.sub (synth_sound _ _ _ _ _ hc₁ fun γ hm => (hent γ hm).1)
+                      (sub_sound _ _ _ _ _ hc₂ fun γ hm => (hent γ hm).2)
     | .not (.fvar x) =>
       simp_all [check]
       obtain ⟨c₁, s', hc₁⟩ : ∃ c₁ s, synth Γ (.not (.fvar x)) = some (c₁, s) := by grind
       obtain ⟨c₂, hc₂⟩ : ∃ c₂, sub Γ s' t = some c₂ := by grind
       simp_all ; rw [←hcheck] at hent
-      exact Check.sub (synth_sound _ _ _ _ _ hc₁ fun ρ hm => (hent ρ hm).1)
-                      (sub_sound _ _ _ _ _ hc₂ fun ρ hm => (hent ρ hm).2)
+      exact Check.sub (synth_sound _ _ _ _ _ hc₁ fun γ hm => (hent γ hm).1)
+                      (sub_sound _ _ _ _ _ hc₂ fun γ hm => (hent γ hm).2)
     | .and (.fvar x) (.fvar y) =>
       simp_all [check]
       obtain ⟨c₁, s', hc₁⟩ : ∃ c₁ s, synth Γ (.and (.fvar x) (.fvar y)) = some (c₁, s) := by grind
       obtain ⟨c₂, hc₂⟩ : ∃ c₂, sub Γ s' t = some c₂ := by grind
       simp_all ; rw [←hcheck] at hent
-      exact Check.sub (synth_sound _ _ _ _ _ hc₁ fun ρ hm => (hent ρ hm).1)
-                      (sub_sound _ _ _ _ _ hc₂ fun ρ hm => (hent ρ hm).2)
+      exact Check.sub (synth_sound _ _ _ _ _ hc₁ fun γ hm => (hent γ hm).1)
+                      (sub_sound _ _ _ _ _ hc₂ fun γ hm => (hent γ hm).2)
     | (.ite (.add _ _) _ _) | (.ite (.ite _ _ _) _ _) | (.ite (.leq _ _) _ _) | (.ite (.not _) _ _)
     | (.ite (.and _ _) _ _) | (.ite (.ann _ _) _ _) | (.ite (.app _ _) _ _) | (.ite (.letin _ _) _ _)
     | (.ite (.lam _) _ _) | (.ite (.bconst true) _ _) | (.ite (.bconst false) _ _)

@@ -26,8 +26,8 @@ inductive Subtyp : KEnv → TEnv → Ty → Ty → Prop where
       algorithmic `sub` produces), so it works uniformly whether `r₁`/`r₂` are
       formulas or κ-applications. -/
   | refine {κ Γ b r₁ r₂} :
-      Entail κ Γ (fun ρ => ∀ ν : b.interp,
-        Refinement.interp κ r₁ ρ ν → Refinement.interp κ r₂ ρ ν) →
+      Entail κ Γ (fun γ => ∀ ν : b.interp,
+        Refinement.interp κ r₁ γ ν → Refinement.interp κ r₂ γ ν) →
       Subtyp κ Γ (.refine b r₁) (.refine b r₂)
 
   /-- SUB-FUN (explicit witness): contravariant input, covariant output. -/

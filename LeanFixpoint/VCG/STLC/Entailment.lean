@@ -15,43 +15,55 @@ open STLC
   needed now that κ lives at the `Refinement` level.
 -/
 
-/-- A model for Γ under κ-assignment: every refined binding is satisfied at
-    the stored ρ-value. -/
+/-- A model for Γ under κ-assignment: every refined binding stores a value of
+    the binding's base (`HasBase`) and is satisfied at that γ-value. The
+    `HasBase` conjunct makes explicit what the old two-field `REnv` encoded
+    structurally — that `x : {ν:b | r}` occupies a base-`b` cell — and is what
+    lets `Entail.ext` round-trip a refined slot through `b.interp`. -/
 @[simp]
 def ModelsEnv (κ : KEnv) : REnv → TEnv → Prop
   | _, []                    => True
-  | ρ, (x, .refine b r) :: Γ => Refinement.interp κ r ρ (REnv.get b ρ x)
-                                 ∧ ModelsEnv κ ρ Γ
-  | ρ, (_, .arrow _ _)  :: Γ => ModelsEnv κ ρ Γ
+  | γ, (x, .refine b r) :: Γ => REnv.HasBase γ x b
+                                 ∧ Refinement.interp κ r γ (REnv.get b γ x)
+                                 ∧ ModelsEnv κ γ Γ
+  | γ, (_, .arrow _ _)  :: Γ => ModelsEnv κ γ Γ
 
 /-- `κ; Γ ⊢ c`: `c` (as a Lean predicate over `REnv`) holds in every model of
     Γ under κ. VCGen-produced constraints use this. -/
 @[simp]
 def Entail (κ : KEnv) (Γ : TEnv) (c : REnv → Prop) : Prop :=
-  ∀ ρ, ModelsEnv κ ρ Γ → c ρ
+  ∀ γ, ModelsEnv κ γ Γ → c γ
 
-/-- Updating slot `x` with its current value is the identity. -/
-@[simp]
-theorem REnv.update_self (b : Base) (ρ : REnv) (x : EVar) :
-    REnv.update b ρ x (REnv.get b ρ x) = ρ := by
-  cases b <;> simp only [REnv.update, REnv.get] <;> ext1 <;> funext y <;>
-    by_cases hxy : x = y <;> simp [hxy]
+/-- Updating slot `x` with its current value is the identity — provided the cell
+    actually holds a base-`b` value (otherwise the read defaults and the write
+    re-stamps the wrong constructor). -/
+theorem REnv.update_self (b : Base) (γ : REnv) (x : EVar) (hb : γ.HasBase x b) :
+    REnv.update b γ x (REnv.get b γ x) = γ := by
+  apply REnv.ext; funext y
+  by_cases hxy : x = y
+  · subst hxy
+    cases b with
+    | int  => obtain ⟨n, hn⟩ := hb
+              simp [hn]
+    | bool => obtain ⟨c, hc⟩ := hb
+              simp [hc]
+  · simp [hxy]
 
-/-- ENT-EMP: `∀ ρ, c ρ ⟹ κ; ∅ ⊢ c`. -/
+/-- ENT-EMP: `∀ γ, c γ ⟹ κ; ∅ ⊢ c`. -/
 @[simp]
-theorem Entail.emp {κ : KEnv} {c : REnv → Prop} (h : ∀ ρ, c ρ) :
+theorem Entail.emp {κ : KEnv} {c : REnv → Prop} (h : ∀ γ, c γ) :
     Entail κ [] c := by
-  intro ρ _; exact h ρ
+  intro γ _; exact h γ
 
 /-- ENT-EXT (predicate form): `κ; Γ ⊢ ∀v:b. r v → c[x↦v]  ⟹  κ; Γ, x:{ν:b|r} ⊢ c`.
-    Instantiate with `REnv.get b ρ x`, then close by `REnv.update_self`. -/
+    Instantiate with `REnv.get b γ x`, then close by `REnv.update_self`. -/
 @[simp]
 theorem Entail.ext {κ : KEnv} {Γ : TEnv} {x : EVar} {b : Base} {r : Refinement b}
     {c : REnv → Prop}
-    (h : Entail κ Γ (fun ρ => ∀ v : b.interp,
-              Refinement.interp κ r ρ v → c (REnv.update b ρ x v))) :
+    (h : Entail κ Γ (fun γ => ∀ v : b.interp,
+              Refinement.interp κ r γ v → c (REnv.update b γ x v))) :
     Entail κ ((x, .refine b r) :: Γ) c := by
-  intro ρ ⟨hr, hΓ⟩
-  have key := h ρ hΓ (REnv.get b ρ x) hr
-  rw [REnv.update_self] at key
+  intro γ ⟨hb, hr, hΓ⟩
+  have key := h γ hΓ (REnv.get b γ x) hr
+  rw [REnv.update_self b γ x hb] at key
   exact key
