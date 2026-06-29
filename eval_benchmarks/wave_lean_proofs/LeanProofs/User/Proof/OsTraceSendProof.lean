@@ -1,0 +1,73 @@
+import LeanFixpoint
+import LeanProofs.Flux.Prelude
+import LeanProofs.Flux.VC.OsTraceSend
+open Classical
+set_option linter.unusedVariables false
+
+
+namespace F
+
+namespace OsTraceSendQualifs
+
+@[qualif]
+def EqTrue (cnt₀ : Prop) : Prop :=
+  cnt₀
+
+@[qualif]
+def EqFalse (cnt₀ : Prop) : Prop :=
+  (¬cnt₀)
+
+@[qualif]
+def EqZero (cnt₀ : Int) : Prop :=
+  (cnt₀ = 0)
+
+@[qualif]
+def GtZero (cnt₀ : Int) : Prop :=
+  (cnt₀ > 0)
+
+@[qualif]
+def GeZero (cnt₀ : Int) : Prop :=
+  (cnt₀ ≥ 0)
+
+@[qualif]
+def LtZero (cnt₀ : Int) : Prop :=
+  (cnt₀ < 0)
+
+@[qualif]
+def LeZero (cnt₀ : Int) : Prop :=
+  (cnt₀ ≤ 0)
+
+@[qualif]
+def Eq (cnt₀ : Int) (fd₀ : Int) : Prop :=
+  (cnt₀ = fd₀)
+
+@[qualif]
+def Gt (cnt₀ : Int) (fd₀ : Int) : Prop :=
+  (cnt₀ > fd₀)
+
+@[qualif]
+def Ge (cnt₀ : Int) (fd₀ : Int) : Prop :=
+  (cnt₀ ≥ fd₀)
+
+@[qualif]
+def Lt (cnt₀ : Int) (fd₀ : Int) : Prop :=
+  (cnt₀ < fd₀)
+
+@[qualif]
+def Le (cnt₀ : Int) (fd₀ : Int) : Prop :=
+  (cnt₀ ≤ fd₀)
+
+@[qualif]
+def Le1 (cnt₀ : Int) (fd₀ : Int) : Prop :=
+  (cnt₀ ≤ (fd₀ - 1))
+
+end OsTraceSendQualifs
+
+open OsTraceSendQualifs
+
+set_option maxHeartbeats 5000000
+#time def OsTraceSend_proof : OsTraceSend := by
+  unfold OsTraceSend
+  solve_fixpoint_combo
+
+end F

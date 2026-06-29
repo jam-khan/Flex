@@ -1,0 +1,4 @@
+import LeanProofs.Flux.VC.BucketMapImpl__0__AllocateSlots
+import LeanProofs.User.Proof.BucketMapImpl__0__AllocateSlotsProof
+
+#check (F.BucketMapImpl__0__AllocateSlots_proof : F.BucketMapImpl__0__AllocateSlots)

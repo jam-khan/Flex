@@ -1,0 +1,73 @@
+import LeanFixpoint
+import LeanProofs.Flux.Prelude
+import LeanProofs.Flux.VC.WrappersWasiFdClose
+open Classical
+set_option linter.unusedVariables false
+
+
+namespace F
+
+namespace WrappersWasiFdCloseQualifs
+
+@[qualif]
+def EqTrue (v_fd₀ : Prop) : Prop :=
+  v_fd₀
+
+@[qualif]
+def EqFalse (v_fd₀ : Prop) : Prop :=
+  (¬v_fd₀)
+
+@[qualif]
+def EqZero (v_fd₀ : Int) : Prop :=
+  (v_fd₀ = 0)
+
+@[qualif]
+def GtZero (v_fd₀ : Int) : Prop :=
+  (v_fd₀ > 0)
+
+@[qualif]
+def GeZero (v_fd₀ : Int) : Prop :=
+  (v_fd₀ ≥ 0)
+
+@[qualif]
+def LtZero (v_fd₀ : Int) : Prop :=
+  (v_fd₀ < 0)
+
+@[qualif]
+def LeZero (v_fd₀ : Int) : Prop :=
+  (v_fd₀ ≤ 0)
+
+@[qualif]
+def Eq (v_fd₀ : Int) (a'₁ : Int) : Prop :=
+  (v_fd₀ = a'₁)
+
+@[qualif]
+def Gt (v_fd₀ : Int) (a'₁ : Int) : Prop :=
+  (v_fd₀ > a'₁)
+
+@[qualif]
+def Ge (v_fd₀ : Int) (a'₁ : Int) : Prop :=
+  (v_fd₀ ≥ a'₁)
+
+@[qualif]
+def Lt (v_fd₀ : Int) (a'₁ : Int) : Prop :=
+  (v_fd₀ < a'₁)
+
+@[qualif]
+def Le (v_fd₀ : Int) (a'₁ : Int) : Prop :=
+  (v_fd₀ ≤ a'₁)
+
+@[qualif]
+def Le1 (v_fd₀ : Int) (a'₁ : Int) : Prop :=
+  (v_fd₀ ≤ (a'₁ - 1))
+
+end WrappersWasiFdCloseQualifs
+
+open WrappersWasiFdCloseQualifs
+
+set_option maxHeartbeats 5000000
+#time def WrappersWasiFdClose_proof : WrappersWasiFdClose := by
+  unfold WrappersWasiFdClose
+  solve_fixpoint_combo
+
+end F

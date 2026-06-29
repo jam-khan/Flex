@@ -1,0 +1,4 @@
+import LeanProofs.Flux.VC.TypestateImpl__1__IntoInputHighZ
+import LeanProofs.User.Proof.TypestateImpl__1__IntoInputHighZProof
+
+#check (F.TypestateImpl__1__IntoInputHighZ_proof : F.TypestateImpl__1__IntoInputHighZ)

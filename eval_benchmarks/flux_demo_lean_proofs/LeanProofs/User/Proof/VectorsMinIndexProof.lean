@@ -1,0 +1,73 @@
+import LeanFixpoint
+import LeanProofs.Flux.Prelude
+import LeanProofs.Flux.VC.VectorsMinIndex
+open Classical
+set_option linter.unusedVariables false
+
+
+namespace F
+
+namespace VectorsMinIndexQualifs
+
+@[qualif]
+def EqTrue (min₀ : Prop) : Prop :=
+  min₀
+
+@[qualif]
+def EqFalse (min₀ : Prop) : Prop :=
+  (¬min₀)
+
+@[qualif]
+def EqZero (min₀ : Int) : Prop :=
+  (min₀ = 0)
+
+@[qualif]
+def GtZero (min₀ : Int) : Prop :=
+  (min₀ > 0)
+
+@[qualif]
+def GeZero (min₀ : Int) : Prop :=
+  (min₀ ≥ 0)
+
+@[qualif]
+def LtZero (min₀ : Int) : Prop :=
+  (min₀ < 0)
+
+@[qualif]
+def LeZero (min₀ : Int) : Prop :=
+  (min₀ ≤ 0)
+
+@[qualif]
+def Eq (min₀ : Int) (iter₀ : Int) : Prop :=
+  (min₀ = iter₀)
+
+@[qualif]
+def Gt (min₀ : Int) (iter₀ : Int) : Prop :=
+  (min₀ > iter₀)
+
+@[qualif]
+def Ge (min₀ : Int) (iter₀ : Int) : Prop :=
+  (min₀ ≥ iter₀)
+
+@[qualif]
+def Lt (min₀ : Int) (iter₀ : Int) : Prop :=
+  (min₀ < iter₀)
+
+@[qualif]
+def Le (min₀ : Int) (iter₀ : Int) : Prop :=
+  (min₀ ≤ iter₀)
+
+@[qualif]
+def Le1 (min₀ : Int) (iter₀ : Int) : Prop :=
+  (min₀ ≤ (iter₀ - 1))
+
+end VectorsMinIndexQualifs
+
+open VectorsMinIndexQualifs
+
+set_option maxHeartbeats 5000000
+#time def VectorsMinIndex_proof : VectorsMinIndex := by
+  unfold VectorsMinIndex
+  solve_fixpoint_combo
+
+end F

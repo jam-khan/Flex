@@ -1,0 +1,4 @@
+import LeanProofs.Flux.VC.Wasm2cFrontendZWasiSnapshotPreview1ZFdReaddirZIiiiji
+import LeanProofs.User.Proof.Wasm2cFrontendZWasiSnapshotPreview1ZFdReaddirZIiiijiProof
+
+#check (F.Wasm2cFrontendZWasiSnapshotPreview1ZFdReaddirZIiiiji_proof : F.Wasm2cFrontendZWasiSnapshotPreview1ZFdReaddirZIiiiji)

@@ -1,0 +1,73 @@
+import LeanFixpoint
+import LeanProofs.Flux.Prelude
+import LeanProofs.Flux.VC.TypesImpl__31__TryFrom
+open Classical
+set_option linter.unusedVariables false
+
+
+namespace F
+
+namespace TypesImpl31TryFromQualifs
+
+@[qualif]
+def EqTrue (flags₀ : Prop) : Prop :=
+  flags₀
+
+@[qualif]
+def EqFalse (flags₀ : Prop) : Prop :=
+  (¬flags₀)
+
+@[qualif]
+def EqZero (flags₀ : Int) : Prop :=
+  (flags₀ = 0)
+
+@[qualif]
+def GtZero (flags₀ : Int) : Prop :=
+  (flags₀ > 0)
+
+@[qualif]
+def GeZero (flags₀ : Int) : Prop :=
+  (flags₀ ≥ 0)
+
+@[qualif]
+def LtZero (flags₀ : Int) : Prop :=
+  (flags₀ < 0)
+
+@[qualif]
+def LeZero (flags₀ : Int) : Prop :=
+  (flags₀ ≤ 0)
+
+@[qualif]
+def Eq (flags₀ : Int) (a'₁ : Int) : Prop :=
+  (flags₀ = a'₁)
+
+@[qualif]
+def Gt (flags₀ : Int) (a'₁ : Int) : Prop :=
+  (flags₀ > a'₁)
+
+@[qualif]
+def Ge (flags₀ : Int) (a'₁ : Int) : Prop :=
+  (flags₀ ≥ a'₁)
+
+@[qualif]
+def Lt (flags₀ : Int) (a'₁ : Int) : Prop :=
+  (flags₀ < a'₁)
+
+@[qualif]
+def Le (flags₀ : Int) (a'₁ : Int) : Prop :=
+  (flags₀ ≤ a'₁)
+
+@[qualif]
+def Le1 (flags₀ : Int) (a'₁ : Int) : Prop :=
+  (flags₀ ≤ (a'₁ - 1))
+
+end TypesImpl31TryFromQualifs
+
+open TypesImpl31TryFromQualifs
+
+set_option maxHeartbeats 5000000
+#time def TypesImpl__31__TryFrom_proof : TypesImpl__31__TryFrom := by
+  unfold TypesImpl__31__TryFrom
+  solve_fixpoint_combo
+
+end F

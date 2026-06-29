@@ -1,0 +1,4 @@
+import LeanProofs.Flux.VC.StatsNoopInstrumentationStopTimer
+import LeanProofs.User.Proof.StatsNoopInstrumentationStopTimerProof
+
+#check (F.StatsNoopInstrumentationStopTimer_proof : F.StatsNoopInstrumentationStopTimer)

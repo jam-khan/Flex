@@ -1,0 +1,4 @@
+import LeanProofs.Flux.VC.StatsNoopInstrumentationOutputHostcallPerfResults
+import LeanProofs.User.Proof.StatsNoopInstrumentationOutputHostcallPerfResultsProof
+
+#check (F.StatsNoopInstrumentationOutputHostcallPerfResults_proof : F.StatsNoopInstrumentationOutputHostcallPerfResults)

@@ -1,0 +1,4 @@
+import LeanProofs.Flux.VC.WritebackWasm2cMarshalAndWritebackU32Pair
+import LeanProofs.User.Proof.WritebackWasm2cMarshalAndWritebackU32PairProof
+
+#check (F.WritebackWasm2cMarshalAndWritebackU32Pair_proof : F.WritebackWasm2cMarshalAndWritebackU32Pair)

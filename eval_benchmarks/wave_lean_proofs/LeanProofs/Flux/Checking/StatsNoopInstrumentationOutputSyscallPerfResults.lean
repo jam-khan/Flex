@@ -1,0 +1,4 @@
+import LeanProofs.Flux.VC.StatsNoopInstrumentationOutputSyscallPerfResults
+import LeanProofs.User.Proof.StatsNoopInstrumentationOutputSyscallPerfResultsProof
+
+#check (F.StatsNoopInstrumentationOutputSyscallPerfResults_proof : F.StatsNoopInstrumentationOutputSyscallPerfResults)

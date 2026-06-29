@@ -1,0 +1,4 @@
+import LeanProofs.Flux.VC.RawVecImpl__1__WithCapacityZeroedIn
+import LeanProofs.User.Proof.RawVecImpl__1__WithCapacityZeroedInProof
+
+#check (F.RawVecImpl__1__WithCapacityZeroedIn_proof : F.RawVecImpl__1__WithCapacityZeroedIn)

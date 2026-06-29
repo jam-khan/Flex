@@ -1,0 +1,4 @@
+import LeanProofs.Flux.VC.RuntimeImpl__0__CopyEnvironBufferToSandbox
+import LeanProofs.User.Proof.RuntimeImpl__0__CopyEnvironBufferToSandboxProof
+
+#check (F.RuntimeImpl__0__CopyEnvironBufferToSandbox_proof : F.RuntimeImpl__0__CopyEnvironBufferToSandbox)

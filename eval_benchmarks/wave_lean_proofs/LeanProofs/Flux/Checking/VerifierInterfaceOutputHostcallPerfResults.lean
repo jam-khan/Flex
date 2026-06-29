@@ -1,0 +1,4 @@
+import LeanProofs.Flux.VC.VerifierInterfaceOutputHostcallPerfResults
+import LeanProofs.User.Proof.VerifierInterfaceOutputHostcallPerfResultsProof
+
+#check (F.VerifierInterfaceOutputHostcallPerfResults_proof : F.VerifierInterfaceOutputHostcallPerfResults)

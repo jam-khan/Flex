@@ -1,0 +1,4 @@
+import LeanProofs.Flux.VC.Wasm2cFrontendZWasiSnapshotPreview1ZPathCreateDirectoryZIiii
+import LeanProofs.User.Proof.Wasm2cFrontendZWasiSnapshotPreview1ZPathCreateDirectoryZIiiiProof
+
+#check (F.Wasm2cFrontendZWasiSnapshotPreview1ZPathCreateDirectoryZIiii_proof : F.Wasm2cFrontendZWasiSnapshotPreview1ZPathCreateDirectoryZIiii)
