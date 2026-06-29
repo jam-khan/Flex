@@ -51,15 +51,8 @@ theorem sub_sound (κ : KEnv) (Γ : TEnv) (s t : Ty) (c : Constraint) :
     · exact hb.2 hpre
   | .arrow s1 t1, .arrow s2 t2 =>
     simp_all [sub]
-    -- use `set` so `w` stays opaque, preventing whnf blowup
-    let w := (EVar.fresh
-            (Γ.dom ++
-              (Γ.tyFv ++
-                (s1.fv ++
-                  (s2.fv ++
-                    (t1.fv ++ t2.fv))))))
-    have hwd : w = EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ
-                          ++ s1.fv ++ s2.fv ++ t1.fv ++ t2.fv) := by grind
+    let w := (EVar.fresh (Γ.dom ++ (Γ.tyFv ++ (s1.fv ++ (s2.fv ++ (t1.fv ++ t2.fv))))))
+    have hwd : w = EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ ++ s1.fv ++ s2.fv ++ t1.fv ++ t2.fv) := by grind
     obtain ⟨c₁, hc₁⟩ : ∃ c₁, sub Γ s2 s1 = some c₁ := by
       rcases Option.eq_none_or_eq_some (sub Γ s2 s1) with eqn | eqs
       · simp_all
@@ -71,20 +64,13 @@ theorem sub_sound (κ : KEnv) (Γ : TEnv) (s t : Ty) (c : Constraint) :
     -- avoid `simp at hsub` to keep implyBind folded
     rw [hc₁, hc₂] at hsub
     simp only [Option.some.injEq] at hsub
-    -- hsub : (fun κ γ => c₁ κ γ ∧ implyBind w s2 c₂ κ γ) = c
-    have hw : w ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ s1.fv ++ s2.fv ++ t1.fv ++ t2.fv
-                := by
-      grind [EVar.fresh_not_mem (Γ.dom ++
-              (Γ.tyFv ++
-                  (s1.fv ++
-                    (s2.fv ++
-                      (t1.fv ++ t2.fv)))))]
+    have hw : w ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ s1.fv ++ s2.fv ++ t1.fv ++ t2.fv := by
+      grind [EVar.fresh_not_mem (Γ.dom ++ (Γ.tyFv ++ (s1.fv ++ (s2.fv ++ (t1.fv ++ t2.fv)))))]
     apply Subtyp.arrow (x := w) _ hw
     · apply sub_sound κ ((w, s2) :: Γ) _ _ c₂ hc₂
       intro γ hm
       have hΓγ : ModelsEnv κ γ Γ := by
         cases s2 with | refine _ _ => exact hm.2.2 | arrow _ _ => exact hm
-      -- use ▸ so implyBind stays folded until we need it
       rw [←hsub] at hent
       have hcγ : c₁ κ γ ∧ implyBind w s2 c₂ κ γ := by grind [hent γ hΓγ]
       simp only [implyBind] at hcγ
@@ -236,11 +222,9 @@ mutual
       obtain ⟨r, hr⟩ : ∃ r, List.lookup cn Γ = some (.refine .bool r) := by grind
       simp_all
       obtain ⟨c₁, c₂, hc₁, hc₂⟩ : ∃ c₁ c₂,
-          (check ((EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ
-                    ++ bt.fv ++ bf.fv ++ t.fv ++ [cn]),
+          (check ((EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ ++ bt.fv ++ bf.fv ++ t.fv ++ [cn]),
                    Ty.refine Base.bool (.fmla (.eq .bool (.fvar .bool cn) (.const .bool true)))) :: Γ) bt t = some c₁) ∧
-          (check ((EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ
-                    ++ bt.fv ++ bf.fv ++ t.fv ++ [cn]),
+          (check ((EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ ++ bt.fv ++ bf.fv ++ t.fv ++ [cn]),
                    Ty.refine .bool (.fmla (.eq .bool (.fvar .bool cn) (.const .bool false)))) :: Γ) bf t = some c₂) := by
         grind
       simp_all
@@ -275,12 +259,9 @@ mutual
         simp_all [check]
         -- Use the LITERAL right-associated fresh expression (matches simp's normal form
         -- so the second simp_all can substitute hc₁ into hcheck).
-        obtain ⟨c₁, hc₁⟩ : ∃ c₁, check ((EVar.fresh (TEnv.dom Γ ++ (e.fv ++ (s1.fv ++ (t1.fv ++ TEnv.tyFv Γ))))
-                                            , s1) :: Γ)
-            (Exp.openVar 0 (EVar.fresh (TEnv.dom Γ ++ (e.fv ++ (s1.fv ++ (t1.fv ++ TEnv.tyFv Γ )))))
-                                            e)
-            (Ty.openVar 0 (EVar.fresh (TEnv.dom Γ ++ (e.fv ++ (s1.fv ++ (t1.fv ++ TEnv.tyFv Γ )))))
-                                            t1) = some c₁ := by grind
+        obtain ⟨c₁, hc₁⟩ : ∃ c₁, check ((EVar.fresh (TEnv.dom Γ ++ (e.fv ++ (s1.fv ++ (t1.fv ++ TEnv.tyFv Γ)))) , s1) :: Γ)
+            (Exp.openVar 0 (EVar.fresh (TEnv.dom Γ ++ (e.fv ++ (s1.fv ++ (t1.fv ++ TEnv.tyFv Γ ))))) e)
+            (Ty.openVar 0 (EVar.fresh (TEnv.dom Γ ++ (e.fv ++ (s1.fv ++ (t1.fv ++ TEnv.tyFv Γ ))))) t1) = some c₁ := by grind
         simp_all
         let L₀ : List EVar := TEnv.dom Γ ++ (e.fv ++ (s1.fv ++ (t1.fv ++ TEnv.tyFv Γ )))
         let x₀ : EVar := EVar.fresh L₀
@@ -313,10 +294,8 @@ mutual
       simp_all [check]
       obtain ⟨c₁, s, hsynth⟩ : ∃ c₁ s, synth Γ e1 = some (c₁, s) := by grind
       -- Use LITERAL right-associated fresh expression (matches simp's normal form).
-      obtain ⟨c₂, hcheck₂⟩ : ∃ c₂, check ((EVar.fresh (TEnv.dom Γ ++ (e2.fv ++ (s.fv ++ (t.fv ++ TEnv.tyFv Γ))))
-                                            , s) :: Γ)
-          (Exp.openVar 0 (EVar.fresh (TEnv.dom Γ ++ (e2.fv ++ (s.fv ++ (t.fv ++ TEnv.tyFv Γ)))))
-                                            e2) t = some c₂ := by grind
+      obtain ⟨c₂, hcheck₂⟩ : ∃ c₂, check ((EVar.fresh (TEnv.dom Γ ++ (e2.fv ++ (s.fv ++ (t.fv ++ TEnv.tyFv Γ)))) , s) :: Γ)
+          (Exp.openVar 0 (EVar.fresh (TEnv.dom Γ ++ (e2.fv ++ (s.fv ++ (t.fv ++ TEnv.tyFv Γ))))) e2) t = some c₂ := by grind
       simp_all
       let L₀ : List EVar := TEnv.dom Γ ++ (e2.fv ++ (s.fv ++ (t.fv ++ TEnv.tyFv Γ)))
       let x₀ : EVar := EVar.fresh L₀

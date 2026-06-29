@@ -15,8 +15,7 @@ inductive Hastype : KEnv → TEnv → Exp → Ty → Prop where
       Hastype κ Γ (.bconst b) (primBool b)
   | lam {κ Γ e s₁ s₂ x} :
       Ty.WFBVars (.arrow s₁ s₂) →
-      x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ
-          ++ e.fv ++ s₁.fv ++ s₂.fv →
+      x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ e.fv ++ s₁.fv ++ s₂.fv →
       Hastype κ ((x, s₁) :: Γ) (e.openVar 0 x) (s₂.openVar 0 x) →
       Hastype κ Γ (.lam e) (.arrow s₁ s₂)
   | app {κ Γ e₁ y s t} :
@@ -27,8 +26,7 @@ inductive Hastype : KEnv → TEnv → Exp → Ty → Prop where
   | letin {κ Γ e₁ e₂ s t x} :
       Ty.WFBVars t →
       Hastype κ Γ e₁ s →
-      x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ
-          ++ e₂.fv ++ s.fv ++ t.fv →
+      x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ e₂.fv ++ s.fv ++ t.fv →
       Hastype κ ((x, s) :: Γ) (e₂.openVar 0 x) t →
       Hastype κ Γ (.letin e₁ e₂) t
   | ann {κ Γ e t} :
@@ -66,8 +64,7 @@ inductive Hastype : KEnv → TEnv → Exp → Ty → Prop where
         (.refine .bool (.fmla (.eq .bool (.bvar .bool 0) (.and (.fvar .bool x) (.fvar .bool y)))))
   | ite {κ Γ x y e₁ e₂ r t} :
       Γ.lookup x = some (.refine .bool r) →
-      y ∉ TEnv.dom Γ ++ TEnv.tyFv Γ
-          ++ e₁.fv ++ e₂.fv ++ t.fv ++ [x] →
+      y ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ e₁.fv ++ e₂.fv ++ t.fv ++ [x] →
       Ty.WFBVars t →
       Hastype κ ((y, .refine .bool (.fmla
                 (.eq .bool (.fvar .bool x) (.const .bool true)))) :: Γ) e₁ t →
