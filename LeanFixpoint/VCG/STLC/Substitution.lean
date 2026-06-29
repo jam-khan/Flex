@@ -607,11 +607,8 @@ theorem Exp.skel_openVar (k : Nat) (x : EVar) (e : Exp) :
   | ite _ _ _ ih₀ ih₁ ih₂ => simp [Exp.openVar, Exp.skel, ih₀, ih₁, ih₂]
   | add _ _ ih₁ ih₂    => simp [Exp.openVar, Exp.skel, ih₁, ih₂]
 
-/-! ## 7. TEnv free variables
+/-! ## 7. TEnv free variables -/
 
-  Free variables of a typing context = union of free vars across all types,
-  excluding the bound names themselves (which are scoped left-to-right by
-  the cofinite typing rules). -/
 def TEnv.fv : TEnv → List EVar
   | []          => []
   | (x, t) :: Γ => t.fv ++ ((TEnv.fv Γ).filter (· ≠ x))

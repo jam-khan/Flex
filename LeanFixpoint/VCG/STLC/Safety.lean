@@ -15,11 +15,6 @@ open STLC
     (T3) `type_safety`          — Closed-term safety (corollary of T2).
     (T4) `vcgen_safety`         — End-to-end VCGen safety:
                                    `topVC κ [] e t → ∃ v, e ⇓ v ∧ ⟦t⟧κ γ_∅ v`.
-
-  All four are κ-indexed and operate over the new locally-nameless syntax with
-  deep `Formula` refinements. The arrow case of the logical relation is stated
-  in the canonical cofinite form (`∃ L, ∀ x ∉ L, …`), with the rename keystone
-  (`TyDenote.rename`) proved as a separate lemma.
 -/
 
 namespace STLC

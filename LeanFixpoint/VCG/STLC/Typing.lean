@@ -10,8 +10,7 @@ open STLC
   picks). The user typically writes `∃ κ, Check κ [] e t`.
 
   Binding sites use locally-nameless: `Exp.lam`/`letin` carry no binder name;
-  the body has `BVar 0` for the parameter. Cofinite quantification picks fresh
-  free names for opening.
+  the body has `BVar 0` for the parameter.
 
   Refinements are deeply-embedded `Formula`s; `Subtyp.refine`'s constraint is
   expressed via `Refinement.subImp` (a `Formula.allI`/`allB` over `ν`).
@@ -33,8 +32,7 @@ inductive Subtyp : KEnv → TEnv → Ty → Ty → Prop where
   /-- SUB-FUN (explicit witness): contravariant input, covariant output. -/
   | arrow {κ Γ s₁ t₁ s₂ t₂ x} :
       Subtyp κ Γ s₂ s₁ →
-      x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ
-          ++ s₁.fv ++ s₂.fv ++ t₁.fv ++ t₂.fv →
+      x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ s₁.fv ++ s₂.fv ++ t₁.fv ++ t₂.fv →
       Subtyp κ ((x, s₂) :: Γ) (t₁.openVar 0 x) (t₂.openVar 0 x) →
       Subtyp κ Γ (.arrow s₁ t₁) (.arrow s₂ t₂)
 
@@ -99,8 +97,7 @@ mutual
         Check κ Γ e t
 
     | lam {κ Γ e s₁ s₂ x} :
-        x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ
-            ++ e.fv ++ s₁.fv ++ s₂.fv →
+        x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ e.fv ++ s₁.fv ++ s₂.fv →
         Check κ ((x, s₁) :: Γ) (e.openVar 0 x) (s₂.openVar 0 x) →
         Check κ Γ (.lam e) (.arrow s₁ s₂)
 
@@ -113,8 +110,7 @@ mutual
 
     | ite {κ Γ x y e₁ e₂ r t} :
         Γ.lookup x = some (.refine .bool r) →
-        y ∉ TEnv.dom Γ ++ TEnv.tyFv Γ
-            ++ e₁.fv ++ e₂.fv ++ t.fv ++ [x] →
+        y ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ e₁.fv ++ e₂.fv ++ t.fv ++ [x] →
         Check κ ((y, .refine .bool (.fmla
                   (.eq .bool (.fvar .bool x) (.const .bool true)))) :: Γ) e₁ t →
         Check κ ((y, .refine .bool (.fmla

@@ -180,9 +180,7 @@ example (κ : KEnv) : topVC κ [] exEq tyEq := by
   simp [topVC, exEq, tyEq]
   solve_fixpoint
 
-/-! ## `exMax`: `λx. λy. let c = x ≤ y in if c then y else x`
-
-  Demonstrates ite + leq + cofinite let nested inside two cofinite λs. -/
+/-! ## `exMax`: `λx. λy. let c = x ≤ y in if c then y else x`. -/
 
 abbrev exMax : Exp :=
   .lam       -- λ x.

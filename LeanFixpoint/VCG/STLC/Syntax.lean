@@ -7,7 +7,7 @@ namespace STLC
   1. **Variables, bases, runtime envs** — `EVar`, `Base`, `REnv`.
   2. **Deep-embedded refinement language** — `Term`, `Formula`, `Refinement`.
      Fully LN: ν, the `Formula` quantifiers, and the `Ty.arrow` binders are all
-     de Bruijn `BVar`s (ν is `BVar 0` of its refinement).
+     de Bruijn `BVar`s.
   3. **Types (LN)** — `Ty`. `arrow s t` carries no binder name; `t` is a body
      with `BVar 0` standing for the function argument.
   4. **Expressions (LN)** — `Exp`. Binding forms (`lam`, `letin`) carry no
@@ -83,10 +83,10 @@ inductive Formula where
   | or    : Formula → Formula → Formula
   | not   : Formula → Formula
   | imp   : Formula → Formula → Formula
-  | exI   : Formula → Formula   -- ∃ (BVar 0 : Int).  φ
-  | exB   : Formula → Formula   -- ∃ (BVar 0 : Bool). φ
-  | allI  : Formula → Formula   -- ∀ (BVar 0 : Int).  φ
-  | allB  : Formula → Formula   -- ∀ (BVar 0 : Bool). φ
+  | exI   : Formula → Formula   -- ∃. φ
+  | exB   : Formula → Formula   -- ∃. φ
+  | allI  : Formula → Formula   -- ∀. φ
+  | allB  : Formula → Formula   -- ∀. φ
 
 /-- A refinement, one stratification level *above* `Formula`: either a
     kvar-FREE `Formula` (whose `BVar 0`, i.e. ν, denotes the refined value), or a
@@ -137,18 +137,11 @@ theorem exists_kenv_curried {P : KEnv → Prop}
     (h : P (mkKEnv ks)) : ∃ κ : KEnv, P κ :=
   ⟨mkKEnv ks, h⟩
 
-/-! ## Types — locally nameless
-
-  `arrow s t`: the codomain `t` is a *body* with `BVar 0` representing the
-  function argument. There are NO binder names on `arrow`.
-
-  `refine b r` is non-binding at the `Ty` level (ν is internal to the
-  `Refinement`).
--/
+/-! ## Types — locally nameless -/
 
 inductive Ty where
-  | refine : (b : Base) → Refinement b → Ty
-  | arrow  : Ty → Ty → Ty
+  | refine : (b : Base) → Refinement b → Ty -- `{ν: b | r}`
+  | arrow  : Ty → Ty → Ty                   -- `x:s -> t`
 
 /-! ## Expressions — locally nameless
 
@@ -172,9 +165,7 @@ inductive Exp where
   | ite    : Exp → Exp → Exp → Exp
   | add    : Exp → Exp → Exp
 
-/-- Typing context: a list of free-name × type pairs. Names are unique by
-    convention (typing rules enforce via cofinite quantification — see
-    `Declarative.lean` / `Typing.lean`). -/
+/-- Typing context: a list of free-name × type pairs. Names are unique by convention. -/
 @[simp]
 abbrev TEnv := List (EVar × Ty)
 
