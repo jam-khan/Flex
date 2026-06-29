@@ -76,7 +76,7 @@ def TyDenote : KEnv → Ty → REnv → Val → Prop
         Val.lc (.clos body) ∧ Val.closed (.clos body) ∧
         ∀ va, TyDenote κ s γ va →
           ∃ vr, BigStep (body.openVal 0 va) vr ∧
-                TyDenote κ (t.substBV va) γ vr
+                TyDenote κ t (γ.push va) vr
 termination_by _ t _ _ => t.skel
 decreasing_by
   all_goals simp_wf

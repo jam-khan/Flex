@@ -291,6 +291,13 @@ def Val.inj : (b : Base) → b.interp → Val
   | .int,  n => .iconst n
   | .bool, c => .bconst c
 
+/-- The base a `Val` carries (`none` for a closure). Mirrors `Ty.optBase`:
+    a value inhabiting a refinement type `{ν:b|…}` has `optBase = some b`. -/
+@[simp] def Val.optBase : Val → Option Base
+  | .iconst _ => some .int
+  | .bconst _ => some .bool
+  | .clos _   => none
+
 /-- Val-level (lossless) lookup. -/
 @[simp, reducible]
 def REnv.lookup (γ : REnv) (x : EVar) : Val := γ.map x
@@ -304,6 +311,25 @@ def REnv.write (γ : REnv) (x : EVar) (v : Val) : REnv :=
 /-- Enter a binder: push value `v` as the new innermost de Bruijn slot (index 0),
     shifting the existing stack up one. The name map is untouched. -/
 @[simp] def REnv.push (γ : REnv) (v : Val) : REnv := ⟨γ.map, v :: γ.bv⟩
+
+/-- Insert value `v` at de Bruijn index `k` (shifting indices `≥ k` up one).
+    `insertBV 0 = push`. Used to bridge `push`-style `TyDenote` with syntactic
+    `substBV`: putting a value into the stack at level `k` mirrors substituting
+    `BVar k` with that value. -/
+def REnv.insertBV (k : Nat) (v : Val) (γ : REnv) : REnv := ⟨γ.map, γ.bv.insertIdx k v⟩
+
+@[simp] theorem REnv.insertBV_zero (v : Val) (γ : REnv) : γ.insertBV 0 v = γ.push v := rfl
+
+@[simp] theorem REnv.insertBV_map (k : Nat) (v : Val) (γ : REnv) :
+    (γ.insertBV k v).map = γ.map := rfl
+
+@[simp] theorem REnv.insertBV_bv (k : Nat) (v : Val) (γ : REnv) :
+    (γ.insertBV k v).bv = γ.bv.insertIdx k v := rfl
+
+/-- Pushing then inserting deeper = inserting then pushing: `push` is `insertBV 0`,
+    and inserting at `k+1` after a `push` is the same as inserting at `k` first. -/
+theorem REnv.push_insertBV_comm (γ : REnv) (w v : Val) (k : Nat) :
+    (γ.insertBV k v).push w = (γ.push w).insertBV (k+1) v := rfl
 
 /-- Read the `b`-typed value of the de Bruijn `BVar k` from the stack. Out of
     range (never on a well-formed read) defaults per base via `Val.proj`. -/
