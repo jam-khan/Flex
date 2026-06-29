@@ -51,10 +51,8 @@ def Formula.fv : Formula → List EVar
   | .or φ₁ φ₂     => Formula.fv φ₁ ++ Formula.fv φ₂
   | .not φ        => Formula.fv φ
   | .imp φ₁ φ₂    => Formula.fv φ₁ ++ Formula.fv φ₂
-  | .exI φ        => Formula.fv φ
-  | .exB φ        => Formula.fv φ
-  | .allI φ       => Formula.fv φ
-  | .allB φ       => Formula.fv φ
+  | .ex _  φ      => Formula.fv φ
+  | .all _ φ      => Formula.fv φ
 
 /-- Open the `b'`-typed `BVar` at level `k` with a free var `x` throughout `φ`.
     Crossing a quantifier binds a fresh innermost `BVar`, so the level bumps. -/
@@ -67,26 +65,22 @@ def Formula.openBVar (b' : Base) (k : Nat) (x : EVar) : Formula → Formula
   | .or φ₁ φ₂     => .or (φ₁.openBVar b' k x) (φ₂.openBVar b' k x)
   | .not φ        => .not (φ.openBVar b' k x)
   | .imp φ₁ φ₂    => .imp (φ₁.openBVar b' k x) (φ₂.openBVar b' k x)
-  | .exI φ        => .exI (φ.openBVar b' (k+1) x)
-  | .exB φ        => .exB (φ.openBVar b' (k+1) x)
-  | .allI φ       => .allI (φ.openBVar b' (k+1) x)
-  | .allB φ       => .allB (φ.openBVar b' (k+1) x)
+  | .ex b φ       => .ex b (φ.openBVar b' (k+1) x)
+  | .all b φ      => .all b (φ.openBVar b' (k+1) x)
 
 /-- Locally closed at level `k`: descends through formula structure. Each
     quantifier binds the innermost `BVar`, so its body is checked at `k+1`. -/
 def Formula.lc_at : Nat → Formula → Prop
   | _, .tt          => True
   | _, .ff          => True
-  | k, .eq _ t₁ t₂   => t₁.lc_at k ∧ t₂.lc_at k
+  | k, .eq _ t₁ t₂  => t₁.lc_at k ∧ t₂.lc_at k
   | k, .leqI t₁ t₂  => t₁.lc_at k ∧ t₂.lc_at k
   | k, .and φ₁ φ₂   => φ₁.lc_at k ∧ φ₂.lc_at k
   | k, .or φ₁ φ₂    => φ₁.lc_at k ∧ φ₂.lc_at k
   | k, .not φ       => φ.lc_at k
   | k, .imp φ₁ φ₂   => φ₁.lc_at k ∧ φ₂.lc_at k
-  | k, .exI φ       => φ.lc_at (k+1)
-  | k, .exB φ       => φ.lc_at (k+1)
-  | k, .allI φ      => φ.lc_at (k+1)
-  | k, .allB φ      => φ.lc_at (k+1)
+  | k, .ex _ φ      => φ.lc_at (k+1)
+  | k, .all _ φ     => φ.lc_at (k+1)
 
 /-! ## 3. Refinement operations -/
 
@@ -187,7 +181,7 @@ def Formula.hasBVar (b : Base) (k : Nat) : Formula → Prop
   | .and φ₁ φ₂ | .or φ₁ φ₂ | .imp φ₁ φ₂ =>
       Formula.hasBVar b k φ₁ ∨ Formula.hasBVar b k φ₂
   | .not φ => Formula.hasBVar b k φ
-  | .exI φ | .exB φ | .allI φ | .allB φ =>
+  | .ex _ φ | .all _ φ =>
       -- each quantifier binds the innermost BVar, so outer levels shift up
       Formula.hasBVar b (k+1) φ
 
@@ -301,7 +295,7 @@ theorem Formula.openBVar_noop (φ : Formula) (b : Base) (k : Nat) (x : EVar)
   | not φ ih =>
     simp [Formula.hasBVar] at h
     simp [Formula.openBVar, ih k h]
-  | exI φ ih | exB φ ih | allI φ ih | allB φ ih =>
+  | ex _ φ ih  | all _ φ ih =>
     simp only [Formula.hasBVar] at h
     simp [Formula.openBVar, ih (k+1) h]
 
@@ -354,7 +348,7 @@ theorem Formula.not_hasBVar_openBVar_same (φ : Formula) (b : Base) (k : Nat) (x
     simp [Formula.hasBVar, Formula.openBVar, Term.not_hasBVar_openBVar_same]
   | and φ₁ φ₂ ih1 ih2 | or φ₁ φ₂ ih1 ih2 | imp φ₁ φ₂ ih1 ih2 =>
     simp [Formula.hasBVar, Formula.openBVar, ih1, ih2]
-  | not φ ih | exI φ ih | exB φ ih | allI φ ih | allB φ ih =>
+  | not φ ih | ex _ φ ih | all _ φ ih =>
     simp [Formula.hasBVar, Formula.openBVar, ih]
 
 /-- Opening φ at (b', j) with (b, k) ≠ (b', j) preserves hasBVar b k. -/
@@ -369,7 +363,7 @@ theorem Formula.hasBVar_openBVar_other (φ : Formula) (b b' : Base) (k j : Nat) 
   | and φ₁ φ₂ ih1 ih2 | or φ₁ φ₂ ih1 ih2 | imp φ₁ φ₂ ih1 ih2 =>
     simp [Formula.hasBVar, Formula.openBVar, ih1 k j hne, ih2 k j hne]
   | not φ ih => simp [Formula.hasBVar, Formula.openBVar, ih k j hne]
-  | exI φ ih | exB φ ih | allI φ ih | allB φ ih =>
+  | ex _ φ ih | all _ φ ih =>
     simp only [Formula.openBVar, Formula.hasBVar]
     exact ih (k+1) (j+1) (hne.imp_right (fun h => by omega))
 
@@ -917,7 +911,7 @@ theorem Formula.lc_at_mono (φ : Formula) {j k : Nat} (hjk : j ≤ k) (h : Formu
   | not φ ih =>
     simp_all [lc_at]
     grind
-  | exI φ ih | exB φ ih | allI φ ih | allB φ ih =>
+  | ex _ φ ih | all _ φ ih =>
     simp_all [lc_at]
     grind
 
@@ -1170,13 +1164,13 @@ theorem Formula.interp_write_fresh (φ : Formula)
     simp only [Formula.fv] at hfv
     simp only [Formula.interp]
     exact not_congr (ih γ hfv)
-  | exI φ ih | exB φ ih =>
+  | ex _ φ ih =>
     simp only [Formula.fv] at hfv
     simp only [Formula.interp]
     refine exists_congr (fun n => ?_)
     rw [REnv.push_write_comm]
     exact ih (γ.push _) hfv
-  | allI φ ih | allB φ ih =>
+  | all _ φ ih =>
     simp only [Formula.fv] at hfv
     simp only [Formula.interp]
     refine forall_congr' (fun n => ?_)

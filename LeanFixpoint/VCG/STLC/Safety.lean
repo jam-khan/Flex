@@ -374,11 +374,11 @@ private theorem Formula.interp_insertBV_openBVar (φ : Formula) (b : Base) (m : 
     simp only [Formula.fv] at hx
     simp only [Formula.interp, Formula.openBVar,
       ih m γ hlen hx (fun b' j h => hwf b' j (by simp [Formula.hasBVar, h]))]
-  | exI φ ih | exB φ ih | allI φ ih | allB φ ih =>
+  | ex b' φ ih | all b'' φ ih =>
     simp only [Formula.fv] at hx
     simp only [Formula.interp, Formula.openBVar]
-    have hwf' : ∀ (b' : Base) (j : Nat),
-        Formula.hasBVar b' j φ → j < m + 1 ∨ (j = m + 1 ∧ b' = b) := by
+    have hwf' : ∀ (b'' : Base) (j : Nat),
+        Formula.hasBVar b'' j φ → j < m + 1 ∨ (j = m + 1 ∧ b'' = b) := by
       intro b' j h
       rcases j with _ | j
       · exact Or.inl (by omega)
@@ -388,16 +388,10 @@ private theorem Formula.interp_insertBV_openBVar (φ : Formula) (b : Base) (m : 
     first
     | exact exists_congr (fun n => by
         rw [REnv.push_insertBV_comm, REnv.push_update_comm]
-        exact ih (m+1) (γ.push (.iconst n)) (Nat.succ_le_succ hlen) hx hwf')
-    | exact exists_congr (fun n => by
-        rw [REnv.push_insertBV_comm, REnv.push_update_comm]
-        exact ih (m+1) (γ.push (.bconst n)) (Nat.succ_le_succ hlen) hx hwf')
+        exact ih (m+1) (γ.push (Val.inj b' n)) (Nat.succ_le_succ hlen) hx hwf')
     | exact forall_congr' (fun n => by
         rw [REnv.push_insertBV_comm, REnv.push_update_comm]
-        exact ih (m+1) (γ.push (.iconst n)) (Nat.succ_le_succ hlen) hx hwf')
-    | exact forall_congr' (fun n => by
-        rw [REnv.push_insertBV_comm, REnv.push_update_comm]
-        exact ih (m+1) (γ.push (.bconst n)) (Nat.succ_le_succ hlen) hx hwf')
+        exact ih (m+1) (γ.push (Val.inj b'' n)) (Nat.succ_le_succ hlen) hx hwf')
 
 /-- `Formula` version with no `BVar` at level `≥ m`: inserting any `w` is invisible. -/
 private theorem Formula.interp_insertBV_fresh (φ : Formula) (m : Nat) (w : Val) (γ : REnv)
@@ -415,17 +409,15 @@ private theorem Formula.interp_insertBV_fresh (φ : Formula) (m : Nat) (w : Val)
       ih₂ m γ (fun b' j h => hwf b' j (by simp [Formula.hasBVar, h]))]
   | not φ ih =>
     simp only [Formula.interp, ih m γ (fun b' j h => hwf b' j (by simp [Formula.hasBVar, h]))]
-  | exI φ ih | exB φ ih | allI φ ih | allB φ ih =>
+  | ex b φ ih | all b φ ih =>
     simp only [Formula.interp]
     have hwf' : ∀ (b' : Base) (j : Nat), Formula.hasBVar b' j φ → j < m + 1 := by
       intro b' j h; rcases j with _ | j
       · omega
       · have := hwf b' j (by simpa [Formula.hasBVar] using h); omega
     first
-    | exact exists_congr (fun n => by rw [REnv.push_insertBV_comm]; exact ih (m+1) (γ.push (.iconst n)) hwf')
-    | exact exists_congr (fun n => by rw [REnv.push_insertBV_comm]; exact ih (m+1) (γ.push (.bconst n)) hwf')
-    | exact forall_congr' (fun n => by rw [REnv.push_insertBV_comm]; exact ih (m+1) (γ.push (.iconst n)) hwf')
-    | exact forall_congr' (fun n => by rw [REnv.push_insertBV_comm]; exact ih (m+1) (γ.push (.bconst n)) hwf')
+    | exact exists_congr (fun n => by rw [REnv.push_insertBV_comm]; exact ih (m+1) (γ.push (Val.inj b n)) hwf')
+    | exact forall_congr' (fun n => by rw [REnv.push_insertBV_comm]; exact ih (m+1) (γ.push (Val.inj b n)) hwf')
 
 /-- `Refinement` version of `Formula.interp_insertBV_openBVar` (ν is pushed first,
     so the inserted/opened level shifts to `m+1`). -/

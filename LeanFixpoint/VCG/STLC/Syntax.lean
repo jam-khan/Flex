@@ -75,18 +75,16 @@ inductive Term : Base → Type where
     `BVar`; see `Refinement` below) this means formulas contain no binder names
     at all — substitution and opening are capture-free by construction. -/
 inductive Formula where
-  | tt    : Formula
-  | ff    : Formula
-  | eq    : (b: Base) -> Term b  → Term b → Formula
-  | leqI  : Term .int  → Term .int  → Formula
-  | and   : Formula → Formula → Formula
-  | or    : Formula → Formula → Formula
-  | not   : Formula → Formula
-  | imp   : Formula → Formula → Formula
-  | exI   : Formula → Formula   -- ∃. φ
-  | exB   : Formula → Formula   -- ∃. φ
-  | allI  : Formula → Formula   -- ∀. φ
-  | allB  : Formula → Formula   -- ∀. φ
+  | tt   : Formula
+  | ff   : Formula
+  | eq   : (b: Base) -> Term b  → Term b → Formula
+  | leqI : Term .int  → Term .int  → Formula
+  | and  : Formula → Formula → Formula
+  | or   : Formula → Formula → Formula
+  | not  : Formula → Formula
+  | imp  : Formula → Formula → Formula
+  | ex   : Base -> Formula → Formula   -- ∃b. φ
+  | all  : Base -> Formula → Formula   -- ∀b. φ
 
 /-- A refinement, one stratification level *above* `Formula`: either a
     kvar-FREE `Formula` (whose `BVar 0`, i.e. ν, denotes the refined value), or a

@@ -30,10 +30,8 @@ def Formula.interp (γ : REnv) : Formula → Prop
   | .or φ₁ φ₂     => Formula.interp γ φ₁ ∨ Formula.interp γ φ₂
   | .not φ        => ¬ Formula.interp γ φ
   | .imp φ₁ φ₂    => Formula.interp γ φ₁ → Formula.interp γ φ₂
-  | .exI φ        => ∃ n : Int,  Formula.interp (γ.push (.iconst n)) φ
-  | .exB φ        => ∃ c : Bool, Formula.interp (γ.push (.bconst c)) φ
-  | .allI φ       => ∀ n : Int,  Formula.interp (γ.push (.iconst n)) φ
-  | .allB φ       => ∀ c : Bool, Formula.interp (γ.push (.bconst c)) φ
+  | .ex b φ       => ∃ x : b.interp,  Formula.interp (γ.push (Val.inj b x)) φ
+  | .all b φ      => ∀ x : b.interp,  Formula.interp (γ.push (Val.inj b x)) φ
 
 /-- Interpret a refinement at value ν under κ-assignment: `push` ν as the
     innermost de Bruijn slot (ν = `BVar 0`), then either interpret the formula
