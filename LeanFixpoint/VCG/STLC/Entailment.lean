@@ -39,15 +39,17 @@ def Entail (κ : KEnv) (Γ : TEnv) (c : REnv → Prop) : Prop :=
     re-stamps the wrong constructor). -/
 theorem REnv.update_self (b : Base) (γ : REnv) (x : EVar) (hb : γ.HasBase x b) :
     REnv.update b γ x (REnv.get b γ x) = γ := by
-  apply REnv.ext; funext y
-  by_cases hxy : x = y
-  · subst hxy
-    cases b with
-    | int  => obtain ⟨n, hn⟩ := hb
-              simp [hn]
-    | bool => obtain ⟨c, hc⟩ := hb
-              simp [hc]
-  · simp [hxy]
+  apply REnv.ext
+  · funext y
+    by_cases hxy : x = y
+    · subst hxy
+      cases b with
+      | int  => obtain ⟨n, hn⟩ := hb
+                simp [hn]
+      | bool => obtain ⟨c, hc⟩ := hb
+                simp [hc]
+    · simp [hxy]
+  · rfl
 
 /-- ENT-EMP: `∀ γ, c γ ⟹ κ; ∅ ⊢ c`. -/
 @[simp]

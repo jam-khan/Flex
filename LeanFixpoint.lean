@@ -30,3 +30,4 @@ import LeanFixpoint.VCG.STLC.VCGen
 import LeanFixpoint.VCG.STLC.Declarative
 import LeanFixpoint.VCG.STLC.Semantics
 import LeanFixpoint.VCG.STLC.Safety
+import LeanFixpoint.VCG.STLC.Examples

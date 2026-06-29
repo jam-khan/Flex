@@ -51,18 +51,8 @@ theorem sub_sound (κ : KEnv) (Γ : TEnv) (s t : Ty) (c : Constraint) :
     · exact hb.2 hpre
   | .arrow s1 t1, .arrow s2 t2 =>
     simp_all [sub]
-    -- use `set` so `w` stays opaque, preventing whnf blowup
-    let w := (EVar.fresh
-            (Γ.dom ++
-              (Γ.tyFv ++
-                (Γ.tyNamed ++
-                  (s1.fv ++
-                    (s2.fv ++
-                      (t1.fv ++ (t2.fv ++ (s1.named ++ (s2.named ++ (t1.named ++ (t2.named ++ [nuName]))))))))))))
-    have hwd : w = EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
-                          ++ s1.fv ++ s2.fv ++ t1.fv ++ t2.fv
-                          ++ Ty.named s1 ++ Ty.named s2
-                          ++ Ty.named t1 ++ Ty.named t2 ++ [nuName]) := by grind
+    let w := (EVar.fresh (Γ.dom ++ (Γ.tyFv ++ (s1.fv ++ (s2.fv ++ (t1.fv ++ t2.fv))))))
+    have hwd : w = EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ ++ s1.fv ++ s2.fv ++ t1.fv ++ t2.fv) := by grind
     obtain ⟨c₁, hc₁⟩ : ∃ c₁, sub Γ s2 s1 = some c₁ := by
       rcases Option.eq_none_or_eq_some (sub Γ s2 s1) with eqn | eqs
       · simp_all
@@ -74,22 +64,13 @@ theorem sub_sound (κ : KEnv) (Γ : TEnv) (s t : Ty) (c : Constraint) :
     -- avoid `simp at hsub` to keep implyBind folded
     rw [hc₁, hc₂] at hsub
     simp only [Option.some.injEq] at hsub
-    -- hsub : (fun κ γ => c₁ κ γ ∧ implyBind w s2 c₂ κ γ) = c
-    have hw : w ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
-                ++ s1.fv ++ s2.fv ++ t1.fv ++ t2.fv
-                ++ Ty.named s1 ++ Ty.named s2 ++ Ty.named t1 ++ Ty.named t2 ++ [nuName] := by
-      grind [EVar.fresh_not_mem (Γ.dom ++
-              (Γ.tyFv ++
-                (Γ.tyNamed ++
-                  (s1.fv ++
-                    (s2.fv ++
-                      (t1.fv ++ (t2.fv ++ (s1.named ++ (s2.named ++ (t1.named ++ (t2.named ++ [nuName])))))))))))]
+    have hw : w ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ s1.fv ++ s2.fv ++ t1.fv ++ t2.fv := by
+      grind [EVar.fresh_not_mem (Γ.dom ++ (Γ.tyFv ++ (s1.fv ++ (s2.fv ++ (t1.fv ++ t2.fv)))))]
     apply Subtyp.arrow (x := w) _ hw
     · apply sub_sound κ ((w, s2) :: Γ) _ _ c₂ hc₂
       intro γ hm
       have hΓγ : ModelsEnv κ γ Γ := by
         cases s2 with | refine _ _ => exact hm.2.2 | arrow _ _ => exact hm
-      -- use ▸ so implyBind stays folded until we need it
       rw [←hsub] at hent
       have hcγ : c₁ κ γ ∧ implyBind w s2 c₂ κ γ := by grind [hent γ hΓγ]
       simp only [implyBind] at hcγ
@@ -147,13 +128,13 @@ mutual
       obtain ⟨c1, s', t', hse⟩ : ∃ c s t, synth Γ e1 = some (c, .arrow s t) := by grind
       obtain ⟨c2, hy⟩ : ∃ c, check Γ (.fvar y) s' = some c := by grind
       simp_all
-      obtain ⟨⟨hyfv, hyn, hyν⟩, hceq, hteq⟩ := hsynth
+      obtain ⟨hyfv, hceq, hteq⟩ := hsynth
       rw [← hteq]
       rw [← hceq] at hent
       exact Synth.app
         (synth_sound κ Γ e1 c1 _ hse fun γ hm => (hent γ hm).1)
         (check_sound κ Γ (.fvar y) s' c2 hy fun γ hm => (hent γ hm).2)
-        hyfv hyn hyν
+        hyfv
     | .ann e1 t' =>
       simp_all [synth]
       obtain ⟨c', hc⟩ : ∃ c, check Γ e1 t' = some c := by grind
@@ -241,19 +222,17 @@ mutual
       obtain ⟨r, hr⟩ : ∃ r, List.lookup cn Γ = some (.refine .bool r) := by grind
       simp_all
       obtain ⟨c₁, c₂, hc₁, hc₂⟩ : ∃ c₁ c₂,
-          (check ((EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
-                    ++ bt.fv ++ bf.fv ++ t.fv ++ Ty.named t ++ [cn, nuName]),
+          (check ((EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ ++ bt.fv ++ bf.fv ++ t.fv ++ [cn]),
                    Ty.refine Base.bool (.fmla (.eq .bool (.fvar .bool cn) (.const .bool true)))) :: Γ) bt t = some c₁) ∧
-          (check ((EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
-                    ++ bt.fv ++ bf.fv ++ t.fv ++ Ty.named t ++ [cn, nuName]),
+          (check ((EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ ++ bt.fv ++ bf.fv ++ t.fv ++ [cn]),
                    Ty.refine .bool (.fmla (.eq .bool (.fvar .bool cn) (.const .bool false)))) :: Γ) bf t = some c₂) := by
         grind
       simp_all
-      rw [← hcheck.2] at hent
+      rw [← hcheck] at hent
       -- `y` is the fresh guard; freshness discharges by `EVar.fresh_not_mem`. The
       -- guard refinement reads `cn` (not `ν`), so the branch obligation is exactly
       -- the matching conjunct of `hent` — no case split on `v` needed.
-      refine Check.ite hr hcheck.1 (EVar.fresh_not_mem _) ?_ ?_
+      refine Check.ite hr (EVar.fresh_not_mem _) ?_ ?_
       · simp only [List.append_assoc]
         apply check_sound _ _ _ _ _ hc₁
         apply Entail.ext
@@ -280,22 +259,11 @@ mutual
         simp_all [check]
         -- Use the LITERAL right-associated fresh expression (matches simp's normal form
         -- so the second simp_all can substitute hc₁ into hcheck).
-        obtain ⟨c₁, hc₁⟩ : ∃ c₁, check ((EVar.fresh (TEnv.dom Γ ++ (e.fv ++ (s1.fv ++ (t1.fv ++
-                                              (Ty.named s1 ++ (Ty.named t1 ++
-                                              (TEnv.tyFv Γ ++ (TEnv.tyNamed Γ ++ [nuName]))))))))
-                                            , s1) :: Γ)
-            (Exp.openVar 0 (EVar.fresh (TEnv.dom Γ ++ (e.fv ++ (s1.fv ++ (t1.fv ++
-                                              (Ty.named s1 ++ (Ty.named t1 ++
-                                              (TEnv.tyFv Γ ++ (TEnv.tyNamed Γ ++ [nuName])))))))))
-                                            e)
-            (Ty.openVar 0 (EVar.fresh (TEnv.dom Γ ++ (e.fv ++ (s1.fv ++ (t1.fv ++
-                                              (Ty.named s1 ++ (Ty.named t1 ++
-                                              (TEnv.tyFv Γ ++ (TEnv.tyNamed Γ ++ [nuName])))))))))
-                                            t1) = some c₁ := by grind
+        obtain ⟨c₁, hc₁⟩ : ∃ c₁, check ((EVar.fresh (TEnv.dom Γ ++ (e.fv ++ (s1.fv ++ (t1.fv ++ TEnv.tyFv Γ)))) , s1) :: Γ)
+            (Exp.openVar 0 (EVar.fresh (TEnv.dom Γ ++ (e.fv ++ (s1.fv ++ (t1.fv ++ TEnv.tyFv Γ ))))) e)
+            (Ty.openVar 0 (EVar.fresh (TEnv.dom Γ ++ (e.fv ++ (s1.fv ++ (t1.fv ++ TEnv.tyFv Γ ))))) t1) = some c₁ := by grind
         simp_all
-        let L₀ : List EVar := TEnv.dom Γ ++ (e.fv ++ (s1.fv ++ (t1.fv ++
-                              (Ty.named s1 ++ (Ty.named t1 ++
-                              (TEnv.tyFv Γ ++ (TEnv.tyNamed Γ ++ [nuName])))))))
+        let L₀ : List EVar := TEnv.dom Γ ++ (e.fv ++ (s1.fv ++ (t1.fv ++ TEnv.tyFv Γ )))
         let x₀ : EVar := EVar.fresh L₀
         -- 1. Body proof at the specific fresh witness `x₀`.
         have hbody₀ :
@@ -316,10 +284,9 @@ mutual
             rw [REnv.update_self b γ x₀ hmγ.1] at h
             exact h
           | arrow _ _ => exact hcγ
-        have hfresh₀ : x₀ ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ ++
-                       e.fv ++ s1.fv ++ t1.fv ++ Ty.named s1 ++ Ty.named t1 ++ [nuName] := by
+        have hfresh₀ : x₀ ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ e.fv ++ s1.fv ++ t1.fv := by
           have h := EVar.fresh_not_mem L₀
-          simp only [L₀, List.mem_append, List.mem_singleton, not_or] at h ⊢
+          simp only [L₀, List.mem_append, not_or] at h ⊢
           grind
         exact Check.lam hfresh₀ hbody₀
     | .letin e1 e2 =>
@@ -327,18 +294,10 @@ mutual
       simp_all [check]
       obtain ⟨c₁, s, hsynth⟩ : ∃ c₁ s, synth Γ e1 = some (c₁, s) := by grind
       -- Use LITERAL right-associated fresh expression (matches simp's normal form).
-      obtain ⟨c₂, hcheck₂⟩ : ∃ c₂, check ((EVar.fresh (TEnv.dom Γ ++ (e2.fv ++ (s.fv ++ (t.fv ++
-                                              (Ty.named s ++ (Ty.named t ++
-                                              (TEnv.tyFv Γ ++ (TEnv.tyNamed Γ ++ [nuName]))))))))
-                                            , s) :: Γ)
-          (Exp.openVar 0 (EVar.fresh (TEnv.dom Γ ++ (e2.fv ++ (s.fv ++ (t.fv ++
-                                              (Ty.named s ++ (Ty.named t ++
-                                              (TEnv.tyFv Γ ++ (TEnv.tyNamed Γ ++ [nuName])))))))))
-                                            e2) t = some c₂ := by grind
+      obtain ⟨c₂, hcheck₂⟩ : ∃ c₂, check ((EVar.fresh (TEnv.dom Γ ++ (e2.fv ++ (s.fv ++ (t.fv ++ TEnv.tyFv Γ)))) , s) :: Γ)
+          (Exp.openVar 0 (EVar.fresh (TEnv.dom Γ ++ (e2.fv ++ (s.fv ++ (t.fv ++ TEnv.tyFv Γ))))) e2) t = some c₂ := by grind
       simp_all
-      let L₀ : List EVar := TEnv.dom Γ ++ (e2.fv ++ (s.fv ++ (t.fv ++
-                             (Ty.named s ++ (Ty.named t ++
-                             (TEnv.tyFv Γ ++ (TEnv.tyNamed Γ ++ [nuName])))))))
+      let L₀ : List EVar := TEnv.dom Γ ++ (e2.fv ++ (s.fv ++ (t.fv ++ TEnv.tyFv Γ)))
       let x₀ : EVar := EVar.fresh L₀
       -- 1. Synth at e1 via synth_sound.
       have hsy : Synth κ Γ e1 s := by
@@ -368,10 +327,9 @@ mutual
           rw [REnv.update_self b γ x₀ hmγ.1] at h
           exact h
         | arrow _ _ => exact himply
-      have hfresh₀ : x₀ ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ ++
-                     e2.fv ++ s.fv ++ t.fv ++ Ty.named s ++ Ty.named t ++ [nuName] := by
+      have hfresh₀ : x₀ ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ e2.fv ++ s.fv ++ t.fv  := by
         have h := EVar.fresh_not_mem L₀
-        simp only [L₀, List.mem_append, List.mem_singleton, not_or] at h ⊢
+        simp only [L₀, List.mem_append, not_or] at h ⊢
         grind
       exact Check.letin hsy hfresh₀ hbody₀
       -- have hx₀_fresh : x₀ ∉ Γ.dom ++ s.fv ++ e2.fv ++ Ty.fv t
@@ -459,29 +417,22 @@ mutual
       have htw := hE.1
       have hht := check_to_hastype hΓ hE.2 htw hck
       exact ⟨.ann hht htw, htw⟩
-    | .app hsy hck hyfv hyn hyν =>
+    | .app hsy hck hyfv =>
       simp only [Exp.WFBVars] at hE
       have ⟨hht1, htw_arr⟩ := synth_to_hastype hΓ hE.1 hsy
       have htw_s_t := htw_arr
       simp only [Ty.WFBVars, Ty.WFBVarCtx] at htw_s_t
       have hht2 := check_to_hastype hΓ (by simp [Exp.WFBVars]) htw_s_t.1 hck
-      refine ⟨.app hht1 hht2 hyfv hyn hyν, ?_⟩
+      refine ⟨.app hht1 hht2 hyfv, ?_⟩
       exact Ty.WFBVarCtx_openVar_last _ [] _ _ htw_s_t.2
     | .add_var hxlk hylk =>
-      have hxν := hΓ.lookup_ne_nu hxlk
-      have hyν := hΓ.lookup_ne_nu hylk
-      exact ⟨.add_var hxlk hylk hxν hyν, Ty.WFBVars_add_result _ _⟩
+      exact ⟨.add_var hxlk hylk, Ty.WFBVars_add_result _ _⟩
     | .leq_var hxlk hylk =>
-      have hxν := hΓ.lookup_ne_nu hxlk
-      have hyν := hΓ.lookup_ne_nu hylk
-      exact ⟨.leq_var hxlk hylk hxν hyν, Ty.WFBVars_leq_result _ _⟩
+      exact ⟨.leq_var hxlk hylk, Ty.WFBVars_leq_result _ _⟩
     | .not_var hxlk =>
-      have hxν := hΓ.lookup_ne_nu hxlk
-      exact ⟨.not_var hxlk hxν, Ty.WFBVars_not_result _⟩
+      exact ⟨.not_var hxlk, Ty.WFBVars_not_result _⟩
     | .and_var hxlk hylk =>
-      have hxν := hΓ.lookup_ne_nu hxlk
-      have hyν := hΓ.lookup_ne_nu hylk
-      exact ⟨.and_var hxlk hylk hxν hyν, Ty.WFBVars_and_result _ _⟩
+      exact ⟨.and_var hxlk hylk, Ty.WFBVars_and_result _ _⟩
 
   theorem check_to_hastype {κ Γ e t}
       (hΓ : TEnv.WFBVars Γ) (hE : Exp.WFBVars e) (ht : Ty.WFBVars t)
@@ -493,15 +444,11 @@ mutual
       exact .sub hht hsub ht
     | .lam hfresh hck =>
       rename_i e s₁ s₂ x
-      have hxν : x ≠ nuName := by
-        have h := hfresh
-        simp only [List.mem_append, List.mem_singleton, not_or] at h
-        exact h.2
       have ht_split : Ty.WFBVarCtx [] s₁ ∧ Ty.WFBVarCtx [s₁.optBase] s₂ := by
         simp only [Ty.WFBVars, Ty.WFBVarCtx] at ht; exact ht
       have hs₂_open_wfb : Ty.WFBVars (s₂.openVar 0 x) :=
         Ty.WFBVarCtx_openVar_last s₂ [] s₁.optBase x ht_split.2
-      have hΓ_ext : TEnv.WFBVars ((x, s₁) :: Γ) := hΓ.cons ht_split.1 hxν
+      have hΓ_ext : TEnv.WFBVars ((x, s₁) :: Γ) := hΓ.cons ht_split.1
       have hE_ext : Exp.WFBVars (e.openVar 0 x) := by
         simp only [Exp.WFBVars] at hE; exact (Exp.WFBVars_openVar e 0 x).mpr hE
       exact .lam ht hfresh (check_to_hastype hΓ_ext hE_ext hs₂_open_wfb hck)
@@ -509,20 +456,14 @@ mutual
       rename_i e₁ e₂ s x
       simp only [Exp.WFBVars] at hE
       have ⟨hht1, hs_wfb⟩ := synth_to_hastype hΓ hE.1 hsy
-      have hxν : x ≠ nuName := by
-        have h := hfresh
-        simp only [List.mem_append, List.mem_singleton, not_or] at h
-        exact h.2
-      have hΓ_ext : TEnv.WFBVars ((x, s) :: Γ) := hΓ.cons hs_wfb hxν
+      have hΓ_ext : TEnv.WFBVars ((x, s) :: Γ) := hΓ.cons hs_wfb
       have hE_ext : Exp.WFBVars (e₂.openVar 0 x) :=
         (Exp.WFBVars_openVar e₂ 0 x).mpr hE.2
       exact .letin ht hht1 hfresh (check_to_hastype hΓ_ext hE_ext ht hck)
-    | .ite hlk hxν hfresh hck1 hck2 =>
+    | .ite hlk hfresh hck1 hck2 =>
       rename_i x y e₁ e₂ r
       simp only [Exp.WFBVars] at hE
       obtain ⟨_, hE1, hE2⟩ := hE
-      have hyν : y ≠ nuName := by
-        intro he; subst he; exact hfresh (by simp)
       -- The branch guard `{ν | x = const}` references `x` free and is kvar-free
       -- with no bvars, so it is WFBVars outright.
       have hstr_wfb : ∀ (const : Bool), Ty.WFBVars (.refine .bool
@@ -532,13 +473,13 @@ mutual
       -- Extended TEnv.WFBVars for the fresh-guard true / false branches.
       have hΓ1 : TEnv.WFBVars ((y, .refine .bool
           (.fmla (.eq .bool (.fvar .bool x) (.const .bool true)))) :: Γ) :=
-        hΓ.cons (hstr_wfb true) hyν
+        hΓ.cons (hstr_wfb true)
       have hΓ2 : TEnv.WFBVars ((y, .refine .bool
           (.fmla (.eq .bool (.fvar .bool x) (.const .bool false)))) :: Γ) :=
-        hΓ.cons (hstr_wfb false) hyν
+        hΓ.cons (hstr_wfb false)
       have hht1 := check_to_hastype hΓ1 hE1 ht hck1
       have hht2 := check_to_hastype hΓ2 hE2 ht hck2
-      exact .ite hlk hxν hfresh ht hht1 hht2
+      exact .ite hlk hfresh ht hht1 hht2
 end
 
 theorem synth_decl_sound (κ : KEnv) (Γ : TEnv) (e : Exp) (c : Constraint) (t : Ty)
@@ -559,8 +500,4 @@ theorem topVC_decl_sound (κ : KEnv) (e : Exp) (t : Ty)
   | none   => intro hf; exact hf.elim
   | some c =>
     intro h
-    have hΓ_nil : TEnv.WFBVars [] := by
-      refine ⟨?_, ?_⟩
-      · intro x s hmem; simp at hmem
-      · simp [TEnv.dom]
-    exact check_decl_sound κ [] e t c hΓ_nil hE ht hck (Entail.emp h)
+    exact check_decl_sound κ [] e t c TEnv.WFBVars.empty hE ht hck (Entail.emp h)
