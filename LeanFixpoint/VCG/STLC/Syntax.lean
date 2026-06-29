@@ -432,20 +432,6 @@ def Refinement.substBV (b : Base) (k : Nat) (v : b.interp)
   | .fmla φ       => .fmla (φ.substBV b k v)
   | .kapp kn args => .kapp kn (args.map (fun a => ⟨a.1, Term.substBV b k v a.2⟩))
 
-/-- Substitute Val `va` for BVar 0 throughout type `t`.
-    `substBV_aux` tracks the de Bruijn level as we descend into arrows
-    (mirroring `Ty.openVar`'s level-shift in the codomain). -/
-def Ty.substBV_aux (k : Nat) (va : Val) : Ty → Ty
-  | .refine b r =>
-    -- ν occupies formula-level 0, so arrow binders live at level `k+1`.
-    match va with
-    | .iconst n  => .refine b (r.substBV .int  (k+1) n)
-    | .bconst bv => .refine b (r.substBV .bool (k+1) bv)
-    | .clos _    => .refine b r
-  | .arrow s t => .arrow (s.substBV_aux k va) (t.substBV_aux (k + 1) va)
-
-def Ty.substBV (va : Val) (t : Ty) : Ty := Ty.substBV_aux 0 va t
-
 /-- Structural skeleton of `Ty`: counts arrow nesting, ignoring refinement
     bodies. Preserved by `openVar` / `openVarAt`. Used as a termination
     measure for the algorithmic subtyping function in `VCGen.lean`. -/

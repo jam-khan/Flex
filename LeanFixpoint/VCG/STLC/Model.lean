@@ -45,16 +45,6 @@ def Refinement.interp (κ : KEnv) {b : Base} (r : Refinement b)
   | .kapp kn args =>
       κ kn (args.map (fun a => ⟨a.1, Term.interp (γ.push (Val.inj b ν)) a.2⟩))
 
-
-/-- Helper lemma to prove termination of TyDenote -/
-@[simp]
-theorem Ty.skel_substBV (va : Val) (t : Ty) : (t.substBV va).skel = t.skel := by
-  simp only [Ty.substBV]
-  suffices h : ∀ k, (t.substBV_aux k va).skel = t.skel from h 0
-  induction t with
-  | refine b r => intro k; cases va <;> simp [Ty.substBV_aux, Ty.skel]
-  | arrow s t ihs iht => intro k; simp [Ty.substBV_aux, Ty.skel, ihs, iht]
-
 /-! ## Logical relation: ⟦τ⟧ as a predicate on values, κ-indexed and parameterized by γ.
 
   - **Refinement bases**: `v` is `.iconst n` / `.bconst b` and the deep refinement
