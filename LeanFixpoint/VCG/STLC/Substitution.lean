@@ -28,15 +28,6 @@ def Term.openBVar (b' : Base) (k : Nat) (x : EVar) :
   | _, .not t        => .not (Term.openBVar b' k x t)
   | _, .and t₁ t₂    => .and (Term.openBVar b' k x t₁) (Term.openBVar b' k x t₂)
 
-/-- Locally closed at level `k`: every `BVar` index is strictly less than `k`. -/
-def Term.lc_at : Nat → {b : Base} → Term b → Prop
-  | _, _, .const _ _   => True
-  | k, _, .bvar _ j    => j < k
-  | _, _, .fvar _ _    => True
-  | k, _, .add t₁ t₂   => Term.lc_at k t₁ ∧ Term.lc_at k t₂
-  | k, _, .not t       => Term.lc_at k t
-  | k, _, .and t₁ t₂   => Term.lc_at k t₁ ∧ Term.lc_at k t₂
-
 /-! ## 2. Formula operations -/
 
 /-- Free variables of a formula. The quantifiers are locally nameless, so they
@@ -68,20 +59,6 @@ def Formula.openBVar (b' : Base) (k : Nat) (x : EVar) : Formula → Formula
   | .ex b φ       => .ex b (φ.openBVar b' (k+1) x)
   | .all b φ      => .all b (φ.openBVar b' (k+1) x)
 
-/-- Locally closed at level `k`: descends through formula structure. Each
-    quantifier binds the innermost `BVar`, so its body is checked at `k+1`. -/
-def Formula.lc_at : Nat → Formula → Prop
-  | _, .tt          => True
-  | _, .ff          => True
-  | k, .eq _ t₁ t₂  => t₁.lc_at k ∧ t₂.lc_at k
-  | k, .leqI t₁ t₂  => t₁.lc_at k ∧ t₂.lc_at k
-  | k, .and φ₁ φ₂   => φ₁.lc_at k ∧ φ₂.lc_at k
-  | k, .or φ₁ φ₂    => φ₁.lc_at k ∧ φ₂.lc_at k
-  | k, .not φ       => φ.lc_at k
-  | k, .imp φ₁ φ₂   => φ₁.lc_at k ∧ φ₂.lc_at k
-  | k, .ex _ φ      => φ.lc_at (k+1)
-  | k, .all _ φ     => φ.lc_at (k+1)
-
 /-! ## 3. Refinement operations -/
 
 /-- Free variables of a refinement. ν is a `BVar` (level 0), never an `fvar`,
@@ -96,11 +73,6 @@ def Refinement.openBVar (b' : Base) (k : Nat) (x : EVar)
   match r with
   | .fmla φ       => .fmla (φ.openBVar b' k x)
   | .kapp kn args => .kapp kn (args.map (fun a => ⟨a.1, Term.openBVar b' k x a.2⟩))
-
-def Refinement.lc_at (k : Nat) {b : Base} (r : Refinement b) : Prop :=
-  match r with
-  | .fmla φ      => φ.lc_at k
-  | .kapp _ args => ∀ a ∈ args, Term.lc_at k a.2
 
 /-- Refinement type for an integer constant: `{ν : Int | ν = n}` (ν = `BVar 0`). -/
 @[simp] def prim (n : Int) : Ty :=
@@ -133,10 +105,6 @@ def Refinement.lc_at (k : Nat) {b : Base} (r : Refinement b) : Prop :=
 def Ty.fv : Ty → List EVar
   | .refine _ r => r.fv
   | .arrow s t  => Ty.fv s ++ Ty.fv t
-
-/-- Well-formedness: all free type-level variables are bound in Γ. -/
-def Ty.WF (Γ : TEnv) (t : Ty) : Prop :=
-  ∀ x ∈ Ty.fv t, ∃ s, (x, s) ∈ Γ
 
 /-- Open a `Ty`'s outermost binder at level `k` with free name `x`. Replaces
     `Term.bvar b (k+1)` for BOTH bases (int and bool) in every refinement
@@ -298,19 +266,6 @@ theorem Formula.openBVar_noop (φ : Formula) (b : Base) (k : Nat) (x : EVar)
   | ex _ φ ih  | all _ φ ih =>
     simp only [Formula.hasBVar] at h
     simp [Formula.openBVar, ih (k+1) h]
-
-/-- WFBVarCtx ensures that a BVar of the "wrong" base (≠ context base) can't appear,
-    so `openBVar` of that wrong base at level 0 is a no-op. -/
-theorem Formula.openBVar_noop_wf (φ : Formula) (b b_d : Base) (hne : b ≠ b_d)
-    (ctx : List (Option Base)) (x : EVar)
-    (hWF : ∀ (b' : Base) (k : Nat), Formula.hasBVar b' k φ → ctx[k]? = some (some b'))
-    (hctx : ctx[0]? = some (some b_d)) :
-    φ.openBVar b 0 x = φ := by
-  apply Formula.openBVar_noop
-  intro hbv
-  have := hWF b 0 hbv
-  rw [hctx] at this
-  exact hne (by simp_all)
 
 /-- Opening a term at (b, k) eliminates all BVar b k occurrences. -/
 private theorem Term.not_hasBVar_openBVar_same (b : Base) (k : Nat) (x : EVar) :
@@ -505,12 +460,6 @@ private theorem optBase_list_getElem?_middle (ctx : List (Option Base)) (a : Opt
   | nil => simp
   | cons hd tl ih => simp
 
-def Ty.lc_at : Nat → Ty → Prop
-  | k, .refine _ r => r.lc_at k
-  | k, .arrow s t  => Ty.lc_at k s ∧ Ty.lc_at (k+1) t
-
-abbrev Ty.lc : Ty → Prop := Ty.lc_at 0
-
 /-! ## 5. Exp operations (locally nameless)
 
   (Val is declared in `Syntax.lean`; its operations follow below in §5b.) -/
@@ -530,39 +479,6 @@ def Exp.openVar (k : Nat) (x : EVar) : Exp → Exp
   | .leq e₁ e₂     => .leq (e₁.openVar k x) (e₂.openVar k x)
   | .ite e₀ e₁ e₂  => .ite (e₀.openVar k x) (e₁.openVar k x) (e₂.openVar k x)
   | .add e₁ e₂     => .add (e₁.openVar k x) (e₂.openVar k x)
-
-/-- Close a free var `x` to `bvar k` (inverse of `openVar`). -/
-def Exp.close (k : Nat) (x : EVar) : Exp → Exp
-  | .bvar j        => .bvar j
-  | .fvar y        => if y = x then .bvar k else .fvar y
-  | .iconst n      => .iconst n
-  | .bconst b      => .bconst b
-  | .lam body      => .lam (body.close (k+1) x)
-  | .letin e₁ e₂   => .letin (e₁.close k x) (e₂.close (k+1) x)
-  | .app e₁ e₂     => .app (e₁.close k x) (e₂.close k x)
-  | .ann e t       => .ann (e.close k x) t
-  | .and e₁ e₂     => .and (e₁.close k x) (e₂.close k x)
-  | .not e         => .not (e.close k x)
-  | .leq e₁ e₂     => .leq (e₁.close k x) (e₂.close k x)
-  | .ite e₀ e₁ e₂  => .ite (e₀.close k x) (e₁.close k x) (e₂.close k x)
-  | .add e₁ e₂     => .add (e₁.close k x) (e₂.close k x)
-
-/-- Substitute the free var `x` with expression `u` (capture-free under LN). -/
-def Exp.subst (x : EVar) (u : Exp) (e : Exp) : Exp :=
-  match e with
-  | .bvar j        => .bvar j
-  | .fvar y        => if y = x then u else .fvar y
-  | .iconst n      => .iconst n
-  | .bconst b      => .bconst b
-  | .lam body      => .lam (Exp.subst x u body)
-  | .letin e₁ e₂   => .letin (Exp.subst x u e₁) (Exp.subst x u e₂)
-  | .app e₁ e₂     => .app (Exp.subst x u e₁) (Exp.subst x u e₂)
-  | .ann e t       => .ann (Exp.subst x u e) t
-  | .and e₁ e₂     => .and (Exp.subst x u e₁) (Exp.subst x u e₂)
-  | .not e         => .not (Exp.subst x u e)
-  | .leq e₁ e₂     => .leq (Exp.subst x u e₁) (Exp.subst x u e₂)
-  | .ite e₀ e₁ e₂  => .ite (Exp.subst x u e₀) (Exp.subst x u e₁) (Exp.subst x u e₂)
-  | .add e₁ e₂     => .add (Exp.subst x u e₁) (Exp.subst x u e₂)
 
 /-- Structural skeleton size: counts constructor depth, ignoring leaf details
     (so `Exp.skel` is preserved under `openVar` / `subst`). Used as a
@@ -602,10 +518,6 @@ theorem Exp.skel_openVar (k : Nat) (x : EVar) (e : Exp) :
   | add _ _ ih₁ ih₂    => simp [Exp.openVar, Exp.skel, ih₁, ih₂]
 
 /-! ## 7. TEnv free variables -/
-
-def TEnv.fv : TEnv → List EVar
-  | []          => []
-  | (x, t) :: Γ => t.fv ++ ((TEnv.fv Γ).filter (· ≠ x))
 
 /-- Flat union of all type free-variables in Γ (no scoping filter). Used for
     freshness conditions: x ∉ TEnv.tyFv Γ ↔ ∀ (y,t) ∈ Γ, x ∉ t.fv. -/
@@ -649,13 +561,6 @@ def EVar.fresh (L : List EVar) : EVar :=
   String.ofList (List.replicate (EVar.maxLen L + 1) 'x')
 
 /-! ## 10. REnv helpers -/
-
-/-- Updating cell `x` leaves a *different* cell `y` untouched — for any bases,
-    since `update` only writes cell `x`. -/
-theorem REnv.map_update_other (b : Base) (γ : REnv) (x : EVar) (v : b.interp)
-    {y : EVar} (h : x ≠ y) : (γ.update b x v).map y = γ.map y := by
-  have hxy : (x == y) = false := by simp [h]
-  simp [hxy]
 
 @[simp] theorem REnv.get_update_same (b : Base) (γ : REnv) (x : EVar) (v : b.interp) :
     REnv.get b (γ.update b x v) x = v := by
@@ -703,10 +608,6 @@ theorem Exp.substEnv_iconst (γ : REnv) (n : Int) :
 @[simp]
 theorem Exp.substEnv_bconst (γ : REnv) (b : Bool) :
     Exp.substEnv γ (.bconst b) = .bconst b := rfl
-
-@[simp]
-theorem Exp.substEnv_bvar (γ : REnv) (j : Nat) :
-    Exp.substEnv γ (.bvar j) = .bvar j := rfl
 
 @[simp]
 theorem Exp.substEnv_lam (γ : REnv) (body : Exp) :
@@ -878,42 +779,6 @@ theorem Exp.openExp_of_lc_at (e : Exp) (k : Nat) (u : Exp) (h : Exp.lc_at k e) :
   | add e₁ e₂ ih₁ ih₂ =>
     simp only [Exp.lc_at] at h; simp only [Exp.openExp]; congr 1
     exact ih₁ k h.1; exact ih₂ k h.2
-
-theorem Term.lc_at_mono {b : Base} (t : Term b) {j k : Nat} (hjk : j ≤ k) (h : Term.lc_at j t) :
-  Term.lc_at k t := by
-  induction t generalizing j k with
-  | const b v => simp_all [lc_at]
-  | bvar b n  => simp_all [lc_at] ; grind
-  | fvar b x  => simp_all [lc_at]
-  | add t₁ t₂ ih1 ih2 | and t₁ t₂ ih1 ih2 =>
-    simp_all [lc_at]
-    grind
-  | not t ih =>
-    simp_all [lc_at]
-    grind
-
-theorem Formula.lc_at_mono (φ : Formula) {j k : Nat} (hjk : j ≤ k) (h : Formula.lc_at j φ) :
-  Formula.lc_at k φ := by
-  induction φ generalizing j k with
-  | tt => simp_all [lc_at]
-  | ff => simp_all [lc_at]
-  | eq _ t1 t2 =>
-    simp_all [lc_at] ; and_intros
-    exact Term.lc_at_mono t1 hjk h.1
-    exact Term.lc_at_mono t2 hjk h.2
-  | leqI i1 i2 =>
-    simp_all [lc_at] ; and_intros
-    exact Term.lc_at_mono i1 hjk h.1
-    exact Term.lc_at_mono i2 hjk h.2
-  | and φ₁ φ₂ ih1 ih2 | or φ₁ φ₂ ih1 ih2 | imp φ₁ φ₂ ih1 ih2 =>
-    simp_all [lc_at]
-    grind
-  | not φ ih =>
-    simp_all [lc_at]
-    grind
-  | ex _ φ ih | all _ φ ih =>
-    simp_all [lc_at]
-    grind
 
 /-- lc_at is monotone: lc_at j implies lc_at k for k ≥ j. -/
 theorem Exp.lc_at_mono (e : Exp) {j k : Nat} (hjk : j ≤ k) (h : Exp.lc_at j e) :
@@ -1106,16 +971,6 @@ theorem REnv.get_write_other (b : Base) (γ : REnv) (x : EVar) (v : Val) {y : EV
     (h : x ≠ y) : REnv.get b (γ.write x v) y = REnv.get b γ y := by
   have hxy : (x == y) = false := by simp [h]
   simp [REnv.get, REnv.lookup, hxy]
-
-/-- `write` at `x` commutes with `update` at a different key `z`. -/
-theorem REnv.write_update_comm (b : Base) (γ : REnv) (z : EVar) (n : b.interp)
-    (x : EVar) (v : Val) (h : x ≠ z) :
-    (γ.update b z n).write x v = (γ.write x v).update b z n := by
-  apply REnv.ext
-  · funext w
-    by_cases hxw : x = w <;> by_cases hzw : z = w <;>
-      simp_all
-  · rfl
 
 /-! ## write-at-fresh-variable invariance of interpretation
 
