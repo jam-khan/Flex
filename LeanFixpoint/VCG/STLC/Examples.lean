@@ -32,15 +32,16 @@ def NatR : Ty := .refine .int (.fmla (.leqI (.const .int 0) (.bvar .int 0)))
 
 /-- `IntN n = {ν : Int | ν = n}`. -/
 abbrev IntN (n : Int) : Ty :=
-  .refine .int (.fmla (.eqI (.bvar .int 0) (.const .int n)))
+  .refine .int (.fmla (.eq .int (.bvar .int 0) (.const .int n)))
 
 /-- κ-refinement on int: `{ν : Int | k(ν)}` for κ-symbol `k`. -/
 abbrev IntK (k : STLC.KVar) : Ty :=
   .refine .int (.kapp k [⟨.int, .bvar .int 0⟩])
 
-/-- κ-refinement on int referencing both an outer variable and ν: `{ν | k(x, ν)}`. -/
+/-- κ-refinement on int referencing both an outer variable and ν: `{ν | k(x, ν)}`.
+    `x` is the enclosing arrow binder (`BVar 1`, since ν occupies `BVar 0`). -/
 abbrev IntR (k : STLC.KVar) : Ty :=
-  .refine .int (.kapp k [⟨.int, .bvar .int 0⟩, ⟨.int, .bvar .int 0⟩])
+  .refine .int (.kapp k [⟨.int, .bvar .int 1⟩, ⟨.int, .bvar .int 0⟩])
 
 /-- Identity function under LN. -/
 abbrev exId : Exp := .lam (.bvar 0)
@@ -58,7 +59,7 @@ def ex1Ty  : Ty  := Pos
 
 example (κ : KEnv) : topVC κ [] ex1Exp ex1Ty := by
   simp only [topVC, check, synth, sub, ex1Exp, ex1Ty, Pos, prim,
-             Refinement.interp, Formula.interp, Term.interp, REnv.get]
+             Refinement.interp, Formula.interp, Term.interp]
   solve_fixpoint
 
 /-! ## Example 2: identity `λx. x ⇐ Pos → Pos` -/
@@ -72,7 +73,6 @@ example (κ : KEnv) : topVC κ [] ex2Exp ex2Ty := by
         Refinement.interp, Formula.interp, Term.interp, REnv.get,
         Exp.openVar, Ty.openVar, Refinement.openBVar, Formula.openBVar,
         Term.openBVar]
-  intro γ v hv v' h; rw [h (by decide)]; exact hv
 
 /-! ## Example 3: `let z = 5 in z ⇐ Pos` -/
 
@@ -82,8 +82,7 @@ def ex3Ty  : Ty  := Pos
 example (κ : KEnv) : topVC κ [] ex3Exp ex3Ty := by
   simp [topVC, check, synth, sub, implyBind, ex3Exp, ex3Ty, Pos, prim, self,
         Refinement.interp, Formula.interp, Term.interp, REnv.get,
-        Exp.openVar, Refinement.named]
-  intro γ v h; rw [h (by decide)]; omega
+        Exp.openVar]
 
 /-! ## κ-example with `ty_k`: `let z = 99 in (λx. x : IntK k → IntK k) z ⇐ Pos`
 
@@ -93,8 +92,8 @@ example (κ : KEnv) : topVC κ [] ex3Exp ex3Ty := by
 
 attribute [simp] check synth sub EVar.fresh implyBind prim self Refinement.interp Formula.interp TEnv.dom
 attribute [simp] Term.interp REnv.get Exp.openVar Ty.openVar Exp.fv Refinement.fv Formula.fv Term.fv Ty.fv
-attribute [simp] Refinement.openBVar Formula.openBVar Term.openBVar nuName String.length EVar.maxLen
-attribute [simp] List.lookup TEnv.tyNamed TEnv.tyFv Ty.named Formula.named Refinement.named
+attribute [simp] Refinement.openBVar Formula.openBVar Term.openBVar String.length EVar.maxLen
+attribute [simp] List.lookup TEnv.tyFv
 
 @[qualif]
 def Ge1 (i : Int) : Prop := 1 ≤ i
@@ -140,14 +139,15 @@ example (κ : KEnv) : topVC κ [] ex3Exp ex3Ty := by
 abbrev exGt : Exp :=
   .lam (.lam (.letin (.leq (.bvar 1) (.bvar 0)) (.not (.bvar 0))))
 
-/-- `ν = true ↔ ¬(x ≤ y)`, using bvars for the two arrow-bound ints. -/
+/-- `ν = true ↔ ¬(x ≤ y)`, using bvars for the two arrow-bound ints. ν is
+    `BVar 0`, so the inner arg `y` is `BVar 1` and the outer arg `x` is `BVar 2`. -/
 abbrev tyGt : Ty :=
   .arrow TT (.arrow TT
     (.refine .bool (.fmla (.and
-      (.imp (.eqB (.bvar .bool 0) (.const .bool true))
-            (.not (.leqI (.bvar .int 1) (.bvar .int 0))))
-      (.imp (.not (.leqI (.bvar .int 1) (.bvar .int 0)))
-            (.eqB (.bvar .bool 0) (.const .bool true)))))))
+      (.imp (.eq .bool (.bvar .bool 0) (.const .bool true))
+            (.not (.leqI (.bvar .int 2) (.bvar .int 1))))
+      (.imp (.not (.leqI (.bvar .int 2) (.bvar .int 1)))
+            (.eq .bool (.bvar .bool 0) (.const .bool true)))))))
 
 example (κ : KEnv) : topVC κ [] exGt tyGt := by
   simp [topVC, exGt, tyGt]
@@ -164,16 +164,17 @@ abbrev exEq : Exp :=
       (.letin (.leq (.bvar 1) (.bvar 2))     -- let v = y ≤ x
         (.and (.bvar 1) (.bvar 0)))))         -- u ∧ v
 
-/-- `ν = true ↔ (x ≤ y ∧ y ≤ x)`, i.e. x = y. -/
+/-- `ν = true ↔ (x ≤ y ∧ y ≤ x)`, i.e. x = y. ν is `BVar 0`, so the inner arg
+    `y` is `BVar 1` and the outer arg `x` is `BVar 2`. -/
 abbrev tyEq : Ty :=
   .arrow TT (.arrow TT
     (.refine .bool (.fmla (.and
-      (.imp (.eqB (.bvar .bool 0) (.const .bool true))
-            (.and (.leqI (.bvar .int 1) (.bvar .int 0))
-                  (.leqI (.bvar .int 0) (.bvar .int 1))))
-      (.imp (.and (.leqI (.bvar .int 1) (.bvar .int 0))
-                  (.leqI (.bvar .int 0) (.bvar .int 1)))
-            (.eqB (.bvar .bool 0) (.const .bool true)))))))
+      (.imp (.eq .bool (.bvar .bool 0) (.const .bool true))
+            (.and (.leqI (.bvar .int 2) (.bvar .int 1))
+                  (.leqI (.bvar .int 1) (.bvar .int 2))))
+      (.imp (.and (.leqI (.bvar .int 2) (.bvar .int 1))
+                  (.leqI (.bvar .int 1) (.bvar .int 2)))
+            (.eq .bool (.bvar .bool 0) (.const .bool true)))))))
 
 example (κ : KEnv) : topVC κ [] exEq tyEq := by
   simp [topVC, exEq, tyEq]
@@ -203,8 +204,8 @@ example :
                             (.arrow (IntK "k2") (IntK "k3"))))
                         (.bvar 1)) (.bvar 0))))
         (.refine .int (.fmla (.or
-          (.eqI (.bvar .int 0) (.const .int 100))
-          (.eqI (.bvar .int 0) (.const .int  99))))) := by
+          (.eq .int (.bvar .int 0) (.const .int 100))
+          (.eq .int (.bvar .int 0) (.const .int  99))))) := by
   under_exists =>
     apply check_sound
     simp ; rfl
@@ -240,7 +241,7 @@ example (κ : KEnv) : Hastype κ [] ex2Exp ex2Ty := by
 example (κ : KEnv) : Hastype κ [] ex3Exp ex3Ty := by
   apply topVC_decl_sound <;>
   simp [topVC, check, synth, sub, implyBind, ex3Exp, ex3Ty, Pos, prim, self,
-        Refinement.interp, Formula.interp, Term.interp, REnv.get, Refinement.named,
+        Refinement.interp, Formula.interp, Term.interp, REnv.get,
         Exp.openVar, Exp.WFBVars, Ty.WFBVars, Ty.WFBVarCtx, Refinement.hasBVar,
         Formula.hasBVar, Term.hasBVar]
 
@@ -257,10 +258,8 @@ example (κ : KEnv) : Hastype κ [] (.ann (.iconst 5) (prim 5)) (prim 5) := by
 
 example (κ : KEnv) (Γ : TEnv) (x y : EVar) (r₁ r₂ : Refinement .int)
     (hx : Γ.lookup x = some (.refine .int r₁))
-    (hy : Γ.lookup y = some (.refine .int r₂))
-    (hxν : x ≠ nuName)
-    (hyν : y ≠ nuName):
+    (hy : Γ.lookup y = some (.refine .int r₂)) :
     Hastype κ Γ (.add (.fvar x) (.fvar y))
-      (.refine .int (.fmla (.eqI (.bvar .int 0)
+      (.refine .int (.fmla (.eq .int (.bvar .int 0)
                           (.add (.fvar .int x) (.fvar .int y))))) := by
   apply Hastype.add_var <;> assumption

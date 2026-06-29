@@ -768,7 +768,7 @@ theorem Ty.WFBVarCtx_substBV_aux_last (t : Ty) (ctx : List (Option Base))
           simp [List.getElem?_append_singleton_gt opt ctx k' hgt,
                 List.getElem?_append_singleton_gt none ctx k' hgt]
     have ctx_last : (some b :: (ctx ++ [opt]))[ctx.length + 1]? = some opt := by
-      simp [List.getElem?_cons_succ]
+      simp
     cases va with
     | clos _ =>
       intro b' k hbv
