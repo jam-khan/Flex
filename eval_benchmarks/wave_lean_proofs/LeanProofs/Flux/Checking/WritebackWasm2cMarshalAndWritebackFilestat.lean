@@ -1,0 +1,4 @@
+import LeanProofs.Flux.VC.WritebackWasm2cMarshalAndWritebackFilestat
+import LeanProofs.User.Proof.WritebackWasm2cMarshalAndWritebackFilestatProof
+
+#check (F.WritebackWasm2cMarshalAndWritebackFilestat_proof : F.WritebackWasm2cMarshalAndWritebackFilestat)

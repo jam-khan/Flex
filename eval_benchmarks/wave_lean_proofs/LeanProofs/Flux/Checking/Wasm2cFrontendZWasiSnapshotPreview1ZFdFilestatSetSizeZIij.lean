@@ -1,0 +1,4 @@
+import LeanProofs.Flux.VC.Wasm2cFrontendZWasiSnapshotPreview1ZFdFilestatSetSizeZIij
+import LeanProofs.User.Proof.Wasm2cFrontendZWasiSnapshotPreview1ZFdFilestatSetSizeZIijProof
+
+#check (F.Wasm2cFrontendZWasiSnapshotPreview1ZFdFilestatSetSizeZIij_proof : F.Wasm2cFrontendZWasiSnapshotPreview1ZFdFilestatSetSizeZIij)

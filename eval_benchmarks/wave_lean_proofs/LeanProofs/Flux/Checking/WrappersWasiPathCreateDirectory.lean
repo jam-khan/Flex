@@ -1,0 +1,4 @@
+import LeanProofs.Flux.VC.WrappersWasiPathCreateDirectory
+import LeanProofs.User.Proof.WrappersWasiPathCreateDirectoryProof
+
+#check (F.WrappersWasiPathCreateDirectory_proof : F.WrappersWasiPathCreateDirectory)

@@ -1,0 +1,4 @@
+import LeanProofs.Flux.VC.WrappersWasiPathFilestatSetTimes
+import LeanProofs.User.Proof.WrappersWasiPathFilestatSetTimesProof
+
+#check (F.WrappersWasiPathFilestatSetTimes_proof : F.WrappersWasiPathFilestatSetTimes)

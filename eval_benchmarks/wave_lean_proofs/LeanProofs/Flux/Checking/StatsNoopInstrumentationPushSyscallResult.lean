@@ -1,0 +1,4 @@
+import LeanProofs.Flux.VC.StatsNoopInstrumentationPushSyscallResult
+import LeanProofs.User.Proof.StatsNoopInstrumentationPushSyscallResultProof
+
+#check (F.StatsNoopInstrumentationPushSyscallResult_proof : F.StatsNoopInstrumentationPushSyscallResult)

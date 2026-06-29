@@ -1,0 +1,4 @@
+import LeanProofs.Flux.VC.RuntimeImpl__0__FitsInLinMemUsize
+import LeanProofs.User.Proof.RuntimeImpl__0__FitsInLinMemUsizeProof
+
+#check (F.RuntimeImpl__0__FitsInLinMemUsize_proof : F.RuntimeImpl__0__FitsInLinMemUsize)

@@ -1,0 +1,4 @@
+import LeanProofs.Flux.VC.TypesPlatformImpl__2__FromPosix
+import LeanProofs.User.Proof.TypesPlatformImpl__2__FromPosixProof
+
+#check (F.TypesPlatformImpl__2__FromPosix_proof : F.TypesPlatformImpl__2__FromPosix)

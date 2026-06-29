@@ -1,0 +1,73 @@
+import LeanFixpoint
+import LeanProofs.Flux.Prelude
+import LeanProofs.Flux.VC.RuntimeImpl__0__WriteU64
+open Classical
+set_option linter.unusedVariables false
+
+
+namespace F
+
+namespace RuntimeImpl0WriteU64Qualifs
+
+@[qualif]
+def EqTrue (cnt₀ : Prop) : Prop :=
+  cnt₀
+
+@[qualif]
+def EqFalse (cnt₀ : Prop) : Prop :=
+  (¬cnt₀)
+
+@[qualif]
+def EqZero (cnt₀ : Int) : Prop :=
+  (cnt₀ = 0)
+
+@[qualif]
+def GtZero (cnt₀ : Int) : Prop :=
+  (cnt₀ > 0)
+
+@[qualif]
+def GeZero (cnt₀ : Int) : Prop :=
+  (cnt₀ ≥ 0)
+
+@[qualif]
+def LtZero (cnt₀ : Int) : Prop :=
+  (cnt₀ < 0)
+
+@[qualif]
+def LeZero (cnt₀ : Int) : Prop :=
+  (cnt₀ ≤ 0)
+
+@[qualif]
+def Eq (cnt₀ : Int) (v₀ : Int) : Prop :=
+  (cnt₀ = v₀)
+
+@[qualif]
+def Gt (cnt₀ : Int) (v₀ : Int) : Prop :=
+  (cnt₀ > v₀)
+
+@[qualif]
+def Ge (cnt₀ : Int) (v₀ : Int) : Prop :=
+  (cnt₀ ≥ v₀)
+
+@[qualif]
+def Lt (cnt₀ : Int) (v₀ : Int) : Prop :=
+  (cnt₀ < v₀)
+
+@[qualif]
+def Le (cnt₀ : Int) (v₀ : Int) : Prop :=
+  (cnt₀ ≤ v₀)
+
+@[qualif]
+def Le1 (cnt₀ : Int) (v₀ : Int) : Prop :=
+  (cnt₀ ≤ (v₀ - 1))
+
+end RuntimeImpl0WriteU64Qualifs
+
+open RuntimeImpl0WriteU64Qualifs
+
+set_option maxHeartbeats 5000000
+#time def RuntimeImpl__0__WriteU64_proof : RuntimeImpl__0__WriteU64 := by
+  unfold RuntimeImpl__0__WriteU64
+  solve_fixpoint_combo
+
+end F

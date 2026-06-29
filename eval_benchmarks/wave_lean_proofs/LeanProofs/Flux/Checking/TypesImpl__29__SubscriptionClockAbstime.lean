@@ -1,0 +1,4 @@
+import LeanProofs.Flux.VC.TypesImpl__29__SubscriptionClockAbstime
+import LeanProofs.User.Proof.TypesImpl__29__SubscriptionClockAbstimeProof
+
+#check (F.TypesImpl__29__SubscriptionClockAbstime_proof : F.TypesImpl__29__SubscriptionClockAbstime)

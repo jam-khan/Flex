@@ -1,0 +1,4 @@
+import LeanProofs.Flux.VC.VerifierInterfacePushSyscallResult
+import LeanProofs.User.Proof.VerifierInterfacePushSyscallResultProof
+
+#check (F.VerifierInterfacePushSyscallResult_proof : F.VerifierInterfacePushSyscallResult)
