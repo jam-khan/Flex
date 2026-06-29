@@ -261,14 +261,15 @@ theorem TyDenote.of_extendBy_fresh {κ : KEnv} {t : Ty} {γ : REnv} {v : Val}
     TyDenote κ t γ v :=
   (TyDenote.extendBy_fresh_iff_aux t.skel κ t (by omega) γ v x va hx).mpr h
 
-/-! ## push ↔ substBV bridge
+/-! ## push ↔ openVar bridge
 
   The new `TyDenote` threads arrow-binder values through the de Bruijn stack
   (`γ.push va`), like `Formula.interp` does for quantifiers. Relating that to the
-  *non-shifting* `substBV` (and thence `openVar`) needs a de Bruijn substitution
-  lemma: inserting a value at stack index `m` (`insertBV`) equals substituting
-  `BVar m` with it, provided no `BVar` sits above level `m` (so the shifted
-  region of the stack is empty). -/
+  *non-shifting* `openVar` needs a de Bruijn substitution lemma: inserting a value
+  at stack index `m` (`insertBV`) equals opening `BVar m` to a fresh name `x` whose
+  value is written into the name map, provided no `BVar` sits above level `m` (so
+  the shifted region of the stack is empty). The old intermediate `substBV` is
+  fused away: each `interp_insertBV_openBVar` lemma proves the bridge directly. -/
 
 private theorem getElem?_insertIdx_lt {α} (l : List α) (m j : Nat) (a : α)
     (h : j < m) : (l.insertIdx m a)[j]? = l[j]? := by
@@ -285,37 +286,48 @@ private theorem getElem?_insertIdx_lt {α} (l : List α) (m j : Nat) (a : α)
       | zero => rfl
       | succ j => simp only [List.getElem?_cons_succ]; exact ih m j (by omega)
 
-/-- Reading a `Term` after inserting `v` at stack level `m` equals reading the
-    `substBV`-substituted term, given no `BVar` above `m` (and base `b` at `m`). -/
-private theorem Term.interp_insertBV {b'' : Base} (t : Term b'') (b : Base) (m : Nat)
-    (v : b.interp) (γ : REnv) (hlen : m ≤ γ.bv.length)
+/-- Reading a `Term` after inserting `Val.inj b v` at stack level `m` equals
+    reading the `openBVar`-opened term under `x ↦ v` in the name map, given `x`
+    fresh and no `BVar` above level `m` (base `b` at `m`). This fuses the old
+    insertBV↔substBV and substBV↔openBVar steps into one direct induction. -/
+private theorem Term.interp_insertBV_openBVar {b'' : Base} (t : Term b'') (b : Base) (m : Nat)
+    (v : b.interp) (x : EVar) (γ : REnv) (hlen : m ≤ γ.bv.length) (hx : x ∉ t.fv)
     (hwf : ∀ (b' : Base) (j : Nat), Term.hasBVar b' j t → j < m ∨ (j = m ∧ b' = b)) :
-    Term.interp (γ.insertBV m (Val.inj b v)) t = Term.interp γ (Term.substBV b m v t) := by
+    Term.interp (γ.insertBV m (Val.inj b v)) t =
+    Term.interp (γ.update b x v) (t.openBVar b m x) := by
   induction t with
   | const _ _ => rfl
   | bvar b' j =>
     have hwfj : j < m ∨ (j = m ∧ b' = b) := hwf b' j (by simp [Term.hasBVar])
     simp only [Term.interp, REnv.getBV, REnv.insertBV_bv]
     rcases hwfj with hjm | ⟨hjeq, hbeq⟩
-    · -- j < m: insert doesn't shift, substBV (at m ≠ j) doesn't touch
+    · -- j < m: open doesn't fire (j ≠ m), insert doesn't shift, update keeps bv
       rw [getElem?_insertIdx_lt γ.bv m j (Val.inj b v) hjm]
-      cases b <;> cases b' <;> simp [Term.substBV, Term.interp, REnv.getBV, Nat.ne_of_lt hjm]
-    · -- j = m, b' = b: insert puts `inj b v` here; substBV → const v
+      cases b <;> cases b' <;>
+        simp [Term.openBVar, Term.interp, REnv.getBV, Nat.ne_of_lt hjm]
+    · -- j = m, b' = b: insert puts `inj b v` here; open turns it into `fvar b x`
       subst hjeq
       rw [List.getElem?_insertIdx_self, if_pos hlen]
-      cases b <;> cases b' <;> simp_all [Term.substBV, Term.interp]
-  | fvar b' x => rfl
+      cases b <;> cases b' <;>
+        simp_all [Term.openBVar, Term.interp, REnv.get]
+  | fvar b' z =>
+    have hxz : x ≠ z := fun h => hx (by subst h; simp [Term.fv])
+    simp only [Term.openBVar, Term.interp]
+    cases b' <;> cases b <;> simp_all [REnv.get]
   | add t₁ t₂ ih₁ ih₂ =>
-    simp only [Term.interp, Term.substBV]
-    rw [ih₁ (fun b' j h => hwf b' j (by simp [Term.hasBVar, h])),
-        ih₂ (fun b' j h => hwf b' j (by simp [Term.hasBVar, h]))]
+    simp only [Term.fv, List.mem_append, not_or] at hx
+    simp only [Term.interp, Term.openBVar,
+      ih₁ hx.1 (fun b' j h => hwf b' j (by simp [Term.hasBVar, h])),
+      ih₂ hx.2 (fun b' j h => hwf b' j (by simp [Term.hasBVar, h]))]
   | not t ih =>
-    simp only [Term.interp, Term.substBV]
-    rw [ih (fun b' j h => hwf b' j (by simp [Term.hasBVar, h]))]
+    simp only [Term.fv] at hx
+    simp only [Term.interp, Term.openBVar,
+      ih hx (fun b' j h => hwf b' j (by simp [Term.hasBVar, h]))]
   | and t₁ t₂ ih₁ ih₂ =>
-    simp only [Term.interp, Term.substBV]
-    rw [ih₁ (fun b' j h => hwf b' j (by simp [Term.hasBVar, h])),
-        ih₂ (fun b' j h => hwf b' j (by simp [Term.hasBVar, h]))]
+    simp only [Term.fv, List.mem_append, not_or] at hx
+    simp only [Term.interp, Term.openBVar,
+      ih₁ hx.1 (fun b' j h => hwf b' j (by simp [Term.hasBVar, h])),
+      ih₂ hx.2 (fun b' j h => hwf b' j (by simp [Term.hasBVar, h]))]
 
 /-- `Term` version with no `BVar` at level `≥ m`: inserting any `w` is invisible. -/
 private theorem Term.interp_insertBV_fresh {b'' : Base} (t : Term b'') (m : Nat)
@@ -337,26 +349,34 @@ private theorem Term.interp_insertBV_fresh {b'' : Base} (t : Term b'') (m : Nat)
     simp only [Term.interp, ih₁ (fun b' j h => hwf b' j (by simp [Term.hasBVar, h])),
                ih₂ (fun b' j h => hwf b' j (by simp [Term.hasBVar, h]))]
 
-/-- `Formula` version of `Term.interp_insertBV`. Quantifiers bump the level. -/
-private theorem Formula.interp_insertBV (φ : Formula) (b : Base) (m : Nat)
-    (v : b.interp) (γ : REnv) (hlen : m ≤ γ.bv.length)
+/-- `Formula` version of `Term.interp_insertBV_openBVar`. Quantifiers bump the
+    level (both the inserted index and the opened level). -/
+private theorem Formula.interp_insertBV_openBVar (φ : Formula) (b : Base) (m : Nat)
+    (v : b.interp) (x : EVar) (γ : REnv) (hlen : m ≤ γ.bv.length) (hx : x ∉ φ.fv)
     (hwf : ∀ (b' : Base) (j : Nat), Formula.hasBVar b' j φ → j < m ∨ (j = m ∧ b' = b)) :
-    Formula.interp (γ.insertBV m (Val.inj b v)) φ ↔ Formula.interp γ (φ.substBV b m v) := by
+    Formula.interp (γ.insertBV m (Val.inj b v)) φ ↔
+    Formula.interp (γ.update b x v) (φ.openBVar b m x) := by
   induction φ generalizing m γ with
   | tt | ff => rfl
   | eq _ t₁ t₂ | leqI t₁ t₂ =>
-    simp only [Formula.interp, Formula.substBV,
-      Term.interp_insertBV t₁ b m v γ hlen (fun b' j h => hwf b' j (by simp [Formula.hasBVar, h])),
-      Term.interp_insertBV t₂ b m v γ hlen (fun b' j h => hwf b' j (by simp [Formula.hasBVar, h]))]
+    simp only [Formula.fv, List.mem_append, not_or] at hx
+    simp only [Formula.interp, Formula.openBVar,
+      Term.interp_insertBV_openBVar t₁ b m v x γ hlen hx.1
+        (fun b' j h => hwf b' j (by simp [Formula.hasBVar, h])),
+      Term.interp_insertBV_openBVar t₂ b m v x γ hlen hx.2
+        (fun b' j h => hwf b' j (by simp [Formula.hasBVar, h]))]
   | and φ₁ φ₂ ih₁ ih₂ | or φ₁ φ₂ ih₁ ih₂ | imp φ₁ φ₂ ih₁ ih₂ =>
-    simp only [Formula.interp, Formula.substBV,
-      ih₁ m γ hlen (fun b' j h => hwf b' j (by simp [Formula.hasBVar, h])),
-      ih₂ m γ hlen (fun b' j h => hwf b' j (by simp [Formula.hasBVar, h]))]
+    simp only [Formula.fv, List.mem_append, not_or] at hx
+    simp only [Formula.interp, Formula.openBVar,
+      ih₁ m γ hlen hx.1 (fun b' j h => hwf b' j (by simp [Formula.hasBVar, h])),
+      ih₂ m γ hlen hx.2 (fun b' j h => hwf b' j (by simp [Formula.hasBVar, h]))]
   | not φ ih =>
-    simp only [Formula.interp, Formula.substBV,
-      ih m γ hlen (fun b' j h => hwf b' j (by simp [Formula.hasBVar, h]))]
+    simp only [Formula.fv] at hx
+    simp only [Formula.interp, Formula.openBVar,
+      ih m γ hlen hx (fun b' j h => hwf b' j (by simp [Formula.hasBVar, h]))]
   | exI φ ih | exB φ ih | allI φ ih | allB φ ih =>
-    simp only [Formula.interp, Formula.substBV]
+    simp only [Formula.fv] at hx
+    simp only [Formula.interp, Formula.openBVar]
     have hwf' : ∀ (b' : Base) (j : Nat),
         Formula.hasBVar b' j φ → j < m + 1 ∨ (j = m + 1 ∧ b' = b) := by
       intro b' j h
@@ -367,17 +387,17 @@ private theorem Formula.interp_insertBV (φ : Formula) (b : Base) (m : Nat)
         · exact Or.inr ⟨by omega, hb⟩
     first
     | exact exists_congr (fun n => by
-        rw [REnv.push_insertBV_comm]
-        exact ih (m+1) (γ.push (.iconst n)) (Nat.succ_le_succ hlen) hwf')
+        rw [REnv.push_insertBV_comm, REnv.push_update_comm]
+        exact ih (m+1) (γ.push (.iconst n)) (Nat.succ_le_succ hlen) hx hwf')
     | exact exists_congr (fun n => by
-        rw [REnv.push_insertBV_comm]
-        exact ih (m+1) (γ.push (.bconst n)) (Nat.succ_le_succ hlen) hwf')
+        rw [REnv.push_insertBV_comm, REnv.push_update_comm]
+        exact ih (m+1) (γ.push (.bconst n)) (Nat.succ_le_succ hlen) hx hwf')
     | exact forall_congr' (fun n => by
-        rw [REnv.push_insertBV_comm]
-        exact ih (m+1) (γ.push (.iconst n)) (Nat.succ_le_succ hlen) hwf')
+        rw [REnv.push_insertBV_comm, REnv.push_update_comm]
+        exact ih (m+1) (γ.push (.iconst n)) (Nat.succ_le_succ hlen) hx hwf')
     | exact forall_congr' (fun n => by
-        rw [REnv.push_insertBV_comm]
-        exact ih (m+1) (γ.push (.bconst n)) (Nat.succ_le_succ hlen) hwf')
+        rw [REnv.push_insertBV_comm, REnv.push_update_comm]
+        exact ih (m+1) (γ.push (.bconst n)) (Nat.succ_le_succ hlen) hx hwf')
 
 /-- `Formula` version with no `BVar` at level `≥ m`: inserting any `w` is invisible. -/
 private theorem Formula.interp_insertBV_fresh (φ : Formula) (m : Nat) (w : Val) (γ : REnv)
@@ -407,27 +427,34 @@ private theorem Formula.interp_insertBV_fresh (φ : Formula) (m : Nat) (w : Val)
     | exact forall_congr' (fun n => by rw [REnv.push_insertBV_comm]; exact ih (m+1) (γ.push (.iconst n)) hwf')
     | exact forall_congr' (fun n => by rw [REnv.push_insertBV_comm]; exact ih (m+1) (γ.push (.bconst n)) hwf')
 
-/-- `Refinement` version of `Formula.interp_insertBV` (ν is pushed first, so the
-    inserted level shifts to `m+1`). -/
-private theorem Refinement.interp_insertBV {b' : Base} (κ : KEnv) (r : Refinement b')
-    (b : Base) (m : Nat) (v : b.interp) (γ : REnv) (ν : b'.interp)
-    (hlen : m ≤ γ.bv.length)
+/-- `Refinement` version of `Formula.interp_insertBV_openBVar` (ν is pushed first,
+    so the inserted/opened level shifts to `m+1`). -/
+private theorem Refinement.interp_insertBV_openBVar {b' : Base} (κ : KEnv) (r : Refinement b')
+    (b : Base) (m : Nat) (v : b.interp) (x : EVar) (γ : REnv) (ν : b'.interp)
+    (hlen : m ≤ γ.bv.length) (hx : x ∉ Refinement.fv r)
     (hwf : ∀ (b'' : Base) (j : Nat), Refinement.hasBVar b'' j r → j < m+1 ∨ (j = m+1 ∧ b'' = b)) :
     Refinement.interp κ r (γ.insertBV m (Val.inj b v)) ν ↔
-    Refinement.interp κ (r.substBV b (m+1) v) γ ν := by
+    Refinement.interp κ (r.openBVar b (m+1) x) (γ.update b x v) ν := by
   cases r with
   | fmla φ =>
-    simp only [Refinement.interp, Refinement.substBV, REnv.push_insertBV_comm]
-    exact Formula.interp_insertBV φ b (m+1) v (γ.push (Val.inj b' ν)) (Nat.succ_le_succ hlen)
+    simp only [Refinement.fv] at hx
+    simp only [Refinement.interp, Refinement.openBVar,
+      REnv.push_insertBV_comm, REnv.push_update_comm]
+    exact Formula.interp_insertBV_openBVar φ b (m+1) v x (γ.push (Val.inj b' ν))
+      (Nat.succ_le_succ hlen) hx
       (fun b'' j h => hwf b'' j (by simpa [Refinement.hasBVar] using h))
   | kapp kn args =>
-    simp only [Refinement.interp, Refinement.substBV, REnv.push_insertBV_comm]
+    simp only [Refinement.interp, Refinement.openBVar,
+      REnv.push_insertBV_comm, REnv.push_update_comm]
     apply Iff.of_eq; congr 1
     rw [List.map_map]
     apply List.map_congr_left
     intro a ha
+    have hxa : x ∉ Term.fv a.2 := fun hm =>
+      hx (by simp only [Refinement.fv, List.mem_flatMap]; exact ⟨a, ha, hm⟩)
     simp only [Function.comp]; congr 1
-    exact Term.interp_insertBV a.2 b (m+1) v (γ.push (Val.inj b' ν)) (Nat.succ_le_succ hlen)
+    exact Term.interp_insertBV_openBVar a.2 b (m+1) v x (γ.push (Val.inj b' ν))
+      (Nat.succ_le_succ hlen) hxa
       (fun b'' j h => hwf b'' j (by simp only [Refinement.hasBVar]; exact ⟨a, ha, h⟩))
 
 /-- `Refinement` version with no `BVar` at level `≥ m+1`: inserting `w` is invisible. -/
@@ -493,8 +520,8 @@ private theorem Val.optBase_of_tyDenote {κ : KEnv} {s : Ty} {γ : REnv} {va : V
     Bruijn level `ρ.length` equals interpreting `t.openVar` with `x ↦ va` written
     into the name map. The `ρ` context lists the (live) enclosing binder bases;
     `[Val.optBase va]` is the inserted binder's base. The arrow case is clean
-    (`push_write_comm`); the leaf composes `interp_insertBV` (insertBV↔substBV)
-    with `interp_substBV` (substBV↔openVar). -/
+    (`push_write_comm`); the leaf is the fused `interp_insertBV_openBVar`
+    (insertBV↔openBVar directly, no `substBV` intermediate). -/
 private theorem TyDenote.insertBV_openVar_aux (n : Nat) :
     ∀ (ρ : List (Option Base)) (κ : KEnv) (t : Ty) (_ : t.skel ≤ n)
       (x : EVar) (γ : REnv) (va : Val) (v : Val)
@@ -527,8 +554,7 @@ private theorem TyDenote.insertBV_openVar_aux (n : Nat) :
         fun b'' j h => wfbv_index_split b .int b'' ρ j (hwfb b'' j h)
       cases b <;> simp only [TyDenote] <;>
         exact exists_congr (fun w => and_congr_right (fun _ =>
-          (Refinement.interp_insertBV κ r .int ρ.length m γ w hlen hwf).trans
-          (Refinement.interp_substBV κ r .int (ρ.length+1) m x γ hx_rfv)))
+          Refinement.interp_insertBV_openBVar κ r .int ρ.length m x γ w hlen hx_rfv hwf))
     | bconst c =>
       simp only [Val.optBase] at hwfb
       simp only [Ty.openVar]
@@ -542,8 +568,7 @@ private theorem TyDenote.insertBV_openVar_aux (n : Nat) :
         fun b'' j h => wfbv_index_split b .bool b'' ρ j (hwfb b'' j h)
       cases b <;> simp only [TyDenote] <;>
         exact exists_congr (fun w => and_congr_right (fun _ =>
-          (Refinement.interp_insertBV κ r .bool ρ.length c γ w hlen hwf).trans
-          (Refinement.interp_substBV κ r .bool (ρ.length+1) c x γ hx_rfv)))
+          Refinement.interp_insertBV_openBVar κ r .bool ρ.length c x γ w hlen hx_rfv hwf))
     | clos body =>
       simp only [Val.optBase] at hwfb
       simp only [Ty.openVar]
@@ -593,10 +618,10 @@ private theorem TyDenote.insertBV_openVar_aux (n : Nat) :
           exact (ih (s'.optBase :: ρ) κ t' (by omega) x (γ.push va') va vr
             (by simpa using hwfb_t') (Nat.succ_le_succ hlen) hxf.2).mpr htd_vr
 
-/-- `substBV va` in TyDenote corresponds to `openVar 0 x` with `extendBy s γ x va`,
+/-- `push va` in TyDenote corresponds to `openVar 0 x` with `γ.write x va`,
     when x is fresh for t, va is compatible with s (TyDenote κ s γ va), and t is
     well-formed (WFBVarCtx [s.optBase] t) so that only the correct-base BVars appear. -/
-theorem TyDenote.substBV_iff (κ : KEnv) (t : Ty) (s : Ty) (x : EVar) (γ : REnv)
+theorem TyDenote.push_iff (κ : KEnv) (t : Ty) (s : Ty) (x : EVar) (γ : REnv)
     (va : Val) (v : Val)
     (hx_fv : x ∉ t.fv)
     (hWF : Ty.WFBVarCtx [s.optBase] t)
@@ -747,8 +772,8 @@ theorem subtyp_sound {κ Γ s t} (hsub : Subtyp κ Γ s t)
       Ty.WFBVarCtx_openVar_last t₁ [] s₂.optBase x hWF_st1'
     have hWF_t2x : Ty.WFBVars (t₂.openVar 0 x) :=
       Ty.WFBVarCtx_openVar_last t₂ [] s₂.optBase x hWF_t2
-    -- Convert t₁.substBV va ↔ t₁.openVar 0 x under extendBy s₂ γ x va
-    rw [TyDenote.substBV_iff κ t₁ s₂ x γ va vr hx_t1fv hWF_st1' htd_va]
+    -- Convert (t₁ under γ.push va) ↔ t₁.openVar 0 x under γ.write x va
+    rw [TyDenote.push_iff κ t₁ s₂ x γ va vr hx_t1fv hWF_st1' htd_va]
       at htd_vr_t1
     -- Build extended model for ((x, s₂) :: Γ')
     have hm_ext : ModelsEnv κ (γ.write x va) ((x, s₂) :: Γ') :=
@@ -756,8 +781,8 @@ theorem subtyp_sound {κ Γ s t} (hsub : Subtyp κ Γ s t)
     -- Apply codomain IH at x
     have htd_vr_t2 : TyDenote κ (t₂.openVar 0 x) (γ.write x va) vr :=
       ih_hcodom hWF_t1x hWF_t2x hm_ext htd_vr_t1
-    -- Convert back: t₂.openVar 0 x ↔ t₂.substBV va
-    exact (TyDenote.substBV_iff κ t₂ s₂ x γ va vr hx_t2fv hWF_t2 htd_va).mpr
+    -- Convert back: t₂.openVar 0 x ↔ t₂ under γ.push va
+    exact (TyDenote.push_iff κ t₂ s₂ x γ va vr hx_t2fv hWF_t2 htd_va).mpr
       htd_vr_t2
 
 /-! ## T2 — Fundamental Lemma -/
@@ -900,7 +925,7 @@ theorem hastype_fundamental {κ Γ e t} (h : Hastype κ Γ e t) :
         simp only [Val.closed, Val.fv]
         exact Exp.substEnv_fv_nil γ body
           (fun z hz => EnvCloses.mem_closed hE (hbody_dom z hz))
-      · -- LR: for any va : s₁, produce vr evaluating body and in s₂.substBV va
+      · -- LR: for any va : s₁, produce vr evaluating body and in s₂ under γ.push va
         intro va htd_va
         -- x is the witness from the constructor; extract freshness facts
         simp [List.mem_append, not_or] at hfresh
@@ -914,7 +939,7 @@ theorem hastype_fundamental {κ Γ e t} (h : Hastype κ Γ e t) :
               (fun w hw => EnvCloses.mem_lc hE (hbody_dom w hw))] at hbs_vr
         have hWF_s₂ : Ty.WFBVarCtx [s₁.optBase] s₂ := hwf_arr.2
         exact ⟨vr, hbs_vr,
-          (TyDenote.substBV_iff κ s₂ s₁ x γ va vr hxs₂ hWF_s₂ htd_va).mpr htd_vr⟩
+          (TyDenote.push_iff κ s₂ s₁ x γ va vr hxs₂ hWF_s₂ htd_va).mpr htd_vr⟩
   | app h_fn h_arg hyfv ih_fn ih_arg =>
       rename_i e₁ y s t
       intro γ hE
@@ -941,7 +966,7 @@ theorem hastype_fundamental {κ Γ e t} (h : Hastype κ Γ e t) :
       have hWF_t : Ty.WFBVarCtx [s.optBase] t := h_fn.wf_bvars.2
       have htd_vr_y : TyDenote κ (t.openVar 0 y) γ vr := by
         rw [← hext]
-        exact (TyDenote.substBV_iff κ t s y γ va vr hyfv hWF_t htd_arg).mp htd_vr
+        exact (TyDenote.push_iff κ t s y γ va vr hyfv hWF_t htd_arg).mp htd_vr
       refine ⟨vr, ?_, htd_vr_y⟩
       rw [Exp.substEnv_app]
       exact BigStep.app hbs_fn hbs_arg hbs_body

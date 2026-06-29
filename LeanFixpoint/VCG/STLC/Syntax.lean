@@ -304,9 +304,9 @@ def REnv.write (γ : REnv) (x : EVar) (v : Val) : REnv :=
 @[simp] def REnv.push (γ : REnv) (v : Val) : REnv := ⟨γ.map, v :: γ.bv⟩
 
 /-- Insert value `v` at de Bruijn index `k` (shifting indices `≥ k` up one).
-    `insertBV 0 = push`. Used to bridge `push`-style `TyDenote` with syntactic
-    `substBV`: putting a value into the stack at level `k` mirrors substituting
-    `BVar k` with that value. -/
+    `insertBV 0 = push`. Used to bridge `push`-style `TyDenote` with `openVar`:
+    putting a value into the stack at level `k` mirrors opening `BVar k` to a
+    fresh name bound to that value. -/
 def REnv.insertBV (k : Nat) (v : Val) (γ : REnv) : REnv := ⟨γ.map, γ.bv.insertIdx k v⟩
 
 @[simp] theorem REnv.insertBV_zero (v : Val) (γ : REnv) : γ.insertBV 0 v = γ.push v := rfl
@@ -378,50 +378,6 @@ def Val.fv (v : Val) : List EVar :=
     indices, not free names). -/
 @[simp]
 def Val.closed (v : Val) : Prop := Val.fv v = []
-
-/-! ### Value substitution for bound variables (substBV)
-
-  `Term.substBV b' k v t` replaces `Term.bvar b' k` with `Term.const b' v` in `t`.
-  This is the semantic counterpart of `Term.openBVar b' k x`: instead of
-  substituting a fresh name, we substitute the concrete value directly.
-
-  `Ty.substBV va t` replaces the BVar at level 0 throughout `t` with the
-  value carried by `va` — mirroring how coq-SystemRF uses `tsubBV v_x t'`.
-  Level shifts by +1 inside each `arrow` binder, mirroring `Ty.openVar`. -/
-
-def Term.substBV (b' : Base) (k : Nat) (v : b'.interp) :
-    {b : Base} → Term b → Term b
-  | _, .const b c    => .const b c
-  | _, .bvar b j     =>
-      match b', b with
-      | .int,  .int  => if j = k then .const .int  v else .bvar .int  j
-      | .bool, .bool => if j = k then .const .bool v else .bvar .bool j
-      | .int,  .bool => .bvar .bool j
-      | .bool, .int  => .bvar .int  j
-  | _, .fvar b x     => .fvar b x
-  | _, .add t₁ t₂    => .add (Term.substBV b' k v t₁) (Term.substBV b' k v t₂)
-  | _, .not t        => .not (Term.substBV b' k v t)
-  | _, .and t₁ t₂    => .and (Term.substBV b' k v t₁) (Term.substBV b' k v t₂)
-
-def Formula.substBV (b : Base) (k : Nat) (v : b.interp) : Formula → Formula
-  | .tt           => .tt
-  | .ff           => .ff
-  | .eq b' t₁ t₂  => .eq b' (t₁.substBV b k v) (t₂.substBV b k v)
-  | .leqI t₁ t₂   => .leqI (t₁.substBV b k v) (t₂.substBV b k v)
-  | .and φ₁ φ₂    => .and (φ₁.substBV b k v) (φ₂.substBV b k v)
-  | .or φ₁ φ₂     => .or (φ₁.substBV b k v) (φ₂.substBV b k v)
-  | .not φ        => .not (φ.substBV b k v)
-  | .imp φ₁ φ₂    => .imp (φ₁.substBV b k v) (φ₂.substBV b k v)
-  | .exI φ        => .exI (φ.substBV b (k+1) v)
-  | .exB φ        => .exB (φ.substBV b (k+1) v)
-  | .allI φ       => .allI (φ.substBV b (k+1) v)
-  | .allB φ       => .allB (φ.substBV b (k+1) v)
-
-def Refinement.substBV (b : Base) (k : Nat) (v : b.interp)
-    {b' : Base} (r : Refinement b') : Refinement b' :=
-  match r with
-  | .fmla φ       => .fmla (φ.substBV b k v)
-  | .kapp kn args => .kapp kn (args.map (fun a => ⟨a.1, Term.substBV b k v a.2⟩))
 
 /-- Structural skeleton of `Ty`: counts arrow nesting, ignoring refinement
     bodies. Preserved by `openVar` / `openVarAt`. Used as a termination
