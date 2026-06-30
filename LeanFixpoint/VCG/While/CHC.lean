@@ -17,63 +17,81 @@ import LeanFixpoint.Tactic
   Soundness: if the CHC system is satisfiable, then `ValidHoareTriple pre c post`.
 -/
 
-/-- Generate CHCs for a command with dynamic variable scoping.
-    `readOnlyVars` are always-available variables (e.g., loop bounds).
-    `inScope` is the current scope (readOnlyVars + any assigned variables so far).
-    As the command executes:
-    - `.seq c₁ c₂`: scope expands after c₁ (c₂ sees c₁'s assignments)
-    - `.ite`: branches stay isolated (no escape of assigned variables)
-    - `.cwhile`: loop body can assign locally; invariant stays at pre-loop scope -/
+/-- CPS weakest-precondition VC generator.  `k` receives the *weakest
+    precondition* of `c` w.r.t. `post`.  The ONLY existential introduced is the
+    invariant of each `cwhile`: `seq` midpoints are *computed* by backward
+    substitution, not guessed.  (Standard `pre`/`ic`/`vc` VC-gen — only the loop
+    invariant is a genuine unknown.) -/
 @[simp]
-def whileCHC (inScope : List CVar)
-    (pre : Assertion) (c : Cmd) (post : Assertion) : Prop :=
+def vcGen (inScope : List CVar) (c : Cmd) (post : Assertion)
+    (k : Assertion → Prop) : Prop :=
   match c with
   | .skip =>
-    ∀ s, pre s → post s
+    k post
 
   | .assign x f =>
-    ∀ s, pre s → post (s[x ↦ f s])
+    k (fun s => post (s[x ↦ f s]))
 
   | .seq c₁ c₂ =>
     let midScope := (inScope ++ c₁.assignedVars).eraseDups
-    ∃ κ : NaryProp midScope.length,
-      whileCHC inScope pre c₁ (applyNary midScope κ) ∧
-      whileCHC midScope (applyNary midScope κ) c₂ post
+    vcGen midScope c₂ post (fun mid => vcGen inScope c₁ mid k)
 
   | .ite g c₁ c₂ =>
-    whileCHC inScope (fun s => pre s ∧ g s = true) c₁ post
-    ∧ whileCHC inScope (fun s => pre s ∧ g s = false) c₂ post
+    vcGen inScope c₁ post (fun wp₁ =>
+      vcGen inScope c₂ post (fun wp₂ =>
+        k (fun s => (g s = true → wp₁ s) ∧ (g s = false → wp₂ s))))
 
   | .cwhile g body =>
     let bodyScope := (inScope ++ body.assignedVars).eraseDups
     ∃ κ : NaryProp inScope.length,
-      (∀ s, pre s → applyNary inScope κ s)                                                   -- init
-    ∧ whileCHC bodyScope (fun s => applyNary inScope κ s ∧ g s = true) body (applyNary inScope κ)    -- preserve
-    ∧ (∀ s, applyNary inScope κ s ∧ g s = false → post s)                                    -- exit
+        vcGen bodyScope body (applyNary inScope κ)
+          (fun wpBody => ∀ s, applyNary inScope κ s ∧ g s = true → wpBody s)   -- preserve
+      ∧ (∀ s, applyNary inScope κ s ∧ g s = false → post s)                    -- exit
+      ∧ k (applyNary inScope κ)                                                -- wp(while) = inv
+
+/-- Top-level VC: the precondition must imply the weakest precondition of `c`. -/
+@[simp]
+def whileCHC (inScope : List CVar)
+    (pre : Assertion) (c : Cmd) (post : Assertion) : Prop :=
+  vcGen inScope c post (fun wp => ∀ s, pre s → wp s)
+
+/-- Generic soundness of the CPS generator: a satisfied `vcGen` yields a weakest
+    precondition `wp` with `{wp} c {post}` and `k wp`. -/
+theorem vcGen_sound (inScope : List CVar) (c : Cmd) (post : Assertion)
+    (k : Assertion → Prop) :
+    vcGen inScope c post k → ∃ wp : Assertion, ValidHoareTriple wp c post ∧ k wp := by
+  induction c generalizing inScope post k with
+  | skip =>
+    intro h; exact ⟨post, hoare_skip, h⟩
+  | assign x f =>
+    intro h; exact ⟨_, hoare_assign, h⟩
+  | seq c₁ c₂ ih₁ ih₂ =>
+    intro h; simp only [vcGen] at h
+    obtain ⟨wp₂, ht₂, h₁⟩ := ih₂ _ _ _ h
+    obtain ⟨wp₁, ht₁, hk⟩ := ih₁ _ _ _ h₁
+    exact ⟨wp₁, hoare_seq ht₁ ht₂, hk⟩
+  | ite g c₁ c₂ ih₁ ih₂ =>
+    intro h; simp only [vcGen] at h
+    obtain ⟨wp₁, ht₁, h₂⟩ := ih₁ _ _ _ h
+    obtain ⟨wp₂, ht₂, hk⟩ := ih₂ _ _ _ h₂
+    refine ⟨fun s => (g s = true → wp₁ s) ∧ (g s = false → wp₂ s), ?_, hk⟩
+    exact hoare_if (hoare_consequence_pre ht₁ (fun s hs => hs.1.1 hs.2))
+                   (hoare_consequence_pre ht₂ (fun s hs => hs.1.2 hs.2))
+  | cwhile g body ih =>
+    intro h; simp only [vcGen] at h
+    obtain ⟨κ, hbody, hexit, hk⟩ := h
+    obtain ⟨wpBody, htBody, hpres⟩ := ih _ _ _ hbody
+    exact ⟨applyNary inScope κ,
+           hoare_while (fun _ hp => hp) (hoare_consequence_pre htBody hpres) hexit,
+           hk⟩
 
 /-- Soundness: if the CHC system is satisfiable, the Hoare triple holds. -/
-@[simp]
 theorem whileCHC_sound (inScope : List CVar)
     (pre : Assertion) (c : Cmd) (post : Assertion) :
     whileCHC inScope pre c post → ValidHoareTriple pre c post := by
-  induction c generalizing inScope pre post with
-  | skip =>
-    intro h s₁ s₂ heval hpre
-    cases heval; exact h _ hpre
-  | assign x f =>
-    intro h s₁ s₂ heval hpre
-    cases heval; exact h _ hpre
-  | seq c₁ c₂ ih₁ ih₂ =>
-    intro ⟨κ, h₁, h₂⟩
-    let midScope := (inScope ++ c₁.assignedVars).eraseDups
-    exact hoare_seq (ih₁ inScope _ _ h₁) (ih₂ midScope _ _ h₂)
-  | ite g c₁ c₂ ih₁ ih₂ =>
-    intro ⟨h₁, h₂⟩
-    exact hoare_if (ih₁ inScope _ _ h₁) (ih₂ inScope _ _ h₂)
-  | cwhile g body ih =>
-    intro ⟨κ, hinit, hpres, hpost⟩
-    let bodyScope := (inScope ++ body.assignedVars).eraseDups
-    exact hoare_while hinit (ih bodyScope _ _ hpres) hpost
+  intro h
+  obtain ⟨wp, htriple, hk⟩ := vcGen_sound inScope c post _ h
+  exact hoare_consequence_pre htriple hk
 
 /-! # Examples -/
 

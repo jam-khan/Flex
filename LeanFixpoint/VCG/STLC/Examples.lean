@@ -103,12 +103,8 @@ example :
       Check κ []
         (.letin (.iconst 99) (.app (.ann exId (ty_k "k")) (.bvar 0)))
         Pos := by
-  under_exists =>
-    apply check_sound
-    simp ; rfl
-    simp
-  intro_kenv
-  simp [mkKEnv, liftK1]
+  vc_generate
+  vc_reify
   solve_fixpoint
 
 /-! ## κ-example with `ty_xk`: same shape, output type `IntN 99` -/
@@ -118,13 +114,9 @@ example :
       Check κ []
         (.letin (.iconst 99) (.app (.ann exId (ty_xk "k")) (.bvar 0)))
         (IntN 99) := by
-    under_exists =>
-      apply check_sound
-      simp ; rfl
-      simp
-    intro_kenv
-    simp [mkKEnv, List.lookup, liftK2]
-    solve_fixpoint
+  vc_generate
+  vc_reify
+  solve_fixpoint
 
 -- /-! ## Example 3 again: prove `topVC` without solver -/
 
@@ -193,8 +185,8 @@ abbrev exMax : Exp :=
 /-! ## κ flagship: `let a = 99 in let b = 100 in exMax a b ⇐ {ν | ν = 100 ∨ ν = 99}` -/
 
 example :
-    ∃ κ : KEnv,
-      Check κ []
+    ∃ σ : KEnv,
+      Check σ []
         (.letin (.iconst 99)
           (.letin (.iconst 100)
             (.app (.app (.ann exMax
@@ -202,14 +194,10 @@ example :
                             (.arrow (IntK "k2") (IntK "k3"))))
                         (.bvar 1)) (.bvar 0))))
         (.refine .int (.fmla (.or
-          (.eq .int (.bvar .int 0) (.const .int 100))
-          (.eq .int (.bvar .int 0) (.const .int  99))))) := by
-  under_exists =>
-    apply check_sound
-    simp ; rfl
-    simp
-  intro_kenv
-  simp [mkKEnv, liftK1]
+          (.eq .int (.fvar .int nuName) (.const .int 100))
+          (.eq .int (.fvar .int nuName) (.const .int  99))))) := by
+  vc_generate
+  vc_reify
   solve_fixpoint
 
 /-! ## Arithmetic: `let a = 3 in let b = 4 in a + b ⇐ IntN 7` -/

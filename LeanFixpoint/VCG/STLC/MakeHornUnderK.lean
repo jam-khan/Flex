@@ -142,3 +142,18 @@ elab "intro_kenv" : tactic => do
     replaceMainGoal [finalGoalMVar.mvarId!]
 
 end KEnvTactic
+
+/-- `vc_generate` — discharge the soundness bridge under the `∃ κ`, turning
+    `∃ κ, Check κ Γ e T` into its verification conditions (a CHC goal over `κ`). -/
+macro "vc_generate" : tactic =>
+  `(tactic|
+    under_exists =>
+      apply check_sound
+      simp ; rfl
+      simp)
+
+/-- `vc_reify` — reify the single `KEnv` into typed per-κ unknowns (arities
+    inferred) and normalize the environment lookups, leaving a clean curried
+    CHC goal. Handles both arity-1 (`liftK1`) and arity-2 (`liftK2`) κ. -/
+macro "vc_reify" : tactic =>
+  `(tactic| intro_kenv <;> simp [STLC.mkKEnv, List.lookup, STLC.liftK1, STLC.liftK2])
