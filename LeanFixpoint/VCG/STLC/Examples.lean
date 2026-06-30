@@ -185,8 +185,8 @@ abbrev exMax : Exp :=
 /-! ## κ flagship: `let a = 99 in let b = 100 in exMax a b ⇐ {ν | ν = 100 ∨ ν = 99}` -/
 
 example :
-    ∃ σ : KEnv,
-      Check σ []
+    ∃ κ : KEnv,
+      Check κ []
         (.letin (.iconst 99)
           (.letin (.iconst 100)
             (.app (.app (.ann exMax
@@ -194,8 +194,8 @@ example :
                             (.arrow (IntK "k2") (IntK "k3"))))
                         (.bvar 1)) (.bvar 0))))
         (.refine .int (.fmla (.or
-          (.eq .int (.fvar .int nuName) (.const .int 100))
-          (.eq .int (.fvar .int nuName) (.const .int  99))))) := by
+          (.eq .int (.bvar .int 0) (.const .int 100))
+          (.eq .int (.bvar .int 0) (.const .int  99))))) := by
   vc_generate
   vc_reify
   solve_fixpoint
