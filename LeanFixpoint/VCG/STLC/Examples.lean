@@ -21,18 +21,14 @@ open STLC
 
 /-! ## Refinement helpers -/
 
-/-- `TT = {ν : Int | True}`. -/
-abbrev TT  : Ty := .refine .int (.fmla .tt)
+abbrev TT  : Ty := <ty| Int{ν : ⊤}|>
 
-/-- `Pos = {ν : Int | 1 ≤ ν}` (integer `ν > 0`). -/
-abbrev Pos : Ty := .refine .int (.fmla (.leqI (.const .int 1) (.bvar .int 0)))
+abbrev Pos : Ty :=  <ty| Int{ν : 1 ≤ ν}|>
 
-/-- `NatR = {ν : Int | 0 ≤ ν}`. -/
-def NatR : Ty := .refine .int (.fmla (.leqI (.const .int 0) (.bvar .int 0)))
+def NatR : Ty := <ty| Int{ν : 0 ≤ ν }|>
 
 /-- `IntN n = {ν : Int | ν = n}`. -/
-abbrev IntN (n : Int) : Ty :=
-  .refine .int (.fmla (.eq .int (.bvar .int 0) (.const .int n)))
+abbrev IntN (n : Int) : Ty := <ty| Int{ν : ν = ⌜n⌝}|>
 
 /-- κ-refinement on int: `{ν : Int | k(ν)}` for κ-symbol `k`. -/
 abbrev IntK (k : STLC.KVar) : Ty :=

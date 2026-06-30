@@ -29,7 +29,7 @@ import LeanFixpoint.VCG.STLC.Syntax
            | fmla ∧ fmla | fmla ∨ fmla | ¬fmla | fmla → fmla
            | ∃x:Int, fmla | ∃x:Bool, fmla | ∀x:Int, fmla | ∀x:Bool, fmla | (fmla)
   refine ::= fmla | ident term*          -- κ-application
-  ty    ::= int { ident : refine } | bool { ident : refine }
+  ty    ::= Int { ident : refine } | Bool { ident : refine }
            | ty -> ty | (ident : ty) -> ty | (ty)
   exp   ::= ident | numeral | (exp)
            | λ ident, exp | let ident = exp in exp
@@ -40,9 +40,9 @@ import LeanFixpoint.VCG.STLC.Syntax
 
   Examples:
   ```lean
-  <| let z = 99 in ((λ x, x) : (int{v : κ v} -> int{v : κ v})) z |>
-  <ty| int { v : 0 ≤ v } |>
-  <ty| (x : int { v : 0 ≤ v }) -> bool { v : v = true } |>
+  <| let z = 99 in ((λ x, x) : (Int{v : κ v} -> Int{v : κ v})) z |>
+  <ty| Int { v : 0 ≤ v } |>
+  <ty| (x : Int { v : 0 ≤ v }) -> Bool { v : v = true } |>
   ```
 -/
 
@@ -58,6 +58,7 @@ declare_syntax_cat stlcExp
 syntax:max "(" stlcTerm ")"               : stlcTerm
 syntax:max ident                          : stlcTerm
 syntax:max num                            : stlcTerm
+syntax:max "⌜" term "⌝"                   : stlcTerm  -- lift a Lean value as Term.const
 syntax:65  stlcTerm:65 " + " stlcTerm:66  : stlcTerm
 syntax:max "¬" stlcTerm:max               : stlcTerm
 syntax:35  stlcTerm:36 " ∧ " stlcTerm:35  : stlcTerm
@@ -72,18 +73,15 @@ syntax:35 stlcFormula:36 " ∧ " stlcFormula:35                : stlcFormula
 syntax:30 stlcFormula:31 " ∨ " stlcFormula:30                : stlcFormula
 syntax:max "¬" stlcFormula:max                               : stlcFormula
 syntax:25 stlcFormula:26 " → " stlcFormula:25                : stlcFormula
-syntax:max "∃" ident " : " "Int" ", " stlcFormula:max        : stlcFormula
-syntax:max "∃" ident " : " "Bool" ", " stlcFormula:max       : stlcFormula
-syntax:max "∀" ident " : " "Int" ", " stlcFormula:max        : stlcFormula
-syntax:max "∀" ident " : " "Bool" ", " stlcFormula:max       : stlcFormula
+syntax:max "∃" ident " : " ident ", " stlcFormula:max         : stlcFormula
+syntax:max "∀" ident " : " ident ", " stlcFormula:max         : stlcFormula
 
 -- Refinements: a kvar-free formula, or a κ-application `κ t₁ … tₙ`
 syntax:max stlcFormula                     : stlcRefine
 syntax:max ident (colGt stlcTerm:max)*      : stlcRefine
 
 -- Types
-syntax:max "int " "{" ident " : " stlcRefine "}"       : stlcTy
-syntax:max "bool " "{" ident " : " stlcRefine "}"      : stlcTy
+syntax:max ident "{" ident " : " stlcRefine "}"        : stlcTy
 syntax:max "(" stlcTy ")"                             : stlcTy
 syntax:25  "(" ident " : " stlcTy ")" " -> " stlcTy:25 : stlcTy
 syntax:25  stlcTy:26 " -> " stlcTy:25                  : stlcTy
@@ -121,81 +119,96 @@ syntax (name := stlcTyProg) "<ty|" stlcTy "|>" : term
   `Base`-indexed and the surface syntax has no other way to pin the index.
   `Formula.leqI` is always over `Term .int` regardless of `base`. -/
 
+class ToTerm (α : Type) (b : outParam Base) where
+  toTerm : α → Term b
+
+instance : ToTerm Int  .int  where toTerm n := .const .int  n
+instance : ToTerm Bool .bool where toTerm b := .const .bool b
+
 open Lean
+
+private def resolveBase (b : TSyntax `ident) : MacroM (TSyntax `term) :=
+  match b.getId.toString with
+  | "Int"  => `(Base.int)
+  | "Bool" => `(Base.bool)
+  | s      => Macro.throwError s!"expected 'Int' or 'Bool', got '{s}'"
+
+private def resolveIdent (rctx : List String) (name : String) : MacroM (TSyntax `term) :=
+    match rctx.findIdx? (· == name) with
+    | some i => `(Term.bvar _ $(Lean.quote i))
+    | none   =>
+        match name with
+        | "true"  => `(Term.const Base.bool true)
+        | "false" => `(Term.const Base.bool false)
+        | _       => `(Term.fvar _ $(Lean.mkIdent (Name.mkSimple name)))
 
 mutual
 
-partial def eTerm (rctx : List String) (base : TSyntax `term) (t : TSyntax `stlcTerm) :
+partial def eTerm (rctx : List String) (t : TSyntax `stlcTerm) :
     MacroM (TSyntax `term) := do
   match t with
-  | `(stlcTerm| ($inner:stlcTerm))            => eTerm rctx base inner
-  | `(stlcTerm| $n:num)                       => `(Term.const $base $n)
+  | `(stlcTerm| ($inner:stlcTerm))            => eTerm rctx inner
+  | `(stlcTerm| $n:num)                       => `(Term.const .int $n)
+  | `(stlcTerm| ⌜ $e:term ⌝)                 => `(ToTerm.toTerm $e)
   | `(stlcTerm| $a:stlcTerm + $b:stlcTerm)    => do
-      let ta ← eTerm rctx base a; let tb ← eTerm rctx base b; `(Term.add $ta $tb)
+      let ta ← eTerm rctx a; let tb ← eTerm rctx b; `(Term.add $ta $tb)
   | `(stlcTerm| ¬ $a:stlcTerm)                 => do
-      let ta ← eTerm rctx base a; `(Term.not $ta)
+      let ta ← eTerm rctx a; `(Term.not $ta)
   | `(stlcTerm| $a:stlcTerm ∧ $b:stlcTerm)     => do
-      let ta ← eTerm rctx base a; let tb ← eTerm rctx base b; `(Term.and $ta $tb)
+      let ta ← eTerm rctx a; let tb ← eTerm rctx b; `(Term.and $ta $tb)
   | `(stlcTerm| $x:ident)                     =>
-      let name := x.getId.toString
-      match rctx.findIdx? (· == name) with
-      | some i => `(Term.bvar $base $(Lean.quote i))
-      | none   => `(Term.fvar $base $(Lean.quote name))
+      resolveIdent rctx x.getId.toString
   | _ => Macro.throwUnsupported
 
-partial def eFormula (rctx : List String) (base : TSyntax `term) (f : TSyntax `stlcFormula) :
+partial def eFormula (rctx : List String) (f : TSyntax `stlcFormula) :
     MacroM (TSyntax `term) := do
   match f with
   | `(stlcFormula| ⊤)                                 => `(Formula.tt)
   | `(stlcFormula| ⊥)                                 => `(Formula.ff)
-  | `(stlcFormula| ($inner:stlcFormula))              => eFormula rctx base inner
+  | `(stlcFormula| ($inner:stlcFormula))              => eFormula rctx inner
   | `(stlcFormula| $a:stlcTerm = $b:stlcTerm)         => do
-      let ta ← eTerm rctx base a; let tb ← eTerm rctx base b; `(Formula.eq $base $ta $tb)
+      let ta ← eTerm rctx a; let tb ← eTerm rctx b; `(Formula.eq _ $ta $tb)
   | `(stlcFormula| $a:stlcTerm ≤ $b:stlcTerm)         => do
-      let ta ← eTerm rctx (← `(Base.int)) a
-      let tb ← eTerm rctx (← `(Base.int)) b
+      let ta ← eTerm rctx a
+      let tb ← eTerm rctx b
       `(Formula.leqI $ta $tb)
   | `(stlcFormula| $a:stlcFormula ∧ $b:stlcFormula)   => do
-      let ta ← eFormula rctx base a; let tb ← eFormula rctx base b; `(Formula.and $ta $tb)
+      let ta ← eFormula rctx a; let tb ← eFormula rctx b; `(Formula.and $ta $tb)
   | `(stlcFormula| $a:stlcFormula ∨ $b:stlcFormula)   => do
-      let ta ← eFormula rctx base a; let tb ← eFormula rctx base b; `(Formula.or $ta $tb)
+      let ta ← eFormula rctx a; let tb ← eFormula rctx b; `(Formula.or $ta $tb)
   | `(stlcFormula| ¬ $a:stlcFormula)                  => do
-      let ta ← eFormula rctx base a; `(Formula.not $ta)
+      let ta ← eFormula rctx a; `(Formula.not $ta)
   | `(stlcFormula| $a:stlcFormula → $b:stlcFormula)   => do
-      let ta ← eFormula rctx base a; let tb ← eFormula rctx base b; `(Formula.imp $ta $tb)
-  | `(stlcFormula| ∃ $x:ident : Int, $body:stlcFormula) => do
-      let tb ← eFormula (x.getId.toString :: rctx) base body; `(Formula.ex Base.int $tb)
-  | `(stlcFormula| ∃ $x:ident : Bool, $body:stlcFormula) => do
-      let tb ← eFormula (x.getId.toString :: rctx) base body; `(Formula.ex Base.bool $tb)
-  | `(stlcFormula| ∀ $x:ident : Int, $body:stlcFormula) => do
-      let tb ← eFormula (x.getId.toString :: rctx) base body; `(Formula.all Base.int $tb)
-  | `(stlcFormula| ∀ $x:ident : Bool, $body:stlcFormula) => do
-      let tb ← eFormula (x.getId.toString :: rctx) base body; `(Formula.all Base.bool $tb)
+      let ta ← eFormula rctx a; let tb ← eFormula rctx b; `(Formula.imp $ta $tb)
+  | `(stlcFormula| ∃ $x:ident : $b:ident, $body:stlcFormula) => do
+      let tb ← eFormula (x.getId.toString :: rctx) body
+      let bExpr ← resolveBase b; `(Formula.ex $bExpr $tb)
+  | `(stlcFormula| ∀ $x:ident : $b:ident, $body:stlcFormula) => do
+      let tb ← eFormula (x.getId.toString :: rctx) body
+      let bExpr ← resolveBase b; `(Formula.all $bExpr $tb)
   | _ => Macro.throwUnsupported
 
-partial def eRefine (rctx : List String) (base : TSyntax `term) (r : TSyntax `stlcRefine) :
+partial def eRefine (rctx : List String)  (r : TSyntax `stlcRefine) :
     MacroM (TSyntax `term) := do
   match r with
   | `(stlcRefine| $k:ident $args:stlcTerm*) => do
       let targs ← args.toList.mapM (fun a => do
-        let ta ← eTerm rctx base a
-        `(term| (⟨$base, $ta⟩ : Σ b : Base, Term b)))
+        let ta ← eTerm rctx a
+        `(term| (⟨_, $ta⟩ : Σ b : Base, Term b)))
       let targs := targs.toArray
       let lst ← `(term| [$[$targs],*])
       `(Refinement.kapp $(Lean.quote k.getId.toString) $lst)
   | `(stlcRefine| $f:stlcFormula) => do
-      let tf ← eFormula rctx base f; `(Refinement.fmla $tf)
+      let tf ← eFormula rctx f; `(Refinement.fmla $tf)
   | _ => Macro.throwUnsupported
 
 partial def eTy (rctx : List String) (t : TSyntax `stlcTy) : MacroM (TSyntax `term) := do
   match t with
   | `(stlcTy| ($inner:stlcTy))                       => eTy rctx inner
-  | `(stlcTy| int { $v:ident : $r:stlcRefine })      => do
-      let tr ← eRefine (v.getId.toString :: rctx) (← `(Base.int)) r
-      `(Ty.refine Base.int $tr)
-  | `(stlcTy| bool { $v:ident : $r:stlcRefine })     => do
-      let tr ← eRefine (v.getId.toString :: rctx) (← `(Base.bool)) r
-      `(Ty.refine Base.bool $tr)
+  | `(stlcTy| $b:ident { $v:ident : $r:stlcRefine })  => do
+      let bExpr ← resolveBase b
+      let tr ← eRefine (v.getId.toString :: rctx) r
+      `(Ty.refine $bExpr $tr)
   | `(stlcTy| ($x:ident : $s:stlcTy) -> $t:stlcTy)   => do
       let ts ← eTy rctx s
       let tt ← eTy (x.getId.toString :: rctx) t

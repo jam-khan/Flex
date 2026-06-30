@@ -1,4 +1,5 @@
 import LeanFixpoint.VCG.STLC.Typing
+import LeanFixpoint.VCG.STLC.Notation
 
 open STLC
 
@@ -41,35 +42,25 @@ inductive Hastype : KEnv → TEnv → Exp → Ty → Prop where
   | add_var {κ Γ x y r₁ r₂} :
       Γ.lookup x = some (.refine .int r₁) →
       Γ.lookup y = some (.refine .int r₂) →
-      Hastype κ Γ (.add (.fvar x) (.fvar y))
-        (.refine .int (.fmla (.eq .int (.bvar .int 0)
-                            (.add (.fvar .int x) (.fvar .int y)))))
+      Hastype κ Γ (.add (.fvar x) (.fvar y)) <ty| Int{ν : ν = x + y}|>
   | leq_var {κ Γ x y r₁ r₂} :
       Γ.lookup x = some (.refine .int r₁) →
       Γ.lookup y = some (.refine .int r₂) →
       Hastype κ Γ (.leq (.fvar x) (.fvar y))
-        (.refine .bool (.fmla (.and
-          (.imp (.eq .bool (.bvar .bool 0) (.const .bool true))
-                (.leqI (.fvar .int x) (.fvar .int y)))
-          (.imp (.leqI (.fvar .int x) (.fvar .int y))
-                (.eq .bool (.bvar .bool 0) (.const .bool true))))))
+        <ty|Bool{ν : (ν = true → x ≤ y) ∧ (x ≤ y → ν = true)} |>
   | not_var {κ Γ x r} :
       Γ.lookup x = some (.refine .bool r) →
-      Hastype κ Γ (.not (.fvar x))
-        (.refine .bool (.fmla (.eq .bool (.bvar .bool 0) (.not (.fvar .bool x)))))
+      Hastype κ Γ (.not (.fvar x)) <ty|Bool{ν : ν = ¬x}|>
   | and_var {κ Γ x y rx ry} :
       Γ.lookup x = some (.refine .bool rx) →
       Γ.lookup y = some (.refine .bool ry) →
-      Hastype κ Γ (.and (.fvar x) (.fvar y))
-        (.refine .bool (.fmla (.eq .bool (.bvar .bool 0) (.and (.fvar .bool x) (.fvar .bool y)))))
+      Hastype κ Γ (.and (.fvar x) (.fvar y)) <ty|Bool{ν : (ν = x ∧ y)}|>
   | ite {κ Γ x y e₁ e₂ r t} :
       Γ.lookup x = some (.refine .bool r) →
       y ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ e₁.fv ++ e₂.fv ++ t.fv ++ [x] →
       Ty.WFBVars t →
-      Hastype κ ((y, .refine .bool (.fmla
-                (.eq .bool (.fvar .bool x) (.const .bool true)))) :: Γ) e₁ t →
-      Hastype κ ((y, .refine .bool (.fmla
-                (.eq .bool (.fvar .bool x) (.const .bool false)))) :: Γ) e₂ t →
+      Hastype κ ((y, <ty|Bool{ν : x = true }|>) :: Γ) e₁ t →
+      Hastype κ ((y, <ty|Bool{ν : x = false}|>) :: Γ) e₂ t →
       Hastype κ Γ (.ite (.fvar x) e₁ e₂) t
 
 /-- For fvar typing, the variable must appear in the context. -/
