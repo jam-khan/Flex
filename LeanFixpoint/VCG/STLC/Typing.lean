@@ -1,6 +1,7 @@
 import LeanFixpoint.VCG.STLC.Syntax
 import LeanFixpoint.VCG.STLC.Substitution
 import LeanFixpoint.VCG.STLC.Entailment
+import LeanFixpoint.VCG.STLC.Notation
 
 open STLC
 
@@ -65,29 +66,21 @@ mutual
         Γ.lookup x = some (.refine .int r₁) →
         Γ.lookup y = some (.refine .int r₂) →
         Synth κ Γ (.leq (.fvar x) (.fvar y))
-          (.refine .bool (.fmla (.and
-            (.imp (.eq .bool (.bvar .bool 0) (.const .bool true))
-                  (.leqI (.fvar .int x) (.fvar .int y)))
-            (.imp (.leqI (.fvar .int x) (.fvar .int y))
-                  (.eq .bool (.bvar .bool 0) (.const .bool true))))))
+           <ty|Bool{ν : (ν = true → x ≤ y) ∧ (x ≤ y → ν = true)}|>
 
     | add_var {κ Γ x y r₁ r₂} :
         Γ.lookup x = some (.refine .int r₁) →
         Γ.lookup y = some (.refine .int r₂) →
-        Synth κ Γ (.add (.fvar x) (.fvar y))
-          (.refine .int (.fmla (.eq .int (.bvar .int 0)
-                              (.add (.fvar .int x) (.fvar .int y)))))
+        Synth κ Γ (.add (.fvar x) (.fvar y)) <ty| Int{ν : ν = x + y}|>
 
     | not_var {κ Γ x r} :
         Γ.lookup x = some (.refine .bool r) →
-        Synth κ Γ (.not (.fvar x))
-          (.refine .bool (.fmla (.eq .bool (.bvar .bool 0) (.not (.fvar .bool x)))))
+        Synth κ Γ (.not (.fvar x)) <ty|Bool{ν : ν = ¬x}|>
 
     | and_var {κ Γ x y rx ry} :
         Γ.lookup x = some (.refine .bool rx) →
         Γ.lookup y = some (.refine .bool ry) →
-        Synth κ Γ (.and (.fvar x) (.fvar y))
-          (.refine .bool (.fmla (.eq .bool (.bvar .bool 0) (.and (.fvar .bool x) (.fvar .bool y)))))
+        Synth κ Γ (.and (.fvar x) (.fvar y)) <ty|Bool{ν : ν = x ∧ y} |>
 
   -- κ; Γ ⊢ e ⇐ t : "e checks against type t under κ"
   inductive Check : KEnv → TEnv → Exp → Ty → Prop where
@@ -103,17 +96,14 @@ mutual
 
     | letin {κ Γ e₁ e₂ s t x} :
         Synth κ Γ e₁ s →
-        x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ
-            ++ e₂.fv ++ s.fv ++ t.fv →
+        x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ e₂.fv ++ s.fv ++ t.fv →
         Check κ ((x, s) :: Γ) (e₂.openVar 0 x) t →
         Check κ Γ (.letin e₁ e₂) t
 
     | ite {κ Γ x y e₁ e₂ r t} :
         Γ.lookup x = some (.refine .bool r) →
         y ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ e₁.fv ++ e₂.fv ++ t.fv ++ [x] →
-        Check κ ((y, .refine .bool (.fmla
-                  (.eq .bool (.fvar .bool x) (.const .bool true)))) :: Γ) e₁ t →
-        Check κ ((y, .refine .bool (.fmla
-                  (.eq .bool (.fvar .bool x) (.const .bool false)))) :: Γ) e₂ t →
+        Check κ ((y, <ty|Bool{ν : x = true }|>) :: Γ) e₁ t →
+        Check κ ((y, <ty|Bool{ν : x = false}|>) :: Γ) e₂ t →
         Check κ Γ (.ite (.fvar x) e₁ e₂) t
 end

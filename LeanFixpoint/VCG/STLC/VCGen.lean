@@ -1,6 +1,7 @@
 import LeanFixpoint.VCG.STLC.Syntax
 import LeanFixpoint.VCG.STLC.Substitution
 import LeanFixpoint.VCG.STLC.Typing
+import LeanFixpoint.VCG.STLC.Notation
 
 open STLC
 
@@ -73,31 +74,21 @@ mutual
     | .leq (.fvar x) (.fvar y) =>
         match Γ.lookup x, Γ.lookup y with
         | some (.refine .int _), some (.refine .int _) =>
-            some ((fun _ _ => True),
-              .refine .bool (.fmla (.and
-                (.imp (.eq .bool (.bvar .bool 0) (.const .bool true))
-                      (.leqI (.fvar .int x) (.fvar .int y)))
-                (.imp (.leqI (.fvar .int x) (.fvar .int y))
-                      (.eq .bool (.bvar .bool 0) (.const .bool true))))))
+            some ((fun _ _ => True), <ty| Bool{ν : (ν = true → x ≤ y) ∧ (x ≤ y → ν = true)} |>)
         | _, _ => none
     | .add (.fvar x) (.fvar y) =>
         match Γ.lookup x, Γ.lookup y with
         | some (.refine .int _), some (.refine .int _) =>
-            some ((fun _ _ => True),
-              .refine .int (.fmla (.eq .int (.bvar .int 0)
-                                 (.add (.fvar .int x) (.fvar .int y)))))
+            some ((fun _ _ => True), <ty| Int{ν : ν = x + y}|>)
         | _, _ => none
     | .not (.fvar x) =>
         match Γ.lookup x with
-        | some (.refine .bool _) =>
-            some ((fun _ _ => True),
-              .refine .bool (.fmla (.eq .bool (.bvar .bool 0) (.not (.fvar .bool x)))))
+        | some (.refine .bool _) => some ((fun _ _ => True), <ty| Bool{ν : ν = ¬x}|>)
         | _ => none
     | .and (.fvar x) (.fvar y) =>
         match Γ.lookup x, Γ.lookup y with
         | some (.refine .bool _), some (.refine .bool _) =>
-            some ((fun _ _ => True),
-              .refine .bool (.fmla (.eq .bool (.bvar .bool 0) (.and (.fvar .bool x) (.fvar .bool y)))))
+            some ((fun _ _ => True), <ty| Bool{ν : ν = x ∧ y} |>)
         | _, _ => none
     | _ => none
   termination_by e => 2 * e.skel
@@ -107,16 +98,14 @@ mutual
 
   def check (Γ : TEnv) : Exp → Ty → Option Constraint
     | .lam e, .arrow s₁ s₂ =>
-        let x := EVar.fresh (TEnv.dom Γ ++ e.fv ++ s₁.fv ++ s₂.fv
-                              ++ TEnv.tyFv Γ)
+        let x := EVar.fresh (TEnv.dom Γ ++ e.fv ++ s₁.fv ++ s₂.fv ++ TEnv.tyFv Γ)
         match check ((x, s₁) :: Γ) (e.openVar 0 x) (s₂.openVar 0 x) with
         | some c => some (implyBind x s₁ c)
         | none   => none
     | .letin e₁ e₂, t =>
         match synth Γ e₁ with
         | some (c₁, s) =>
-            let x := EVar.fresh (TEnv.dom Γ ++ e₂.fv ++ s.fv ++ t.fv
-                                  ++ TEnv.tyFv Γ)
+            let x := EVar.fresh (TEnv.dom Γ ++ e₂.fv ++ s.fv ++ t.fv ++ TEnv.tyFv Γ)
             match check ((x, s) :: Γ) (e₂.openVar 0 x) t with
             | some c₂ => some (fun κ γ => c₁ κ γ ∧ implyBind x s c₂ κ γ)
             | none    => none
@@ -132,10 +121,8 @@ mutual
                   -- in each branch without conjoining into the (atomic) refinement.
                   let y := EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ
                                         ++ e₁.fv ++ e₂.fv ++ t.fv ++ [x])
-                  let r_true  : Ty := .refine .bool (.fmla
-                    (.eq .bool (.fvar .bool x) (.const .bool true)))
-                  let r_false : Ty := .refine .bool (.fmla
-                    (.eq .bool (.fvar .bool x) (.const .bool false)))
+                  let r_true  : Ty := <ty| Bool{ν : x = true}|>
+                  let r_false : Ty := <ty| Bool{ν : x = false}|>
                   match check ((y, r_true) :: Γ) e₁ t,
                         check ((y, r_false) :: Γ) e₂ t with
                   | some c₁, some c₂ =>

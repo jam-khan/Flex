@@ -14,8 +14,8 @@ open STLC
 example :
     ∃ κ : KEnv,
       topVC κ []
-      <| let z = 99 in ((λ x, x) : (int{v : κ v} -> int{v : κ v})) z |>
-      <ty| int{ v : 1 ≤ v } |> := by
+      <| let z = 99 in ((λ x, x) : (Int{v : κ v} -> Int{v : κ v})) z |>
+      <ty| Int{ v : 1 ≤ v } |> := by
   simp [topVC]
   intro_kenv
   simp [mkKEnv, liftK1]
@@ -26,8 +26,8 @@ example :
 example :
     ∃ κ : KEnv,
       topVC κ []
-      <| let z = 99 in ((λ x, x) : (x : int {v : ⊤}) -> int {v : κ x v}) z |>
-      <ty| int{ v : v = 99 } |> := by
+      <| let z = 99 in ((λ x, x) : (x : Int {v : ⊤}) -> Int {v : κ x v}) z |>
+      <ty| Int{ v : v = 99 } |> := by
   simp [topVC]
   intro_kenv
   simp [mkKEnv, List.lookup, liftK2]
