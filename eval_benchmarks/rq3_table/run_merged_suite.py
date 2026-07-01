@@ -52,7 +52,8 @@ def run_lake_build(merged_dir: Path):
         t0 = time.monotonic()
         result = subprocess.run(
             ["lake", "build"], cwd=merged_dir,
-            capture_output=True, text=True, timeout=3600,
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            text=True, timeout=3600,
         )
         wall_ms = int((time.monotonic() - t0) * 1000)
         return result.returncode, wall_ms, result.stdout.splitlines()
