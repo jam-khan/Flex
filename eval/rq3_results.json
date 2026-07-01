@@ -8,10 +8,10 @@
       "tactic": "fusion",
       "status": "ok",
       "hb": 264,
-      "ms": 27,
+      "ms": 20,
       "depth": 99,
       "nconst": 46,
-      "kerus": 7416,
+      "kerus": 6583,
       "phases": {
         "fusion:sol": 20,
         "fusion:build": 18,
@@ -24,7 +24,7 @@
       "tactic": "fusion_grind",
       "status": "FAIL",
       "hb": 3383,
-      "ms": 245,
+      "ms": 259,
       "depth": 0,
       "nconst": 0,
       "kerus": 0,
@@ -38,10 +38,10 @@
       "tactic": "fusion_aesop",
       "status": "ok",
       "hb": 12387,
-      "ms": 633,
+      "ms": 725,
       "depth": 99,
       "nconst": 66,
-      "kerus": 10433,
+      "kerus": 9925,
       "phases": {
         "fusion_aesop:sol": 20,
         "fusion_aesop:build": 12093,
@@ -59,10 +59,10 @@
       "tactic": "fusion",
       "status": "ok",
       "hb": 49,
-      "ms": 12,
+      "ms": 5,
       "depth": 45,
       "nconst": 38,
-      "kerus": 969,
+      "kerus": 922,
       "phases": {
         "fusion:sol": 3,
         "fusion:build": 4,
@@ -70,37 +70,37 @@
       },
       "elim_hb": 27
     },
-    "grind": {
-      "config": "grind",
-      "tactic": "fusion_grind",
-      "status": "ok",
-      "hb": 406,
-      "ms": 33,
-      "depth": 45,
-      "nconst": 36,
-      "kerus": 846,
-      "phases": {
-        "fusion_grind:sol": 3,
-        "fusion_grind:build": 362,
-        "fusion_grind:clean": 20
-      },
-      "elim_hb": 385
-    },
     "aesop": {
       "config": "aesop",
       "tactic": "fusion_aesop",
       "status": "ok",
       "hb": 360,
-      "ms": 60,
+      "ms": 31,
       "depth": 45,
       "nconst": 49,
-      "kerus": 1171,
+      "kerus": 969,
       "phases": {
         "fusion_aesop:sol": 3,
         "fusion_aesop:build": 313,
         "fusion_aesop:clean": 20
       },
       "elim_hb": 336
+    },
+    "grind": {
+      "config": "grind",
+      "tactic": "fusion_grind",
+      "status": "ok",
+      "hb": 406,
+      "ms": 34,
+      "depth": 45,
+      "nconst": 36,
+      "kerus": 785,
+      "phases": {
+        "fusion_grind:sol": 3,
+        "fusion_grind:build": 362,
+        "fusion_grind:clean": 20
+      },
+      "elim_hb": 385
     }
   },
   "icfp17-ex1": {
@@ -112,10 +112,10 @@
       "tactic": "fusion",
       "status": "ok",
       "hb": 46,
-      "ms": 9,
+      "ms": 5,
       "depth": 47,
       "nconst": 43,
-      "kerus": 975,
+      "kerus": 800,
       "phases": {
         "fusion:sol": 3,
         "fusion:build": 4,
@@ -128,10 +128,10 @@
       "tactic": "fusion_grind",
       "status": "ok",
       "hb": 587,
-      "ms": 38,
+      "ms": 43,
       "depth": 47,
       "nconst": 42,
-      "kerus": 952,
+      "kerus": 912,
       "phases": {
         "fusion_grind:sol": 3,
         "fusion_grind:build": 546,
@@ -144,10 +144,10 @@
       "tactic": "fusion_aesop",
       "status": "ok",
       "hb": 243,
-      "ms": 53,
+      "ms": 24,
       "depth": 47,
       "nconst": 51,
-      "kerus": 1175,
+      "kerus": 968,
       "phases": {
         "fusion_aesop:sol": 3,
         "fusion_aesop:build": 199,
@@ -165,10 +165,10 @@
       "tactic": "fusion",
       "status": "ok",
       "hb": 155,
-      "ms": 18,
+      "ms": 12,
       "depth": 74,
       "nconst": 46,
-      "kerus": 3764,
+      "kerus": 3221,
       "phases": {
         "fusion:sol": 10,
         "fusion:build": 12,
@@ -176,37 +176,37 @@
       },
       "elim_hb": 88
     },
-    "grind": {
-      "config": "grind",
-      "tactic": "fusion_grind",
-      "status": "ok",
-      "hb": 8732,
-      "ms": 481,
-      "depth": 74,
-      "nconst": 46,
-      "kerus": 3361,
-      "phases": {
-        "fusion_grind:sol": 10,
-        "fusion_grind:build": 8594,
-        "fusion_grind:clean": 66
-      },
-      "elim_hb": 8670
-    },
     "aesop": {
       "config": "aesop",
       "tactic": "fusion_aesop",
       "status": "ok",
       "hb": 2411,
-      "ms": 158,
+      "ms": 160,
       "depth": 99,
       "nconst": 59,
-      "kerus": 6512,
+      "kerus": 6575,
       "phases": {
         "fusion_aesop:sol": 10,
         "fusion_aesop:build": 2240,
         "fusion_aesop:clean": 66
       },
       "elim_hb": 2316
+    },
+    "grind": {
+      "config": "grind",
+      "tactic": "fusion_grind",
+      "status": "ok",
+      "hb": 8732,
+      "ms": 594,
+      "depth": 74,
+      "nconst": 46,
+      "kerus": 3490,
+      "phases": {
+        "fusion_grind:sol": 10,
+        "fusion_grind:build": 8594,
+        "fusion_grind:clean": 66
+      },
+      "elim_hb": 8670
     }
   },
   "icfp17-ex3": {
@@ -218,10 +218,10 @@
       "tactic": "fusion",
       "status": "ok",
       "hb": 123,
-      "ms": 13,
+      "ms": 10,
       "depth": 68,
       "nconst": 46,
-      "kerus": 2090,
+      "kerus": 1933,
       "phases": {
         "fusion:sol": 9,
         "fusion:build": 7,
@@ -234,7 +234,7 @@
       "tactic": "fusion_grind",
       "status": "FAIL",
       "hb": 1367,
-      "ms": 79,
+      "ms": 97,
       "depth": 0,
       "nconst": 0,
       "kerus": 0,
@@ -248,10 +248,10 @@
       "tactic": "fusion_aesop",
       "status": "ok",
       "hb": 2768,
-      "ms": 169,
+      "ms": 187,
       "depth": 68,
       "nconst": 59,
-      "kerus": 2977,
+      "kerus": 3124,
       "phases": {
         "fusion_aesop:sol": 9,
         "fusion_aesop:build": 2640,
@@ -269,10 +269,10 @@
       "tactic": "fusion",
       "status": "ok",
       "hb": 49,
-      "ms": 8,
+      "ms": 5,
       "depth": 47,
       "nconst": 40,
-      "kerus": 954,
+      "kerus": 880,
       "phases": {
         "fusion:sol": 3,
         "fusion:build": 3,
@@ -280,37 +280,37 @@
       },
       "elim_hb": 26
     },
-    "grind": {
-      "config": "grind",
-      "tactic": "fusion_grind",
-      "status": "ok",
-      "hb": 523,
-      "ms": 39,
-      "depth": 47,
-      "nconst": 39,
-      "kerus": 910,
-      "phases": {
-        "fusion_grind:sol": 3,
-        "fusion_grind:build": 479,
-        "fusion_grind:clean": 20
-      },
-      "elim_hb": 502
-    },
     "aesop": {
       "config": "aesop",
       "tactic": "fusion_aesop",
       "status": "ok",
       "hb": 318,
-      "ms": 47,
+      "ms": 29,
       "depth": 59,
       "nconst": 47,
-      "kerus": 1495,
+      "kerus": 1421,
       "phases": {
         "fusion_aesop:sol": 3,
         "fusion_aesop:build": 267,
         "fusion_aesop:clean": 20
       },
       "elim_hb": 290
+    },
+    "grind": {
+      "config": "grind",
+      "tactic": "fusion_grind",
+      "status": "ok",
+      "hb": 523,
+      "ms": 45,
+      "depth": 47,
+      "nconst": 39,
+      "kerus": 961,
+      "phases": {
+        "fusion_grind:sol": 3,
+        "fusion_grind:build": 479,
+        "fusion_grind:clean": 20
+      },
+      "elim_hb": 502
     }
   },
   "mod00": {
@@ -322,10 +322,10 @@
       "tactic": "fusion",
       "status": "ok",
       "hb": 48,
-      "ms": 10,
+      "ms": 6,
       "depth": 46,
       "nconst": 39,
-      "kerus": 1006,
+      "kerus": 857,
       "phases": {
         "fusion:sol": 3,
         "fusion:build": 4,
@@ -333,37 +333,37 @@
       },
       "elim_hb": 26
     },
-    "grind": {
-      "config": "grind",
-      "tactic": "fusion_grind",
-      "status": "ok",
-      "hb": 627,
-      "ms": 49,
-      "depth": 46,
-      "nconst": 38,
-      "kerus": 838,
-      "phases": {
-        "fusion_grind:sol": 3,
-        "fusion_grind:build": 583,
-        "fusion_grind:clean": 19
-      },
-      "elim_hb": 605
-    },
     "aesop": {
       "config": "aesop",
       "tactic": "fusion_aesop",
       "status": "ok",
       "hb": 496,
-      "ms": 56,
+      "ms": 41,
       "depth": 46,
       "nconst": 51,
-      "kerus": 1760,
+      "kerus": 1328,
       "phases": {
         "fusion_aesop:sol": 3,
         "fusion_aesop:build": 449,
         "fusion_aesop:clean": 19
       },
       "elim_hb": 471
+    },
+    "grind": {
+      "config": "grind",
+      "tactic": "fusion_grind",
+      "status": "ok",
+      "hb": 627,
+      "ms": 53,
+      "depth": 46,
+      "nconst": 38,
+      "kerus": 852,
+      "phases": {
+        "fusion_grind:sol": 3,
+        "fusion_grind:build": 583,
+        "fusion_grind:clean": 19
+      },
+      "elim_hb": 605
     }
   },
   "scrape03": {
@@ -375,10 +375,10 @@
       "tactic": "fusion",
       "status": "ok",
       "hb": 34,
-      "ms": 7,
+      "ms": 5,
       "depth": 49,
       "nconst": 38,
-      "kerus": 604,
+      "kerus": 574,
       "phases": {
         "fusion:sol": 4,
         "fusion:build": 4,
@@ -391,10 +391,10 @@
       "tactic": "fusion_grind",
       "status": "ok",
       "hb": 213,
-      "ms": 20,
+      "ms": 22,
       "depth": 49,
       "nconst": 37,
-      "kerus": 557,
+      "kerus": 567,
       "phases": {
         "fusion_grind:sol": 4,
         "fusion_grind:build": 183,
@@ -407,10 +407,10 @@
       "tactic": "fusion_aesop",
       "status": "ok",
       "hb": 934,
-      "ms": 82,
+      "ms": 63,
       "depth": 49,
       "nconst": 41,
-      "kerus": 615,
+      "kerus": 562,
       "phases": {
         "fusion_aesop:sol": 4,
         "fusion_aesop:build": 903,
@@ -428,10 +428,10 @@
       "tactic": "fusion",
       "status": "ok",
       "hb": 61,
-      "ms": 10,
+      "ms": 7,
       "depth": 51,
       "nconst": 40,
-      "kerus": 1250,
+      "kerus": 1271,
       "phases": {
         "fusion:sol": 4,
         "fusion:build": 5,
@@ -439,37 +439,37 @@
       },
       "elim_hb": 31
     },
-    "grind": {
-      "config": "grind",
-      "tactic": "fusion_grind",
-      "status": "ok",
-      "hb": 1210,
-      "ms": 76,
-      "depth": 51,
-      "nconst": 39,
-      "kerus": 1251,
-      "phases": {
-        "fusion_grind:sol": 4,
-        "fusion_grind:build": 1154,
-        "fusion_grind:clean": 22
-      },
-      "elim_hb": 1180
-    },
     "aesop": {
       "config": "aesop",
       "tactic": "fusion_aesop",
       "status": "ok",
       "hb": 875,
-      "ms": 77,
+      "ms": 62,
       "depth": 51,
       "nconst": 55,
-      "kerus": 1593,
+      "kerus": 1654,
       "phases": {
         "fusion_aesop:sol": 4,
         "fusion_aesop:build": 816,
         "fusion_aesop:clean": 22
       },
       "elim_hb": 842
+    },
+    "grind": {
+      "config": "grind",
+      "tactic": "fusion_grind",
+      "status": "ok",
+      "hb": 1210,
+      "ms": 85,
+      "depth": 51,
+      "nconst": 39,
+      "kerus": 1348,
+      "phases": {
+        "fusion_grind:sol": 4,
+        "fusion_grind:build": 1155,
+        "fusion_grind:clean": 22
+      },
+      "elim_hb": 1181
     }
   },
   "comment": {
@@ -481,10 +481,10 @@
       "tactic": "fusion",
       "status": "ok",
       "hb": 678,
-      "ms": 67,
+      "ms": 66,
       "depth": 88,
       "nconst": 53,
-      "kerus": 14667,
+      "kerus": 15360,
       "phases": {
         "fusion:sol": 60,
         "fusion:build": 61,
@@ -497,7 +497,7 @@
       "tactic": "fusion_grind",
       "status": "FAIL",
       "hb": 8198,
-      "ms": 492,
+      "ms": 558,
       "depth": 0,
       "nconst": 0,
       "kerus": 0,
@@ -511,10 +511,10 @@
       "tactic": "fusion_aesop",
       "status": "ok",
       "hb": 90335,
-      "ms": 4008,
+      "ms": 5014,
       "depth": 194,
       "nconst": 88,
-      "kerus": 31712,
+      "kerus": 35483,
       "phases": {
         "fusion_aesop:sol": 60,
         "fusion_aesop:build": 89481,
@@ -532,10 +532,10 @@
       "tactic": "fusion",
       "status": "ok",
       "hb": 513,
-      "ms": 52,
+      "ms": 48,
       "depth": 128,
       "nconst": 45,
-      "kerus": 19367,
+      "kerus": 20366,
       "phases": {
         "fusion:sol": 32,
         "fusion:build": 56,
@@ -548,7 +548,7 @@
       "tactic": "fusion_grind",
       "status": "FAIL",
       "hb": 33660,
-      "ms": 1621,
+      "ms": 2065,
       "depth": 0,
       "nconst": 0,
       "kerus": 0,
@@ -562,7 +562,7 @@
       "tactic": "fusion_aesop",
       "status": "FAIL",
       "hb": 1469616,
-      "ms": 53680,
+      "ms": 53358,
       "depth": 0,
       "nconst": 0,
       "kerus": 0,
@@ -581,10 +581,10 @@
       "tactic": "fusion",
       "status": "ok",
       "hb": 587,
-      "ms": 75,
+      "ms": 62,
       "depth": 145,
       "nconst": 40,
-      "kerus": 9499,
+      "kerus": 8162,
       "phases": {
         "fusion:sol": 96,
         "fusion:build": 23,
@@ -597,10 +597,10 @@
       "tactic": "fusion_aesop",
       "status": "ok",
       "hb": 10870,
-      "ms": 536,
+      "ms": 638,
       "depth": 145,
       "nconst": 54,
-      "kerus": 11877,
+      "kerus": 12723,
       "phases": {
         "fusion_aesop:sol": 96,
         "fusion_aesop:build": 10265,
@@ -613,10 +613,10 @@
       "tactic": "fusion_grind",
       "status": "ok",
       "hb": 17091,
-      "ms": 866,
+      "ms": 1192,
       "depth": 145,
       "nconst": 46,
-      "kerus": 9851,
+      "kerus": 10991,
       "phases": {
         "fusion_grind:sol": 96,
         "fusion_grind:build": 16534,
@@ -634,10 +634,10 @@
       "tactic": "fusion",
       "status": "ok",
       "hb": 229,
-      "ms": 27,
+      "ms": 22,
       "depth": 93,
       "nconst": 47,
-      "kerus": 5037,
+      "kerus": 4450,
       "phases": {
         "fusion:sol": 23,
         "fusion:build": 23,
@@ -645,37 +645,37 @@
       },
       "elim_hb": 132
     },
-    "aesop": {
-      "config": "aesop",
-      "tactic": "fusion_aesop",
-      "status": "ok",
-      "hb": 18433,
-      "ms": 797,
-      "depth": 93,
-      "nconst": 55,
-      "kerus": 6304,
-      "phases": {
-        "fusion_aesop:sol": 23,
-        "fusion_aesop:build": 18215,
-        "fusion_aesop:clean": 86
-      },
-      "elim_hb": 18324
-    },
     "grind": {
       "config": "grind",
       "tactic": "fusion_grind",
       "status": "ok",
       "hb": 19125,
-      "ms": 866,
+      "ms": 1096,
       "depth": 93,
       "nconst": 49,
-      "kerus": 5016,
+      "kerus": 5420,
       "phases": {
         "fusion_grind:sol": 23,
         "fusion_grind:build": 18921,
         "fusion_grind:clean": 86
       },
       "elim_hb": 19030
+    },
+    "aesop": {
+      "config": "aesop",
+      "tactic": "fusion_aesop",
+      "status": "ok",
+      "hb": 18433,
+      "ms": 1097,
+      "depth": 93,
+      "nconst": 55,
+      "kerus": 6228,
+      "phases": {
+        "fusion_aesop:sol": 23,
+        "fusion_aesop:build": 18215,
+        "fusion_aesop:clean": 86
+      },
+      "elim_hb": 18324
     }
   },
   "Fix-Test7": {
@@ -687,10 +687,10 @@
       "tactic": "fusion",
       "status": "ok",
       "hb": 181,
-      "ms": 19,
+      "ms": 15,
       "depth": 85,
       "nconst": 43,
-      "kerus": 4000,
+      "kerus": 3698,
       "phases": {
         "fusion:sol": 15,
         "fusion:build": 15,
@@ -703,7 +703,7 @@
       "tactic": "fusion_grind",
       "status": "FAIL",
       "hb": 4406,
-      "ms": 232,
+      "ms": 287,
       "depth": 0,
       "nconst": 0,
       "kerus": 0,
@@ -717,10 +717,10 @@
       "tactic": "fusion_aesop",
       "status": "ok",
       "hb": 8394,
-      "ms": 382,
+      "ms": 461,
       "depth": 119,
       "nconst": 64,
-      "kerus": 6363,
+      "kerus": 6930,
       "phases": {
         "fusion_aesop:sol": 15,
         "fusion_aesop:build": 8195,
@@ -738,10 +738,10 @@
       "tactic": "fusion",
       "status": "ok",
       "hb": 75,
-      "ms": 12,
+      "ms": 9,
       "depth": 37,
       "nconst": 50,
-      "kerus": 1550,
+      "kerus": 1589,
       "phases": {
         "fusion:sol": 4,
         "fusion:build": 10,
@@ -754,10 +754,10 @@
       "tactic": "fusion_grind",
       "status": "ok",
       "hb": 838,
-      "ms": 52,
+      "ms": 58,
       "depth": 37,
       "nconst": 49,
-      "kerus": 1541,
+      "kerus": 1696,
       "phases": {
         "fusion_grind:sol": 4,
         "fusion_grind:build": 773,
@@ -770,10 +770,10 @@
       "tactic": "fusion_aesop",
       "status": "ok",
       "hb": 7324,
-      "ms": 341,
+      "ms": 419,
       "depth": 37,
       "nconst": 58,
-      "kerus": 1851,
+      "kerus": 1825,
       "phases": {
         "fusion_aesop:sol": 4,
         "fusion_aesop:build": 7256,
@@ -791,10 +791,10 @@
       "tactic": "fusion",
       "status": "ok",
       "hb": 144,
-      "ms": 18,
+      "ms": 14,
       "depth": 62,
       "nconst": 51,
-      "kerus": 3550,
+      "kerus": 3712,
       "phases": {
         "fusion:sol": 7,
         "fusion:build": 19,
@@ -807,7 +807,7 @@
       "tactic": "fusion_grind",
       "status": "FAIL",
       "hb": 4010,
-      "ms": 233,
+      "ms": 288,
       "depth": 0,
       "nconst": 0,
       "kerus": 0,
@@ -821,10 +821,10 @@
       "tactic": "fusion_aesop",
       "status": "ok",
       "hb": 102376,
-      "ms": 4033,
+      "ms": 4838,
       "depth": 88,
       "nconst": 81,
-      "kerus": 8882,
+      "kerus": 7410,
       "phases": {
         "fusion_aesop:sol": 7,
         "fusion_aesop:build": 102166,
@@ -842,10 +842,10 @@
       "tactic": "fusion",
       "status": "ok",
       "hb": 248,
-      "ms": 27,
+      "ms": 21,
       "depth": 80,
       "nconst": 49,
-      "kerus": 5822,
+      "kerus": 5640,
       "phases": {
         "fusion:sol": 21,
         "fusion:build": 30,
@@ -858,10 +858,10 @@
       "tactic": "fusion_grind",
       "status": "ok",
       "hb": 13268,
-      "ms": 629,
+      "ms": 851,
       "depth": 80,
       "nconst": 50,
-      "kerus": 5626,
+      "kerus": 10304,
       "phases": {
         "fusion_grind:sol": 21,
         "fusion_grind:build": 13051,
@@ -874,10 +874,10 @@
       "tactic": "fusion_aesop",
       "status": "ok",
       "hb": 75348,
-      "ms": 3163,
+      "ms": 3588,
       "depth": 80,
       "nconst": 63,
-      "kerus": 6946,
+      "kerus": 5906,
       "phases": {
         "fusion_aesop:sol": 21,
         "fusion_aesop:build": 75115,
@@ -895,10 +895,10 @@
       "tactic": "fusion",
       "status": "ok",
       "hb": 739,
-      "ms": 76,
+      "ms": 61,
       "depth": 145,
       "nconst": 59,
-      "kerus": 18660,
+      "kerus": 19065,
       "phases": {
         "fusion:sol": 39,
         "fusion:build": 73,
@@ -910,8 +910,8 @@
       "config": "grind",
       "tactic": "fusion_grind",
       "status": "FAIL",
-      "hb": 350510,
-      "ms": 22593,
+      "hb": 350516,
+      "ms": 22511,
       "depth": 0,
       "nconst": 0,
       "kerus": 0,
@@ -925,10 +925,10 @@
       "tactic": "fusion_aesop",
       "status": "ok",
       "hb": 797284,
-      "ms": 31925,
+      "ms": 34544,
       "depth": 161,
       "nconst": 94,
-      "kerus": 38080,
+      "kerus": 38040,
       "phases": {
         "fusion_aesop:sol": 39,
         "fusion_aesop:build": 796277,

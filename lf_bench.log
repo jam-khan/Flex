@@ -106,7 +106,12 @@
               ∃ a0,
                 a0 = false ∧ ((z0 = p01 ∧ z1 = p00) ∧ z2 = p01) ∧ z3 = a0 ∨
                   a0 = true ∧ ((z0 = p01 + 1 ∧ z1 = p00) ∧ z2 = p01) ∧ z3 = true
-[5/47] Building: bitv.lean ... OK
+[5/47] Building: bitv.lean ... ERROR
+    /home/ranjit/Desktop/lean-fixpoint/Benchmarks/Liquid-fixpoint/bitv.lean:42:2: error: maximum recursion depth has been reached
+    use `set_option maxRecDepth <num>` to increase limit
+    use `set_option diagnostics true` to get diagnostic information
+    [solve_fixpoint] Acyclic κ: []
+    [solve_fixpoint] Cyclic κ:  []
 [6/47] Building: bitv8.lean ... OK
     [solve_fixpoint] closed by: grind
     [solve_fixpoint] closed by: grind
@@ -211,7 +216,7 @@
     [solve_fixpoint] --- PA on cyclic κ's [k4] ---
     [solve_fixpoint]   PA sol for k4 = (((((z1 ≤ z2 - 1 ∧ z1 < z2) ∧ z1 ≤ z0) ∧ z1 ≤ z2) ∧ z0 ≥ z1) ∧ z2 ≥ z1) ∧ z2 > z1
     [fixpoint] PA sol for k4 := (((((z1 ≤ z2 - 1 ∧ z1 < z2) ∧ z1 ≤ z0) ∧ z1 ≤ z2) ∧ z0 ≥ z1) ∧ z2 ≥ z1) ∧ z2 > z1
-    /Users/petros/Documents/UCSD/Work/lean-fixpoint/Benchmarks/Liquid-fixpoint/comment.lean:59:2: warning: aesop: failed to prove the goal after exhaustive search.
+    /home/ranjit/Desktop/lean-fixpoint/Benchmarks/Liquid-fixpoint/comment.lean:59:2: warning: aesop: failed to prove the goal after exhaustive search.
 [10/47] Building: constant.lean ... OK
     [solve_fixpoint] closed by: aesop
     [solve_fixpoint] Acyclic κ: []
@@ -221,7 +226,19 @@
     [solve_fixpoint] closed by: grind
     [solve_fixpoint] Acyclic κ: []
     [solve_fixpoint] Cyclic κ:  []
-[12/47] Building: define_fun02.lean ... OK
+[12/47] Building: define_fun02.lean ... ERROR
+    [solve_fixpoint] closed by: grind
+    /home/ranjit/Desktop/lean-fixpoint/Benchmarks/Liquid-fixpoint/define_fun02.lean:22:2: warning: aesop: failed to prove the goal after exhaustive search.
+    [solve_fixpoint] closed by: aesop
+    /home/ranjit/Desktop/lean-fixpoint/Benchmarks/Liquid-fixpoint/define_fun02.lean:20:34: error: unsolved goals
+    case h
+    a0 : ℤ
+    a1 : Finset ℤ
+    _x : ℤ
+    a : {a0} ∪ a1 = ∅
+    ⊢ False
+    [solve_fixpoint] Acyclic κ: []
+    [solve_fixpoint] Cyclic κ:  []
 [13/47] Building: define_fun03.lean ... OK
     [solve_fixpoint] closed by: grind
     [solve_fixpoint] closed by: grind
@@ -383,7 +400,7 @@
     [solve]   sol = (∃ a0, a0 = 4 ∧ z0 = a0) ∨ ∃ a1, a1 = 10 ∧ z0 = a1
     [solve]   lam = fun z0 => (∃ a0, a0 = 4 ∧ z0 = a0) ∨ ∃ a1, a1 = 10 ∧ z0 = a1
 [27/47] Building: numeric-sort-00.lean ... OK
-    /Users/petros/Documents/UCSD/Work/lean-fixpoint/Benchmarks/Liquid-fixpoint/numeric-sort-00.lean:21:9: warning: unused variable `y`
+    /home/ranjit/Desktop/lean-fixpoint/Benchmarks/Liquid-fixpoint/numeric-sort-00.lean:21:9: warning: unused variable `y`
     
     Note: This linter can be disabled with `set_option linter.unusedVariables false`
     [solve_fixpoint] closed by: grind
@@ -394,7 +411,7 @@
     [solve_fixpoint] --- PA on cyclic κ's [κ1] ---
     [solve_fixpoint]   PA sol for κ1 = 0 ≤ z0
 [28/47] Building: numeric-sort-01.lean ... OK
-    /Users/petros/Documents/UCSD/Work/lean-fixpoint/Benchmarks/Liquid-fixpoint/numeric-sort-01.lean:21:9: warning: unused variable `y`
+    /home/ranjit/Desktop/lean-fixpoint/Benchmarks/Liquid-fixpoint/numeric-sort-01.lean:21:9: warning: unused variable `y`
     
     Note: This linter can be disabled with `set_option linter.unusedVariables false`
     [solve_fixpoint] closed by: grind
@@ -405,7 +422,7 @@
     [solve_fixpoint] --- PA on cyclic κ's [κ1] ---
     [solve_fixpoint]   PA sol for κ1 = 0 ≤ z0
 [29/47] Building: numeric-sort-02.lean ... OK
-    /Users/petros/Documents/UCSD/Work/lean-fixpoint/Benchmarks/Liquid-fixpoint/numeric-sort-02.lean:26:11: warning: unused variable `y`
+    /home/ranjit/Desktop/lean-fixpoint/Benchmarks/Liquid-fixpoint/numeric-sort-02.lean:26:11: warning: unused variable `y`
     
     Note: This linter can be disabled with `set_option linter.unusedVariables false`
     [solve_fixpoint] closed by: grind
@@ -426,7 +443,7 @@
     [solve_fixpoint] --- PA on cyclic κ's [κ1] ---
     [solve_fixpoint]   PA sol for κ1 = ((((0 ≤ z0 ∧ 0 ≤ z1) ∧ z1 ≤ 0) ∧ z1 = 0) ∧ z1 ≤ z0) ∧ z0 ≥ z1
 [30/47] Building: numeric-sort-03.lean ... OK
-    /Users/petros/Documents/UCSD/Work/lean-fixpoint/Benchmarks/Liquid-fixpoint/numeric-sort-03.lean:23:11: warning: unused variable `y`
+    /home/ranjit/Desktop/lean-fixpoint/Benchmarks/Liquid-fixpoint/numeric-sort-03.lean:23:11: warning: unused variable `y`
     
     Note: This linter can be disabled with `set_option linter.unusedVariables false`
     [solve_fixpoint] closed by: grind
@@ -655,17 +672,17 @@
     [solve_fixpoint]   PA sol for k2 = ((f_get_mode z2 z0 = Adt0.mkadt0_0 ∧ f_get_mode z2 z1 = Adt0.mkadt0_0) ∧ f_get_mode z2 z3 = Adt0.mkadt0_0) ∧ z3 = 0
     [solve_fixpoint]   PA sol for k3 = (f_get_mode z1 z0 = Adt0.mkadt0_0 ∧ f_get_mode z1 z2 = Adt0.mkadt0_0) ∧ z2 = 0
 [39/47] Building: scrape03.lean ... OK
-    /Users/petros/Documents/UCSD/Work/lean-fixpoint/Benchmarks/Liquid-fixpoint/scrape03.lean:34:10: warning: unused variable `a2`
+    /home/ranjit/Desktop/lean-fixpoint/Benchmarks/Liquid-fixpoint/scrape03.lean:34:10: warning: unused variable `a2`
     
     Note: This linter can be disabled with `set_option linter.unusedVariables false`
-    /Users/petros/Documents/UCSD/Work/lean-fixpoint/Benchmarks/Liquid-fixpoint/scrape03.lean:35:12: warning: unused variable `a3`
+    /home/ranjit/Desktop/lean-fixpoint/Benchmarks/Liquid-fixpoint/scrape03.lean:35:12: warning: unused variable `a3`
     
     Note: This linter can be disabled with `set_option linter.unusedVariables false`
     [solve_fixpoint] closed by: grind
-    /Users/petros/Documents/UCSD/Work/lean-fixpoint/Benchmarks/Liquid-fixpoint/scrape03.lean:41:2: warning: aesop: failed to prove the goal after exhaustive search.
+    /home/ranjit/Desktop/lean-fixpoint/Benchmarks/Liquid-fixpoint/scrape03.lean:41:2: warning: aesop: failed to prove the goal after exhaustive search.
     [solve_fixpoint] closed by: aesop
     [solve_fixpoint] closed by: bv_decide
-    /Users/petros/Documents/UCSD/Work/lean-fixpoint/Benchmarks/Liquid-fixpoint/scrape03.lean:41:2: warning: aesop: failed to prove the goal after exhaustive search.
+    /home/ranjit/Desktop/lean-fixpoint/Benchmarks/Liquid-fixpoint/scrape03.lean:41:2: warning: aesop: failed to prove the goal after exhaustive search.
     [solve_fixpoint] closed by: aesop
     [solve_fixpoint] closed by: bv_decide
     [solve_fixpoint] closed by: aesop
@@ -682,20 +699,20 @@
 [41/47] Building: str01.lean ... OK
     [solve_fixpoint] closed by: aesop
     [solve_fixpoint] closed by: aesop
-    /Users/petros/Documents/UCSD/Work/lean-fixpoint/Benchmarks/Liquid-fixpoint/str01.lean:21:2: warning: aesop: failed to prove the goal after exhaustive search.
+    /home/ranjit/Desktop/lean-fixpoint/Benchmarks/Liquid-fixpoint/str01.lean:21:2: warning: aesop: failed to prove the goal after exhaustive search.
     [solve_fixpoint] closed by: aesop
     [solve_fixpoint] closed by: native_decide
-    /Users/petros/Documents/UCSD/Work/lean-fixpoint/Benchmarks/Liquid-fixpoint/str01.lean:21:2: warning: aesop: failed to prove the goal after exhaustive search.
+    /home/ranjit/Desktop/lean-fixpoint/Benchmarks/Liquid-fixpoint/str01.lean:21:2: warning: aesop: failed to prove the goal after exhaustive search.
     [solve_fixpoint] closed by: aesop
     [solve_fixpoint] closed by: native_decide
-    /Users/petros/Documents/UCSD/Work/lean-fixpoint/Benchmarks/Liquid-fixpoint/str01.lean:21:2: warning: aesop: failed to prove the goal after exhaustive search.
+    /home/ranjit/Desktop/lean-fixpoint/Benchmarks/Liquid-fixpoint/str01.lean:21:2: warning: aesop: failed to prove the goal after exhaustive search.
     [solve_fixpoint] closed by: aesop
     [solve_fixpoint] closed by: native_decide
     [solve_fixpoint] closed by: aesop
     [solve_fixpoint] Acyclic κ: []
     [solve_fixpoint] Cyclic κ:  []
 [42/47] Building: sum_rec-ok.lean ... OK
-    /Users/petros/Documents/UCSD/Work/lean-fixpoint/Benchmarks/Liquid-fixpoint/sum_rec-ok.lean:21:9: warning: unused variable `y`
+    /home/ranjit/Desktop/lean-fixpoint/Benchmarks/Liquid-fixpoint/sum_rec-ok.lean:21:9: warning: unused variable `y`
     
     Note: This linter can be disabled with `set_option linter.unusedVariables false`
     [solve_fixpoint] closed by: grind
