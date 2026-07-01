@@ -183,7 +183,7 @@ def load_wick_suite(display_name: str, dir_name: str) -> SuiteStats | None:
     time_path         = ROOT / f"{dir_name}.time"
     flux_timings_path = ROOT / f"{dir_name}_flux.timings"
     flux_time_path    = ROOT / f"{dir_name}_flux.time"   # legacy fallback
-    vc_dir            = ROOT / dir_name / "LeanProofs" / "Flux" / "VC"
+    vc_dir            = ROOT.parent / dir_name / "LeanProofs" / "Flux" / "VC"
 
     if not log_path.exists():
         print(f"  [warning] missing log: {log_path}", file=sys.stderr)
