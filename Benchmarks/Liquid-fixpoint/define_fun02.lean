@@ -19,8 +19,4 @@ def lhSetProp : Prop :=
 
 theorem lhSetProof : lhSetProp := by
   unfold lhSetProp
-  intro xs _
-  refine ⟨fun _ h => h, ?_⟩
-  intro a0 _ a1 _ _x hxs
-  rw [hxs, ← Finset.nonempty_iff_ne_empty]
-  exact ⟨a0, by simp⟩
+  solve_fixpoint
