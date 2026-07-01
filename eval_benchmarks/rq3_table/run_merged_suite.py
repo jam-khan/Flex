@@ -49,6 +49,11 @@ def _vc_key_from_proof_path(path_str: str) -> str | None:
 def run_lake_build(merged_dir: Path):
     """Run lake build in merged_dir; return (returncode, wall_ms, stdout_lines)."""
     try:
+        subprocess.run(
+            ["lake", "clean"], cwd=merged_dir,
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            text=True, timeout=300,
+        )
         t0 = time.monotonic()
         result = subprocess.run(
             ["lake", "build"], cwd=merged_dir,

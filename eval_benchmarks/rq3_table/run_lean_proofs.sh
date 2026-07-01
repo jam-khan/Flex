@@ -20,6 +20,9 @@ for dir in "${DIRS[@]}"; do
     echo "==> Running lake update in $dir"
     (cd "$SCRIPT_DIR/../$dir" && lake update) >>"$log" 2>&1 || echo "lake update failed (exit $?)" >>"$log"
 
+    echo "==> Running lake clean in $dir"
+    (cd "$SCRIPT_DIR/../$dir" && lake clean) >>"$log" 2>&1 || echo "lake clean failed (exit $?)" >>"$log"
+
     echo "==> Running lake build in $dir (output -> ${dir}.log, time -> ${dir}.time)"
     start=$(date +%s%N)
     (cd "$SCRIPT_DIR/../$dir" && lake build) >>"$log" 2>&1 || echo "lake build failed (exit $?)" >>"$log"
