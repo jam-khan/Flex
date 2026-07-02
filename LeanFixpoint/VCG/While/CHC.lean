@@ -104,8 +104,7 @@ abbrev countToN : Cmd :=
 
 -- vars=["n","x"]: inScope expands from ["n"] to ["n","x"] after first assignment
 example : {| 0 ≤ n |} countToN {| x = n |} := by
-  imp_vc_sound
-  reify
+  imp_vcgen
   solve_fixpoint
 
 -- Program: while x ≠ 0 do x := x - 1 end
@@ -117,8 +116,7 @@ def reduceToZero : Cmd :=
 -- x is pre-existing variable (in readOnlyVars); inScope stays ["x"]
 theorem reduceToZero_correct :
     {| ⊤ |} reduceToZero {| x = 0 |} := by
-  imp_vc_sound
-  reify
+  imp_vcgen
   solve_fixpoint
 
 @[qualif]
@@ -142,6 +140,5 @@ abbrev slowAssign : Cmd :=
 -- κ = fun nv xv yv => xv + yv = nv ∧ 0 ≤ xv
 theorem slowAssign_correct :
     {| 0 ≤ n |} slowAssign {| y = n |} := by
-  imp_vc_sound
-  reify
+  imp_vcgen
   solve_fixpoint
