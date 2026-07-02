@@ -26,6 +26,7 @@ inductive Cmd where
   | cwhile : (State → Bool) → Cmd → Cmd
 
 /-- Collect all assignment-target variable names in first-appearance order. -/
+@[simp]
 def Cmd.assignedVars : Cmd → List CVar
   | .skip        => []
   | .assign x _  => [x]

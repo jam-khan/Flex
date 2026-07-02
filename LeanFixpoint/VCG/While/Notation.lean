@@ -1,4 +1,5 @@
 import LeanFixpoint.VCG.While.Types
+import LeanFixpoint.VCG.While.Semantics
 
 /-! # Surface Syntax for While Programs
 
@@ -111,3 +112,71 @@ private partial def eCmd (c : TSyntax `whileCmd) : MacroM (TSyntax `term) := do
 
 macro_rules
   | `(<| $c |>) => eCmd c
+
+/-! ## Hoare Triple Notation `|- P -| cmd |- Q -|`
+
+  Propositions may use the same variable names as While programs; each
+  identifier is elaborated to a state lookup `s "name"`.
+
+  Grammar:
+  ```
+  prop ::= ⊤ | ⊥
+         | prop ∧ prop | prop ∨ prop | ¬ prop | prop → prop
+         | whileExpr = whileExpr | whileExpr ≠ whileExpr | whileExpr != whileExpr
+         | whileExpr < whileExpr | whileExpr ≤ whileExpr
+         | whileExpr > whileExpr | whileExpr ≥ whileExpr
+  ```
+
+  Example:
+  ```lean
+  |- x = 0 -| <| x := x + 1 |> |- x = 1 -|
+  ```
+-/
+
+declare_syntax_cat whileProp
+
+-- Atoms (use ⊤/⊥ to avoid conflict with Lean's term-level True/False)
+syntax "⊤"                                            : whileProp
+syntax "⊥"                                            : whileProp
+
+-- Comparisons (Prop-valued)
+syntax:50 whileExpr " = "  whileExpr                 : whileProp
+syntax:50 whileExpr " ≠ "  whileExpr                 : whileProp
+syntax:50 whileExpr " != " whileExpr                 : whileProp
+syntax:50 whileExpr " < "  whileExpr                 : whileProp
+syntax:50 whileExpr " ≤ "  whileExpr                 : whileProp
+syntax:50 whileExpr " > "  whileExpr                 : whileProp
+syntax:50 whileExpr " ≥ "  whileExpr                 : whileProp
+
+-- Connectives
+syntax:40 "¬ " whileProp:41                           : whileProp
+syntax:35 whileProp:36 " ∧ " whileProp:35             : whileProp
+syntax:30 whileProp:31 " ∨ " whileProp:30             : whileProp
+syntax:20 whileProp:21 " → " whileProp:20             : whileProp
+
+open Lean in
+private partial def eProp (p : TSyntax `whileProp) : MacroM (TSyntax `term) := do
+  match p with
+  | `(whileProp| ⊤)                                 => `(True)
+  | `(whileProp| ⊥)                                 => `(False)
+  | `(whileProp| $a:whileExpr =  $b:whileExpr)      => do let a' ← eExpr a; let b' ← eExpr b; `($a' = $b')
+  | `(whileProp| $a:whileExpr ≠  $b:whileExpr)      => do let a' ← eExpr a; let b' ← eExpr b; `($a' ≠ $b')
+  | `(whileProp| $a:whileExpr != $b:whileExpr)      => do let a' ← eExpr a; let b' ← eExpr b; `($a' ≠ $b')
+  | `(whileProp| $a:whileExpr <  $b:whileExpr)      => do let a' ← eExpr a; let b' ← eExpr b; `($a' < $b')
+  | `(whileProp| $a:whileExpr ≤  $b:whileExpr)      => do let a' ← eExpr a; let b' ← eExpr b; `($a' ≤ $b')
+  | `(whileProp| $a:whileExpr >  $b:whileExpr)      => do let a' ← eExpr a; let b' ← eExpr b; `($a' > $b')
+  | `(whileProp| $a:whileExpr ≥  $b:whileExpr)      => do let a' ← eExpr a; let b' ← eExpr b; `($a' ≥ $b')
+  | `(whileProp| ¬ $q:whileProp)                    => do let q' ← eProp q; `(¬ $q')
+  | `(whileProp| $p:whileProp ∧ $q:whileProp)       => do let p' ← eProp p; let q' ← eProp q; `($p' ∧ $q')
+  | `(whileProp| $p:whileProp ∨ $q:whileProp)       => do let p' ← eProp p; let q' ← eProp q; `($p' ∨ $q')
+  | `(whileProp| $p:whileProp → $q:whileProp)       => do let p' ← eProp p; let q' ← eProp q; `($p' → $q')
+  | _ => Macro.throwUnsupported
+
+syntax (name := hoareTriple) "{|" whileProp "|}" term:max "{|" whileProp "|}" : term
+
+open Lean in
+macro_rules
+  | `({| $p:whileProp |} $c:term {| $q:whileProp |}) => do
+      let p' ← eProp p
+      let q' ← eProp q
+      `(ValidHoareTriple (fun s => $p') $c (fun s => $q'))

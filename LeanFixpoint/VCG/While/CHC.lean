@@ -97,17 +97,15 @@ theorem whileCHC_sound (inScope : List CVar)
 
 -- Program: x := 0; while x < n do x := x + 1 end
 -- Pre: 0 ≤ n, Post: x = n
-def countToN : Cmd :=
+abbrev countToN : Cmd :=
   <| x := 0 ; while x < n do x := x + 1 |>
 
 @[qualif] def Le (i1 i2 : Int) : Prop := i1 ≤ i2
 
 -- vars=["n","x"]: inScope expands from ["n"] to ["n","x"] after first assignment
-example : ValidHoareTriple (fun s => 0 ≤ s "n") countToN (fun s => s "x" = s "n") := by
-  apply whileCHC_sound ["n"]
-  dsimp [whileCHC, countToN, State.update, applyNary, Cmd.assignedVars]
-  simp_scopes ; simp
-  hoist_exists
+example : {| 0 ≤ n |} countToN {| x = n |} := by
+  imp_vc_sound
+  reify
   solve_fixpoint
 
 -- Program: while x ≠ 0 do x := x - 1 end
@@ -116,12 +114,11 @@ example : ValidHoareTriple (fun s => 0 ≤ s "n") countToN (fun s => s "x" = s "
 def reduceToZero : Cmd :=
   <| while x != 0 do x := x - 1 |>
 
-set_option maxHeartbeats 1600000 in
 -- x is pre-existing variable (in readOnlyVars); inScope stays ["x"]
 theorem reduceToZero_correct :
-    ValidHoareTriple (fun _ => True) reduceToZero (fun s => s "x" = 0) := by
-  apply whileCHC_sound ["x"]
-  simp [whileCHC]
+    {| ⊤ |} reduceToZero {| x = 0 |} := by
+  imp_vc_sound
+  reify
   solve_fixpoint
 
 @[qualif]
@@ -139,14 +136,12 @@ def Ge0 (i1 : Int) : Prop :=
 -- Program: x := n; y := 0; while x ≠ 0 do x := x-1; y := y+1 end
 -- Pre: 0 ≤ n, Post: y = n
 -- vars=["n","x","y"]: every ∃ has type Int → Int → Int → Prop  (args: s "n", s "x", s "y")
-def slowAssign : Cmd :=
+abbrev slowAssign : Cmd :=
   <| x := n ; y := 0 ; while x != 0 do (x := x - 1 ; y := y + 1) |>
 
 -- κ = fun nv xv yv => xv + yv = nv ∧ 0 ≤ xv
 theorem slowAssign_correct :
-    ValidHoareTriple (fun s => 0 ≤ s "n") slowAssign (fun s => s "y" = s "n") := by
-  apply whileCHC_sound ["n"]
-  dsimp [whileCHC, slowAssign, State.update, applyNary, Cmd.assignedVars]
-  simp_scopes ; simp
-  hoist_exists
+    {| 0 ≤ n |} slowAssign {| y = n |} := by
+  imp_vc_sound
+  reify
   solve_fixpoint
