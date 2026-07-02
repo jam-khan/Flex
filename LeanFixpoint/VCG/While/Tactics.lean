@@ -57,19 +57,70 @@ private partial def analyzeCmdExpr (e : Expr) : MetaM CmdInfo := do
   else
     throwError "vcg_scope: cannot analyze Cmd expression: {e}"
 
+/-! ## Constant scraping
+
+  Walks the body of an `Assertion` (a `fun s => body` lambda) and collects
+  all free `FVarId`s of type `Int` that are not the state variable itself.
+  These are Lean-level parameters (e.g. the `n` in `fibLoop_correct (n : Int)`)
+  that should become additional arguments of each loop invariant. -/
+
+private partial def collectFreeIntFVars (stateId : FVarId) (e : Expr) : MetaM (Array FVarId) := do
+  match e with
+  | .fvar id =>
+    if id == stateId then return #[]
+    let ty ← whnf (← inferType e)
+    if ty == mkConst ``Int then return #[id]
+    return #[]
+  | .app f _ =>
+    -- skip state lookups `s "varname"` — f is the state fvar applied to a string
+    if f == .fvar stateId then return #[]
+    let lf ← collectFreeIntFVars stateId f
+    let la ← collectFreeIntFVars stateId e.appArg!
+    return lf ++ la
+  | .lam _ _ _ _  => return #[]   -- don't descend into inner lambdas
+  | .letE _ _ v b _ =>
+    return (← collectFreeIntFVars stateId v) ++ (← collectFreeIntFVars stateId b)
+  | _ => return #[]
+
+/-- Open an `Assertion` lambda and return the free Int fvars inside it.
+    Uses the lambda's own binder type to avoid naming `State` in meta context. -/
+private def scrapeAssertion (assertion : Expr) : MetaM (Array FVarId) := do
+  let a ← whnf assertion
+  match a with
+  | .lam n binderType body bi =>
+    withLocalDecl n bi binderType fun s =>
+      collectFreeIntFVars s.fvarId! (body.instantiate1 s)
+  | _ => return #[]
+
 elab "imp_vc_sound" : tactic => do
   let goal   ← getMainGoal
   let target ← goal.getType
   unless target.isAppOfArity ``ValidHoareTriple 3 do
     throwTacticEx `vcg_scope goal
       m!"goal must be of the form `ValidHoareTriple P c Q`, got: {target}"
-  let cmdExpr := target.getAppArgs[1]!
+  let targs   := target.getAppArgs
+  let cmdExpr := targs[1]!
   let info ← analyzeCmdExpr cmdExpr
   let inScope : List String := info.initScope.toList.eraseDups
   let inScopeTerms : Array (TSyntax `term) := inScope.toArray.map (fun s => Lean.quote s)
   let listTerm : TSyntax `term ← `([$inScopeTerms,*])
+
+  -- Scrape free Int parameters from pre- and post-conditions
+  let preIds  ← scrapeAssertion targs[0]!
+  let postIds ← scrapeAssertion targs[2]!
+  let allIds  := ((preIds ++ postIds).toList.eraseDups).toArray
+
+  -- Build const list as syntax: [fun _ => v₁, fun _ => v₂, ...]
+  -- Using mkIdent on the local-decl userName keeps this late-bound (no compile-time lookup).
+  let constTerms ← allIds.mapM fun id => do
+    let ldecl := (← getLCtx).get! id
+    let vi := mkIdent ldecl.userName
+    `(fun (_ : _) => $vi)
+  let constListTerm : TSyntax `term ← `([$constTerms,*])
+
+  -- `whileCHC_sound` is in CHC.lean (which imports us), so use mkIdent for late binding.
   let soundId : TSyntax `term := mkIdent `whileCHC_sound
-  evalTactic (← `(tactic| apply $soundId $listTerm ; simp [*] ; hoist_exists))
+  evalTactic (← `(tactic| apply $soundId $listTerm $constListTerm ; simp [*] ; hoist_exists))
 
 elab "simp_scopes" : tactic => do
   liftMetaTactic fun goal => do

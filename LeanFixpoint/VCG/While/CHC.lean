@@ -23,7 +23,7 @@ import LeanFixpoint.Tactic
     substitution, not guessed.  (Standard `pre`/`ic`/`vc` VC-gen — only the loop
     invariant is a genuine unknown.) -/
 @[simp]
-def vcGen (inScope : List CVar) (c : Cmd) (post : Assertion)
+def vcGen (inScope : List CVar) (consts : List (State → Int)) (c : Cmd) (post : Assertion)
     (k : Assertion → Prop) : Prop :=
   match c with
   | .skip =>
@@ -34,32 +34,32 @@ def vcGen (inScope : List CVar) (c : Cmd) (post : Assertion)
 
   | .seq c₁ c₂ =>
     let midScope := (inScope ++ c₁.assignedVars).eraseDups
-    vcGen midScope c₂ post (fun mid => vcGen inScope c₁ mid k)
+    vcGen midScope consts c₂ post (fun mid => vcGen inScope consts c₁ mid k)
 
   | .ite g c₁ c₂ =>
-    vcGen inScope c₁ post (fun wp₁ =>
-      vcGen inScope c₂ post (fun wp₂ =>
+    vcGen inScope consts c₁ post (fun wp₁ =>
+      vcGen inScope consts c₂ post (fun wp₂ =>
         k (fun s => (g s = true → wp₁ s) ∧ (g s = false → wp₂ s))))
 
   | .cwhile g body =>
     let bodyScope := (inScope ++ body.assignedVars).eraseDups
-    ∃ κ : NaryProp inScope.length,
-        vcGen bodyScope body (applyNary inScope κ)
-          (fun wpBody => ∀ s, applyNary inScope κ s ∧ g s = true → wpBody s)   -- preserve
-      ∧ (∀ s, applyNary inScope κ s ∧ g s = false → post s)                    -- exit
-      ∧ k (applyNary inScope κ)                                                -- wp(while) = inv
+    ∃ κ : NaryProp (inScope.length + consts.length),
+        vcGen bodyScope consts body (applyNaryConsts inScope consts κ)
+          (fun wpBody => ∀ s, applyNaryConsts inScope consts κ s ∧ g s = true → wpBody s)   -- preserve
+      ∧ (∀ s, applyNaryConsts inScope consts κ s ∧ g s = false → post s)                    -- exit
+      ∧ k (applyNaryConsts inScope consts κ)                                                -- wp(while) = inv
 
 /-- Top-level VC: the precondition must imply the weakest precondition of `c`. -/
 @[simp]
-def whileCHC (inScope : List CVar)
+def whileCHC (inScope : List CVar) (consts : List (State → Int))
     (pre : Assertion) (c : Cmd) (post : Assertion) : Prop :=
-  vcGen inScope c post (fun wp => ∀ s, pre s → wp s)
+  vcGen inScope consts c post (fun wp => ∀ s, pre s → wp s)
 
 /-- Generic soundness of the CPS generator: a satisfied `vcGen` yields a weakest
     precondition `wp` with `{wp} c {post}` and `k wp`. -/
-theorem vcGen_sound (inScope : List CVar) (c : Cmd) (post : Assertion)
-    (k : Assertion → Prop) :
-    vcGen inScope c post k → ∃ wp : Assertion, ValidHoareTriple wp c post ∧ k wp := by
+theorem vcGen_sound (inScope : List CVar) (consts : List (State → Int)) (c : Cmd)
+    (post : Assertion) (k : Assertion → Prop) :
+    vcGen inScope consts c post k → ∃ wp : Assertion, ValidHoareTriple wp c post ∧ k wp := by
   induction c generalizing inScope post k with
   | skip =>
     intro h; exact ⟨post, hoare_skip, h⟩
@@ -81,16 +81,16 @@ theorem vcGen_sound (inScope : List CVar) (c : Cmd) (post : Assertion)
     intro h; simp only [vcGen] at h
     obtain ⟨κ, hbody, hexit, hk⟩ := h
     obtain ⟨wpBody, htBody, hpres⟩ := ih _ _ _ hbody
-    exact ⟨applyNary inScope κ,
+    exact ⟨applyNaryConsts inScope consts κ,
            hoare_while (fun _ hp => hp) (hoare_consequence_pre htBody hpres) hexit,
            hk⟩
 
 /-- Soundness: if the CHC system is satisfiable, the Hoare triple holds. -/
-theorem whileCHC_sound (inScope : List CVar)
+theorem whileCHC_sound (inScope : List CVar) (consts : List (State → Int))
     (pre : Assertion) (c : Cmd) (post : Assertion) :
-    whileCHC inScope pre c post → ValidHoareTriple pre c post := by
+    whileCHC inScope consts pre c post → ValidHoareTriple pre c post := by
   intro h
-  obtain ⟨wp, htriple, hk⟩ := vcGen_sound inScope c post _ h
+  obtain ⟨wp, htriple, hk⟩ := vcGen_sound inScope consts c post _ h
   exact hoare_consequence_pre htriple hk
 
 /-! # Examples -/
@@ -140,5 +140,42 @@ abbrev slowAssign : Cmd :=
 -- κ = fun nv xv yv => xv + yv = nv ∧ 0 ≤ xv
 theorem slowAssign_correct :
     {| 0 ≤ n |} slowAssign {| y = n |} := by
+  imp_vcgen
+  solve_fixpoint
+
+
+@[grind]
+def fib_spec (n : Int) : Int :=
+  if n ≤ 1 then 1
+  else fib_spec (n - 1) + fib_spec (n - 2)
+termination_by n.toNat
+
+abbrev fibLoop : Cmd :=
+  <|
+    x := 0 ;
+    if n ≤ 1 then
+      x := 1
+    else (
+      prev := 1 ;
+      x := 2 ;
+      i := 2 ;
+      while i < n do (
+        next := x + prev ;
+        prev := x ;
+        x := next ;
+        i := i + 1
+      )
+    )
+  |>
+
+@[qualif] def q_gt1 (a : Int) : Prop := a > 1
+@[qualif] def q_eq_fib (v i : Int) : Prop := v = fib_spec i
+@[qualif] def q_eq_fib_pred (v i : Int) : Prop := v = fib_spec (i - 1)
+
+theorem fibLoop_correct (n : Int) :
+  ValidHoareTriple
+  (fun s => s "n" = n)
+    fibLoop
+  (fun s => s "x" = fib_spec n) := by
   imp_vcgen
   solve_fixpoint
