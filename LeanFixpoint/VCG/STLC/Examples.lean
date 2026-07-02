@@ -179,18 +179,12 @@ example (κ : KEnv) : topVC κ [] exEq tyEq := by
 /-! ## `exMax`: `λx. λy. let c = x ≤ y in if c then y else x`. -/
 
 abbrev exMax : Exp :=
-  .lam
-    (.lam
-      (.letin (.leq (.bvar 1) (.bvar 0))
-        (.letin (.ite (.bvar 0) (.bvar 1) (.bvar 2))
-          (.bvar 0))))
--- abbrev exMax : Exp :=
---   .lam       -- λ x.
---     (.lam    -- λ y.
---       (.letin (.leq (.bvar 1) (.bvar 0))    -- let c = x ≤ y
---         (.ite (.bvar 0)                      -- in if c
---               (.bvar 1)                      -- then y
---               (.bvar 2))))                   -- else x
+  .lam       -- λ x.
+    (.lam    -- λ y.
+      (.letin (.leq (.bvar 1) (.bvar 0))    -- let c = x ≤ y
+        (.ite (.bvar 0)                      -- in if c
+              (.bvar 1)                      -- then y
+              (.bvar 2))))                   -- else x
 
 /-! ## κ flagship: `let a = 99 in let b = 100 in exMax a b ⇐ {ν | ν = 100 ∨ ν = 99}` -/
 

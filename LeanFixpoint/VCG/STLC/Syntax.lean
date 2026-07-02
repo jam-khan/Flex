@@ -127,6 +127,10 @@ def liftK2 (p : Int → Int → Prop) : List (Σ b : Base, b.interp) → Prop
   | [⟨.int, x⟩, ⟨.int, y⟩] => p x y
   | _                        => True
 
+def liftK3 (p : Int → Int → Int → Prop) : List (Σ b : Base, b.interp) → Prop
+  | [⟨.int, x⟩, ⟨.int, y⟩, ⟨.int, z⟩] => p x y z
+  | _                        => True
+
 def mkKEnv (ks : List (KVar × (List (Σ b : Base, b.interp) → Prop))) : KEnv :=
   fun name => (ks.lookup name).getD (fun _ => True)
 
