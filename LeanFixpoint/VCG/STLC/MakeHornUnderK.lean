@@ -69,7 +69,8 @@ elab "intro_kenv" : tactic => do
     let propTy := mkSort Level.zero
     let kPredTy : Nat → Expr
       | 1 => .forallE `_ intTy propTy .default
-      | _ => .forallE `_ intTy (.forallE `_ intTy propTy .default) .default
+      | 2 => .forallE `_ intTy (.forallE `_ intTy propTy .default) .default
+      | _ => .forallE `_ intTy (.forallE `_ intTy (.forallE `_ intTy propTy .default) .default) .default
 
     -- Fresh MVars for each k-predicate
     let kMVars ← kvarArr.mapM fun (name, arity) =>
@@ -77,7 +78,9 @@ elab "intro_kenv" : tactic => do
 
     -- Build list [("k1", liftK1 ?k1), ...] using direct mkApp (no AppBuilder checks)
     -- Get element type from a dummy element to avoid List.nil type inference issues
-    let liftFn0 := mkConst (if kvarArr[0]!.2 == 1 then ``STLC.liftK1 else ``STLC.liftK2)
+    let liftFn0 := mkConst (if kvarArr[0]!.2 == 1 then ``STLC.liftK1
+                             else if kvarArr[0]!.2 == 2 then ``STLC.liftK2
+                             else ``STLC.liftK3)
     let lifted0 := mkApp liftFn0 kMVars[0]!
     let liftedTy ← inferType lifted0          -- List (Σ b, b.interp) → Prop
     let strTy    := mkConst ``String
@@ -92,7 +95,9 @@ elab "intro_kenv" : tactic => do
     let mut kenvListExpr := mkApp nilC elemTy
     for i in (List.range kvarArr.size).reverse do
       let (name, arity) := kvarArr[i]!
-      let liftFn := mkConst (if arity == 1 then ``STLC.liftK1 else ``STLC.liftK2)
+      let liftFn := mkConst (if arity == 1 then ``STLC.liftK1
+                              else if arity == 2 then ``STLC.liftK2
+                              else ``STLC.liftK3)
       let liftedKi := mkApp liftFn kMVars[i]!
       let elem := mkApp4 prodMkC strTy liftedTy (mkStrLit name) liftedKi
       kenvListExpr := mkApp3 consC elemTy elem kenvListExpr
@@ -156,4 +161,4 @@ macro "vc_generate" : tactic =>
     inferred) and normalize the environment lookups, leaving a clean curried
     CHC goal. Handles both arity-1 (`liftK1`) and arity-2 (`liftK2`) κ. -/
 macro "vc_reify" : tactic =>
-  `(tactic| intro_kenv <;> simp [STLC.mkKEnv, List.lookup, STLC.liftK1, STLC.liftK2])
+  `(tactic| intro_kenv <;> simp [STLC.mkKEnv, List.lookup, STLC.liftK1, STLC.liftK2, STLC.liftK3])
