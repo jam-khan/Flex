@@ -18,7 +18,7 @@ macro "make_horn_under_k" : tactic => `(tactic| make_horn_under_k [])
 
     Usage:
     ```
-    intro_kenv [("k1", liftK1 ?k1), ("k2", liftK2 ?k2)]
+    intro_kenv [("k1", liftKPred 1 ?k1), ("k2", liftKPred 2 ?k2)]
     · exact fun v => v = 99        -- fills ?k1
     · exact fun x y => x = y      -- fills ?k2
     · <proof of P (mkKEnv [...])>
@@ -67,21 +67,21 @@ elab "intro_kenv" : tactic => do
     let kvarArr := kvars.toArray
     let intTy  := mkConst ``Int
     let propTy := mkSort Level.zero
-    let kPredTy : Nat → Expr
-      | 1 => .forallE `_ intTy propTy .default
-      | 2 => .forallE `_ intTy (.forallE `_ intTy propTy .default) .default
-      | _ => .forallE `_ intTy (.forallE `_ intTy (.forallE `_ intTy propTy .default) .default) .default
+    -- Build `Int → Int → … → Int → Prop` (n times) for any arity n.
+    let kPredTy : Nat → Expr := fun n =>
+      (List.range n).foldr (fun _ acc => .forallE `_ intTy acc .default) propTy
 
     -- Fresh MVars for each k-predicate
     let kMVars ← kvarArr.mapM fun (name, arity) =>
       mkFreshExprMVar (kPredTy arity) (kind := .natural) (userName := name.toName)
 
-    -- Build list [("k1", liftK1 ?k1), ...] using direct mkApp (no AppBuilder checks)
-    -- Get element type from a dummy element to avoid List.nil type inference issues
-    let liftFn0 := mkConst (if kvarArr[0]!.2 == 1 then ``STLC.liftK1
-                             else if kvarArr[0]!.2 == 2 then ``STLC.liftK2
-                             else ``STLC.liftK3)
-    let lifted0 := mkApp liftFn0 kMVars[0]!
+    -- Build list [("k1", liftKPred n1 ?k1), ...] using direct mkApp (no AppBuilder).
+    -- `liftKPred n` has type `KPred n → List (Σ b, b.interp) → Prop`; since
+    -- `KPred n` is @[reducible] to `Int → … → Int → Prop`, it unifies with our MVars.
+    let liftKPredC := mkConst ``STLC.liftKPred
+    let mkLifted (arity : Nat) (kMVar : Expr) : Expr :=
+      mkApp2 liftKPredC (mkNatLit arity) kMVar
+    let lifted0  := mkLifted kvarArr[0]!.2 kMVars[0]!
     let liftedTy ← inferType lifted0          -- List (Σ b, b.interp) → Prop
     let strTy    := mkConst ``String
     -- Prod.mk.{u,v} takes universe indices where α : Type u.
@@ -95,10 +95,7 @@ elab "intro_kenv" : tactic => do
     let mut kenvListExpr := mkApp nilC elemTy
     for i in (List.range kvarArr.size).reverse do
       let (name, arity) := kvarArr[i]!
-      let liftFn := mkConst (if arity == 1 then ``STLC.liftK1
-                              else if arity == 2 then ``STLC.liftK2
-                              else ``STLC.liftK3)
-      let liftedKi := mkApp liftFn kMVars[i]!
+      let liftedKi := mkLifted arity kMVars[i]!
       let elem := mkApp4 prodMkC strTy liftedTy (mkStrLit name) liftedKi
       kenvListExpr := mkApp3 consC elemTy elem kenvListExpr
     let kenvExpr := mkApp (mkConst ``STLC.mkKEnv) kenvListExpr
@@ -158,7 +155,8 @@ macro "vc_generate" : tactic =>
       simp)
 
 /-- `vc_reify` — reify the single `KEnv` into typed per-κ unknowns (arities
-    inferred) and normalize the environment lookups, leaving a clean curried
-    CHC goal. Handles both arity-1 (`liftK1`) and arity-2 (`liftK2`) κ. -/
+    inferred automatically) and normalize the environment lookups, leaving a
+    clean curried CHC goal. Handles any arity via `liftKPred`. -/
 macro "vc_reify" : tactic =>
-  `(tactic| intro_kenv <;> simp [STLC.mkKEnv, List.lookup, STLC.liftK1, STLC.liftK2, STLC.liftK3])
+  `(tactic| intro_kenv <;> simp [STLC.mkKEnv, List.lookup, STLC.liftKPred,
+                                  STLC.liftKPred_zero, STLC.liftKPred_succ_int])

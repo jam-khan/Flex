@@ -178,6 +178,7 @@ example (κ : KEnv) : topVC κ [] exEq tyEq := by
 
 /-! ## `exMax`: `λx. λy. let c = x ≤ y in if c then y else x`. -/
 
+
 abbrev exMax : Exp :=
   .lam       -- λ x.
     (.lam    -- λ y.
