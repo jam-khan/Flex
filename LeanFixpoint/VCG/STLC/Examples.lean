@@ -34,6 +34,14 @@ abbrev IntN (n : Int) : Ty := <ty| Int{ν : ν = ⌜n⌝}|>
 abbrev IntK (k : STLC.KVar) : Ty :=
   .refine .int (.kapp k [⟨.int, .bvar .int 0⟩])
 
+abbrev IntK2 (k : STLC.KVar) : Ty :=
+  .refine .int (.kapp k [⟨.int, .bvar .int 1⟩, ⟨.int, .bvar .int 0⟩])
+
+/-- κ-refinement on int: `{ν | k(x, y, ν)}` for the two enclosing arrow binders.
+    `bvar 2` = x (outer arg), `bvar 1` = y (inner arg), `bvar 0` = ν. -/
+abbrev IntK3 (k : STLC.KVar) : Ty :=
+  .refine .int (.kapp k [⟨.int, .bvar .int 2⟩, ⟨.int, .bvar .int 1⟩, ⟨.int, .bvar .int 0⟩])
+
 /-- κ-refinement on int referencing both an outer variable and ν: `{ν | k(x, ν)}`.
     `x` is the enclosing arrow binder (`BVar 1`, since ν occupies `BVar 0`). -/
 abbrev IntR (k : STLC.KVar) : Ty :=
@@ -170,6 +178,7 @@ example (κ : KEnv) : topVC κ [] exEq tyEq := by
 
 /-! ## `exMax`: `λx. λy. let c = x ≤ y in if c then y else x`. -/
 
+
 abbrev exMax : Exp :=
   .lam       -- λ x.
     (.lam    -- λ y.
@@ -186,8 +195,8 @@ example :
         (.letin (.iconst 99)
           (.letin (.iconst 100)
             (.app (.app (.ann exMax
-                          (.arrow (IntK "k1")
-                            (.arrow (IntK "k2") (IntK "k3"))))
+                          (.arrow TT
+                            (.arrow TT (IntK3 "k"))))
                         (.bvar 1)) (.bvar 0))))
         (.refine .int (.fmla (.or
           (.eq .int (.bvar .int 0) (.const .int 100))

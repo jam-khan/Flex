@@ -18,7 +18,7 @@ example :
       <ty| Int{ v : 1 ≤ v } |> := by
   simp [topVC]
   intro_kenv
-  simp [mkKEnv, liftK1]
+  simp [mkKEnv, liftKPred]
   solve_fixpoint
 
 /-! ## κ-example with `ty_xk`: same shape, output type `IntN 99` -/
@@ -30,7 +30,7 @@ example :
       <ty| Int{ v : v = 99 } |> := by
   simp [topVC]
   intro_kenv
-  simp [mkKEnv, List.lookup, liftK2]
+  simp [mkKEnv, List.lookup, liftKPred]
   solve_fixpoint
 
 /-! ## Example 3: `let z = 5 in z ⇐ Pos` -/
