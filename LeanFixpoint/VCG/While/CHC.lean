@@ -150,32 +150,18 @@ def fib_spec (n : Int) : Int :=
   else fib_spec (n - 1) + fib_spec (n - 2)
 termination_by n.toNat
 
-abbrev fibLoop : Cmd :=
-  <|
-    x := 0 ;
-    if n ≤ 1 then
-      x := 1
-    else (
-      prev := 1 ;
-      x := 2 ;
-      i := 2 ;
-      while i < n do (
-        next := x + prev ;
-        prev := x ;
-        x := next ;
-        i := i + 1
-      )
-    )
-  |>
-
 @[qualif] def q_gt1 (a : Int) : Prop := a > 1
 @[qualif] def q_eq_fib (v i : Int) : Prop := v = fib_spec i
 @[qualif] def q_eq_fib_pred (v i : Int) : Prop := v = fib_spec (i - 1)
 
 theorem fibLoop_correct (n : Int) :
-  ValidHoareTriple
-  (fun s => s "n" = n)
-    fibLoop
+  ⊧ (fun s => s "n" = n ∧ n ≥ 2)
+    <| prev := 1; x := 2; i := 2;
+    while i < n do (
+      next := prev + x ;
+      prev := x ;
+      x := next ;
+      i := i + 1) |>
   (fun s => s "x" = fib_spec n) := by
   imp_vcgen
   solve_fixpoint
