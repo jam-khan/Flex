@@ -68,6 +68,6 @@ open TestOkOrElseSomeQualifs
 set_option maxHeartbeats 5000000
 #time def TestOkOrElseSome_proof : TestOkOrElseSome := by
   unfold TestOkOrElseSome
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

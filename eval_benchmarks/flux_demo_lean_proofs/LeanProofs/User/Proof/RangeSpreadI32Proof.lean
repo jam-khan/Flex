@@ -68,6 +68,6 @@ open RangeSpreadI32Qualifs
 set_option maxHeartbeats 5000000
 #time def RangeSpreadI32_proof : RangeSpreadI32 := by
   unfold RangeSpreadI32
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

@@ -68,6 +68,6 @@ open BufferWriteQualifs
 set_option maxHeartbeats 5000000
 #time def BufferWrite_proof : BufferWrite := by
   unfold BufferWrite
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

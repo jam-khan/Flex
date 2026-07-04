@@ -68,6 +68,6 @@ open ArraysAdd2NQualifs
 set_option maxHeartbeats 5000000
 #time def ArraysAdd2N_proof : ArraysAdd2N := by
   unfold ArraysAdd2N
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

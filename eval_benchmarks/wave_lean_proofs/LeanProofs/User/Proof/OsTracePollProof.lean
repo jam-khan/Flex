@@ -68,6 +68,6 @@ open OsTracePollQualifs
 set_option maxHeartbeats 5000000
 #time def OsTracePoll_proof : OsTracePoll := by
   unfold OsTracePoll
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

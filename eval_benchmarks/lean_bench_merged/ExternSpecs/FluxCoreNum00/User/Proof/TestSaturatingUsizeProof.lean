@@ -68,6 +68,6 @@ open TestSaturatingUsizeQualifs
 set_option maxHeartbeats 5000000
 #time def TestSaturatingUsize_proof : TestSaturatingUsize := by
   unfold TestSaturatingUsize
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

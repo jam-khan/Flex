@@ -68,6 +68,6 @@ open Impl0NowQualifs
 set_option maxHeartbeats 5000000
 #time def Impl__0__Now_proof : Impl__0__Now := by
   unfold Impl__0__Now
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

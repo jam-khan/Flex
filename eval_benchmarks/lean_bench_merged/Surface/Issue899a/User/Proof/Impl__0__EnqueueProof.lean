@@ -68,6 +68,6 @@ open Impl0EnqueueQualifs
 set_option maxHeartbeats 5000000
 #time def Impl__0__Enqueue_proof : Impl__0__Enqueue := by
   unfold Impl__0__Enqueue
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

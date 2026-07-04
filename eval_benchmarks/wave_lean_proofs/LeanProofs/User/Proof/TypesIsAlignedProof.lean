@@ -68,6 +68,6 @@ open TypesIsAlignedQualifs
 set_option maxHeartbeats 5000000
 #time def TypesIsAligned_proof : TypesIsAligned := by
   unfold TypesIsAligned
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

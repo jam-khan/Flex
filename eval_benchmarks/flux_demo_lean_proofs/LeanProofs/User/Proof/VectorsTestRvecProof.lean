@@ -68,6 +68,6 @@ open VectorsTestRvecQualifs
 set_option maxHeartbeats 5000000
 #time def VectorsTestRvec_proof : VectorsTestRvec := by
   unfold VectorsTestRvec
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

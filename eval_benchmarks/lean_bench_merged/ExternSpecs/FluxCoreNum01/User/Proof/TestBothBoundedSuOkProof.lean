@@ -68,6 +68,6 @@ open TestBothBoundedSuOkQualifs
 set_option maxHeartbeats 5000000
 #time def TestBothBoundedSuOk_proof : TestBothBoundedSuOk := by
   unfold TestBothBoundedSuOk
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

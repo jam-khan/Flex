@@ -68,6 +68,6 @@ open TestMapQualifs
 set_option maxHeartbeats 5000000
 #time def TestMap_proof : TestMap := by
   unfold TestMap
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

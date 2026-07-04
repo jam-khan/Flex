@@ -68,6 +68,6 @@ open SharedRefBoxQualifs
 set_option maxHeartbeats 5000000
 #time def SharedRefBox_proof : SharedRefBox := by
   unfold SharedRefBox
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

@@ -68,6 +68,6 @@ open BcopyAuxQualifs
 set_option maxHeartbeats 5000000
 #time def BcopyAux_proof : BcopyAux := by
   unfold BcopyAux
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

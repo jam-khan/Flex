@@ -41,6 +41,14 @@ WICK_SUITES = [
 MERGED_SUITE_NAME = "flux-medium"
 MERGED_SUITE_MEMBERS = {"flux-demo", "kani-vecdeque", "pldi23"}
 
+# LaTeX macro to use for each suite's display name in table 1.
+SUITE_MACROS = {
+    "flux-medium":     r"\fluxmedium",
+    "wave":             r"\wavesuite",
+    "Flux lean-bench":  r"\fluxtests",
+    "Liquid-fixpoint":  r"\lfsuite",
+}
+
 # ── shared regexes (same as classify_nontrivial_vcs.py / count_failures.py) ──
 
 LAST_DEF_RE = re.compile(r"(?s).*\bdef\s+(\w+)\s*:=(.*)")
@@ -350,12 +358,14 @@ def render_table2_md(suites: list[SuiteStats]) -> str:
 
 def render_table1_latex(suites: list[SuiteStats]) -> str:
     lines = [
-        r"\begin{tabular}{lrrrrrr}",
+        r"\begin{table}[t]",
+        r"\centering\small",
+        r"\begin{tabular}{lrrrrr}",
         r"\toprule",
-        r"Benchmark & Non-trivial VCs & Failures & Success \% & Success \% (cyclic) & fixpoint-hs time & Lean Time \\",
+        r"Benchmark & \#CHCs & Success & Success (cyclic) & LF time & \sys Time \\",
         r"\midrule",
     ]
-    tot_nt = tot_fail = tot_cyclic = tot_cyclic_proven = 0
+    tot_nt = tot_cyclic = tot_cyclic_proven = 0
     tot_ms: int | None = 0
     tot_flux_ms: int | None = 0
     for s in suites:
@@ -365,21 +375,33 @@ def render_table1_latex(suites: list[SuiteStats]) -> str:
         n_cyclic = t["cyclic_only"] + t["both"]
         pct  = f"{100*(nt-fail)/nt:.1f}" if nt else "--"
         cpct = f"{100*s.n_cyclic_proven()/n_cyclic:.1f}" if n_cyclic else "--"
-        name = s.name.replace("_", r"\_")
+        cstr = f"{n_cyclic} ({cpct}\\%)" if n_cyclic else "—"
+        name = SUITE_MACROS.get(s.name, s.name.replace("_", r"\_"))
         lines.append(
-            rf"{name} & {nt} & {fail} & {pct}\% & {cpct}\% & {_fmt_time(s.flux_time_ms)} & {_fmt_time(s.time_ms)} \\"
+            rf"{name} & {nt} & {pct}\% & {cstr} & {_fmt_time(s.flux_time_ms)} & {_fmt_time(s.time_ms)} \\"
         )
-        tot_nt += nt; tot_fail += fail
+        tot_nt += nt
         tot_cyclic += n_cyclic; tot_cyclic_proven += s.n_cyclic_proven()
         tot_ms      = _acc_time(tot_ms, s.time_ms)
         tot_flux_ms = _acc_time(tot_flux_ms, s.flux_time_ms)
-    tot_pct  = f"{100*(tot_nt-tot_fail)/tot_nt:.1f}" if tot_nt else "--"
+    tot_fail_total = sum(s.n_failed() for s in suites)
+    tot_pct  = f"{100*(tot_nt-tot_fail_total)/tot_nt:.1f}" if tot_nt else "--"
     tot_cpct = f"{100*tot_cyclic_proven/tot_cyclic:.1f}" if tot_cyclic else "--"
+    tot_cstr = f"{tot_cyclic} ({tot_cpct}\\%)" if tot_cyclic else "—"
     lines += [
         r"\midrule",
-        rf"\textbf{{Total}} & {tot_nt} & {tot_fail} & {tot_pct}\% & {tot_cpct}\% & {_fmt_time(tot_flux_ms)} & {_fmt_time(tot_ms)} \\",
+        rf"\textbf{{Total}} & {tot_nt} & {tot_pct}\% & {tot_cstr} & {_fmt_time(tot_flux_ms)} & {_fmt_time(tot_ms)} \\",
         r"\bottomrule",
         r"\end{tabular}",
+        r"\caption{Automation coverage of the full solver pipeline (\zap{} followed by",
+        r"  \Fixname{} with a \lean{grind}/\lean{aesop} oracle), run with no human input.",
+        r"  \#CHCs is the number of constraints in the suite; Success is the fraction",
+        r"  discharged, and Success (cyclic) the fraction discharged among those",
+        r"  constraints with a cyclic $\kappa$-variable.",
+        r"  LF time and \sys Time are the total wall-clock time to solve the entire suite",
+        r"  with Liquid Fixpoint (SMT) and \sys, respectively.}",
+        r"\label{tab:benchmarks}",
+        r"\end{table}",
     ]
     return "\n".join(lines)
 

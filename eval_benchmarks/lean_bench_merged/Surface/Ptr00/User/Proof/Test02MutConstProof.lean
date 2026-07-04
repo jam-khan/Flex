@@ -68,6 +68,6 @@ open Test02MutConstQualifs
 set_option maxHeartbeats 5000000
 #time def Test02MutConst_proof : Test02MutConst := by
   unfold Test02MutConst
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

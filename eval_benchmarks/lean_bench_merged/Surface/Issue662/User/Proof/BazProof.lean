@@ -68,6 +68,6 @@ open BazQualifs
 set_option maxHeartbeats 5000000
 #time def Baz_proof : Baz := by
   unfold Baz
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

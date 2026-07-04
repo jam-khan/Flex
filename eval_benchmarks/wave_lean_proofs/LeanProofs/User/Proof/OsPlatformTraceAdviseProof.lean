@@ -68,6 +68,6 @@ open OsPlatformTraceAdviseQualifs
 set_option maxHeartbeats 5000000
 #time def OsPlatformTraceAdvise_proof : OsPlatformTraceAdvise := by
   unfold OsPlatformTraceAdvise
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

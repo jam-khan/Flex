@@ -68,6 +68,6 @@ open Dot2Qualifs
 set_option maxHeartbeats 5000000
 #time def Dot2_proof : Dot2 := by
   unfold Dot2
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

@@ -68,6 +68,6 @@ open TestSplitLastEmptyQualifs
 set_option maxHeartbeats 5000000
 #time def TestSplitLastEmpty_proof : TestSplitLastEmpty := by
   unfold TestSplitLastEmpty
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

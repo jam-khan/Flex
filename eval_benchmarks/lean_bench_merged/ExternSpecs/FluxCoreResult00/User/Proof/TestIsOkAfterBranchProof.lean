@@ -68,6 +68,6 @@ open TestIsOkAfterBranchQualifs
 set_option maxHeartbeats 5000000
 #time def TestIsOkAfterBranch_proof : TestIsOkAfterBranch := by
   unfold TestIsOkAfterBranch
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

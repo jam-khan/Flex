@@ -68,6 +68,6 @@ open Test4MutQualifs
 set_option maxHeartbeats 5000000
 #time def Test4Mut_proof : Test4Mut := by
   unfold Test4Mut
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

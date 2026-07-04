@@ -68,6 +68,6 @@ open OsTraceUtimensatQualifs
 set_option maxHeartbeats 5000000
 #time def OsTraceUtimensat_proof : OsTraceUtimensat := by
   unfold OsTraceUtimensat
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

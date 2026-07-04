@@ -68,6 +68,6 @@ open FdmapImpl0DeleteQualifs
 set_option maxHeartbeats 5000000
 #time def FdmapImpl__0__Delete_proof : FdmapImpl__0__Delete := by
   unfold FdmapImpl__0__Delete
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

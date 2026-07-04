@@ -68,6 +68,6 @@ open ConsQualifs
 set_option maxHeartbeats 5000000
 #time def Cons_proof : Cons := by
   unfold Cons
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

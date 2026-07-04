@@ -68,6 +68,6 @@ open PollPollParseClockQualifs
 set_option maxHeartbeats 5000000
 #time def PollPollParseClock_proof : PollPollParseClock := by
   unfold PollPollParseClock
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

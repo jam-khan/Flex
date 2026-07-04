@@ -68,6 +68,6 @@ open PollWritebackTimeoutsQualifs
 set_option maxHeartbeats 5000000
 #time def PollWritebackTimeouts_proof : PollWritebackTimeouts := by
   unfold PollWritebackTimeouts
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

@@ -68,6 +68,6 @@ open MaximumQualifs
 set_option maxHeartbeats 5000000
 #time def Maximum_proof : Maximum := by
   unfold Maximum
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

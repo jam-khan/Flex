@@ -68,6 +68,6 @@ open I64U32BoundedQualifs
 set_option maxHeartbeats 5000000
 #time def I64U32Bounded_proof : I64U32Bounded := by
   unfold I64U32Bounded
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

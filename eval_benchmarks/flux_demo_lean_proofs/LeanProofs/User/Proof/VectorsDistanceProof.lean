@@ -68,6 +68,6 @@ open VectorsDistanceQualifs
 set_option maxHeartbeats 5000000
 #time def VectorsDistance_proof : VectorsDistance := by
   unfold VectorsDistance
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

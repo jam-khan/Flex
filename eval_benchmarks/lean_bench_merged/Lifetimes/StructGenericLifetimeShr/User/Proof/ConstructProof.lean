@@ -68,6 +68,6 @@ open ConstructQualifs
 set_option maxHeartbeats 5000000
 #time def Construct_proof : Construct := by
   unfold Construct
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

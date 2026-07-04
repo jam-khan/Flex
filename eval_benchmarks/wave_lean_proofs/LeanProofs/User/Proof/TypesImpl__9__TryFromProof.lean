@@ -68,6 +68,6 @@ open TypesImpl9TryFromQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__9__TryFrom_proof : TypesImpl__9__TryFrom := by
   unfold TypesImpl__9__TryFrom
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

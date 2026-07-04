@@ -68,6 +68,6 @@ open IdQualifs
 set_option maxHeartbeats 5000000
 #time def Id_proof : Id := by
   unfold Id
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

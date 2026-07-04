@@ -68,6 +68,6 @@ open TestU64Qualifs
 set_option maxHeartbeats 5000000
 #time def TestU64_proof : TestU64 := by
   unfold TestU64
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

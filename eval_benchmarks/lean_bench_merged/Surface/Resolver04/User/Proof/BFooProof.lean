@@ -68,6 +68,6 @@ open BFooQualifs
 set_option maxHeartbeats 5000000
 #time def BFoo_proof : BFoo := by
   unfold BFoo
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

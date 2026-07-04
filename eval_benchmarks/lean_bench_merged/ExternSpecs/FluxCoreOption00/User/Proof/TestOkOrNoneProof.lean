@@ -68,6 +68,6 @@ open TestOkOrNoneQualifs
 set_option maxHeartbeats 5000000
 #time def TestOkOrNone_proof : TestOkOrNone := by
   unfold TestOkOrNone
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

@@ -68,6 +68,6 @@ open ListsLenQualifs
 set_option maxHeartbeats 5000000
 #time def ListsLen_proof : ListsLen := by
   unfold ListsLen
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

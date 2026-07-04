@@ -68,6 +68,6 @@ open WrappersWasiPathOpenQualifs
 set_option maxHeartbeats 5000000
 #time def WrappersWasiPathOpen_proof : WrappersWasiPathOpen := by
   unfold WrappersWasiPathOpen
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

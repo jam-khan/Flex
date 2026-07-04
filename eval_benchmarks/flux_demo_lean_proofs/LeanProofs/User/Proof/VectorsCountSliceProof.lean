@@ -68,6 +68,6 @@ open VectorsCountSliceQualifs
 set_option maxHeartbeats 5000000
 #time def VectorsCountSlice_proof : VectorsCountSlice := by
   unfold VectorsCountSlice
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

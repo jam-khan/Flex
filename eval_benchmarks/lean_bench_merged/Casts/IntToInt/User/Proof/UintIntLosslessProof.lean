@@ -68,6 +68,6 @@ open UintIntLosslessQualifs
 set_option maxHeartbeats 5000000
 #time def UintIntLossless_proof : UintIntLossless := by
   unfold UintIntLossless
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

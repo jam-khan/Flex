@@ -68,6 +68,6 @@ open FdmapImpl0ShiftQualifs
 set_option maxHeartbeats 5000000
 #time def FdmapImpl__0__Shift_proof : FdmapImpl__0__Shift := by
   unfold FdmapImpl__0__Shift
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

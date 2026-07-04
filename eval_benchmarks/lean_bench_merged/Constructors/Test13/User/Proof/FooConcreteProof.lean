@@ -68,6 +68,6 @@ open FooConcreteQualifs
 set_option maxHeartbeats 5000000
 #time def FooConcrete_proof : FooConcrete := by
   unfold FooConcrete
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

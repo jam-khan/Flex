@@ -68,6 +68,6 @@ open OsTraceShutdownQualifs
 set_option maxHeartbeats 5000000
 #time def OsTraceShutdown_proof : OsTraceShutdown := by
   unfold OsTraceShutdown
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

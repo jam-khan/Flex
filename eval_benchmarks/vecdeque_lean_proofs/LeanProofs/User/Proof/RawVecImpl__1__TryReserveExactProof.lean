@@ -68,6 +68,6 @@ open RawVecImpl1TryReserveExactQualifs
 set_option maxHeartbeats 5000000
 #time def RawVecImpl__1__TryReserveExact_proof : RawVecImpl__1__TryReserveExact := by
   unfold RawVecImpl__1__TryReserveExact
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

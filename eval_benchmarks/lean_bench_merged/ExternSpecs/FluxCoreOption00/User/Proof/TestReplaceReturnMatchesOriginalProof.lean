@@ -68,6 +68,6 @@ open TestReplaceReturnMatchesOriginalQualifs
 set_option maxHeartbeats 5000000
 #time def TestReplaceReturnMatchesOriginal_proof : TestReplaceReturnMatchesOriginal := by
   unfold TestReplaceReturnMatchesOriginal
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

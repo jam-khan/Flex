@@ -68,6 +68,6 @@ open Lib4Qualifs
 set_option maxHeartbeats 5000000
 #time def Lib4_proof : Lib4 := by
   unfold Lib4
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

@@ -68,6 +68,6 @@ open NeuralImpl0ForwardQualifs
 set_option maxHeartbeats 5000000
 #time def NeuralImpl__0__Forward_proof : NeuralImpl__0__Forward := by
   unfold NeuralImpl__0__Forward
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

@@ -68,6 +68,6 @@ open Impl0TakeShrQualifs
 set_option maxHeartbeats 5000000
 #time def Impl__0__TakeShr_proof : Impl__0__TakeShr := by
   unfold Impl__0__TakeShr
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

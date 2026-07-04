@@ -68,6 +68,6 @@ open IntToFloatQualifs
 set_option maxHeartbeats 5000000
 #time def IntToFloat_proof : IntToFloat := by
   unfold IntToFloat
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

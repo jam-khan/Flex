@@ -68,6 +68,6 @@ open PollWritebackFdsQualifs
 set_option maxHeartbeats 5000000
 #time def PollWritebackFds_proof : PollWritebackFds := by
   unfold PollWritebackFds
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

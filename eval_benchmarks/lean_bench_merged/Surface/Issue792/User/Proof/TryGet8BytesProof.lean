@@ -68,6 +68,6 @@ open TryGet8BytesQualifs
 set_option maxHeartbeats 5000000
 #time def TryGet8Bytes_proof : TryGet8Bytes := by
   unfold TryGet8Bytes
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

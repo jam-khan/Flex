@@ -68,6 +68,6 @@ open TestCloneQualifs
 set_option maxHeartbeats 5000000
 #time def TestClone_proof : TestClone := by
   unfold TestClone
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

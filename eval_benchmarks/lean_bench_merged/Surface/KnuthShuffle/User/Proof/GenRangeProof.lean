@@ -68,6 +68,6 @@ open GenRangeQualifs
 set_option maxHeartbeats 5000000
 #time def GenRange_proof : GenRange := by
   unfold GenRange
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

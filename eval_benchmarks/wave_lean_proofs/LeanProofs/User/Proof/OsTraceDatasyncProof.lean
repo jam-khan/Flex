@@ -68,6 +68,6 @@ open OsTraceDatasyncQualifs
 set_option maxHeartbeats 5000000
 #time def OsTraceDatasync_proof : OsTraceDatasync := by
   unfold OsTraceDatasync
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

@@ -68,6 +68,6 @@ open Wasm2cFrontendAdjustOflagsQualifs
 set_option maxHeartbeats 5000000
 #time def Wasm2cFrontendAdjustOflags_proof : Wasm2cFrontendAdjustOflags := by
   unfold Wasm2cFrontendAdjustOflags
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

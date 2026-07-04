@@ -68,6 +68,6 @@ open DemoImpl0NewQualifs
 set_option maxHeartbeats 5000000
 #time def DemoImpl__0__New_proof : DemoImpl__0__New := by
   unfold DemoImpl__0__New
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

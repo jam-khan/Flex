@@ -68,6 +68,6 @@ open BillQualifs
 set_option maxHeartbeats 5000000
 #time def Bill_proof : Bill := by
   unfold Bill
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

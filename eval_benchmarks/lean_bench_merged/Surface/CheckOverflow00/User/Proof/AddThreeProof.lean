@@ -68,6 +68,6 @@ open AddThreeQualifs
 set_option maxHeartbeats 5000000
 #time def AddThree_proof : AddThree := by
   unfold AddThree
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

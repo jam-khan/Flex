@@ -68,6 +68,6 @@ open TrivialLeQualifs
 set_option maxHeartbeats 5000000
 #time def TrivialLe_proof : TrivialLe := by
   unfold TrivialLe
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

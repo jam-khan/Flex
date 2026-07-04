@@ -68,6 +68,6 @@ open AssertTrueQualifs
 set_option maxHeartbeats 5000000
 #time def AssertTrue_proof : AssertTrue := by
   unfold AssertTrue
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

@@ -68,6 +68,6 @@ open RangeImpl3IntoIterQualifs
 set_option maxHeartbeats 5000000
 #time def RangeImpl__3__IntoIter_proof : RangeImpl__3__IntoIter := by
   unfold RangeImpl__3__IntoIter
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

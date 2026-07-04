@@ -68,6 +68,6 @@ open WrappersWasiPathRemoveDirectoryQualifs
 set_option maxHeartbeats 5000000
 #time def WrappersWasiPathRemoveDirectory_proof : WrappersWasiPathRemoveDirectory := by
   unfold WrappersWasiPathRemoveDirectory
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

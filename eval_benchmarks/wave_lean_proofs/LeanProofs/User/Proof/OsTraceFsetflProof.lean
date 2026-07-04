@@ -68,6 +68,6 @@ open OsTraceFsetflQualifs
 set_option maxHeartbeats 5000000
 #time def OsTraceFsetfl_proof : OsTraceFsetfl := by
   unfold OsTraceFsetfl
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

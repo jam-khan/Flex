@@ -68,6 +68,6 @@ open CastToU8Qualifs
 set_option maxHeartbeats 5000000
 #time def CastToU8_proof : CastToU8 := by
   unfold CastToU8
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

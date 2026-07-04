@@ -68,6 +68,6 @@ open TestUnwrapOrQualifs
 set_option maxHeartbeats 5000000
 #time def TestUnwrapOr_proof : TestUnwrapOr := by
   unfold TestUnwrapOr
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

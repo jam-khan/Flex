@@ -68,6 +68,6 @@ open TypesImpl15ShouldFollowQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__15__ShouldFollow_proof : TypesImpl__15__ShouldFollow := by
   unfold TypesImpl__15__ShouldFollow
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

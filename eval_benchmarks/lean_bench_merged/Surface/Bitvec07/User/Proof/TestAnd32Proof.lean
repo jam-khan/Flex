@@ -68,6 +68,6 @@ open TestAnd32Qualifs
 set_option maxHeartbeats 5000000
 #time def TestAnd32_proof : TestAnd32 := by
   unfold TestAnd32
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

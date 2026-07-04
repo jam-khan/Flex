@@ -68,6 +68,6 @@ open BorrowsDecrementQualifs
 set_option maxHeartbeats 5000000
 #time def BorrowsDecrement_proof : BorrowsDecrement := by
   unfold BorrowsDecrement
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

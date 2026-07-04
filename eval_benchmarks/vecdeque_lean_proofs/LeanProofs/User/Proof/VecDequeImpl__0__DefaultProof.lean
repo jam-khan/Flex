@@ -68,6 +68,6 @@ open VecDequeImpl0DefaultQualifs
 set_option maxHeartbeats 5000000
 #time def VecDequeImpl__0__Default_proof : VecDequeImpl__0__Default := by
   unfold VecDequeImpl__0__Default
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

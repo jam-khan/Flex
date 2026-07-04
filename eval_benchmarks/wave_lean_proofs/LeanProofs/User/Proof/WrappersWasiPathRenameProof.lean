@@ -68,6 +68,6 @@ open WrappersWasiPathRenameQualifs
 set_option maxHeartbeats 5000000
 #time def WrappersWasiPathRename_proof : WrappersWasiPathRename := by
   unfold WrappersWasiPathRename
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

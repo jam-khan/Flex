@@ -68,6 +68,6 @@ open Impl0SimplifyQualifs
 set_option maxHeartbeats 5000000
 #time def Impl__0__Simplify_proof : Impl__0__Simplify := by
   unfold Impl__0__Simplify
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

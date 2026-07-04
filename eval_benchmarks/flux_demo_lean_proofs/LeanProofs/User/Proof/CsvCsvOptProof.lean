@@ -68,6 +68,6 @@ open CsvCsvOptQualifs
 set_option maxHeartbeats 5000000
 #time def CsvCsvOpt_proof : CsvCsvOpt := by
   unfold CsvCsvOpt
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

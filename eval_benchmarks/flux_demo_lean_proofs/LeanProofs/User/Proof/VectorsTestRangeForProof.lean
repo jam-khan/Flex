@@ -68,6 +68,6 @@ open VectorsTestRangeForQualifs
 set_option maxHeartbeats 5000000
 #time def VectorsTestRangeFor_proof : VectorsTestRangeFor := by
   unfold VectorsTestRangeFor
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

@@ -68,6 +68,6 @@ open TypesImpl5FromSyscallRetQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__5__FromSyscallRet_proof : TypesImpl__5__FromSyscallRet := by
   unfold TypesImpl__5__FromSyscallRet
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

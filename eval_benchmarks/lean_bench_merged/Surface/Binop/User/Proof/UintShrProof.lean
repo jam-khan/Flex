@@ -68,6 +68,6 @@ open UintShrQualifs
 set_option maxHeartbeats 5000000
 #time def UintShr_proof : UintShr := by
   unfold UintShr
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

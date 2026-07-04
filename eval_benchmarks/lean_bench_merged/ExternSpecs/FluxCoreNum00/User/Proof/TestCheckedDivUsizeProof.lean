@@ -68,6 +68,6 @@ open TestCheckedDivUsizeQualifs
 set_option maxHeartbeats 5000000
 #time def TestCheckedDivUsize_proof : TestCheckedDivUsize := by
   unfold TestCheckedDivUsize
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

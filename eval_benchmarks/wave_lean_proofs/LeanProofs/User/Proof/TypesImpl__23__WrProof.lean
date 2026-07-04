@@ -68,6 +68,6 @@ open TypesImpl23WrQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__23__Wr_proof : TypesImpl__23__Wr := by
   unfold TypesImpl__23__Wr
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

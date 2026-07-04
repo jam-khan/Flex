@@ -68,6 +68,6 @@ open TypesImpl25RecvWaitallQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__25__RecvWaitall_proof : TypesImpl__25__RecvWaitall := by
   unfold TypesImpl__25__RecvWaitall
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

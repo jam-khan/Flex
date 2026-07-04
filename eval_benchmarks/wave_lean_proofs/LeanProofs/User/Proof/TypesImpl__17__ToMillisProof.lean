@@ -68,6 +68,6 @@ open TypesImpl17ToMillisQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__17__ToMillis_proof : TypesImpl__17__ToMillis := by
   unfold TypesImpl__17__ToMillis
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

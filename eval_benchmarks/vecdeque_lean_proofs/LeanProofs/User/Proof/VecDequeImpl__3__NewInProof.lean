@@ -68,6 +68,6 @@ open VecDequeImpl3NewInQualifs
 set_option maxHeartbeats 5000000
 #time def VecDequeImpl__3__NewIn_proof : VecDequeImpl__3__NewIn := by
   unfold VecDequeImpl__3__NewIn
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

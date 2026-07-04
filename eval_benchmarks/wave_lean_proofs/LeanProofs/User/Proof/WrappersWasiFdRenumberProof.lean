@@ -68,6 +68,6 @@ open WrappersWasiFdRenumberQualifs
 set_option maxHeartbeats 5000000
 #time def WrappersWasiFdRenumber_proof : WrappersWasiFdRenumber := by
   unfold WrappersWasiFdRenumber
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

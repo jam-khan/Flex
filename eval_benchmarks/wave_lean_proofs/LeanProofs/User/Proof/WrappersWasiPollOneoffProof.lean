@@ -68,6 +68,6 @@ open WrappersWasiPollOneoffQualifs
 set_option maxHeartbeats 5000000
 #time def WrappersWasiPollOneoff_proof : WrappersWasiPollOneoff := by
   unfold WrappersWasiPollOneoff
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

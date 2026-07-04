@@ -68,6 +68,6 @@ open VecFromElemNQualifs
 set_option maxHeartbeats 5000000
 #time def VecFromElemN_proof : VecFromElemN := by
   unfold VecFromElemN
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

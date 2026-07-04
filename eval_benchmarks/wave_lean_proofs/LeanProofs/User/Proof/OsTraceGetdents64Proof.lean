@@ -68,6 +68,6 @@ open OsTraceGetdents64Qualifs
 set_option maxHeartbeats 5000000
 #time def OsTraceGetdents64_proof : OsTraceGetdents64 := by
   unfold OsTraceGetdents64
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

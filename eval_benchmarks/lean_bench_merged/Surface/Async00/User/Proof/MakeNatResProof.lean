@@ -68,6 +68,6 @@ open MakeNatResQualifs
 set_option maxHeartbeats 5000000
 #time def MakeNatRes_proof : MakeNatRes := by
   unfold MakeNatRes
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

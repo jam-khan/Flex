@@ -68,6 +68,6 @@ open AnfImpl0IsImmQualifs
 set_option maxHeartbeats 5000000
 #time def AnfImpl__0__IsImm_proof : AnfImpl__0__IsImm := by
   unfold AnfImpl__0__IsImm
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

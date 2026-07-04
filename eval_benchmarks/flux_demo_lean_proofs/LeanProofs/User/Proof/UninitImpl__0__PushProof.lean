@@ -68,6 +68,6 @@ open UninitImpl0PushQualifs
 set_option maxHeartbeats 5000000
 #time def UninitImpl__0__Push_proof : UninitImpl__0__Push := by
   unfold UninitImpl__0__Push
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

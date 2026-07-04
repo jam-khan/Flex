@@ -68,6 +68,6 @@ open FillVecIndexLoopQualifs
 set_option maxHeartbeats 5000000
 #time def FillVecIndexLoop_proof : FillVecIndexLoop := by
   unfold FillVecIndexLoop
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

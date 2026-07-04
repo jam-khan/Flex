@@ -68,6 +68,6 @@ open Impl0FooBarBazQualifs
 set_option maxHeartbeats 5000000
 #time def Impl__0__FooBarBaz_proof : Impl__0__FooBarBaz := by
   unfold Impl__0__FooBarBaz
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

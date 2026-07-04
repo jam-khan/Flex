@@ -68,6 +68,6 @@ open SimplexDepartVarQualifs
 set_option maxHeartbeats 5000000
 #time def SimplexDepartVar_proof : SimplexDepartVar := by
   unfold SimplexDepartVar
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

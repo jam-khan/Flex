@@ -68,6 +68,6 @@ open SparseImpl0GetQualifs
 set_option maxHeartbeats 5000000
 #time def SparseImpl__0__Get_proof : SparseImpl__0__Get := by
   unfold SparseImpl__0__Get
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

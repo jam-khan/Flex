@@ -68,6 +68,6 @@ open TestCharToIntMaxQualifs
 set_option maxHeartbeats 5000000
 #time def TestCharToIntMax_proof : TestCharToIntMax := by
   unfold TestCharToIntMax
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

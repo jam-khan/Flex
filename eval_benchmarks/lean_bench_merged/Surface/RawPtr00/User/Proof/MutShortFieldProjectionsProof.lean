@@ -68,6 +68,6 @@ open MutShortFieldProjectionsQualifs
 set_option maxHeartbeats 5000000
 #time def MutShortFieldProjections_proof : MutShortFieldProjections := by
   unfold MutShortFieldProjections
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

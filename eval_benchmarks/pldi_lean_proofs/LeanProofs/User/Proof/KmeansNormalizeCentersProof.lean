@@ -68,6 +68,6 @@ open KmeansNormalizeCentersQualifs
 set_option maxHeartbeats 5000000
 #time def KmeansNormalizeCenters_proof : KmeansNormalizeCenters := by
   unfold KmeansNormalizeCenters
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

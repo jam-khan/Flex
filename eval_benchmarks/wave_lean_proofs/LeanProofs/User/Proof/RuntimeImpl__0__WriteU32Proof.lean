@@ -68,6 +68,6 @@ open RuntimeImpl0WriteU32Qualifs
 set_option maxHeartbeats 5000000
 #time def RuntimeImpl__0__WriteU32_proof : RuntimeImpl__0__WriteU32 := by
   unfold RuntimeImpl__0__WriteU32
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

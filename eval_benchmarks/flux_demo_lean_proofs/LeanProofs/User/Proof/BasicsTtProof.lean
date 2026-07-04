@@ -68,6 +68,6 @@ open BasicsTtQualifs
 set_option maxHeartbeats 5000000
 #time def BasicsTt_proof : BasicsTt := by
   unfold BasicsTt
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

@@ -68,6 +68,6 @@ open TestIterAsSliceLenQualifs
 set_option maxHeartbeats 5000000
 #time def TestIterAsSliceLen_proof : TestIterAsSliceLen := by
   unfold TestIterAsSliceLen
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

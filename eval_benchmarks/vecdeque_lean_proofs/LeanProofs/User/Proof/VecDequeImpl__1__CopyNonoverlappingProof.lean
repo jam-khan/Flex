@@ -68,6 +68,6 @@ open VecDequeImpl1CopyNonoverlappingQualifs
 set_option maxHeartbeats 5000000
 #time def VecDequeImpl__1__CopyNonoverlapping_proof : VecDequeImpl__1__CopyNonoverlapping := by
   unfold VecDequeImpl__1__CopyNonoverlapping
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

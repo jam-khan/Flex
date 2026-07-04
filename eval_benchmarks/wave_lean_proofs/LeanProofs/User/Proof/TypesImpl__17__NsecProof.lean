@@ -68,6 +68,6 @@ open TypesImpl17NsecQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__17__Nsec_proof : TypesImpl__17__Nsec := by
   unfold TypesImpl__17__Nsec
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

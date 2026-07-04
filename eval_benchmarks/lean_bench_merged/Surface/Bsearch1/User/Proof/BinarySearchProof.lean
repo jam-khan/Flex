@@ -68,6 +68,6 @@ open BinarySearchQualifs
 set_option maxHeartbeats 5000000
 #time def BinarySearch_proof : BinarySearch := by
   unfold BinarySearch
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

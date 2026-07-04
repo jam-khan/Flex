@@ -68,6 +68,6 @@ open TestRepeatArrayAssignmentQualifs
 set_option maxHeartbeats 5000000
 #time def TestRepeatArrayAssignment_proof : TestRepeatArrayAssignment := by
   unfold TestRepeatArrayAssignment
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

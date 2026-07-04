@@ -68,6 +68,6 @@ open FiveQualifs
 set_option maxHeartbeats 5000000
 #time def Five_proof : Five := by
   unfold Five
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

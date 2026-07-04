@@ -68,6 +68,6 @@ open SetQualifs
 set_option maxHeartbeats 5000000
 #time def Set_proof : Set := by
   unfold Set
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

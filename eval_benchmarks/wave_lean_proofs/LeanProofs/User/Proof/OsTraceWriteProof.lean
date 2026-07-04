@@ -68,6 +68,6 @@ open OsTraceWriteQualifs
 set_option maxHeartbeats 5000000
 #time def OsTraceWrite_proof : OsTraceWrite := by
   unfold OsTraceWrite
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

@@ -68,6 +68,6 @@ open NormalizeCentersQualifs
 set_option maxHeartbeats 5000000
 #time def NormalizeCenters_proof : NormalizeCenters := by
   unfold NormalizeCenters
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

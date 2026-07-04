@@ -68,6 +68,6 @@ open StatsNoopInstrumentationPushSyscallResultQualifs
 set_option maxHeartbeats 5000000
 #time def StatsNoopInstrumentationPushSyscallResult_proof : StatsNoopInstrumentationPushSyscallResult := by
   unfold StatsNoopInstrumentationPushSyscallResult
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

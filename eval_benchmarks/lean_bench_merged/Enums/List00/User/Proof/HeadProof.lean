@@ -68,6 +68,6 @@ open HeadQualifs
 set_option maxHeartbeats 5000000
 #time def Head_proof : Head := by
   unfold Head
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

@@ -68,6 +68,6 @@ open ArraysRedQualifs
 set_option maxHeartbeats 5000000
 #time def ArraysRed_proof : ArraysRed := by
   unfold ArraysRed
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

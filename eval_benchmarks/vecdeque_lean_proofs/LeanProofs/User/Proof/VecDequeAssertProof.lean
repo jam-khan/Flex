@@ -68,6 +68,6 @@ open VecDequeAssertQualifs
 set_option maxHeartbeats 5000000
 #time def VecDequeAssert_proof : VecDequeAssert := by
   unfold VecDequeAssert
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

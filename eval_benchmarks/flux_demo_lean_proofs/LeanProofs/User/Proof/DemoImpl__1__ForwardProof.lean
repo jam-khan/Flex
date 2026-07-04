@@ -68,6 +68,6 @@ open DemoImpl1ForwardQualifs
 set_option maxHeartbeats 5000000
 #time def DemoImpl__1__Forward_proof : DemoImpl__1__Forward := by
   unfold DemoImpl__1__Forward
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

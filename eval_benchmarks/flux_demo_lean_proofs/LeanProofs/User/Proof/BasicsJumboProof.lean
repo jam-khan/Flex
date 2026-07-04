@@ -68,6 +68,6 @@ open BasicsJumboQualifs
 set_option maxHeartbeats 5000000
 #time def BasicsJumbo_proof : BasicsJumbo := by
   unfold BasicsJumbo
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

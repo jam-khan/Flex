@@ -68,6 +68,6 @@ open VecDequeImpl2WithCapacityQualifs
 set_option maxHeartbeats 5000000
 #time def VecDequeImpl__2__WithCapacity_proof : VecDequeImpl__2__WithCapacity := by
   unfold VecDequeImpl__2__WithCapacity
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

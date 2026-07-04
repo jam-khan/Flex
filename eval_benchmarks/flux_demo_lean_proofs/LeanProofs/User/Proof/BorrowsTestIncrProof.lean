@@ -68,6 +68,6 @@ open BorrowsTestIncrQualifs
 set_option maxHeartbeats 5000000
 #time def BorrowsTestIncr_proof : BorrowsTestIncr := by
   unfold BorrowsTestIncr
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

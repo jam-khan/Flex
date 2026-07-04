@@ -68,6 +68,6 @@ open TestAllRQualifs
 set_option maxHeartbeats 5000000
 #time def TestAllR_proof : TestAllR := by
   unfold TestAllR
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

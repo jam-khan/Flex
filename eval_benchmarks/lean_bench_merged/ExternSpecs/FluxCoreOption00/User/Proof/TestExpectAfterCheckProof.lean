@@ -68,6 +68,6 @@ open TestExpectAfterCheckQualifs
 set_option maxHeartbeats 5000000
 #time def TestExpectAfterCheck_proof : TestExpectAfterCheck := by
   unfold TestExpectAfterCheck
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

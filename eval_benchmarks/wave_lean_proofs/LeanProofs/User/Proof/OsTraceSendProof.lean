@@ -68,6 +68,6 @@ open OsTraceSendQualifs
 set_option maxHeartbeats 5000000
 #time def OsTraceSend_proof : OsTraceSend := by
   unfold OsTraceSend
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

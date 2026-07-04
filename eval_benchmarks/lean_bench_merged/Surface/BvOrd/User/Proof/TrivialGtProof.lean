@@ -68,6 +68,6 @@ open TrivialGtQualifs
 set_option maxHeartbeats 5000000
 #time def TrivialGt_proof : TrivialGt := by
   unfold TrivialGt
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

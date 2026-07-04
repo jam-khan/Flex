@@ -68,6 +68,6 @@ open TestFalsePreQualifs
 set_option maxHeartbeats 5000000
 #time def TestFalsePre_proof : TestFalsePre := by
   unfold TestFalsePre
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

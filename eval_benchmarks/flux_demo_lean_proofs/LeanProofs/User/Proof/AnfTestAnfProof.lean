@@ -68,6 +68,6 @@ open AnfTestAnfQualifs
 set_option maxHeartbeats 5000000
 #time def AnfTestAnf_proof : AnfTestAnf := by
   unfold AnfTestAnf
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

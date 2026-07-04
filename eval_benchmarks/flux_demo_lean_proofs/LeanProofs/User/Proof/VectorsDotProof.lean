@@ -68,6 +68,6 @@ open VectorsDotQualifs
 set_option maxHeartbeats 5000000
 #time def VectorsDot_proof : VectorsDot := by
   unfold VectorsDot
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

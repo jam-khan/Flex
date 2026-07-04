@@ -68,6 +68,6 @@ open IovParseIovsQualifs
 set_option maxHeartbeats 5000000
 #time def IovParseIovs_proof : IovParseIovs := by
   unfold IovParseIovs
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

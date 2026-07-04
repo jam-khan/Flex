@@ -68,6 +68,6 @@ open TestNot02Qualifs
 set_option maxHeartbeats 5000000
 #time def TestNot02_proof : TestNot02 := by
   unfold TestNot02
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

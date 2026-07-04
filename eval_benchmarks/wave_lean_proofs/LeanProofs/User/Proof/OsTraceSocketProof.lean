@@ -68,6 +68,6 @@ open OsTraceSocketQualifs
 set_option maxHeartbeats 5000000
 #time def OsTraceSocket_proof : OsTraceSocket := by
   unfold OsTraceSocket
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

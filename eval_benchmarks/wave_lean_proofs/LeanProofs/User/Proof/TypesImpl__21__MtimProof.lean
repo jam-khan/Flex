@@ -68,6 +68,6 @@ open TypesImpl21MtimQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__21__Mtim_proof : TypesImpl__21__Mtim := by
   unfold TypesImpl__21__Mtim
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

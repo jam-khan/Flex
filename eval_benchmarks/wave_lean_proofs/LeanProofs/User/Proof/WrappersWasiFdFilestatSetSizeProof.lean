@@ -68,6 +68,6 @@ open WrappersWasiFdFilestatSetSizeQualifs
 set_option maxHeartbeats 5000000
 #time def WrappersWasiFdFilestatSetSize_proof : WrappersWasiFdFilestatSetSize := by
   unfold WrappersWasiFdFilestatSetSize
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

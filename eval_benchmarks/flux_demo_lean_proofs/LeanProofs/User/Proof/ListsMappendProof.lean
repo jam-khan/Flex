@@ -68,6 +68,6 @@ open ListsMappendQualifs
 set_option maxHeartbeats 5000000
 #time def ListsMappend_proof : ListsMappend := by
   unfold ListsMappend
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

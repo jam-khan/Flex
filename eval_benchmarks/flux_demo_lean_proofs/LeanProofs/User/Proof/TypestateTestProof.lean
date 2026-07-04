@@ -68,6 +68,6 @@ open TypestateTestQualifs
 set_option maxHeartbeats 5000000
 #time def TypestateTest_proof : TypestateTest := by
   unfold TypestateTest
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

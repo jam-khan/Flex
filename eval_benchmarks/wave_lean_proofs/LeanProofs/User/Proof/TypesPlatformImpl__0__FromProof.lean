@@ -68,6 +68,6 @@ open TypesPlatformImpl0FromQualifs
 set_option maxHeartbeats 5000000
 #time def TypesPlatformImpl__0__From_proof : TypesPlatformImpl__0__From := by
   unfold TypesPlatformImpl__0__From
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

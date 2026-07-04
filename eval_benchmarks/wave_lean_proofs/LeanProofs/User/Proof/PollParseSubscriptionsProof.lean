@@ -68,6 +68,6 @@ open PollParseSubscriptionsQualifs
 set_option maxHeartbeats 5000000
 #time def PollParseSubscriptions_proof : PollParseSubscriptions := by
   unfold PollParseSubscriptions
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

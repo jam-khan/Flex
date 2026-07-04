@@ -68,6 +68,6 @@ open TakeShrRefQualifs
 set_option maxHeartbeats 5000000
 #time def TakeShrRef_proof : TakeShrRef := by
   unfold TakeShrRef
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

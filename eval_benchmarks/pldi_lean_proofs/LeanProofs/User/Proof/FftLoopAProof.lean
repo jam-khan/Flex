@@ -68,6 +68,6 @@ open FftLoopAQualifs
 set_option maxHeartbeats 5000000
 #time def FftLoopA_proof : FftLoopA := by
   unfold FftLoopA
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

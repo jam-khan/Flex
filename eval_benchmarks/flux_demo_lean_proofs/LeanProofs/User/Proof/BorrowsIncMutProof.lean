@@ -68,6 +68,6 @@ open BorrowsIncMutQualifs
 set_option maxHeartbeats 5000000
 #time def BorrowsIncMut_proof : BorrowsIncMut := by
   unfold BorrowsIncMut
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

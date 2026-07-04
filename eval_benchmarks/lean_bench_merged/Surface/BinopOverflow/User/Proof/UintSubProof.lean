@@ -68,6 +68,6 @@ open UintSubQualifs
 set_option maxHeartbeats 5000000
 #time def UintSub_proof : UintSub := by
   unfold UintSub
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

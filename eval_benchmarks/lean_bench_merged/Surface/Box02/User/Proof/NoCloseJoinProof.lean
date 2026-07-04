@@ -68,6 +68,6 @@ open NoCloseJoinQualifs
 set_option maxHeartbeats 5000000
 #time def NoCloseJoin_proof : NoCloseJoin := by
   unfold NoCloseJoin
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

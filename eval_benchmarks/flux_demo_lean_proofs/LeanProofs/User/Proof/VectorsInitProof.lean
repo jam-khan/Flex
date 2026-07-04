@@ -68,6 +68,6 @@ open VectorsInitQualifs
 set_option maxHeartbeats 5000000
 #time def VectorsInit_proof : VectorsInit := by
   unfold VectorsInit
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

@@ -68,6 +68,6 @@ open ShiftDownQualifs
 set_option maxHeartbeats 5000000
 #time def ShiftDown_proof : ShiftDown := by
   unfold ShiftDown
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

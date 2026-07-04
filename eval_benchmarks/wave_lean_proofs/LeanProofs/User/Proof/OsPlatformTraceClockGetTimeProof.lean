@@ -68,6 +68,6 @@ open OsPlatformTraceClockGetTimeQualifs
 set_option maxHeartbeats 5000000
 #time def OsPlatformTraceClockGetTime_proof : OsPlatformTraceClockGetTime := by
   unfold OsPlatformTraceClockGetTime
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

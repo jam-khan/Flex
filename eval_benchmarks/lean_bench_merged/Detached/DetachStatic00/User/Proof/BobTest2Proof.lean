@@ -68,6 +68,6 @@ open BobTest2Qualifs
 set_option maxHeartbeats 5000000
 #time def BobTest2_proof : BobTest2 := by
   unfold BobTest2
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

@@ -68,6 +68,6 @@ open TestFrogQualifs
 set_option maxHeartbeats 5000000
 #time def TestFrog_proof : TestFrog := by
   unfold TestFrog
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

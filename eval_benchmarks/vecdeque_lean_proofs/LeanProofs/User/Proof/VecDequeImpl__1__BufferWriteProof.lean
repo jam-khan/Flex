@@ -68,6 +68,6 @@ open VecDequeImpl1BufferWriteQualifs
 set_option maxHeartbeats 5000000
 #time def VecDequeImpl__1__BufferWrite_proof : VecDequeImpl__1__BufferWrite := by
   unfold VecDequeImpl__1__BufferWrite
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

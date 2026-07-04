@@ -68,6 +68,6 @@ open ReadRefQualifs
 set_option maxHeartbeats 5000000
 #time def ReadRef_proof : ReadRef := by
   unfold ReadRef
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

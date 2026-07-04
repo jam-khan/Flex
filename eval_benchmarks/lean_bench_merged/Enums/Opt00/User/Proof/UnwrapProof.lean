@@ -68,6 +68,6 @@ open UnwrapQualifs
 set_option maxHeartbeats 5000000
 #time def Unwrap_proof : Unwrap := by
   unfold Unwrap
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

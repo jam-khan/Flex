@@ -68,6 +68,6 @@ open TypesImpl17TsToNativeQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__17__TsToNative_proof : TypesImpl__17__TsToNative := by
   unfold TypesImpl__17__TsToNative
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

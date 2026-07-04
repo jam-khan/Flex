@@ -68,6 +68,6 @@ open SimplexInitRatioCQualifs
 set_option maxHeartbeats 5000000
 #time def SimplexInitRatioC_proof : SimplexInitRatioC := by
   unfold SimplexInitRatioC
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

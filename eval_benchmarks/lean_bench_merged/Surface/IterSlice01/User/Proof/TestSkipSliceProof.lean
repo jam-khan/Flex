@@ -68,6 +68,6 @@ open TestSkipSliceQualifs
 set_option maxHeartbeats 5000000
 #time def TestSkipSlice_proof : TestSkipSlice := by
   unfold TestSkipSlice
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

@@ -68,6 +68,6 @@ open UpdateCentersQualifs
 set_option maxHeartbeats 5000000
 #time def UpdateCenters_proof : UpdateCenters := by
   unfold UpdateCenters
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

@@ -68,6 +68,6 @@ open RuntimeImpl0TranslatePathQualifs
 set_option maxHeartbeats 5000000
 #time def RuntimeImpl__0__TranslatePath_proof : RuntimeImpl__0__TranslatePath := by
   unfold RuntimeImpl__0__TranslatePath
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F
