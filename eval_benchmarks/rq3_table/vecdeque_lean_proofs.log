@@ -1,829 +1,531 @@
 info: toolchain not updated; already up-to-date
 info: mathlib: running post-update hooks
-✔ [4/21] Built Batteries.Data.String.Basic:c.o (62ms)
-✔ [5/21] Built Cache.Init (179ms)
-✔ [6/21] Built Cache.Lean (232ms)
-✔ [7/21] Built Cache.Init:c.o (50ms)
-✔ [8/21] Built Cache.Lean:c.o (80ms)
-✔ [9/21] Built Batteries.Data.Array.Match (413ms)
-✔ [10/21] Built Batteries.Data.Array.Match:c.o (152ms)
-✔ [11/21] Built Batteries.Data.String.Matcher (205ms)
+✔ [4/21] Built Batteries.Data.String.Basic:c.o (60ms)
+✔ [5/21] Built Cache.Init (188ms)
+✔ [6/21] Built Cache.Lean (244ms)
+✔ [7/21] Built Cache.Init:c.o (48ms)
+✔ [8/21] Built Cache.Lean:c.o (83ms)
+✔ [9/21] Built Batteries.Data.Array.Match (412ms)
+✔ [10/21] Built Batteries.Data.Array.Match:c.o (150ms)
+✔ [11/21] Built Batteries.Data.String.Matcher (193ms)
 ✔ [12/21] Built Batteries.Data.String.Matcher:c.o (125ms)
-✔ [13/21] Built Cache.IO (781ms)
-✔ [14/21] Built Cache.Hashing (406ms)
-✔ [15/21] Built Cache.Hashing:c.o (283ms)
-✔ [16/21] Built Cache.IO:c.o (924ms)
+✔ [13/21] Built Cache.IO (754ms)
+✔ [14/21] Built Cache.Hashing (403ms)
+✔ [15/21] Built Cache.Hashing:c.o (286ms)
+✔ [16/21] Built Cache.IO:c.o (929ms)
 ✔ [17/21] Built Cache.Requests (1.1s)
-✔ [18/21] Built Cache.Main (444ms)
-✔ [19/21] Built Cache.Main:c.o (338ms)
+✔ [18/21] Built Cache.Main (445ms)
+✔ [19/21] Built Cache.Main:c.o (344ms)
 ✔ [20/21] Built Cache.Requests:c.o (1.4s)
-✔ [21/21] Built cache:exe (509ms)
+✔ [21/21] Built cache:exe (445ms)
 Fetching ProofWidgets cloud release... done!
 Current branch: HEAD
 Using cache (Azure) from origin: leanprover-community/mathlib4
 No files to download
 Decompressing 8043 file(s) (174 already decompressed)
-Decompressed in 5460 ms
+Decompressed in 5358 ms
 Completed successfully!
-✔ [3/104] Built LeanProofs.Flux.Prelude (301ms)
-✔ [4/104] Built Aesop.Forward.PremiseIndex (290ms)
-✔ [5/104] Built Aesop.Forward.SlotIndex (313ms)
-✔ [6/104] Built Aesop.Forward.LevelIndex (323ms)
-✔ [7/104] Built Aesop.Nanos (334ms)
-✔ [8/109] Built Aesop.Percent (373ms)
-✔ [9/130] Built Aesop.Check (489ms)
-✔ [10/130] Built Aesop.Util.UnionFind (497ms)
-✔ [11/145] Built LeanProofs.Flux.VC.RawVecImpl__0__New (291ms)
-✔ [13/146] Built Aesop.Index.DiscrTreeConfig (728ms)
-✔ [15/146] Built Aesop.Rule.Name (655ms)
-✔ [16/146] Built Aesop.Util.OrderedHashSet (408ms)
-✔ [17/146] Built Aesop.RuleTac.FVarIdSubst (861ms)
-✔ [18/146] Built Aesop.Constants (263ms)
-✔ [19/146] Built Aesop.Options.Public (1.1s)
-✔ [20/146] Built Aesop.Script.GoalWithMVars (718ms)
-✔ [21/146] Built LeanFixpoint.Core.Simplify (1.1s)
-✔ [22/146] Built LeanFixpoint.Tactic.Utils (1.2s)
-✔ [23/146] Built Aesop.RuleTac.RuleTerm (427ms)
-✔ [24/146] Built Aesop.Script.Tactic (778ms)
-✔ [25/146] Built Aesop.ElabM (810ms)
-✔ [26/146] Built Aesop.Search.Expansion.Simp (554ms)
-✔ [27/146] Built LeanFixpoint.Core.KVar (1.2s)
-✔ [28/146] Built Batteries.Lean.Meta.Expr (312ms)
-✔ [29/146] Built Batteries.Lean.PersistentHashMap (366ms)
-✔ [30/146] Built Batteries.Lean.PersistentHashSet (435ms)
-✔ [31/146] Built Aesop.RuleSet.Name (742ms)
-✔ [32/146] Built Batteries.Lean.MonadBacktrack (288ms)
-✔ [33/146] Built Aesop.Util.Unfold (1.1s)
-✔ [34/146] Built Batteries.Lean.Meta.UnusedNames (476ms)
-✔ [35/150] Built Batteries.Lean.TagAttribute (337ms)
-✔ [36/150] Built Batteries.Control.Lemmas (428ms)
-✔ [37/150] Built Batteries.Lean.Meta.Inaccessible (461ms)
-✔ [38/150] Built Batteries.Data.String.Basic (393ms)
-✔ [39/150] Built Aesop.Script.OptimizeSyntax (1.1s)
-✔ [40/152] Built Batteries.Tactic.Unreachable (511ms)
-✔ [41/152] Built Batteries.Util.ProofWanted (567ms)
-✔ [42/152] Built Batteries.Tactic.PermuteGoals (605ms)
-✔ [43/155] Built Batteries.Tactic.SeqFocus (732ms)
-✔ [44/159] Built Batteries.Lean.Expr (675ms)
-✔ [45/169] Built Aesop.Options.Internal (800ms)
-✔ [46/169] Built Batteries.Lean.AttributeExtra (514ms)
-✔ [47/169] Built Batteries.Control.LawfulMonadState (1.1s)
-✔ [48/169] Built Batteries.Lean.HashSet (378ms)
-✔ [49/190] Built Batteries.CodeAction.Deprecated (1.1s)
-✔ [50/190] Built Batteries.Tactic.Init (1.1s)
-✔ [51/190] Built Batteries.Tactic.OpenPrivate (1.2s)
-✔ [52/206] Built Aesop.RuleTac.ElabRuleTerm (1.1s)
-✔ [53/206] Built Aesop.RuleSet.Filter (824ms)
-✔ [54/223] Built LeanFixpoint.Core.Pretty (1.1s)
-✔ [55/223] Built Batteries.Linter.UnreachableTactic (884ms)
-✔ [56/223] Built Batteries.Control.ForInStep.Basic (324ms)
-✔ [57/226] Built LeanFixpoint.Core.SubstK (1.3s)
-✔ [58/226] Built Batteries.Data.Array.Merge (1.4s)
-✔ [59/226] Built Batteries.Control.OptionT (470ms)
-✔ [60/228] Built LeanFixpoint.Core.Monad (1.3s)
-✔ [61/228] Built Aesop.Options (713ms)
-✔ [62/228] Built Aesop.Exception (907ms)
-✔ [64/363] Built Aesop.Util.Tactic (753ms)
-✔ [65/363] Built Aesop.Util.Tactic.Unfold (1.3s)
-✔ [66/363] Built Aesop.Frontend.Basic (721ms)
-✔ [67/363] Built Batteries.Lean.Meta.DiscrTree (430ms)
-✔ [68/363] Built Aesop.Util.UnorderedArraySet (488ms)
-✔ [69/363] Built LeanFixpoint.VCG.While.Types (601ms)
-✔ [70/363] Built LeanProofs.Flux.VC.RawVecImpl__0__WithCapacity (301ms)
-✔ [71/363] Built LeanProofs.Flux.VC.RawVecImpl__0__WithCapacityZeroed (316ms)
-✔ [72/363] Built LeanProofs.Flux.VC.RawVecImpl__1__NewIn (316ms)
-✔ [73/363] Built Batteries.Control.AlternativeMonad (740ms)
-✔ [74/363] Built Batteries.Linter.UnnecessarySeqFocus (1.3s)
-✔ [75/363] Built LeanProofs.Flux.VC.RawVecImpl__1__WithCapacityZeroedIn (298ms)
-✔ [76/363] Built LeanProofs.Flux.VC.RawVecImpl__1__Capacity (281ms)
-✔ [77/363] Built LeanProofs.Flux.VC.RawVecImpl__1__Allocator (306ms)
-✔ [78/363] Built LeanProofs.Flux.VC.RawVecImpl__1__CurrentMemory (287ms)
-✔ [79/363] Built LeanProofs.Flux.VC.RawVecImpl__1__ReserveDoReserveAndHandle (283ms)
-✔ [80/363] Built LeanFixpoint.PA.Qualifier (1.2s)
-✔ [81/363] Built LeanFixpoint.VCG.STLC.Syntax (811ms)
-✔ [82/363] Built LeanProofs.Flux.VC.RawVecImpl__1__Reserve (334ms)
-✔ [83/363] Built LeanProofs.Flux.VC.RawVecImpl__1__ReserveForPush (293ms)
+✔ [3/77] Built LeanProofs.Flux.Prelude (292ms)
+✔ [4/103] Built Aesop.Forward.PremiseIndex (323ms)
+✔ [5/103] Built Aesop.Forward.SlotIndex (339ms)
+✔ [6/103] Built Aesop.Forward.LevelIndex (333ms)
+✔ [7/103] Built Aesop.Percent (343ms)
+✔ [8/120] Built Aesop.Check (454ms)
+✔ [9/120] Built Aesop.Nanos (378ms)
+✔ [10/141] Built LeanProofs.Flux.VC.RawVecImpl__0__New (278ms)
+✔ [11/141] Built Aesop.Util.UnionFind (516ms)
+✔ [12/141] Built Aesop.Index.DiscrTreeConfig (667ms)
+✔ [15/141] Built Aesop.Rule.Name (677ms)
+✔ [16/141] Built Aesop.Util.OrderedHashSet (428ms)
+✔ [17/141] Built Aesop.RuleTac.FVarIdSubst (857ms)
+✔ [18/141] Built Aesop.Options.Public (1.0s)
+✔ [19/141] Built Aesop.Script.Tactic (730ms)
+✔ [20/141] Built Batteries.Lean.Meta.Expr (303ms)
+✔ [21/141] Built Batteries.Lean.PersistentHashMap (359ms)
+✔ [22/141] Built Batteries.Lean.PersistentHashSet (445ms)
+✔ [23/141] Built LeanFixpoint.Tactic.Utils (1.1s)
+✔ [24/141] Built Aesop.Script.GoalWithMVars (770ms)
+✔ [25/141] Built Aesop.ElabM (805ms)
+✔ [26/141] Built Aesop.RuleSet.Name (723ms)
+✔ [27/141] Built Aesop.Search.Expansion.Simp (603ms)
+✔ [28/141] Built LeanFixpoint.Core.KVar (1.2s)
+✔ [29/141] Built LeanFixpoint.Core.Simplify (1.2s)
+✔ [30/141] Built Batteries.Lean.Meta.UnusedNames (465ms)
+✔ [31/142] Built Batteries.Lean.MonadBacktrack (332ms)
+✔ [32/142] Built Batteries.Lean.Meta.Inaccessible (489ms)
+✔ [33/142] Built Batteries.Control.Lemmas (402ms)
+✔ [34/142] Built Aesop.Util.Unfold (1.0s)
+✔ [35/142] Built Batteries.Lean.TagAttribute (353ms)
+✔ [36/142] Built Batteries.Data.String.Basic (401ms)
+✔ [37/142] Built Batteries.Tactic.PermuteGoals (642ms)
+✔ [38/145] Built Batteries.Tactic.Unreachable (526ms)
+✔ [39/145] Built Batteries.Util.ProofWanted (618ms)
+✔ [40/145] Built Aesop.Script.OptimizeSyntax (1.2s)
+✔ [41/145] Built Batteries.Tactic.SeqFocus (733ms)
+✔ [42/145] Built Aesop.RuleTac.RuleTerm (478ms)
+✔ [43/155] Built Batteries.Lean.Expr (675ms)
+✔ [44/159] Built Aesop.Constants (294ms)
+✔ [45/162] Built Aesop.Options.Internal (786ms)
+✔ [46/162] Built Batteries.CodeAction.Deprecated (978ms)
+✔ [47/162] Built Batteries.Control.LawfulMonadState (1.0s)
+✔ [48/169] Built Batteries.Tactic.Init (1.1s)
+✔ [49/206] Built Batteries.Lean.AttributeExtra (489ms)
+✔ [50/206] Built Batteries.Tactic.OpenPrivate (1.3s)
+✔ [51/206] Built Aesop.RuleSet.Filter (853ms)
+✔ [52/206] Built Batteries.Lean.HashSet (341ms)
+✔ [53/208] Built Aesop.RuleTac.ElabRuleTerm (1.1s)
+✔ [54/208] Built Batteries.Control.ForInStep.Basic (305ms)
+✔ [55/212] Built Batteries.Control.OptionT (518ms)
+✔ [56/216] Built LeanFixpoint.Core.Pretty (1.1s)
+✔ [57/216] Built Batteries.Data.Array.Merge (1.4s)
+✔ [58/216] Built Batteries.Linter.UnreachableTactic (891ms)
+✔ [59/227] Built LeanFixpoint.Core.SubstK (1.2s)
+✔ [60/227] Built Aesop.Options (665ms)
+✔ [61/227] Built Aesop.Exception (824ms)
+✔ [63/363] Built Aesop.Util.Tactic.Unfold (1.2s)
+✔ [64/363] Built LeanFixpoint.Core.Monad (1.3s)
+✔ [65/363] Built Aesop.Frontend.Basic (711ms)
+✔ [66/363] Built Aesop.Util.Tactic (777ms)
+✔ [67/363] Built Batteries.Lean.Meta.DiscrTree (386ms)
+✔ [68/363] Built LeanProofs.Flux.VC.RawVecImpl__0__WithCapacity (310ms)
+✔ [69/363] Built Aesop.Util.UnorderedArraySet (558ms)
+✔ [70/363] Built Batteries.Control.AlternativeMonad (733ms)
+✔ [71/363] Built LeanProofs.Flux.VC.RawVecImpl__0__WithCapacityZeroed (300ms)
+✔ [72/363] Built LeanProofs.Flux.VC.RawVecImpl__1__NewIn (305ms)
+✔ [73/363] Built LeanFixpoint.VCG.While.Types (615ms)
+✔ [74/363] Built LeanProofs.Flux.VC.RawVecImpl__1__WithCapacityZeroedIn (314ms)
+✔ [75/363] Built LeanProofs.Flux.VC.RawVecImpl__1__Capacity (302ms)
+✔ [76/363] Built LeanProofs.Flux.VC.RawVecImpl__1__CurrentMemory (291ms)
+✔ [77/363] Built Batteries.Linter.UnnecessarySeqFocus (1.3s)
+✔ [78/363] Built LeanProofs.Flux.VC.RawVecImpl__1__Allocator (341ms)
+✔ [79/363] Built LeanProofs.Flux.VC.RawVecImpl__1__Reserve (300ms)
+✔ [80/363] Built LeanProofs.Flux.VC.RawVecImpl__1__ReserveForPush (297ms)
+✔ [81/363] Built LeanFixpoint.PA.Qualifier (1.2s)
+✔ [82/363] Built LeanFixpoint.VCG.STLC.Syntax (894ms)
+✔ [83/363] Built LeanProofs.Flux.VC.RawVecImpl__1__ReserveDoReserveAndHandle (357ms)
 ✔ [84/363] Built LeanProofs.Flux.VC.RawVecImpl__1__TryReserve (294ms)
-✔ [85/363] Built LeanProofs.Flux.VC.RawVecImpl__1__TryReserveExact (304ms)
-✔ [86/363] Built LeanProofs.Flux.VC.RawVecImpl__1__ShrinkToFit (308ms)
-✔ [87/363] Built LeanProofs.Flux.VC.RawVecImpl__2__NeedsToGrow (284ms)
-✔ [88/363] Built LeanProofs.Flux.VC.RawVecImpl__3__Drop (290ms)
-✔ [89/363] Built LeanProofs.Flux.VC.RawVecAllocGuard (322ms)
-✔ [90/363] Built LeanProofs.Flux.VC.VecDequeImpl__0__Default (309ms)
-✔ [91/363] Built LeanFixpoint.Core (1.1s)
-✔ [92/363] Built LeanProofs.Flux.VC.VecDequeImpl__1__Ptr (291ms)
-⚠ [93/363] Built LeanProofs.User.Fun.VecDequePow2 (293ms)
+✔ [85/363] Built LeanProofs.Flux.VC.RawVecImpl__1__TryReserveExact (318ms)
+✔ [86/363] Built LeanProofs.Flux.VC.RawVecImpl__1__ShrinkToFit (321ms)
+✔ [87/363] Built LeanProofs.Flux.VC.RawVecImpl__2__NeedsToGrow (307ms)
+✔ [88/363] Built LeanProofs.Flux.VC.RawVecImpl__3__Drop (337ms)
+✔ [89/363] Built LeanProofs.Flux.VC.RawVecAllocGuard (303ms)
+✔ [90/363] Built LeanProofs.Flux.VC.VecDequeImpl__0__Default (294ms)
+✔ [91/363] Built LeanProofs.Flux.VC.VecDequeImpl__1__Ptr (301ms)
+✔ [92/363] Built LeanProofs.Flux.Struct.VecDequeVecDeque (354ms)
+⚠ [93/363] Built LeanProofs.User.Fun.VecDequePow2 (303ms)
 warning: LeanProofs/User/Fun/VecDequePow2.lean:8:18: declaration uses `sorry`
-✔ [94/363] Built LeanProofs.Flux.VC.VecDequeImpl__2__New (301ms)
-✔ [95/363] Built LeanProofs.Flux.Struct.VecDequeVecDeque (405ms)
-✔ [96/363] Built LeanProofs.Flux.Fun.VecDequeMAXIMUMZSTCAPACITY (335ms)
-✔ [97/363] Built LeanProofs.Flux.VC.VecDequeImpl__3__IsEmpty (303ms)
-✔ [98/363] Built LeanProofs.Flux.VC.VecDequeImpl__3__Front (316ms)
-✔ [99/363] Built LeanProofs.Flux.VC.VecDequeImpl__3__FrontMut (282ms)
-✔ [100/363] Built LeanProofs.Flux.VC.VecDequeImpl__3__Back (301ms)
-✔ [101/363] Built LeanProofs.Flux.VC.VecDequeImpl__1__BufferWrite (300ms)
-✔ [102/363] Built Batteries.Tactic.Alias (2.0s)
-✔ [103/363] Built LeanFixpoint.Tactic.Tactics.Zap (1.9s)
-✔ [104/363] Built LeanProofs.Flux.VC.VecDequeImpl__2__WithCapacity (323ms)
-✔ [105/363] Built LeanProofs.Flux.VC.VecDequeImpl__3__PushFront (317ms)
-✔ [106/363] Built LeanProofs.Flux.VC.VecDequeImpl__3__PushBack (316ms)
-✔ [107/363] Built LeanProofs.Flux.VC.VecDequeCount (291ms)
-✔ [108/363] Built LeanFixpoint.Tactic.Tactics.Lazy (1.8s)
-✔ [109/363] Built LeanFixpoint.VCG.While.Semantics (320ms)
-✔ [110/363] Built LeanProofs.Flux.VC.VecDequeAssert (283ms)
-✔ [111/363] Built Batteries.Linter (406ms)
-✔ [112/363] Built LeanFixpoint.Tactic.Tactics.Hoist (2.1s)
-✔ [113/363] Built LeanProofs.Flux.VC.VecDequeImpl__3__NewIn (289ms)
-✔ [114/363] Built LeanProofs.Flux.VC.VecDequeImpl__3__WithCapacityIn (286ms)
-✔ [115/363] Built Batteries.Lean.Meta.Basic (513ms)
-✔ [116/363] Built LeanFixpoint.Tactic.Tactics.SplitHyps (2.2s)
-✔ [117/363] Built LeanProofs.Flux.VC.VecDequeImpl__3__Grow (343ms)
-✔ [118/363] Built LeanProofs.Flux.VC.VecDequeImpl__3__Len (317ms)
-✔ [119/363] Built LeanProofs.Flux.VC.VecDequeImpl__1__WrapAdd (317ms)
-✔ [120/363] Built LeanProofs.Flux.VC.VecDequeImpl__1__WrapSub (286ms)
-✔ [121/363] Built LeanProofs.Flux.VC.VecDequeImpl__1__CopyNonoverlapping (329ms)
-✔ [122/363] Built LeanProofs.Flux.VC.VecDequeImpl__1__HandleCapacityIncrease (404ms)
-✔ [123/363] Built LeanProofs.Flux.VC.VecDequeImpl__3__Reserve (374ms)
-✔ [124/363] Built LeanProofs.Flux.VC.VecDequeImpl__3__Capacity (371ms)
-✔ [125/363] Built LeanProofs.Flux.VC.VecDequeImpl__1__IsFull (311ms)
-✔ [126/363] Built Batteries.Tactic.Basic (455ms)
-✔ [127/363] Built Batteries.Lean.Meta.SavedState (430ms)
-✔ [128/363] Built Batteries.Lean.Meta.InstantiateMVars (448ms)
-✔ [129/363] Built LeanFixpoint.Fusion.Flatten (1.2s)
-✔ [130/363] Built LeanFixpoint.Zap.Scope (1.2s)
-✔ [131/363] Built LeanFixpoint.Elab.ToExpr (1.2s)
-✔ [132/363] Built LeanFixpoint.Elab.FromExpr (1.2s)
-✔ [133/363] Built LeanFixpoint.Zap.Utils (1.2s)
-✔ [134/363] Built LeanFixpoint.PA.Instantiation (1.2s)
-✔ [135/363] Built LeanFixpoint.Zap.Emit (1.8s)
-✔ [136/363] Built Aesop.Script.TacticState (985ms)
-✔ [137/363] Built Batteries.Classes.Order (758ms)
-✔ [138/363] Built LeanFixpoint.Elab (976ms)
-✔ [139/363] Built LeanFixpoint.Zap.Sol1 (1.2s)
-✔ [140/363] Built LeanFixpoint.Fusion.Graph (1.4s)
-✔ [141/363] Built Batteries.Data.UInt (872ms)
-✔ [142/363] Built LeanFixpoint.Zap.Walk (1.2s)
-✔ [143/363] Built Aesop.Util.Basic (3.3s)
-✔ [144/363] Built LeanFixpoint.Fusion.Scope (1.2s)
-✔ [145/363] Built LeanFixpoint.Zap (938ms)
-✔ [146/363] Built Aesop.Script.CtorNames (950ms)
-✔ [147/363] Built Aesop.Forward.Substitution (1.1s)
-✔ [148/363] Built LeanFixpoint.Fusion.Sol1 (855ms)
-✔ [149/363] Built Aesop.RulePattern.Cache (473ms)
-✔ [150/363] Built Aesop.Util.EqualUpToIds (3.9s)
-✔ [151/363] Built Batteries.Data.Array.Basic (2.5s)
-✔ [152/363] Built Aesop.Script.Util (519ms)
-✔ [153/363] Built Aesop.RuleTac.Forward.Basic (593ms)
-✔ [154/363] Built LeanFixpoint.Fusion.Strip (797ms)
-✔ [155/363] Built Batteries.Data.BinomialHeap.Basic (3.7s)
-✔ [156/363] Built LeanFixpoint.VCG.STLC.Substitution (5.7s)
-✔ [157/363] Built LeanFixpoint.VCG.STLC.Entailment (251ms)
-✔ [158/363] Built LeanFixpoint.VCG.STLC.Semantics (277ms)
-✔ [159/363] Built Aesop.Tracing (764ms)
-✔ [160/363] Built LeanFixpoint.Fusion.Elim (699ms)
-✔ [161/363] Built LeanFixpoint.VCG.STLC.Typing (254ms)
-✔ [162/363] Built LeanFixpoint.Fusion.StripPres (760ms)
-✔ [163/363] Built Aesop.Util.Tactic.Ext (723ms)
-✔ [164/363] Built Aesop.EMap (752ms)
-✔ [165/363] Built LeanFixpoint.Fusion (735ms)
-✔ [166/363] Built Aesop.Script.Step (934ms)
-✔ [167/363] Built Aesop.Stats.Basic (985ms)
-✔ [168/363] Built LeanFixpoint.VCG.STLC.VCGen (890ms)
-✔ [169/363] Built Aesop.Script.UScript (524ms)
-✔ [170/363] Built Aesop.BaseM (492ms)
-✔ [171/363] Built Aesop.Script.SScript (564ms)
-✔ [172/363] Built Aesop.Stats.Extension (509ms)
-✔ [173/363] Built Aesop.Stats.File (493ms)
-✔ [174/363] Built Aesop.Script.ScriptM (561ms)
-✔ [175/363] Built Aesop.Script.Check (571ms)
-✔ [176/363] Built LeanFixpoint.Tactic.Tactics.RewriteKs (1.2s)
-✔ [177/363] Built LeanFixpoint.VCG.STLC.Declarative (1.9s)
-✔ [178/363] Built Aesop.Stats.Report (690ms)
-✔ [179/363] Built Aesop.Script.UScriptToSScript (933ms)
-✔ [180/363] Built Aesop.RuleTac.GoalDiff (981ms)
-✔ [181/363] Built Aesop.RulePattern (1.3s)
-✔ [182/363] Built LeanFixpoint.Tactic.Tactics.ReorderKs (890ms)
-✔ [183/363] Built Aesop.Script.StructureStatic (840ms)
-✔ [184/363] Built LeanFixpoint.Tactic.Tactics.Fusion (1.4s)
-ℹ [185/363] Built LeanFixpoint.Tactic.Tactics.Sol1 (1.4s)
+✔ [94/363] Built LeanProofs.Flux.VC.VecDequeImpl__2__New (289ms)
+✔ [95/363] Built LeanProofs.Flux.Fun.VecDequeMAXIMUMZSTCAPACITY (305ms)
+✔ [96/363] Built LeanProofs.Flux.VC.VecDequeImpl__3__IsEmpty (283ms)
+✔ [97/363] Built Batteries.Tactic.Alias (1.0s)
+✔ [98/363] Built LeanProofs.Flux.VC.VecDequeImpl__3__Front (335ms)
+✔ [99/363] Built LeanProofs.Flux.VC.VecDequeImpl__3__FrontMut (295ms)
+✔ [100/363] Built LeanProofs.Flux.VC.VecDequeImpl__3__Back (310ms)
+✔ [101/363] Built LeanProofs.Flux.VC.VecDequeImpl__1__BufferWrite (327ms)
+✔ [102/363] Built LeanProofs.Flux.VC.VecDequeImpl__2__WithCapacity (293ms)
+✔ [103/363] Built LeanProofs.Flux.VC.VecDequeImpl__3__PushFront (328ms)
+✔ [104/363] Built LeanProofs.Flux.VC.VecDequeImpl__3__PushBack (292ms)
+✔ [105/363] Built LeanFixpoint.Tactic.Tactics.Zap (1.9s)
+✔ [106/363] Built LeanProofs.Flux.VC.VecDequeCount (282ms)
+✔ [107/363] Built LeanProofs.Flux.VC.VecDequeAssert (322ms)
+✔ [108/363] Built LeanFixpoint.VCG.While.Semantics (326ms)
+✔ [109/363] Built LeanProofs.Flux.VC.VecDequeImpl__3__Len (313ms)
+✔ [110/363] Built LeanProofs.Flux.VC.VecDequeImpl__3__Grow (320ms)
+✔ [111/363] Built Batteries.Linter (433ms)
+✔ [112/363] Built Batteries.Lean.Meta.Basic (545ms)
+✔ [113/363] Built LeanFixpoint.Tactic.Tactics.Lazy (1.8s)
+✔ [114/363] Built LeanProofs.Flux.VC.VecDequeImpl__1__WrapSub (292ms)
+✔ [115/363] Built LeanProofs.Flux.VC.VecDequeImpl__1__CopyNonoverlapping (342ms)
+✔ [116/363] Built LeanProofs.Flux.VC.VecDequeImpl__1__HandleCapacityIncrease (386ms)
+✔ [117/363] Built LeanProofs.Flux.VC.VecDequeImpl__3__Reserve (360ms)
+✔ [118/363] Built LeanFixpoint.Tactic.Tactics.SplitHyps (2.2s)
+✔ [119/363] Built LeanProofs.Flux.VC.VecDequeImpl__1__WrapAdd (283ms)
+✔ [120/363] Built LeanFixpoint.Tactic.Tactics.Hoist (2.1s)
+✔ [121/363] Built LeanProofs.Flux.VC.VecDequeImpl__1__IsFull (300ms)
+✔ [122/363] Built LeanProofs.Flux.VC.VecDequeImpl__3__Capacity (264ms)
+✔ [123/363] Built LeanProofs.Flux.VC.VecDequeImpl__3__WithCapacityIn (279ms)
+✔ [124/363] Built LeanProofs.Flux.VC.VecDequeImpl__3__NewIn (281ms)
+✔ [125/363] Built LeanFixpoint.Core (1.0s)
+✔ [126/363] Built Batteries.Tactic.Basic (422ms)
+✔ [127/363] Built Batteries.Lean.Meta.SavedState (347ms)
+✔ [128/363] Built Batteries.Lean.Meta.InstantiateMVars (346ms)
+✔ [129/363] Built LeanFixpoint.PA.Instantiation (1.2s)
+✔ [130/363] Built Aesop.Script.TacticState (936ms)
+✔ [131/363] Built Batteries.Classes.Order (839ms)
+✔ [132/363] Built LeanFixpoint.Elab.ToExpr (1.1s)
+✔ [133/363] Built LeanFixpoint.Fusion.Flatten (1.1s)
+✔ [134/363] Built LeanFixpoint.Zap.Scope (1.2s)
+✔ [135/363] Built LeanFixpoint.Elab.FromExpr (1.2s)
+✔ [136/363] Built LeanFixpoint.Zap.Utils (1.2s)
+✔ [137/363] Built LeanFixpoint.Zap.Emit (1.6s)
+✔ [138/363] Built Batteries.Data.UInt (853ms)
+✔ [139/363] Built Aesop.Util.Basic (2.9s)
+✔ [140/363] Built LeanFixpoint.Elab (1.1s)
+✔ [141/363] Built LeanFixpoint.Zap.Sol1 (1.4s)
+✔ [142/363] Built LeanFixpoint.Fusion.Graph (1.4s)
+✔ [143/363] Built LeanFixpoint.Zap.Walk (1.4s)
+✔ [144/363] Built Aesop.Script.CtorNames (1.3s)
+✔ [145/363] Built Aesop.Forward.Substitution (1.4s)
+✔ [146/363] Built LeanFixpoint.Fusion.Scope (963ms)
+✔ [147/363] Built Aesop.Util.EqualUpToIds (4.1s)
+✔ [148/363] Built LeanFixpoint.Zap (837ms)
+✔ [149/363] Built Aesop.RulePattern.Cache (496ms)
+✔ [150/363] Built Aesop.Script.Util (513ms)
+✔ [151/363] Built Aesop.RuleTac.Forward.Basic (615ms)
+✔ [152/363] Built LeanFixpoint.Fusion.Sol1 (817ms)
+✔ [153/363] Built Batteries.Data.Array.Basic (2.7s)
+✔ [154/363] Built Batteries.Data.BinomialHeap.Basic (3.9s)
+✔ [155/363] Built LeanFixpoint.Fusion.Strip (744ms)
+✔ [156/363] Built Aesop.Tracing (745ms)
+✔ [157/363] Built LeanFixpoint.VCG.STLC.Substitution (5.0s)
+✔ [158/363] Built LeanFixpoint.VCG.STLC.Entailment (246ms)
+✔ [159/363] Built LeanFixpoint.VCG.STLC.Semantics (278ms)
+✔ [160/363] Built LeanFixpoint.VCG.STLC.Typing (289ms)
+✔ [161/363] Built Aesop.Util.Tactic.Ext (678ms)
+✔ [162/363] Built Aesop.EMap (717ms)
+✔ [163/363] Built LeanFixpoint.Fusion.Elim (798ms)
+✔ [164/363] Built LeanFixpoint.Fusion.StripPres (854ms)
+✔ [165/363] Built Aesop.Script.Step (905ms)
+✔ [166/363] Built Aesop.Stats.Basic (995ms)
+✔ [167/363] Built LeanFixpoint.VCG.STLC.VCGen (886ms)
+✔ [168/363] Built Aesop.BaseM (521ms)
+✔ [169/363] Built Aesop.Script.UScript (537ms)
+✔ [170/363] Built Aesop.Script.SScript (589ms)
+✔ [171/363] Built Aesop.Stats.Extension (535ms)
+✔ [172/363] Built Aesop.Stats.File (521ms)
+✔ [173/363] Built LeanFixpoint.Fusion (738ms)
+✔ [174/363] Built Aesop.Script.Check (540ms)
+✔ [175/363] Built Aesop.Script.ScriptM (539ms)
+✔ [176/363] Built Aesop.Stats.Report (707ms)
+✔ [177/363] Built Aesop.RuleTac.GoalDiff (911ms)
+✔ [178/363] Built Aesop.Script.UScriptToSScript (914ms)
+✔ [179/363] Built LeanFixpoint.VCG.STLC.Declarative (1.9s)
+✔ [180/363] Built Aesop.RulePattern (1.1s)
+✔ [181/363] Built LeanFixpoint.Tactic.Tactics.RewriteKs (1.1s)
+✔ [182/363] Built Aesop.Script.StructureStatic (922ms)
+✔ [183/363] Built LeanFixpoint.Tactic.Tactics.ReorderKs (877ms)
+✔ [184/363] Built Aesop.Forward.RuleInfo (1.1s)
+✔ [185/363] Built Aesop.Script.StructureDynamic (1.4s)
+✔ [186/363] Built Aesop.Script.SpecificTactics (1.8s)
+ℹ [187/363] Built LeanFixpoint.Tactic.Tactics.Sol1 (1.2s)
 info: LeanFixpoint/Tactic/Tactics/Sol1.lean:174:2: rewriteKs: already in optimal order
 info: LeanFixpoint/Tactic/Tactics/Sol1.lean:186:2: rewriteKs: already in optimal order
 info: LeanFixpoint/Tactic/Tactics/Sol1.lean:187:2: rewriteKs: already in optimal order
 info: LeanFixpoint/Tactic/Tactics/Sol1.lean:196:2: rewriteKs: already in optimal order
 info: LeanFixpoint/Tactic/Tactics/Sol1.lean:208:2: rewriteKs: already in optimal order
 info: LeanFixpoint/Tactic/Tactics/Sol1.lean:209:2: rewriteKs: already in optimal order
-✔ [186/363] Built Aesop.Forward.RuleInfo (988ms)
-✔ [187/363] Built Aesop.Script.StructureDynamic (1.3s)
-✔ [188/363] Built Aesop.Script.SpecificTactics (1.8s)
-✔ [189/363] Built Aesop.Rule.Forward (466ms)
-✔ [190/363] Built Aesop.Script.Main (548ms)
-✔ [191/363] Built Aesop.Forward.Match.Types (467ms)
-✔ [192/363] Built Aesop.Index.Basic (518ms)
-✔ [193/363] Built Aesop.RuleTac.Basic (560ms)
-✔ [194/363] Built Aesop.Index.Forward (550ms)
-✔ [195/363] Built Aesop.Index.RulePattern (644ms)
-✔ [196/363] Built Aesop.RuleTac.Descr (514ms)
-✔ [197/363] Built Aesop.RuleTac.Preprocess (578ms)
-✔ [198/363] Built Aesop.Search.Expansion.Basic (543ms)
+✔ [188/363] Built LeanFixpoint.Tactic.Tactics.Fusion (1.3s)
+✔ [189/363] Built Aesop.Rule.Forward (478ms)
+✔ [190/363] Built Aesop.Script.Main (556ms)
+✔ [191/363] Built Aesop.Forward.Match.Types (464ms)
+✔ [192/363] Built Aesop.Index.Basic (493ms)
+✔ [193/363] Built Aesop.RuleTac.Basic (543ms)
+✔ [194/363] Built Aesop.Index.Forward (543ms)
+✔ [195/363] Built Aesop.Index.RulePattern (649ms)
+✔ [196/363] Built Aesop.RuleTac.Descr (517ms)
+✔ [197/363] Built Aesop.Search.Expansion.Basic (534ms)
+✔ [198/363] Built Aesop.RuleTac.Preprocess (578ms)
 ✔ [199/363] Built Aesop.RuleTac.Apply (710ms)
-✔ [200/363] Built Aesop.RuleTac.Tactic (662ms)
-✔ [201/363] Built Aesop.RuleTac.Cases (816ms)
-✔ [202/363] Built Aesop.Rule.Basic (444ms)
-✔ [203/363] Built Aesop.Rule (526ms)
-✔ [204/363] Built Aesop.RuleSet.Member (467ms)
-✔ [205/363] Built Aesop.Tree.UnsafeQueue (467ms)
-✔ [206/363] Built Aesop.Builder.Basic (498ms)
+✔ [200/363] Built Aesop.RuleTac.Tactic (687ms)
+✔ [201/363] Built Aesop.RuleTac.Cases (808ms)
+✔ [202/363] Built Aesop.Rule.Basic (428ms)
+✔ [203/363] Built Aesop.Rule (524ms)
+✔ [204/363] Built Aesop.RuleSet.Member (466ms)
+✔ [205/363] Built Aesop.Tree.UnsafeQueue (466ms)
+✔ [206/363] Built Aesop.Builder.Basic (491ms)
 ✔ [207/363] Built Aesop.Forward.Match (1.1s)
-✔ [208/363] Built Aesop.Builder.Constructors (643ms)
-✔ [209/363] Built Aesop.Builder.NormSimp (614ms)
-✔ [210/363] Built Aesop.Builder.Tactic (621ms)
-✔ [211/363] Built Aesop.Builder.Apply (611ms)
-✔ [212/363] Built Aesop.Builder.Unfold (679ms)
-✔ [213/363] Built Aesop.Builder.Cases (757ms)
-✔ [214/363] Built Aesop.Tree.Data.ForwardRuleMatches (790ms)
-✔ [215/363] Built Aesop.Builder.Default (548ms)
+✔ [208/363] Built Aesop.Builder.Constructors (703ms)
+✔ [209/363] Built Aesop.Builder.Unfold (663ms)
+✔ [210/363] Built Aesop.Builder.Cases (745ms)
+✔ [211/363] Built Aesop.Builder.NormSimp (730ms)
+✔ [212/363] Built Aesop.Builder.Tactic (785ms)
+✔ [213/363] Built Aesop.Builder.Apply (760ms)
+✔ [214/363] Built Aesop.Tree.Data.ForwardRuleMatches (801ms)
+✔ [215/363] Built Aesop.Builder.Default (522ms)
 ✔ [216/363] Built Aesop.Index (1.2s)
 ✔ [217/363] Built Aesop.Builder.Forward (1.3s)
-✔ [218/363] Built LeanFixpoint.VCG.STLC.Soundness (7.6s)
-✔ [219/363] Built Aesop.RuleTac.Forward (1.6s)
-✔ [220/363] Built Aesop.RuleTac (551ms)
-✔ [221/363] Built LeanFixpoint.VCG.STLC.Safety (957ms)
-✔ [222/363] Built Aesop.Frontend.RuleExpr (1.7s)
+✔ [218/363] Built Aesop.RuleTac.Forward (1.5s)
+✔ [219/363] Built LeanFixpoint.VCG.STLC.Soundness (7.4s)
+✔ [220/363] Built Aesop.RuleTac (598ms)
+✔ [221/363] Built LeanFixpoint.VCG.STLC.Safety (951ms)
+✔ [222/363] Built Aesop.Frontend.RuleExpr (1.8s)
 ✔ [223/363] Built Aesop.RuleSet (1.0s)
-✔ [224/363] Built Aesop.Frontend.Extension.Init (497ms)
+✔ [224/363] Built Aesop.Frontend.Extension.Init (494ms)
 ✔ [225/363] Built Aesop.Forward.State (3.9s)
-✔ [226/363] Built Aesop.Frontend.Extension (673ms)
-✔ [227/363] Built Aesop.Forward.State.ApplyGoalDiff (639ms)
-✔ [228/363] Built Aesop.Forward.State.Initial (628ms)
+✔ [226/363] Built Aesop.Frontend.Extension (669ms)
+✔ [227/363] Built Aesop.Forward.State.ApplyGoalDiff (631ms)
+✔ [228/363] Built Aesop.Forward.State.Initial (624ms)
 ✔ [229/363] Built Aesop.Tree.Data (1.2s)
-✔ [230/363] Built Aesop.Frontend.Attribute (731ms)
-✔ [231/363] Built Aesop.Frontend.Tactic (1.1s)
+✔ [230/363] Built Aesop.Frontend.Attribute (755ms)
+✔ [231/363] Built Aesop.Frontend.Tactic (1.2s)
 ✔ [232/363] Built Aesop.Frontend.Command (1.4s)
-✔ [233/363] Built Aesop.Search.Queue.Class (835ms)
-✔ [234/363] Built Aesop.BuiltinRules.Ext (905ms)
-✔ [235/363] Built Aesop.BuiltinRules.Rfl (881ms)
-✔ [236/363] Built Aesop.BuiltinRules.Split (951ms)
-✔ [237/363] Built Aesop.Tree.RunMetaM (924ms)
-✔ [238/363] Built Aesop.BuiltinRules.ApplyHyps (1.1s)
-✔ [239/363] Built Aesop.BuiltinRules.Intros (960ms)
-✔ [240/363] Built Aesop.Tree.Traversal (1.0s)
-✔ [241/363] Built Aesop.BuiltinRules.Assumption (1.1s)
-✔ [242/363] Built Aesop.BuiltinRules.DestructProducts (1.1s)
-✔ [243/363] Built Aesop.BuiltinRules.Subst (1.1s)
-✔ [244/363] Built Aesop.Tree.TreeM (1.1s)
-✔ [245/363] Built Aesop.BuiltinRules (705ms)
-✔ [246/363] Built Aesop.Tree.State (895ms)
-✔ [247/363] Built Aesop.Tree.Free (842ms)
-✔ [248/363] Built Aesop.Tree.Stats (823ms)
-✔ [249/363] Built Aesop.Forward.State.UpdateGoal (938ms)
-✔ [250/363] Built Aesop.Search.SearchM (1.0s)
-✔ [251/363] Built Aesop.Tree.Tracing (1.5s)
+✔ [233/363] Built Aesop.Search.Queue.Class (749ms)
+✔ [234/363] Built Aesop.Tree.RunMetaM (928ms)
+✔ [235/363] Built Aesop.BuiltinRules.Rfl (863ms)
+✔ [236/363] Built Aesop.Tree.Traversal (980ms)
+✔ [237/363] Built Aesop.BuiltinRules.Ext (1000ms)
+✔ [238/363] Built Aesop.BuiltinRules.Intros (951ms)
+✔ [239/363] Built Aesop.BuiltinRules.Split (997ms)
+✔ [240/363] Built Aesop.BuiltinRules.ApplyHyps (1.0s)
+✔ [241/363] Built Aesop.BuiltinRules.Subst (1.1s)
+✔ [242/363] Built Aesop.Tree.TreeM (1.1s)
+✔ [243/363] Built Aesop.BuiltinRules.Assumption (1.1s)
+✔ [244/363] Built Aesop.BuiltinRules.DestructProducts (1.1s)
+✔ [245/363] Built Aesop.Tree.Free (743ms)
+✔ [246/363] Built Aesop.Tree.State (1.0s)
+✔ [247/363] Built Aesop.BuiltinRules (827ms)
+✔ [248/363] Built Aesop.Forward.State.UpdateGoal (896ms)
+✔ [249/363] Built Aesop.Tree.Stats (933ms)
+✔ [250/363] Built Aesop.Search.SearchM (1.1s)
+✔ [251/363] Built Aesop.Tree.Tracing (1.4s)
 ✔ [252/363] Built Aesop.Tree.ExtractProof (1.3s)
-✔ [253/363] Built Aesop.Tree.ExtractScript (1.4s)
-✔ [254/363] Built Aesop.Search.RuleSelection (678ms)
-✔ [255/363] Built Aesop.Tree.Check (1.0s)
-✔ [256/363] Built Aesop.Tree.AddRapp (1.9s)
-✔ [257/363] Built Aesop.Tree (487ms)
-✔ [258/363] Built Aesop.Search.Queue (555ms)
+✔ [253/363] Built Aesop.Tree.ExtractScript (1.5s)
+✔ [254/363] Built Aesop.Search.RuleSelection (662ms)
+✔ [255/363] Built Aesop.Tree.AddRapp (1.0s)
+✔ [256/363] Built Aesop.Tree.Check (1.0s)
+✔ [257/363] Built Aesop.Tree (491ms)
+✔ [258/363] Built Aesop.Search.Queue (565ms)
 ✔ [259/363] Built Aesop.Saturate (4.8s)
-✔ [260/363] Built Aesop.Search.Expansion.Norm (1.9s)
-✔ [261/363] Built Aesop.Frontend.Saturate (830ms)
-✔ [262/363] Built Aesop.Frontend (477ms)
+✔ [260/363] Built Aesop.Search.Expansion.Norm (1.0s)
+✔ [261/363] Built Aesop.Frontend.Saturate (820ms)
+✔ [262/363] Built Aesop.Frontend (489ms)
 ✔ [263/363] Built Aesop.Search.Expansion (1.3s)
-✔ [264/363] Built Aesop.Search.ExpandSafePrefix (752ms)
-✔ [265/363] Built Aesop.Search.Main (2.2s)
-✔ [266/363] Built Aesop.Main (776ms)
-✔ [267/363] Built Aesop (479ms)
-✔ [268/363] Built LeanFixpoint.Tactic.Closers (684ms)
-✔ [269/363] Built LeanFixpoint.PA.Check (754ms)
-✔ [270/363] Built LeanFixpoint.PA.Weaken (747ms)
-✔ [271/363] Built LeanFixpoint.PA.Fixpoint (688ms)
+✔ [264/363] Built Aesop.Search.ExpandSafePrefix (754ms)
+✔ [265/363] Built Aesop.Search.Main (2.1s)
+✔ [266/363] Built Aesop.Main (772ms)
+✔ [267/363] Built Aesop (474ms)
+✔ [268/363] Built LeanFixpoint.Tactic.Closers (683ms)
+✔ [269/363] Built LeanFixpoint.PA.Check (753ms)
+✔ [270/363] Built LeanFixpoint.PA.Weaken (745ms)
+✔ [271/363] Built LeanFixpoint.PA.Fixpoint (686ms)
 ✔ [272/363] Built LeanFixpoint.PA (646ms)
-✔ [273/363] Built LeanFixpoint.Tactic.Tactics.SolveFixpoint (988ms)
-✔ [274/363] Built LeanFixpoint.Tactic.Tactics.Fixpoint (878ms)
-✔ [275/363] Built LeanFixpoint.Tactic.Tactics.SolveFixpointCombo (718ms)
-✔ [276/363] Built LeanFixpoint.Tactic.Tactics (646ms)
-✔ [277/363] Built LeanFixpoint.Tactic (649ms)
-✔ [278/363] Built LeanFixpoint (649ms)
+✔ [273/363] Built LeanFixpoint.Tactic.Tactics.SolveFixpoint (987ms)
+✔ [274/363] Built LeanFixpoint.Tactic.Tactics.Fixpoint (862ms)
+✔ [275/363] Built LeanFixpoint.Tactic.Tactics.SolveFixpointCombo (719ms)
+✔ [276/363] Built LeanFixpoint.Tactic.Tactics (650ms)
+✔ [277/363] Built LeanFixpoint.Tactic (643ms)
+✔ [278/363] Built LeanFixpoint (652ms)
 ℹ [279/363] Built LeanProofs.User.Proof.VecDequeImpl__3__FrontMutProof (1.2s)
-info: LeanProofs/User/Proof/VecDequeImpl__3__FrontMutProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/VecDequeImpl__3__FrontMutProof.lean:69:0: time: 2ms
-info: LeanProofs/User/Proof/VecDequeImpl__3__FrontMutProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [280/363] Built LeanProofs.User.Proof.VecDequeImpl__1__WrapSubProof (1.2s)
-info: LeanProofs/User/Proof/VecDequeImpl__1__WrapSubProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__1__WrapSubProof.lean:69:0: time: 41ms
-info: LeanProofs/User/Proof/VecDequeImpl__1__WrapSubProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [281/363] Built LeanProofs.User.Proof.VecDequeImpl__2__WithCapacityProof (1.2s)
-info: LeanProofs/User/Proof/VecDequeImpl__2__WithCapacityProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/VecDequeImpl__2__WithCapacityProof.lean:69:0: time: 3ms
-info: LeanProofs/User/Proof/VecDequeImpl__2__WithCapacityProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [282/363] Built LeanProofs.User.Proof.VecDequeImpl__3__PushFrontProof (1.2s)
-info: LeanProofs/User/Proof/VecDequeImpl__3__PushFrontProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/VecDequeImpl__3__PushFrontProof.lean:69:0: time: 3ms
-info: LeanProofs/User/Proof/VecDequeImpl__3__PushFrontProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [283/363] Built LeanProofs.User.Proof.VecDequeImpl__3__PushBackProof (1.2s)
-info: LeanProofs/User/Proof/VecDequeImpl__3__PushBackProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/VecDequeImpl__3__PushBackProof.lean:69:0: time: 2ms
-info: LeanProofs/User/Proof/VecDequeImpl__3__PushBackProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [284/363] Built LeanProofs.User.Proof.VecDequeCountProof (1.2s)
-info: LeanProofs/User/Proof/VecDequeCountProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/VecDequeCountProof.lean:69:0: time: 4ms
-info: LeanProofs/User/Proof/VecDequeCountProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
+info: LeanProofs/User/Proof/VecDequeImpl__3__FrontMutProof.lean:69:0: time: 1ms
+ℹ [280/363] Built LeanProofs.User.Proof.VecDequeImpl__3__BackProof (1.1s)
+info: LeanProofs/User/Proof/VecDequeImpl__3__BackProof.lean:69:0: time: 1ms
+ℹ [281/363] Built LeanProofs.User.Proof.VecDequeImpl__1__BufferWriteProof (1.2s)
+info: LeanProofs/User/Proof/VecDequeImpl__1__BufferWriteProof.lean:69:0: time: 1ms
+ℹ [282/363] Built LeanProofs.User.Proof.VecDequeImpl__2__WithCapacityProof (1.2s)
+info: LeanProofs/User/Proof/VecDequeImpl__2__WithCapacityProof.lean:69:0: time: 1ms
+ℹ [283/363] Built LeanProofs.User.Proof.VecDequeImpl__3__PushFrontProof (1.2s)
+info: LeanProofs/User/Proof/VecDequeImpl__3__PushFrontProof.lean:69:0: time: 2ms
+ℹ [284/363] Built LeanProofs.User.Proof.VecDequeImpl__3__PushBackProof (1.2s)
+info: LeanProofs/User/Proof/VecDequeImpl__3__PushBackProof.lean:69:0: time: 1ms
 ℹ [285/363] Built LeanProofs.User.Proof.VecDequeAssertProof (1.2s)
-info: LeanProofs/User/Proof/VecDequeAssertProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/VecDequeAssertProof.lean:69:0: time: 3ms
-info: LeanProofs/User/Proof/VecDequeAssertProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [286/363] Built LeanProofs.User.Proof.VecDequeImpl__3__BackProof (1.3s)
-info: LeanProofs/User/Proof/VecDequeImpl__3__BackProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/VecDequeImpl__3__BackProof.lean:69:0: time: 3ms
-info: LeanProofs/User/Proof/VecDequeImpl__3__BackProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [287/363] Built LeanProofs.User.Proof.VecDequeImpl__1__BufferWriteProof (1.3s)
-info: LeanProofs/User/Proof/VecDequeImpl__1__BufferWriteProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/VecDequeImpl__1__BufferWriteProof.lean:69:0: time: 4ms
-info: LeanProofs/User/Proof/VecDequeImpl__1__BufferWriteProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [288/363] Built LeanProofs.User.Proof.VecDequeImpl__1__WrapAddProof (1.3s)
-info: LeanProofs/User/Proof/VecDequeImpl__1__WrapAddProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__1__WrapAddProof.lean:69:0: time: 23ms
+info: LeanProofs/User/Proof/VecDequeAssertProof.lean:69:0: time: 1ms
+ℹ [286/363] Built LeanProofs.User.Proof.VecDequeImpl__1__WrapAddProof (1.3s)
+info: LeanProofs/User/Proof/VecDequeImpl__1__WrapAddProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__1__WrapAddProof.lean:69:0: time: 79ms
 info: LeanProofs/User/Proof/VecDequeImpl__1__WrapAddProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
 [solve_fixpoint] Cyclic κ:  []
-ℹ [289/363] Built LeanProofs.User.Proof.VecDequeImpl__1__CopyNonoverlappingProof (1.3s)
-info: LeanProofs/User/Proof/VecDequeImpl__1__CopyNonoverlappingProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__1__CopyNonoverlappingProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__1__CopyNonoverlappingProof.lean:69:0: time: 37ms
+ℹ [287/363] Built LeanProofs.User.Proof.VecDequeImpl__1__WrapSubProof (1.3s)
+info: LeanProofs/User/Proof/VecDequeImpl__1__WrapSubProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__1__WrapSubProof.lean:69:0: time: 71ms
+info: LeanProofs/User/Proof/VecDequeImpl__1__WrapSubProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  []
+ℹ [288/363] Built LeanProofs.User.Proof.VecDequeImpl__1__CopyNonoverlappingProof (1.3s)
+info: LeanProofs/User/Proof/VecDequeImpl__1__CopyNonoverlappingProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__1__CopyNonoverlappingProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__1__CopyNonoverlappingProof.lean:69:0: time: 142ms
 info: LeanProofs/User/Proof/VecDequeImpl__1__CopyNonoverlappingProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
 [solve_fixpoint] Cyclic κ:  []
-ℹ [290/363] Built LeanProofs.User.Proof.VecDequeImpl__3__WithCapacityInProof (1.3s)
-info: LeanProofs/User/Proof/VecDequeImpl__3__WithCapacityInProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__3__WithCapacityInProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__3__WithCapacityInProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__3__WithCapacityInProof.lean:69:0: time: 54ms
+ℹ [289/363] Built LeanProofs.User.Proof.VecDequeImpl__3__WithCapacityInProof (1.3s)
+info: LeanProofs/User/Proof/VecDequeImpl__3__WithCapacityInProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__3__WithCapacityInProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__3__WithCapacityInProof.lean:69:0: time: 57ms
 info: LeanProofs/User/Proof/VecDequeImpl__3__WithCapacityInProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
 [solve_fixpoint] Cyclic κ:  []
-ℹ [291/363] Built LeanProofs.User.Proof.VecDequeImpl__3__LenProof (1.3s)
-info: LeanProofs/User/Proof/VecDequeImpl__3__LenProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__3__LenProof.lean:69:0: time: 29ms
+ℹ [290/363] Built LeanProofs.User.Proof.VecDequeImpl__3__LenProof (1.3s)
+info: LeanProofs/User/Proof/VecDequeImpl__3__LenProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__3__LenProof.lean:69:0: time: 89ms
 info: LeanProofs/User/Proof/VecDequeImpl__3__LenProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
 [solve_fixpoint] Cyclic κ:  []
-ℹ [292/363] Built LeanProofs.User.Proof.VecDequeImpl__3__ReserveProof (1.4s)
-info: LeanProofs/User/Proof/VecDequeImpl__3__ReserveProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__3__ReserveProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__3__ReserveProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__3__ReserveProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__3__ReserveProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__3__ReserveProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__3__ReserveProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__3__ReserveProof.lean:69:0: time: 237ms
+ℹ [291/363] Built LeanProofs.User.Proof.VecDequeCountProof (1.3s)
+info: LeanProofs/User/Proof/VecDequeCountProof.lean:69:0: time: 2ms
+ℹ [292/363] Built LeanProofs.User.Proof.VecDequeImpl__3__GrowProof (1.5s)
+info: LeanProofs/User/Proof/VecDequeImpl__3__GrowProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__3__GrowProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__3__GrowProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__3__GrowProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__3__GrowProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__3__GrowProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__3__GrowProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__3__GrowProof.lean:69:0: time: 233ms
+info: LeanProofs/User/Proof/VecDequeImpl__3__GrowProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  []
+ℹ [293/363] Built LeanProofs.User.Proof.VecDequeImpl__3__ReserveProof (1.6s)
+info: LeanProofs/User/Proof/VecDequeImpl__3__ReserveProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__3__ReserveProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__3__ReserveProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__3__ReserveProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__3__ReserveProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__3__ReserveProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__3__ReserveProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__3__ReserveProof.lean:69:0: time: 357ms
 info: LeanProofs/User/Proof/VecDequeImpl__3__ReserveProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
 [solve_fixpoint] Cyclic κ:  []
-ℹ [293/363] Built LeanProofs.User.Proof.VecDequeImpl__3__GrowProof (1.5s)
-info: LeanProofs/User/Proof/VecDequeImpl__3__GrowProof.lean:71:2: [solve_fixpoint] closed by: aesop
-info: LeanProofs/User/Proof/VecDequeImpl__3__GrowProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__3__GrowProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__3__GrowProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__3__GrowProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__3__GrowProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__3__GrowProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__3__GrowProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__3__GrowProof.lean:69:0: time: 299ms
-info: LeanProofs/User/Proof/VecDequeImpl__3__GrowProof.lean:69:0: [solve_fixpoint] Acyclic κ: [k0]
+ℹ [294/363] Built LeanProofs.User.Proof.VecDequeImpl__1__HandleCapacityIncreaseProof (1.0s)
+info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:69:0: time: 707ms
+info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
 [solve_fixpoint] Cyclic κ:  []
-[solve] --- k0 ---
-[solve]   sol = ∃ dummy₀ a'₀, a'₀ ∧ (z0 = dummy₀.head ∧ z1 = dummy₀.tail) ∧ z2 = dummy₀.cap
-[solve]   lam = fun z0 z1 z2 => ∃ dummy₀ a'₀, a'₀ ∧ (z0 = dummy₀.head ∧ z1 = dummy₀.tail) ∧ z2 = dummy₀.cap
-ℹ [294/363] Built LeanProofs.User.Proof.VecDequeImpl__3__IsEmptyProof (1.2s)
-info: LeanProofs/User/Proof/VecDequeImpl__3__IsEmptyProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/VecDequeImpl__3__IsEmptyProof.lean:69:0: time: 3ms
-info: LeanProofs/User/Proof/VecDequeImpl__3__IsEmptyProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [295/363] Built LeanProofs.User.Proof.VecDequeImpl__3__FrontProof (1.2s)
-info: LeanProofs/User/Proof/VecDequeImpl__3__FrontProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/VecDequeImpl__3__FrontProof.lean:69:0: time: 3ms
-info: LeanProofs/User/Proof/VecDequeImpl__3__FrontProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [296/363] Built LeanProofs.User.Proof.RawVecImpl__1__TryReserveExactProof (1.2s)
-info: LeanProofs/User/Proof/RawVecImpl__1__TryReserveExactProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/RawVecImpl__1__TryReserveExactProof.lean:69:0: time: 2ms
-info: LeanProofs/User/Proof/RawVecImpl__1__TryReserveExactProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [297/363] Built LeanProofs.User.Proof.RawVecImpl__1__ShrinkToFitProof (1.2s)
-info: LeanProofs/User/Proof/RawVecImpl__1__ShrinkToFitProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/RawVecImpl__1__ShrinkToFitProof.lean:69:0: time: 3ms
-info: LeanProofs/User/Proof/RawVecImpl__1__ShrinkToFitProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [298/363] Built LeanProofs.User.Proof.RawVecImpl__2__NeedsToGrowProof (1.2s)
-info: LeanProofs/User/Proof/RawVecImpl__2__NeedsToGrowProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/RawVecImpl__2__NeedsToGrowProof.lean:69:0: time: 3ms
-info: LeanProofs/User/Proof/RawVecImpl__2__NeedsToGrowProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [299/363] Built LeanProofs.User.Proof.RawVecImpl__3__DropProof (1.2s)
-info: LeanProofs/User/Proof/RawVecImpl__3__DropProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/RawVecImpl__3__DropProof.lean:69:0: time: 9ms
-info: LeanProofs/User/Proof/RawVecImpl__3__DropProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [300/363] Built LeanProofs.User.Proof.RawVecAllocGuardProof (1.2s)
-info: LeanProofs/User/Proof/RawVecAllocGuardProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/RawVecAllocGuardProof.lean:69:0: time: 3ms
-info: LeanProofs/User/Proof/RawVecAllocGuardProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [301/363] Built LeanProofs.User.Proof.VecDequeImpl__0__DefaultProof (1.2s)
-info: LeanProofs/User/Proof/VecDequeImpl__0__DefaultProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/VecDequeImpl__0__DefaultProof.lean:69:0: time: 3ms
-info: LeanProofs/User/Proof/VecDequeImpl__0__DefaultProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [302/363] Built LeanProofs.User.Proof.VecDequeImpl__1__PtrProof (1.2s)
-info: LeanProofs/User/Proof/VecDequeImpl__1__PtrProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/VecDequeImpl__1__PtrProof.lean:69:0: time: 3ms
-info: LeanProofs/User/Proof/VecDequeImpl__1__PtrProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [303/363] Built LeanProofs.User.Proof.VecDequeImpl__1__IsFullProof (1.3s)
-info: LeanProofs/User/Proof/VecDequeImpl__1__IsFullProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__1__IsFullProof.lean:69:0: time: 21ms
+ℹ [295/363] Built LeanProofs.User.Proof.VecDequeImpl__3__IsEmptyProof (1.2s)
+info: LeanProofs/User/Proof/VecDequeImpl__3__IsEmptyProof.lean:69:0: time: 1ms
+ℹ [296/363] Built LeanProofs.User.Proof.VecDequeImpl__3__FrontProof (1.2s)
+info: LeanProofs/User/Proof/VecDequeImpl__3__FrontProof.lean:69:0: time: 2ms
+ℹ [297/363] Built LeanProofs.User.Proof.RawVecImpl__2__NeedsToGrowProof (1.2s)
+info: LeanProofs/User/Proof/RawVecImpl__2__NeedsToGrowProof.lean:69:0: time: 1ms
+ℹ [298/363] Built LeanProofs.User.Proof.RawVecImpl__3__DropProof (1.2s)
+info: LeanProofs/User/Proof/RawVecImpl__3__DropProof.lean:69:0: time: 3ms
+ℹ [299/363] Built LeanProofs.User.Proof.RawVecAllocGuardProof (1.2s)
+info: LeanProofs/User/Proof/RawVecAllocGuardProof.lean:69:0: time: 1ms
+ℹ [300/363] Built LeanProofs.User.Proof.VecDequeImpl__0__DefaultProof (1.2s)
+info: LeanProofs/User/Proof/VecDequeImpl__0__DefaultProof.lean:69:0: time: 1ms
+ℹ [301/363] Built LeanProofs.User.Proof.VecDequeImpl__1__PtrProof (1.3s)
+info: LeanProofs/User/Proof/VecDequeImpl__1__PtrProof.lean:69:0: time: 2ms
+ℹ [302/363] Built LeanProofs.User.Proof.VecDequeImpl__1__IsFullProof (1.3s)
+info: LeanProofs/User/Proof/VecDequeImpl__1__IsFullProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__1__IsFullProof.lean:69:0: time: 63ms
 info: LeanProofs/User/Proof/VecDequeImpl__1__IsFullProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
 [solve_fixpoint] Cyclic κ:  []
-ℹ [304/363] Built LeanProofs.User.Proof.VecDequeImpl__2__NewProof (1.2s)
-info: LeanProofs/User/Proof/VecDequeImpl__2__NewProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/VecDequeImpl__2__NewProof.lean:69:0: time: 2ms
-info: LeanProofs/User/Proof/VecDequeImpl__2__NewProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [305/363] Built LeanProofs.User.Proof.VecDequeImpl__3__NewInProof (1.2s)
-info: LeanProofs/User/Proof/VecDequeImpl__3__NewInProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/VecDequeImpl__3__NewInProof.lean:69:0: time: 5ms
+ℹ [303/363] Built LeanProofs.User.Proof.VecDequeImpl__2__NewProof (1.2s)
+info: LeanProofs/User/Proof/VecDequeImpl__2__NewProof.lean:69:0: time: 3ms
+ℹ [304/363] Built LeanProofs.User.Proof.VecDequeImpl__3__NewInProof (1.2s)
+info: LeanProofs/User/Proof/VecDequeImpl__3__NewInProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__3__NewInProof.lean:69:0: time: 12ms
 info: LeanProofs/User/Proof/VecDequeImpl__3__NewInProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
 [solve_fixpoint] Cyclic κ:  []
-ℹ [306/363] Built LeanProofs.User.Proof.VecDequeImpl__3__CapacityProof (1.3s)
-info: LeanProofs/User/Proof/VecDequeImpl__3__CapacityProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__3__CapacityProof.lean:69:0: time: 15ms
+ℹ [305/363] Built LeanProofs.User.Proof.VecDequeImpl__3__CapacityProof (1.3s)
+info: LeanProofs/User/Proof/VecDequeImpl__3__CapacityProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/VecDequeImpl__3__CapacityProof.lean:69:0: time: 32ms
 info: LeanProofs/User/Proof/VecDequeImpl__3__CapacityProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
 [solve_fixpoint] Cyclic κ:  []
-ℹ [307/363] Built LeanProofs.User.Proof.RawVecImpl__1__TryReserveProof (1.2s)
-info: LeanProofs/User/Proof/RawVecImpl__1__TryReserveProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/RawVecImpl__1__TryReserveProof.lean:69:0: time: 3ms
-info: LeanProofs/User/Proof/RawVecImpl__1__TryReserveProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [308/363] Built LeanProofs.User.Proof.RawVecImpl__1__ReserveForPushProof (1.2s)
-info: LeanProofs/User/Proof/RawVecImpl__1__ReserveForPushProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/RawVecImpl__1__ReserveForPushProof.lean:69:0: time: 3ms
-info: LeanProofs/User/Proof/RawVecImpl__1__ReserveForPushProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [309/363] Built LeanProofs.User.Proof.RawVecImpl__1__ReserveProof (1.2s)
-info: LeanProofs/User/Proof/RawVecImpl__1__ReserveProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/RawVecImpl__1__ReserveProof.lean:69:0: time: 3ms
-info: LeanProofs/User/Proof/RawVecImpl__1__ReserveProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
+ℹ [306/363] Built LeanProofs.User.Proof.RawVecImpl__1__TryReserveExactProof (1.2s)
+info: LeanProofs/User/Proof/RawVecImpl__1__TryReserveExactProof.lean:69:0: time: 6ms
+ℹ [307/363] Built LeanProofs.User.Proof.RawVecImpl__1__ShrinkToFitProof (1.3s)
+info: LeanProofs/User/Proof/RawVecImpl__1__ShrinkToFitProof.lean:69:0: time: 2ms
+ℹ [308/363] Built LeanProofs.User.Proof.RawVecImpl__1__TryReserveProof (1.2s)
+info: LeanProofs/User/Proof/RawVecImpl__1__TryReserveProof.lean:69:0: time: 1ms
+ℹ [309/363] Built LeanProofs.User.Proof.RawVecImpl__1__ReserveForPushProof (1.2s)
+info: LeanProofs/User/Proof/RawVecImpl__1__ReserveForPushProof.lean:69:0: time: 4ms
 ℹ [310/363] Built LeanProofs.User.Proof.RawVecImpl__1__ReserveDoReserveAndHandleProof (1.2s)
-info: LeanProofs/User/Proof/RawVecImpl__1__ReserveDoReserveAndHandleProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/RawVecImpl__1__ReserveDoReserveAndHandleProof.lean:69:0: time: 3ms
-info: LeanProofs/User/Proof/RawVecImpl__1__ReserveDoReserveAndHandleProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [311/363] Built LeanProofs.Flux.Checking.VecDequeImpl__2__WithCapacity (1.1s)
-info: LeanProofs/Flux/Checking/VecDequeImpl__2__WithCapacity.lean:4:0: F.VecDequeImpl__2__WithCapacity_proof : F.VecDequeImpl__2__WithCapacity
-ℹ [312/363] Built LeanProofs.Flux.Checking.VecDequeCount (1.1s)
-info: LeanProofs/Flux/Checking/VecDequeCount.lean:4:0: F.VecDequeCount_proof : F.VecDequeCount
-ℹ [313/363] Built LeanProofs.User.Proof.RawVecImpl__0__NewProof (1.3s)
-info: LeanProofs/User/Proof/RawVecImpl__0__NewProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/RawVecImpl__0__NewProof.lean:69:0: time: 3ms
-info: LeanProofs/User/Proof/RawVecImpl__0__NewProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [314/363] Built LeanProofs.User.Proof.RawVecImpl__0__WithCapacityProof (1.2s)
-info: LeanProofs/User/Proof/RawVecImpl__0__WithCapacityProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/RawVecImpl__0__WithCapacityProof.lean:69:0: time: 2ms
-info: LeanProofs/User/Proof/RawVecImpl__0__WithCapacityProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [315/363] Built LeanProofs.User.Proof.RawVecImpl__0__WithCapacityZeroedProof (1.2s)
-info: LeanProofs/User/Proof/RawVecImpl__0__WithCapacityZeroedProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/RawVecImpl__0__WithCapacityZeroedProof.lean:69:0: time: 3ms
-info: LeanProofs/User/Proof/RawVecImpl__0__WithCapacityZeroedProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [316/363] Built LeanProofs.User.Proof.RawVecImpl__1__NewInProof (1.3s)
-info: LeanProofs/User/Proof/RawVecImpl__1__NewInProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/RawVecImpl__1__NewInProof.lean:69:0: time: 2ms
-info: LeanProofs/User/Proof/RawVecImpl__1__NewInProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [317/363] Built LeanProofs.User.Proof.RawVecImpl__1__WithCapacityZeroedInProof (1.2s)
-info: LeanProofs/User/Proof/RawVecImpl__1__WithCapacityZeroedInProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/RawVecImpl__1__WithCapacityZeroedInProof.lean:69:0: time: 3ms
-info: LeanProofs/User/Proof/RawVecImpl__1__WithCapacityZeroedInProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [318/363] Built LeanProofs.User.Proof.RawVecImpl__1__CapacityProof (1.3s)
-info: LeanProofs/User/Proof/RawVecImpl__1__CapacityProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/RawVecImpl__1__CapacityProof.lean:69:0: time: 3ms
-info: LeanProofs/User/Proof/RawVecImpl__1__CapacityProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [319/363] Built LeanProofs.User.Proof.RawVecImpl__1__AllocatorProof (1.2s)
-info: LeanProofs/User/Proof/RawVecImpl__1__AllocatorProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/RawVecImpl__1__AllocatorProof.lean:69:0: time: 3ms
-info: LeanProofs/User/Proof/RawVecImpl__1__AllocatorProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [320/363] Built LeanProofs.User.Proof.RawVecImpl__1__CurrentMemoryProof (1.2s)
-info: LeanProofs/User/Proof/RawVecImpl__1__CurrentMemoryProof.lean:71:2: [solve_fixpoint] closed by: native_decide
-info: LeanProofs/User/Proof/RawVecImpl__1__CurrentMemoryProof.lean:69:0: time: 2ms
-info: LeanProofs/User/Proof/RawVecImpl__1__CurrentMemoryProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [321/363] Built LeanProofs.Flux.Checking.VecDequeImpl__1__WrapSub (1.2s)
-info: LeanProofs/Flux/Checking/VecDequeImpl__1__WrapSub.lean:4:0: F.VecDequeImpl__1__WrapSub_proof : F.VecDequeImpl__1__WrapSub
-ℹ [322/363] Built LeanProofs.Flux.Checking.VecDequeImpl__3__FrontMut (1.1s)
+info: LeanProofs/User/Proof/RawVecImpl__1__ReserveDoReserveAndHandleProof.lean:69:0: time: 1ms
+ℹ [311/363] Built LeanProofs.User.Proof.RawVecImpl__1__WithCapacityZeroedInProof (1.2s)
+info: LeanProofs/User/Proof/RawVecImpl__1__WithCapacityZeroedInProof.lean:69:0: time: 2ms
+ℹ [312/363] Built LeanProofs.User.Proof.RawVecImpl__1__ReserveProof (1.2s)
+info: LeanProofs/User/Proof/RawVecImpl__1__ReserveProof.lean:69:0: time: 1ms
+ℹ [313/363] Built LeanProofs.Flux.Checking.VecDequeImpl__3__FrontMut (1.1s)
 info: LeanProofs/Flux/Checking/VecDequeImpl__3__FrontMut.lean:4:0: F.VecDequeImpl__3__FrontMut_proof : F.VecDequeImpl__3__FrontMut
-ℹ [323/363] Built LeanProofs.Flux.Checking.VecDequeImpl__3__PushFront (1.1s)
-info: LeanProofs/Flux/Checking/VecDequeImpl__3__PushFront.lean:4:0: F.VecDequeImpl__3__PushFront_proof : F.VecDequeImpl__3__PushFront
-ℹ [324/363] Built LeanProofs.Flux.Checking.VecDequeImpl__1__WrapAdd (1.1s)
-info: LeanProofs/Flux/Checking/VecDequeImpl__1__WrapAdd.lean:4:0: F.VecDequeImpl__1__WrapAdd_proof : F.VecDequeImpl__1__WrapAdd
-ℹ [325/363] Built LeanProofs.Flux.Checking.VecDequeImpl__3__PushBack (1.1s)
-info: LeanProofs/Flux/Checking/VecDequeImpl__3__PushBack.lean:4:0: F.VecDequeImpl__3__PushBack_proof : F.VecDequeImpl__3__PushBack
-ℹ [326/363] Built LeanProofs.Flux.Checking.VecDequeAssert (1.1s)
-info: LeanProofs/Flux/Checking/VecDequeAssert.lean:4:0: F.VecDequeAssert_proof : F.VecDequeAssert
-ℹ [327/363] Built LeanProofs.Flux.Checking.VecDequeImpl__3__Front (1.1s)
-info: LeanProofs/Flux/Checking/VecDequeImpl__3__Front.lean:4:0: F.VecDequeImpl__3__Front_proof : F.VecDequeImpl__3__Front
-ℹ [328/363] Built LeanProofs.Flux.Checking.VecDequeImpl__3__Back (1.1s)
+ℹ [314/363] Built LeanProofs.User.Proof.RawVecImpl__0__NewProof (1.2s)
+info: LeanProofs/User/Proof/RawVecImpl__0__NewProof.lean:69:0: time: 2ms
+ℹ [315/363] Built LeanProofs.User.Proof.RawVecImpl__0__WithCapacityProof (1.2s)
+info: LeanProofs/User/Proof/RawVecImpl__0__WithCapacityProof.lean:69:0: time: 2ms
+ℹ [316/363] Built LeanProofs.User.Proof.RawVecImpl__0__WithCapacityZeroedProof (1.2s)
+info: LeanProofs/User/Proof/RawVecImpl__0__WithCapacityZeroedProof.lean:69:0: time: 1ms
+ℹ [317/363] Built LeanProofs.User.Proof.RawVecImpl__1__NewInProof (1.2s)
+info: LeanProofs/User/Proof/RawVecImpl__1__NewInProof.lean:69:0: time: 1ms
+ℹ [318/363] Built LeanProofs.User.Proof.RawVecImpl__1__CapacityProof (1.3s)
+info: LeanProofs/User/Proof/RawVecImpl__1__CapacityProof.lean:69:0: time: 1ms
+ℹ [319/363] Built LeanProofs.User.Proof.RawVecImpl__1__AllocatorProof (1.2s)
+info: LeanProofs/User/Proof/RawVecImpl__1__AllocatorProof.lean:69:0: time: 2ms
+ℹ [320/363] Built LeanProofs.User.Proof.RawVecImpl__1__CurrentMemoryProof (1.2s)
+info: LeanProofs/User/Proof/RawVecImpl__1__CurrentMemoryProof.lean:69:0: time: 2ms
+ℹ [321/363] Built LeanProofs.Flux.Checking.VecDequeImpl__3__Back (1.1s)
 info: LeanProofs/Flux/Checking/VecDequeImpl__3__Back.lean:4:0: F.VecDequeImpl__3__Back_proof : F.VecDequeImpl__3__Back
-ℹ [329/363] Built LeanProofs.Flux.Checking.VecDequeImpl__1__CopyNonoverlapping (1.1s)
-info: LeanProofs/Flux/Checking/VecDequeImpl__1__CopyNonoverlapping.lean:4:0: F.VecDequeImpl__1__CopyNonoverlapping_proof : F.VecDequeImpl__1__CopyNonoverlapping
-ℹ [330/363] Built LeanProofs.Flux.Checking.VecDequeImpl__3__WithCapacityIn (1.2s)
+ℹ [322/363] Built LeanProofs.Flux.Checking.VecDequeImpl__2__WithCapacity (1.2s)
+info: LeanProofs/Flux/Checking/VecDequeImpl__2__WithCapacity.lean:4:0: F.VecDequeImpl__2__WithCapacity_proof : F.VecDequeImpl__2__WithCapacity
+ℹ [323/363] Built LeanProofs.Flux.Checking.VecDequeImpl__3__PushFront (1.2s)
+info: LeanProofs/Flux/Checking/VecDequeImpl__3__PushFront.lean:4:0: F.VecDequeImpl__3__PushFront_proof : F.VecDequeImpl__3__PushFront
+ℹ [324/363] Built LeanProofs.Flux.Checking.VecDequeImpl__3__PushBack (1.1s)
+info: LeanProofs/Flux/Checking/VecDequeImpl__3__PushBack.lean:4:0: F.VecDequeImpl__3__PushBack_proof : F.VecDequeImpl__3__PushBack
+ℹ [325/363] Built LeanProofs.Flux.Checking.VecDequeAssert (1.2s)
+info: LeanProofs/Flux/Checking/VecDequeAssert.lean:4:0: F.VecDequeAssert_proof : F.VecDequeAssert
+ℹ [326/363] Built LeanProofs.Flux.Checking.VecDequeImpl__1__BufferWrite (1.2s)
+info: LeanProofs/Flux/Checking/VecDequeImpl__1__BufferWrite.lean:4:0: F.VecDequeImpl__1__BufferWrite_proof : F.VecDequeImpl__1__BufferWrite
+ℹ [327/363] Built LeanProofs.Flux.Checking.VecDequeImpl__1__WrapAdd (1.1s)
+info: LeanProofs/Flux/Checking/VecDequeImpl__1__WrapAdd.lean:4:0: F.VecDequeImpl__1__WrapAdd_proof : F.VecDequeImpl__1__WrapAdd
+ℹ [328/363] Built LeanProofs.Flux.Checking.VecDequeCount (1.1s)
+info: LeanProofs/Flux/Checking/VecDequeCount.lean:4:0: F.VecDequeCount_proof : F.VecDequeCount
+ℹ [329/363] Built LeanProofs.Flux.Checking.VecDequeImpl__3__IsEmpty (1.1s)
+info: LeanProofs/Flux/Checking/VecDequeImpl__3__IsEmpty.lean:4:0: F.VecDequeImpl__3__IsEmpty_proof : F.VecDequeImpl__3__IsEmpty
+ℹ [330/363] Built LeanProofs.Flux.Checking.VecDequeImpl__3__Front (1.1s)
+info: LeanProofs/Flux/Checking/VecDequeImpl__3__Front.lean:4:0: F.VecDequeImpl__3__Front_proof : F.VecDequeImpl__3__Front
+ℹ [331/363] Built LeanProofs.Flux.Checking.VecDequeImpl__1__WrapSub (1.2s)
+info: LeanProofs/Flux/Checking/VecDequeImpl__1__WrapSub.lean:4:0: F.VecDequeImpl__1__WrapSub_proof : F.VecDequeImpl__1__WrapSub
+ℹ [332/363] Built LeanProofs.Flux.Checking.VecDequeImpl__1__HandleCapacityIncrease (1.1s)
+info: LeanProofs/Flux/Checking/VecDequeImpl__1__HandleCapacityIncrease.lean:4:0: F.VecDequeImpl__1__HandleCapacityIncrease_proof : F.VecDequeImpl__1__HandleCapacityIncrease
+ℹ [333/363] Built LeanProofs.Flux.Checking.VecDequeImpl__3__WithCapacityIn (1.1s)
 info: LeanProofs/Flux/Checking/VecDequeImpl__3__WithCapacityIn.lean:4:0: F.VecDequeImpl__3__WithCapacityIn_proof : F.VecDequeImpl__3__WithCapacityIn
-ℹ [331/363] Built LeanProofs.Flux.Checking.VecDequeImpl__3__Reserve (1.1s)
-info: LeanProofs/Flux/Checking/VecDequeImpl__3__Reserve.lean:4:0: F.VecDequeImpl__3__Reserve_proof : F.VecDequeImpl__3__Reserve
-ℹ [332/363] Built LeanProofs.Flux.Checking.VecDequeImpl__3__Len (1.1s)
+ℹ [334/363] Built LeanProofs.Flux.Checking.VecDequeImpl__3__Len (1.1s)
 info: LeanProofs/Flux/Checking/VecDequeImpl__3__Len.lean:4:0: F.VecDequeImpl__3__Len_proof : F.VecDequeImpl__3__Len
-ℹ [333/363] Built LeanProofs.Flux.Checking.VecDequeImpl__3__Grow (1.1s)
+ℹ [335/363] Built LeanProofs.Flux.Checking.VecDequeImpl__3__Grow (1.2s)
 info: LeanProofs/Flux/Checking/VecDequeImpl__3__Grow.lean:4:0: F.VecDequeImpl__3__Grow_proof : F.VecDequeImpl__3__Grow
-ℹ [334/363] Built LeanProofs.Flux.Checking.VecDequeImpl__0__Default (1.2s)
-info: LeanProofs/Flux/Checking/VecDequeImpl__0__Default.lean:4:0: F.VecDequeImpl__0__Default_proof : F.VecDequeImpl__0__Default
-ℹ [335/363] Built LeanProofs.Flux.Checking.VecDequeImpl__1__Ptr (1.2s)
-info: LeanProofs/Flux/Checking/VecDequeImpl__1__Ptr.lean:4:0: F.VecDequeImpl__1__Ptr_proof : F.VecDequeImpl__1__Ptr
 ℹ [336/363] Built LeanProofs.Flux.Checking.VecDequeImpl__2__New (1.1s)
 info: LeanProofs/Flux/Checking/VecDequeImpl__2__New.lean:4:0: F.VecDequeImpl__2__New_proof : F.VecDequeImpl__2__New
-ℹ [337/363] Built LeanProofs.Flux.Checking.VecDequeImpl__1__BufferWrite (1.2s)
-info: LeanProofs/Flux/Checking/VecDequeImpl__1__BufferWrite.lean:4:0: F.VecDequeImpl__1__BufferWrite_proof : F.VecDequeImpl__1__BufferWrite
-ℹ [338/363] Built LeanProofs.Flux.Checking.VecDequeImpl__3__IsEmpty (1.2s)
-info: LeanProofs/Flux/Checking/VecDequeImpl__3__IsEmpty.lean:4:0: F.VecDequeImpl__3__IsEmpty_proof : F.VecDequeImpl__3__IsEmpty
-ℹ [339/363] Built LeanProofs.Flux.Checking.RawVecImpl__2__NeedsToGrow (1.1s)
-info: LeanProofs/Flux/Checking/RawVecImpl__2__NeedsToGrow.lean:4:0: F.RawVecImpl__2__NeedsToGrow_proof : F.RawVecImpl__2__NeedsToGrow
-ℹ [340/363] Built LeanProofs.Flux.Checking.RawVecAllocGuard (1.2s)
-info: LeanProofs/Flux/Checking/RawVecAllocGuard.lean:4:0: F.RawVecAllocGuard_proof : F.RawVecAllocGuard
-ℹ [341/363] Built LeanProofs.Flux.Checking.VecDequeImpl__1__IsFull (1.1s)
-info: LeanProofs/Flux/Checking/VecDequeImpl__1__IsFull.lean:4:0: F.VecDequeImpl__1__IsFull_proof : F.VecDequeImpl__1__IsFull
-ℹ [342/363] Built LeanProofs.Flux.Checking.VecDequeImpl__3__Capacity (1.2s)
-info: LeanProofs/Flux/Checking/VecDequeImpl__3__Capacity.lean:4:0: F.VecDequeImpl__3__Capacity_proof : F.VecDequeImpl__3__Capacity
-ℹ [343/363] Built LeanProofs.Flux.Checking.RawVecImpl__1__WithCapacityZeroedIn (1.1s)
-info: LeanProofs/Flux/Checking/RawVecImpl__1__WithCapacityZeroedIn.lean:4:0: F.RawVecImpl__1__WithCapacityZeroedIn_proof : F.RawVecImpl__1__WithCapacityZeroedIn
-ℹ [344/363] Built LeanProofs.Flux.Checking.RawVecImpl__1__Reserve (1.1s)
-info: LeanProofs/Flux/Checking/RawVecImpl__1__Reserve.lean:4:0: F.RawVecImpl__1__Reserve_proof : F.RawVecImpl__1__Reserve
-ℹ [345/363] Built LeanProofs.Flux.Checking.RawVecImpl__1__ReserveForPush (1.2s)
-info: LeanProofs/Flux/Checking/RawVecImpl__1__ReserveForPush.lean:4:0: F.RawVecImpl__1__ReserveForPush_proof : F.RawVecImpl__1__ReserveForPush
-ℹ [346/363] Built LeanProofs.Flux.Checking.RawVecImpl__1__TryReserve (1.2s)
-info: LeanProofs/Flux/Checking/RawVecImpl__1__TryReserve.lean:4:0: F.RawVecImpl__1__TryReserve_proof : F.RawVecImpl__1__TryReserve
-ℹ [347/363] Built LeanProofs.Flux.Checking.RawVecImpl__1__TryReserveExact (1.4s)
-info: LeanProofs/Flux/Checking/RawVecImpl__1__TryReserveExact.lean:4:0: F.RawVecImpl__1__TryReserveExact_proof : F.RawVecImpl__1__TryReserveExact
-ℹ [348/363] Built LeanProofs.Flux.Checking.RawVecImpl__1__ShrinkToFit (1.2s)
-info: LeanProofs/Flux/Checking/RawVecImpl__1__ShrinkToFit.lean:4:0: F.RawVecImpl__1__ShrinkToFit_proof : F.RawVecImpl__1__ShrinkToFit
-ℹ [349/363] Built LeanProofs.Flux.Checking.RawVecImpl__3__Drop (1.2s)
-info: LeanProofs/Flux/Checking/RawVecImpl__3__Drop.lean:4:0: F.RawVecImpl__3__Drop_proof : F.RawVecImpl__3__Drop
-ℹ [350/363] Built LeanProofs.Flux.Checking.VecDequeImpl__3__NewIn (1.3s)
+ℹ [337/363] Built LeanProofs.Flux.Checking.VecDequeImpl__3__NewIn (1.1s)
 info: LeanProofs/Flux/Checking/VecDequeImpl__3__NewIn.lean:4:0: F.VecDequeImpl__3__NewIn_proof : F.VecDequeImpl__3__NewIn
-ℹ [351/363] Built LeanProofs.Flux.Checking.RawVecImpl__1__Allocator (1.2s)
-info: LeanProofs/Flux/Checking/RawVecImpl__1__Allocator.lean:4:0: F.RawVecImpl__1__Allocator_proof : F.RawVecImpl__1__Allocator
-ℹ [352/363] Built LeanProofs.Flux.Checking.RawVecImpl__1__CurrentMemory (1.2s)
-info: LeanProofs/Flux/Checking/RawVecImpl__1__CurrentMemory.lean:4:0: F.RawVecImpl__1__CurrentMemory_proof : F.RawVecImpl__1__CurrentMemory
-ℹ [353/363] Built LeanProofs.Flux.Checking.RawVecImpl__1__ReserveDoReserveAndHandle (1.2s)
-info: LeanProofs/Flux/Checking/RawVecImpl__1__ReserveDoReserveAndHandle.lean:4:0: F.RawVecImpl__1__ReserveDoReserveAndHandle_proof : F.RawVecImpl__1__ReserveDoReserveAndHandle
-ℹ [354/363] Built LeanProofs.Flux.Checking.RawVecImpl__0__New (744ms)
-info: LeanProofs/Flux/Checking/RawVecImpl__0__New.lean:4:0: F.RawVecImpl__0__New_proof : F.RawVecImpl__0__New
-ℹ [355/363] Built LeanProofs.Flux.Checking.RawVecImpl__0__WithCapacity (729ms)
+ℹ [338/363] Built LeanProofs.Flux.Checking.VecDequeImpl__1__CopyNonoverlapping (1.2s)
+info: LeanProofs/Flux/Checking/VecDequeImpl__1__CopyNonoverlapping.lean:4:0: F.VecDequeImpl__1__CopyNonoverlapping_proof : F.VecDequeImpl__1__CopyNonoverlapping
+ℹ [339/363] Built LeanProofs.Flux.Checking.VecDequeImpl__3__Reserve (1.2s)
+info: LeanProofs/Flux/Checking/VecDequeImpl__3__Reserve.lean:4:0: F.VecDequeImpl__3__Reserve_proof : F.VecDequeImpl__3__Reserve
+ℹ [340/363] Built LeanProofs.Flux.Checking.VecDequeImpl__3__Capacity (1.2s)
+info: LeanProofs/Flux/Checking/VecDequeImpl__3__Capacity.lean:4:0: F.VecDequeImpl__3__Capacity_proof : F.VecDequeImpl__3__Capacity
+ℹ [341/363] Built LeanProofs.Flux.Checking.VecDequeImpl__1__Ptr (1.1s)
+info: LeanProofs/Flux/Checking/VecDequeImpl__1__Ptr.lean:4:0: F.VecDequeImpl__1__Ptr_proof : F.VecDequeImpl__1__Ptr
+ℹ [342/363] Built LeanProofs.Flux.Checking.RawVecImpl__2__NeedsToGrow (1.1s)
+info: LeanProofs/Flux/Checking/RawVecImpl__2__NeedsToGrow.lean:4:0: F.RawVecImpl__2__NeedsToGrow_proof : F.RawVecImpl__2__NeedsToGrow
+ℹ [343/363] Built LeanProofs.Flux.Checking.RawVecImpl__3__Drop (1.1s)
+info: LeanProofs/Flux/Checking/RawVecImpl__3__Drop.lean:4:0: F.RawVecImpl__3__Drop_proof : F.RawVecImpl__3__Drop
+ℹ [344/363] Built LeanProofs.Flux.Checking.RawVecImpl__1__TryReserve (1.1s)
+info: LeanProofs/Flux/Checking/RawVecImpl__1__TryReserve.lean:4:0: F.RawVecImpl__1__TryReserve_proof : F.RawVecImpl__1__TryReserve
+ℹ [345/363] Built LeanProofs.Flux.Checking.RawVecImpl__1__TryReserveExact (1.1s)
+info: LeanProofs/Flux/Checking/RawVecImpl__1__TryReserveExact.lean:4:0: F.RawVecImpl__1__TryReserveExact_proof : F.RawVecImpl__1__TryReserveExact
+ℹ [346/363] Built LeanProofs.Flux.Checking.RawVecAllocGuard (1.2s)
+info: LeanProofs/Flux/Checking/RawVecAllocGuard.lean:4:0: F.RawVecAllocGuard_proof : F.RawVecAllocGuard
+ℹ [347/363] Built LeanProofs.Flux.Checking.VecDequeImpl__0__Default (1.2s)
+info: LeanProofs/Flux/Checking/VecDequeImpl__0__Default.lean:4:0: F.VecDequeImpl__0__Default_proof : F.VecDequeImpl__0__Default
+ℹ [348/363] Built LeanProofs.Flux.Checking.RawVecImpl__0__WithCapacity (1.1s)
 info: LeanProofs/Flux/Checking/RawVecImpl__0__WithCapacity.lean:4:0: F.RawVecImpl__0__WithCapacity_proof : F.RawVecImpl__0__WithCapacity
-ℹ [356/363] Built LeanProofs.Flux.Checking.RawVecImpl__0__WithCapacityZeroed (809ms)
+ℹ [349/363] Built LeanProofs.Flux.Checking.RawVecImpl__1__WithCapacityZeroedIn (1.1s)
+info: LeanProofs/Flux/Checking/RawVecImpl__1__WithCapacityZeroedIn.lean:4:0: F.RawVecImpl__1__WithCapacityZeroedIn_proof : F.RawVecImpl__1__WithCapacityZeroedIn
+ℹ [350/363] Built LeanProofs.Flux.Checking.RawVecImpl__1__Allocator (1.1s)
+info: LeanProofs/Flux/Checking/RawVecImpl__1__Allocator.lean:4:0: F.RawVecImpl__1__Allocator_proof : F.RawVecImpl__1__Allocator
+ℹ [351/363] Built LeanProofs.Flux.Checking.RawVecImpl__1__CurrentMemory (1.1s)
+info: LeanProofs/Flux/Checking/RawVecImpl__1__CurrentMemory.lean:4:0: F.RawVecImpl__1__CurrentMemory_proof : F.RawVecImpl__1__CurrentMemory
+ℹ [352/363] Built LeanProofs.Flux.Checking.RawVecImpl__1__Reserve (1.1s)
+info: LeanProofs/Flux/Checking/RawVecImpl__1__Reserve.lean:4:0: F.RawVecImpl__1__Reserve_proof : F.RawVecImpl__1__Reserve
+ℹ [353/363] Built LeanProofs.Flux.Checking.RawVecImpl__1__ReserveDoReserveAndHandle (1.1s)
+info: LeanProofs/Flux/Checking/RawVecImpl__1__ReserveDoReserveAndHandle.lean:4:0: F.RawVecImpl__1__ReserveDoReserveAndHandle_proof : F.RawVecImpl__1__ReserveDoReserveAndHandle
+ℹ [354/363] Built LeanProofs.Flux.Checking.RawVecImpl__1__ReserveForPush (1.1s)
+info: LeanProofs/Flux/Checking/RawVecImpl__1__ReserveForPush.lean:4:0: F.RawVecImpl__1__ReserveForPush_proof : F.RawVecImpl__1__ReserveForPush
+ℹ [355/363] Built LeanProofs.Flux.Checking.RawVecImpl__1__ShrinkToFit (1.2s)
+info: LeanProofs/Flux/Checking/RawVecImpl__1__ShrinkToFit.lean:4:0: F.RawVecImpl__1__ShrinkToFit_proof : F.RawVecImpl__1__ShrinkToFit
+ℹ [356/363] Built LeanProofs.Flux.Checking.VecDequeImpl__1__IsFull (1.2s)
+info: LeanProofs/Flux/Checking/VecDequeImpl__1__IsFull.lean:4:0: F.VecDequeImpl__1__IsFull_proof : F.VecDequeImpl__1__IsFull
+ℹ [357/363] Built LeanProofs.Flux.Checking.RawVecImpl__0__New (1.1s)
+info: LeanProofs/Flux/Checking/RawVecImpl__0__New.lean:4:0: F.RawVecImpl__0__New_proof : F.RawVecImpl__0__New
+ℹ [358/363] Built LeanProofs.Flux.Checking.RawVecImpl__0__WithCapacityZeroed (912ms)
 info: LeanProofs/Flux/Checking/RawVecImpl__0__WithCapacityZeroed.lean:4:0: F.RawVecImpl__0__WithCapacityZeroed_proof : F.RawVecImpl__0__WithCapacityZeroed
-ℹ [357/363] Built LeanProofs.Flux.Checking.RawVecImpl__1__NewIn (755ms)
+ℹ [359/363] Built LeanProofs.Flux.Checking.RawVecImpl__1__NewIn (660ms)
 info: LeanProofs/Flux/Checking/RawVecImpl__1__NewIn.lean:4:0: F.RawVecImpl__1__NewIn_proof : F.RawVecImpl__1__NewIn
-ℹ [358/363] Built LeanProofs.Flux.Checking.RawVecImpl__1__Capacity (722ms)
+ℹ [360/363] Built LeanProofs.Flux.Checking.RawVecImpl__1__Capacity (759ms)
 info: LeanProofs/Flux/Checking/RawVecImpl__1__Capacity.lean:4:0: F.RawVecImpl__1__Capacity_proof : F.RawVecImpl__1__Capacity
-ℹ [359/363] Built LeanProofs.User.Proof.VecDequeImpl__1__HandleCapacityIncreaseProof (11s)
-info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:2: [solve_fixpoint] closed by: aesop
-info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:2: [solve_fixpoint] closed by: aesop
-info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:71:2: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:69:0: time: 9990ms
-info: LeanProofs/User/Proof/VecDequeImpl__1__HandleCapacityIncreaseProof.lean:69:0: [solve_fixpoint] Acyclic κ: [k0, k2, k1]
-[solve_fixpoint] Cyclic κ:  []
-[solve] --- k0 ---
-[solve]   sol = ∃ v₀ old_capacity₀,
-  (v₀.tail < old_capacity₀ ∧ 2 * old_capacity₀ ≤ v₀.cap) ∧
-    old_capacity₀ ≥ 0 ∧
-      ∃ new_capacity₀,
-        (new_capacity₀ = v₀.cap ∧ vec_deque_pow2 new_capacity₀ ∧ 1 ≤ new_capacity₀) ∧
-          new_capacity₀ ≥ 0 ∧
-            v₀.tail < v₀.cap ∧
-              v₀.tail ≥ 0 ∧
-                v₀.head < v₀.cap ∧
-                  v₀.head ≥ 0 ∧
-                    (vec_deque_pow2 v₀.cap ∧ 1 ≤ v₀.cap) ∧
-                      ¬v₀.tail ≤ v₀.head ∧
-                        ¬v₀.head < old_capacity₀ - v₀.tail ∧
-                          v₀.head < new_capacity₀ - (old_capacity₀ - v₀.tail) ∧
-                            (((z0 = v₀.head ∧ z1 = v₀.tail) ∧ z2 = v₀.cap) ∧ z3 = old_capacity₀) ∧ z4 = new_capacity₀
-[solve]   lam = fun z0 z1 z2 z3 z4 =>
-  ∃ v₀ old_capacity₀,
-    (v₀.tail < old_capacity₀ ∧ 2 * old_capacity₀ ≤ v₀.cap) ∧
-      old_capacity₀ ≥ 0 ∧
-        ∃ new_capacity₀,
-          (new_capacity₀ = v₀.cap ∧ vec_deque_pow2 new_capacity₀ ∧ 1 ≤ new_capacity₀) ∧
-            new_capacity₀ ≥ 0 ∧
-              v₀.tail < v₀.cap ∧
-                v₀.tail ≥ 0 ∧
-                  v₀.head < v₀.cap ∧
-                    v₀.head ≥ 0 ∧
-                      (vec_deque_pow2 v₀.cap ∧ 1 ≤ v₀.cap) ∧
-                        ¬v₀.tail ≤ v₀.head ∧
-                          ¬v₀.head < old_capacity₀ - v₀.tail ∧
-                            v₀.head < new_capacity₀ - (old_capacity₀ - v₀.tail) ∧
-                              (((z0 = v₀.head ∧ z1 = v₀.tail) ∧ z2 = v₀.cap) ∧ z3 = old_capacity₀) ∧ z4 = new_capacity₀
-[solve] --- k2 ---
-[solve]   sol = ∃ v₀ old_capacity₀,
-  (v₀.tail < old_capacity₀ ∧ 2 * old_capacity₀ ≤ v₀.cap) ∧
-    old_capacity₀ ≥ 0 ∧
-      ∃ new_capacity₀,
-        (new_capacity₀ = v₀.cap ∧ vec_deque_pow2 new_capacity₀ ∧ 1 ≤ new_capacity₀) ∧
-          new_capacity₀ ≥ 0 ∧
-            v₀.tail < v₀.cap ∧
-              v₀.tail ≥ 0 ∧
-                v₀.head < v₀.cap ∧
-                  v₀.head ≥ 0 ∧
-                    (vec_deque_pow2 v₀.cap ∧ 1 ≤ v₀.cap) ∧
-                      ¬v₀.tail ≤ v₀.head ∧
-                        v₀.head < old_capacity₀ - v₀.tail ∧
-                          v₀.head + old_capacity₀ > v₀.tail ∧
-                            (((z0 = v₀.head ∧ z1 = v₀.tail) ∧ z2 = v₀.cap) ∧ z3 = old_capacity₀) ∧ z4 = new_capacity₀
-[solve]   lam = fun z0 z1 z2 z3 z4 =>
-  ∃ v₀ old_capacity₀,
-    (v₀.tail < old_capacity₀ ∧ 2 * old_capacity₀ ≤ v₀.cap) ∧
-      old_capacity₀ ≥ 0 ∧
-        ∃ new_capacity₀,
-          (new_capacity₀ = v₀.cap ∧ vec_deque_pow2 new_capacity₀ ∧ 1 ≤ new_capacity₀) ∧
-            new_capacity₀ ≥ 0 ∧
-              v₀.tail < v₀.cap ∧
-                v₀.tail ≥ 0 ∧
-                  v₀.head < v₀.cap ∧
-                    v₀.head ≥ 0 ∧
-                      (vec_deque_pow2 v₀.cap ∧ 1 ≤ v₀.cap) ∧
-                        ¬v₀.tail ≤ v₀.head ∧
-                          v₀.head < old_capacity₀ - v₀.tail ∧
-                            v₀.head + old_capacity₀ > v₀.tail ∧
-                              (((z0 = v₀.head ∧ z1 = v₀.tail) ∧ z2 = v₀.cap) ∧ z3 = old_capacity₀) ∧ z4 = new_capacity₀
-[solve] --- k1 ---
-[solve]   sol = ∃ v₀ old_capacity₀,
-  (v₀.tail < old_capacity₀ ∧ 2 * old_capacity₀ ≤ v₀.cap) ∧
-    old_capacity₀ ≥ 0 ∧
-      ∃ new_capacity₀,
-        (new_capacity₀ = v₀.cap ∧ vec_deque_pow2 new_capacity₀ ∧ 1 ≤ new_capacity₀) ∧
-          new_capacity₀ ≥ 0 ∧
-            v₀.tail < v₀.cap ∧
-              v₀.tail ≥ 0 ∧
-                v₀.head < v₀.cap ∧
-                  v₀.head ≥ 0 ∧
-                    (vec_deque_pow2 v₀.cap ∧ 1 ≤ v₀.cap) ∧
-                      (¬v₀.tail ≤ v₀.head ∧
-                          (¬v₀.head < old_capacity₀ - v₀.tail ∧
-                              (∃ v₀_1 old_capacity₀_1,
-                                  (v₀_1.tail < old_capacity₀_1 ∧ 2 * old_capacity₀_1 ≤ v₀_1.cap) ∧
-                                    old_capacity₀_1 ≥ 0 ∧
-                                      ∃ new_capacity₀_1,
-                                        (new_capacity₀_1 = v₀_1.cap ∧
-                                            vec_deque_pow2 new_capacity₀_1 ∧ 1 ≤ new_capacity₀_1) ∧
-                                          new_capacity₀_1 ≥ 0 ∧
-                                            v₀_1.tail < v₀_1.cap ∧
-                                              v₀_1.tail ≥ 0 ∧
-                                                v₀_1.head < v₀_1.cap ∧
-                                                  v₀_1.head ≥ 0 ∧
-                                                    (vec_deque_pow2 v₀_1.cap ∧ 1 ≤ v₀_1.cap) ∧
-                                                      ¬v₀_1.tail ≤ v₀_1.head ∧
-                                                        ¬v₀_1.head < old_capacity₀_1 - v₀_1.tail ∧
-                                                          v₀_1.head < new_capacity₀_1 - (old_capacity₀_1 - v₀_1.tail) ∧
-                                                            (((v₀.head = v₀_1.head ∧ v₀.tail = v₀_1.tail) ∧
-                                                                  v₀.cap = v₀_1.cap) ∧
-                                                                old_capacity₀ = old_capacity₀_1) ∧
-                                                              new_capacity₀ = new_capacity₀_1) ∧
-                                (((((z0 = new_capacity₀ - (old_capacity₀ - v₀.tail) ∧ z1 = v₀.head) ∧ z2 = v₀.head) ∧
-                                        z3 = v₀.tail) ∧
-                                      z4 = v₀.cap) ∧
-                                    z5 = old_capacity₀) ∧
-                                  z6 = new_capacity₀ ∨
-                            v₀.head < old_capacity₀ - v₀.tail ∧
-                              (∃ v₀_1 old_capacity₀_1,
-                                  (v₀_1.tail < old_capacity₀_1 ∧ 2 * old_capacity₀_1 ≤ v₀_1.cap) ∧
-                                    old_capacity₀_1 ≥ 0 ∧
-                                      ∃ new_capacity₀_1,
-                                        (new_capacity₀_1 = v₀_1.cap ∧
-                                            vec_deque_pow2 new_capacity₀_1 ∧ 1 ≤ new_capacity₀_1) ∧
-                                          new_capacity₀_1 ≥ 0 ∧
-                                            v₀_1.tail < v₀_1.cap ∧
-                                              v₀_1.tail ≥ 0 ∧
-                                                v₀_1.head < v₀_1.cap ∧
-                                                  v₀_1.head ≥ 0 ∧
-                                                    (vec_deque_pow2 v₀_1.cap ∧ 1 ≤ v₀_1.cap) ∧
-                                                      ¬v₀_1.tail ≤ v₀_1.head ∧
-                                                        v₀_1.head < old_capacity₀_1 - v₀_1.tail ∧
-                                                          v₀_1.head + old_capacity₀_1 > v₀_1.tail ∧
-                                                            (((v₀.head = v₀_1.head ∧ v₀.tail = v₀_1.tail) ∧
-                                                                  v₀.cap = v₀_1.cap) ∧
-                                                                old_capacity₀ = old_capacity₀_1) ∧
-                                                              new_capacity₀ = new_capacity₀_1) ∧
-                                (((((z0 = v₀.tail ∧ z1 = v₀.head + old_capacity₀) ∧ z2 = v₀.head) ∧ z3 = v₀.tail) ∧
-                                      z4 = v₀.cap) ∧
-                                    z5 = old_capacity₀) ∧
-                                  z6 = new_capacity₀) ∨
-                        v₀.tail ≤ v₀.head ∧
-                          (((((z0 = v₀.tail ∧ z1 = v₀.head) ∧ z2 = v₀.head) ∧ z3 = v₀.tail) ∧ z4 = v₀.cap) ∧
-                              z5 = old_capacity₀) ∧
-                            z6 = new_capacity₀)
-[solve]   lam = fun z0 z1 z2 z3 z4 z5 z6 =>
-  ∃ v₀ old_capacity₀,
-    (v₀.tail < old_capacity₀ ∧ 2 * old_capacity₀ ≤ v₀.cap) ∧
-      old_capacity₀ ≥ 0 ∧
-        ∃ new_capacity₀,
-          (new_capacity₀ = v₀.cap ∧ vec_deque_pow2 new_capacity₀ ∧ 1 ≤ new_capacity₀) ∧
-            new_capacity₀ ≥ 0 ∧
-              v₀.tail < v₀.cap ∧
-                v₀.tail ≥ 0 ∧
-                  v₀.head < v₀.cap ∧
-                    v₀.head ≥ 0 ∧
-                      (vec_deque_pow2 v₀.cap ∧ 1 ≤ v₀.cap) ∧
-                        (¬v₀.tail ≤ v₀.head ∧
-                            (¬v₀.head < old_capacity₀ - v₀.tail ∧
-                                (∃ v₀_1 old_capacity₀_1,
-                                    (v₀_1.tail < old_capacity₀_1 ∧ 2 * old_capacity₀_1 ≤ v₀_1.cap) ∧
-                                      old_capacity₀_1 ≥ 0 ∧
-                                        ∃ new_capacity₀_1,
-                                          (new_capacity₀_1 = v₀_1.cap ∧
-                                              vec_deque_pow2 new_capacity₀_1 ∧ 1 ≤ new_capacity₀_1) ∧
-                                            new_capacity₀_1 ≥ 0 ∧
-                                              v₀_1.tail < v₀_1.cap ∧
-                                                v₀_1.tail ≥ 0 ∧
-                                                  v₀_1.head < v₀_1.cap ∧
-                                                    v₀_1.head ≥ 0 ∧
-                                                      (vec_deque_pow2 v₀_1.cap ∧ 1 ≤ v₀_1.cap) ∧
-                                                        ¬v₀_1.tail ≤ v₀_1.head ∧
-                                                          ¬v₀_1.head < old_capacity₀_1 - v₀_1.tail ∧
-                                                            v₀_1.head <
-                                                                new_capacity₀_1 - (old_capacity₀_1 - v₀_1.tail) ∧
-                                                              (((v₀.head = v₀_1.head ∧ v₀.tail = v₀_1.tail) ∧
-                                                                    v₀.cap = v₀_1.cap) ∧
-                                                                  old_capacity₀ = old_capacity₀_1) ∧
-                                                                new_capacity₀ = new_capacity₀_1) ∧
-                                  (((((z0 = new_capacity₀ - (old_capacity₀ - v₀.tail) ∧ z1 = v₀.head) ∧ z2 = v₀.head) ∧
-                                          z3 = v₀.tail) ∧
-                                        z4 = v₀.cap) ∧
-                                      z5 = old_capacity₀) ∧
-                                    z6 = new_capacity₀ ∨
-                              v₀.head < old_capacity₀ - v₀.tail ∧
-                                (∃ v₀_1 old_capacity₀_1,
-                                    (v₀_1.tail < old_capacity₀_1 ∧ 2 * old_capacity₀_1 ≤ v₀_1.cap) ∧
-                                      old_capacity₀_1 ≥ 0 ∧
-                                        ∃ new_capacity₀_1,
-                                          (new_capacity₀_1 = v₀_1.cap ∧
-                                              vec_deque_pow2 new_capacity₀_1 ∧ 1 ≤ new_capacity₀_1) ∧
-                                            new_capacity₀_1 ≥ 0 ∧
-                                              v₀_1.tail < v₀_1.cap ∧
-                                                v₀_1.tail ≥ 0 ∧
-                                                  v₀_1.head < v₀_1.cap ∧
-                                                    v₀_1.head ≥ 0 ∧
-                                                      (vec_deque_pow2 v₀_1.cap ∧ 1 ≤ v₀_1.cap) ∧
-                                                        ¬v₀_1.tail ≤ v₀_1.head ∧
-                                                          v₀_1.head < old_capacity₀_1 - v₀_1.tail ∧
-                                                            v₀_1.head + old_capacity₀_1 > v₀_1.tail ∧
-                                                              (((v₀.head = v₀_1.head ∧ v₀.tail = v₀_1.tail) ∧
-                                                                    v₀.cap = v₀_1.cap) ∧
-                                                                  old_capacity₀ = old_capacity₀_1) ∧
-                                                                new_capacity₀ = new_capacity₀_1) ∧
-                                  (((((z0 = v₀.tail ∧ z1 = v₀.head + old_capacity₀) ∧ z2 = v₀.head) ∧ z3 = v₀.tail) ∧
-                                        z4 = v₀.cap) ∧
-                                      z5 = old_capacity₀) ∧
-                                    z6 = new_capacity₀) ∨
-                          v₀.tail ≤ v₀.head ∧
-                            (((((z0 = v₀.tail ∧ z1 = v₀.head) ∧ z2 = v₀.head) ∧ z3 = v₀.tail) ∧ z4 = v₀.cap) ∧
-                                z5 = old_capacity₀) ∧
-                              z6 = new_capacity₀)
-ℹ [360/363] Built LeanProofs.Flux.Checking.VecDequeImpl__1__HandleCapacityIncrease (597ms)
-info: LeanProofs/Flux/Checking/VecDequeImpl__1__HandleCapacityIncrease.lean:4:0: F.VecDequeImpl__1__HandleCapacityIncrease_proof : F.VecDequeImpl__1__HandleCapacityIncrease
-✔ [361/363] Built LeanProofs.Basic (595ms)
-✔ [362/363] Built LeanProofs (608ms)
+✔ [361/363] Built LeanProofs.Basic (601ms)
+✔ [362/363] Built LeanProofs (600ms)
 Build completed successfully (363 jobs).

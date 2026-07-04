@@ -5,12 +5,12 @@
 \toprule
 Benchmark & \#CHCs & Success & Success (cyclic) & LF time & \sys Time \\
 \midrule
-\fluxmedium & 148 & 81.8\% & 60 (60.0\%) & — & 10.8m \\
-\wavesuite & 77 & 84.4\% & 10 (20.0\%) & — & 10.0m \\
-\fluxtests & 620 & 95.0\% & 80 (77.5\%) & — & 17.3m \\
-\lfsuite & 47 & 95.7\% & 14 (100.0\%) & — & 1.4m \\
+\fluxmedium & 148 & 89.2\% & 56 (78.6\%) & — & 9.2m \\
+\wavesuite & 77 & 96.1\% & 10 (70.0\%) & — & 4.0m \\
+\fluxtests & 620 & 96.6\% & 77 (83.1\%) & — & 7.4m \\
+\lfsuite & 47 & 95.7\% & 14 (100.0\%) & — & 1.3m \\
 \midrule
-\textbf{Total} & 892 & 91.9\% & 164 (69.5\%) & — & 39.5m \\
+\textbf{Total} & 892 & 95.3\% & 157 (82.2\%) & — & 22.0m \\
 \bottomrule
 \end{tabular}
 \caption{Automation coverage of the full solver pipeline (\zap{} followed by
@@ -28,11 +28,11 @@ Benchmark & \#CHCs & Success & Success (cyclic) & LF time & \sys Time \\
 \toprule
 Benchmark & none & acyclic & cyclic & both & Total \\
 \midrule
-flux-medium & 52 & 36 & 16 & 44 & 148 \\
-wave & 41 & 26 & 1 & 9 & 77 \\
-Flux lean-bench & 355 & 185 & 30 & 50 & 620 \\
+flux-medium & 89 & 3 & 56 & 0 & 148 \\
+wave & 67 & 0 & 10 & 0 & 77 \\
+Flux lean-bench & 540 & 3 & 75 & 2 & 620 \\
 Liquid-fixpoint & 22 & 11 & 12 & 2 & 47 \\
 \midrule
-\textbf{Total} & 470 & 258 & 59 & 105 & 892 \\
+\textbf{Total} & 718 & 17 & 153 & 4 & 892 \\
 \bottomrule
 \end{tabular}
