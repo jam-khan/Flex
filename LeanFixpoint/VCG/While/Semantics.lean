@@ -42,3 +42,5 @@ def Assertion := State → Prop
 @[simp]
 def ValidHoareTriple (P : Assertion) (c : Cmd) (Q : Assertion) : Prop :=
   ∀ s₁ s₂, Ceval c s₁ s₂ → P s₁ → Q s₂
+
+notation "⊧" => ValidHoareTriple
