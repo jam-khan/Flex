@@ -146,7 +146,17 @@ elab_rules : tactic
         let kctx : KContext := { kvars := kctxMap }
         let (acyclic, cyclic) ← (exprPartitionKVars bodyWithMvars).run kctx
 
+        -- RQ3 evaluation logging (mirrors `solve_fixpoint`'s Acyclic/Cyclic
+        -- print): report the κ's fusion started with and the κ's still
+        -- unsolved afterward, so a benchmark harness can classify each VC
+        -- as none / acyclic_only / cyclic_only / both by comparing the two
+        -- lists — without this, fusion's elimination is invisible to any
+        -- log parsed *after* the fact, since it runs before `solve_fixpoint`
+        -- and leaves no other trace of what it ate.
+        IO.println s!"[fusion] Start κ: {kvars.toList.map (·.name)}"
+
         if acyclic.isEmpty then
+          IO.println s!"[fusion] End κ:   {cyclic.map (·.name)}"
           dataRef.set none
           return
 
@@ -184,6 +194,7 @@ elab_rules : tactic
             binders[idx]!
         let newGoalType ← mkExistsChain cyclicBinders curr_fv
 
+        IO.println s!"[fusion] End κ:   {cyclic.map (·.name)}"
         dataRef.set (some (newGoalType, kLams, acyclic, cyclic, kvars,
                            bodyWithMvars, prefixInfo))
 
