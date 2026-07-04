@@ -68,6 +68,6 @@ open TestReplaceReturnsOldNoneQualifs
 set_option maxHeartbeats 5000000
 #time def TestReplaceReturnsOldNone_proof : TestReplaceReturnsOldNone := by
   unfold TestReplaceReturnsOldNone
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

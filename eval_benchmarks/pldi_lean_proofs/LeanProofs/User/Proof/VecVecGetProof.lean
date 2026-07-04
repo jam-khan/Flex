@@ -68,6 +68,6 @@ open VecVecGetQualifs
 set_option maxHeartbeats 5000000
 #time def VecVecGet_proof : VecVecGet := by
   unfold VecVecGet
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

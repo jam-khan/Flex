@@ -68,6 +68,6 @@ open IncFstQualifs
 set_option maxHeartbeats 5000000
 #time def IncFst_proof : IncFst := by
   unfold IncFst
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

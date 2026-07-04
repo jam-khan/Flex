@@ -68,6 +68,6 @@ open OsTracePreadQualifs
 set_option maxHeartbeats 5000000
 #time def OsTracePread_proof : OsTracePread := by
   unfold OsTracePread
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

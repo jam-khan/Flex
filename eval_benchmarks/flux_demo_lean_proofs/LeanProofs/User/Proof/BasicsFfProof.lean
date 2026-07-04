@@ -68,6 +68,6 @@ open BasicsFfQualifs
 set_option maxHeartbeats 5000000
 #time def BasicsFf_proof : BasicsFf := by
   unfold BasicsFf
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

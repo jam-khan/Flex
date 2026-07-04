@@ -68,6 +68,6 @@ open TypesFreshLibcTimespecQualifs
 set_option maxHeartbeats 5000000
 #time def TypesFreshLibcTimespec_proof : TypesFreshLibcTimespec := by
   unfold TypesFreshLibcTimespec
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

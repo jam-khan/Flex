@@ -68,6 +68,6 @@ open VecDequeImpl3LenQualifs
 set_option maxHeartbeats 5000000
 #time def VecDequeImpl__3__Len_proof : VecDequeImpl__3__Len := by
   unfold VecDequeImpl__3__Len
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

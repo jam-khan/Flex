@@ -68,6 +68,6 @@ open TypesImpl0RemainderMaskQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__0__RemainderMask_proof : TypesImpl__0__RemainderMask := by
   unfold TypesImpl__0__RemainderMask
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

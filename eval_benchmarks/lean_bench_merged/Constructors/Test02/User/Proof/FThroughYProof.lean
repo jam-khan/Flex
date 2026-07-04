@@ -68,6 +68,6 @@ open FThroughYQualifs
 set_option maxHeartbeats 5000000
 #time def FThroughY_proof : FThroughY := by
   unfold FThroughY
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

@@ -68,6 +68,6 @@ open TestPushQualifs
 set_option maxHeartbeats 5000000
 #time def TestPush_proof : TestPush := by
   unfold TestPush
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

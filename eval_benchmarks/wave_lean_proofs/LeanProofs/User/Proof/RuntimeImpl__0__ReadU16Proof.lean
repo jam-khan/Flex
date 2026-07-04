@@ -68,6 +68,6 @@ open RuntimeImpl0ReadU16Qualifs
 set_option maxHeartbeats 5000000
 #time def RuntimeImpl__0__ReadU16_proof : RuntimeImpl__0__ReadU16 := by
   unfold RuntimeImpl__0__ReadU16
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

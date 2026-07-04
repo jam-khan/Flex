@@ -68,6 +68,6 @@ open RisQualifs
 set_option maxHeartbeats 5000000
 #time def Ris_proof : Ris := by
   unfold Ris
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

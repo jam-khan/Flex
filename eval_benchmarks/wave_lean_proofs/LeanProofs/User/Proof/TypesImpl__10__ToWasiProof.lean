@@ -68,6 +68,6 @@ open TypesImpl10ToWasiQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__10__ToWasi_proof : TypesImpl__10__ToWasi := by
   unfold TypesImpl__10__ToWasi
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

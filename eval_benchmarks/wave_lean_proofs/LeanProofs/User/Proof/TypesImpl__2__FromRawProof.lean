@@ -68,6 +68,6 @@ open TypesImpl2FromRawQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__2__FromRaw_proof : TypesImpl__2__FromRaw := by
   unfold TypesImpl__2__FromRaw
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

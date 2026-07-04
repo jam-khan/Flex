@@ -68,6 +68,6 @@ open MapQualifs
 set_option maxHeartbeats 5000000
 #time def Map_proof : Map := by
   unfold Map
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

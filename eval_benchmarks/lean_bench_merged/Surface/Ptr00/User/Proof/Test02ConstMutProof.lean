@@ -68,6 +68,6 @@ open Test02ConstMutQualifs
 set_option maxHeartbeats 5000000
 #time def Test02ConstMut_proof : Test02ConstMut := by
   unfold Test02ConstMut
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

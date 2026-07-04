@@ -68,6 +68,6 @@ open KmeansNormalQualifs
 set_option maxHeartbeats 5000000
 #time def KmeansNormal_proof : KmeansNormal := by
   unfold KmeansNormal
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

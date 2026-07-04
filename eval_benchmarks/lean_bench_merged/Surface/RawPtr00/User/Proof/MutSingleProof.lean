@@ -68,6 +68,6 @@ open MutSingleQualifs
 set_option maxHeartbeats 5000000
 #time def MutSingle_proof : MutSingle := by
   unfold MutSingle
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

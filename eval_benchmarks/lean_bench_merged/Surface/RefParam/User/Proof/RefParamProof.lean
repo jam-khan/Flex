@@ -68,6 +68,6 @@ open RefParamQualifs
 set_option maxHeartbeats 5000000
 #time def RefParam_proof : RefParam := by
   unfold RefParam
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

@@ -68,6 +68,6 @@ open RealExampleQualifs
 set_option maxHeartbeats 5000000
 #time def RealExample_proof : RealExample := by
   unfold RealExample
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

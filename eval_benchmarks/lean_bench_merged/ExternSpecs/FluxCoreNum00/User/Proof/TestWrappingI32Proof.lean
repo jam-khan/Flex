@@ -68,6 +68,6 @@ open TestWrappingI32Qualifs
 set_option maxHeartbeats 5000000
 #time def TestWrappingI32_proof : TestWrappingI32 := by
   unfold TestWrappingI32
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

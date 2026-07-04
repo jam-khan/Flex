@@ -68,6 +68,6 @@ open VecDequeImpl3GrowQualifs
 set_option maxHeartbeats 5000000
 #time def VecDequeImpl__3__Grow_proof : VecDequeImpl__3__Grow := by
   unfold VecDequeImpl__3__Grow
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

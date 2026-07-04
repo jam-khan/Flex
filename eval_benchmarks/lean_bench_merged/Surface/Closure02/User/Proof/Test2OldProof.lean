@@ -68,6 +68,6 @@ open Test2OldQualifs
 set_option maxHeartbeats 5000000
 #time def Test2Old_proof : Test2Old := by
   unfold Test2Old
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

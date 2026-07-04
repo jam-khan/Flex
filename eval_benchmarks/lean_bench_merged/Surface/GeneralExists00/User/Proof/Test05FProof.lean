@@ -68,6 +68,6 @@ open Test05FQualifs
 set_option maxHeartbeats 5000000
 #time def Test05F_proof : Test05F := by
   unfold Test05F
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

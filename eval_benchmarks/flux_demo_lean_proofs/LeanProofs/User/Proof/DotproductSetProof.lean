@@ -68,6 +68,6 @@ open DotproductSetQualifs
 set_option maxHeartbeats 5000000
 #time def DotproductSet_proof : DotproductSet := by
   unfold DotproductSet
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

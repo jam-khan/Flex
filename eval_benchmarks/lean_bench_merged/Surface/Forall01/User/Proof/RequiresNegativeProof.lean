@@ -68,6 +68,6 @@ open RequiresNegativeQualifs
 set_option maxHeartbeats 5000000
 #time def RequiresNegative_proof : RequiresNegative := by
   unfold RequiresNegative
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

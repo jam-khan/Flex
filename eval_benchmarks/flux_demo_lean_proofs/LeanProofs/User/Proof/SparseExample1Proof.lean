@@ -68,6 +68,6 @@ open SparseExample1Qualifs
 set_option maxHeartbeats 5000000
 #time def SparseExample1_proof : SparseExample1 := by
   unfold SparseExample1
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

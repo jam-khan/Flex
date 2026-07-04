@@ -68,6 +68,6 @@ open TypesPlatformImpl3ParseQualifs
 set_option maxHeartbeats 5000000
 #time def TypesPlatformImpl__3__Parse_proof : TypesPlatformImpl__3__Parse := by
   unfold TypesPlatformImpl__3__Parse
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

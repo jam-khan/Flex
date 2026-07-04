@@ -68,6 +68,6 @@ open TestSplitAtMutCheckedLengthsQualifs
 set_option maxHeartbeats 5000000
 #time def TestSplitAtMutCheckedLengths_proof : TestSplitAtMutCheckedLengths := by
   unfold TestSplitAtMutCheckedLengths
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

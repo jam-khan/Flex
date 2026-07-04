@@ -68,6 +68,6 @@ open AnfImpl1CompileQualifs
 set_option maxHeartbeats 5000000
 #time def AnfImpl__1__Compile_proof : AnfImpl__1__Compile := by
   unfold AnfImpl__1__Compile
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

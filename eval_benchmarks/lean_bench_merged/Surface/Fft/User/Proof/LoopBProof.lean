@@ -68,6 +68,6 @@ open LoopBQualifs
 set_option maxHeartbeats 5000000
 #time def LoopB_proof : LoopB := by
   unfold LoopB
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

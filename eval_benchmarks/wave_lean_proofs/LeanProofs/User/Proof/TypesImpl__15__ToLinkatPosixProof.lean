@@ -68,6 +68,6 @@ open TypesImpl15ToLinkatPosixQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__15__ToLinkatPosix_proof : TypesImpl__15__ToLinkatPosix := by
   unfold TypesImpl__15__ToLinkatPosix
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

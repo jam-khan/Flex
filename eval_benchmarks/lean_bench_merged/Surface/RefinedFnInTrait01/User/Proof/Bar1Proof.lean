@@ -68,6 +68,6 @@ open Bar1Qualifs
 set_option maxHeartbeats 5000000
 #time def Bar1_proof : Bar1 := by
   unfold Bar1
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

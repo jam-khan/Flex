@@ -68,6 +68,6 @@ open TestSplitFirstTailLenQualifs
 set_option maxHeartbeats 5000000
 #time def TestSplitFirstTailLen_proof : TestSplitFirstTailLen := by
   unfold TestSplitFirstTailLen
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

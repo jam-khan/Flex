@@ -68,6 +68,6 @@ open TestAndNoneLeftQualifs
 set_option maxHeartbeats 5000000
 #time def TestAndNoneLeft_proof : TestAndNoneLeft := by
   unfold TestAndNoneLeft
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

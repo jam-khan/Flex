@@ -68,6 +68,6 @@ open I64MaxQualifs
 set_option maxHeartbeats 5000000
 #time def I64Max_proof : I64Max := by
   unfold I64Max
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

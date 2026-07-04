@@ -68,6 +68,6 @@ open Impl1ForeachQualifs
 set_option maxHeartbeats 5000000
 #time def Impl__1__Foreach_proof : Impl__1__Foreach := by
   unfold Impl__1__Foreach
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

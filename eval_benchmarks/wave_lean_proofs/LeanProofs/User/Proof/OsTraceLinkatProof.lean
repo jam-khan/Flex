@@ -68,6 +68,6 @@ open OsTraceLinkatQualifs
 set_option maxHeartbeats 5000000
 #time def OsTraceLinkat_proof : OsTraceLinkat := by
   unfold OsTraceLinkat
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

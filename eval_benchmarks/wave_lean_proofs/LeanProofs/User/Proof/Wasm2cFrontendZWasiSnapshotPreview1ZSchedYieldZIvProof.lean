@@ -68,6 +68,6 @@ open Wasm2cFrontendZWasiSnapshotPreview1ZSchedYieldZIvQualifs
 set_option maxHeartbeats 5000000
 #time def Wasm2cFrontendZWasiSnapshotPreview1ZSchedYieldZIv_proof : Wasm2cFrontendZWasiSnapshotPreview1ZSchedYieldZIv := by
   unfold Wasm2cFrontendZWasiSnapshotPreview1ZSchedYieldZIv
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

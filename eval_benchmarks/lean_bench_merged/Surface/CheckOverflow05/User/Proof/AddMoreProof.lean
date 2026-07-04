@@ -68,6 +68,6 @@ open AddMoreQualifs
 set_option maxHeartbeats 5000000
 #time def AddMore_proof : AddMore := by
   unfold AddMore
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

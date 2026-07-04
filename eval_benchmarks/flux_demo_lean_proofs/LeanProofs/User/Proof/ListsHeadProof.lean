@@ -68,6 +68,6 @@ open ListsHeadQualifs
 set_option maxHeartbeats 5000000
 #time def ListsHead_proof : ListsHead := by
   unfold ListsHead
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

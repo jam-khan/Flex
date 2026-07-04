@@ -68,6 +68,6 @@ open TestI16Qualifs
 set_option maxHeartbeats 5000000
 #time def TestI16_proof : TestI16 := by
   unfold TestI16
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

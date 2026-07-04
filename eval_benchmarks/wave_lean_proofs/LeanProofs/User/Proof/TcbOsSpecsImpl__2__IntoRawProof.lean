@@ -68,6 +68,6 @@ open TcbOsSpecsImpl2IntoRawQualifs
 set_option maxHeartbeats 5000000
 #time def TcbOsSpecsImpl__2__IntoRaw_proof : TcbOsSpecsImpl__2__IntoRaw := by
   unfold TcbOsSpecsImpl__2__IntoRaw
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

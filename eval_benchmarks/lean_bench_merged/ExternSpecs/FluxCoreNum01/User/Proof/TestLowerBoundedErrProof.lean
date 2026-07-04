@@ -68,6 +68,6 @@ open TestLowerBoundedErrQualifs
 set_option maxHeartbeats 5000000
 #time def TestLowerBoundedErr_proof : TestLowerBoundedErr := by
   unfold TestLowerBoundedErr
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

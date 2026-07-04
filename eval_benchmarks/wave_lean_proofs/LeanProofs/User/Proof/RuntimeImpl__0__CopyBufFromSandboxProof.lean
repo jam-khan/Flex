@@ -68,6 +68,6 @@ open RuntimeImpl0CopyBufFromSandboxQualifs
 set_option maxHeartbeats 5000000
 #time def RuntimeImpl__0__CopyBufFromSandbox_proof : RuntimeImpl__0__CopyBufFromSandbox := by
   unfold RuntimeImpl__0__CopyBufFromSandbox
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

@@ -68,6 +68,6 @@ open TestOr8Qualifs
 set_option maxHeartbeats 5000000
 #time def TestOr8_proof : TestOr8 := by
   unfold TestOr8
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

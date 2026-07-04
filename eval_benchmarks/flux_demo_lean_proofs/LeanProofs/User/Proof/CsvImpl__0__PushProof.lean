@@ -68,6 +68,6 @@ open CsvImpl0PushQualifs
 set_option maxHeartbeats 5000000
 #time def CsvImpl__0__Push_proof : CsvImpl__0__Push := by
   unfold CsvImpl__0__Push
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

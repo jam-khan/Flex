@@ -68,6 +68,6 @@ open TestAnd8Qualifs
 set_option maxHeartbeats 5000000
 #time def TestAnd8_proof : TestAnd8 := by
   unfold TestAnd8
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

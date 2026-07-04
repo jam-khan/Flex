@@ -68,6 +68,6 @@ open PathResolutionExpandPathQualifs
 set_option maxHeartbeats 5000000
 #time def PathResolutionExpandPath_proof : PathResolutionExpandPath := by
   unfold PathResolutionExpandPath
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

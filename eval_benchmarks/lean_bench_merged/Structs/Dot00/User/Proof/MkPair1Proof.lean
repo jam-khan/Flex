@@ -68,6 +68,6 @@ open MkPair1Qualifs
 set_option maxHeartbeats 5000000
 #time def MkPair1_proof : MkPair1 := by
   unfold MkPair1
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

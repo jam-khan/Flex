@@ -68,6 +68,6 @@ open AssignWordQualifs
 set_option maxHeartbeats 5000000
 #time def AssignWord_proof : AssignWord := by
   unfold AssignWord
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

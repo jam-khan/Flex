@@ -68,6 +68,6 @@ open TestFooEqQualifs
 set_option maxHeartbeats 5000000
 #time def TestFooEq_proof : TestFooEq := by
   unfold TestFooEq
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

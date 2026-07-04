@@ -68,6 +68,6 @@ open TestReplaceLeavesSomeQualifs
 set_option maxHeartbeats 5000000
 #time def TestReplaceLeavesSome_proof : TestReplaceLeavesSome := by
   unfold TestReplaceLeavesSome
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

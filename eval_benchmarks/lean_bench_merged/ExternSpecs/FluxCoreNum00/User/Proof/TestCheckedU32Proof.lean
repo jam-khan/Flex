@@ -68,6 +68,6 @@ open TestCheckedU32Qualifs
 set_option maxHeartbeats 5000000
 #time def TestCheckedU32_proof : TestCheckedU32 := by
   unfold TestCheckedU32
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

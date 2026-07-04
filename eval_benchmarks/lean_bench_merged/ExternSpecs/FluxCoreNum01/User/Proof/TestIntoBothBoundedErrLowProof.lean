@@ -68,6 +68,6 @@ open TestIntoBothBoundedErrLowQualifs
 set_option maxHeartbeats 5000000
 #time def TestIntoBothBoundedErrLow_proof : TestIntoBothBoundedErrLow := by
   unfold TestIntoBothBoundedErrLow
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

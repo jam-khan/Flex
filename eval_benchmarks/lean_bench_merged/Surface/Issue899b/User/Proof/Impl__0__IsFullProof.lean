@@ -68,6 +68,6 @@ open Impl0IsFullQualifs
 set_option maxHeartbeats 5000000
 #time def Impl__0__IsFull_proof : Impl__0__IsFull := by
   unfold Impl__0__IsFull
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

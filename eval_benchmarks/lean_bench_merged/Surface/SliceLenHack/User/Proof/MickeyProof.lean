@@ -68,6 +68,6 @@ open MickeyQualifs
 set_option maxHeartbeats 5000000
 #time def Mickey_proof : Mickey := by
   unfold Mickey
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

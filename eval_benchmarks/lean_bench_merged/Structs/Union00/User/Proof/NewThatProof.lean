@@ -68,6 +68,6 @@ open NewThatQualifs
 set_option maxHeartbeats 5000000
 #time def NewThat_proof : NewThat := by
   unfold NewThat
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

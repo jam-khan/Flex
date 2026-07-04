@@ -68,6 +68,6 @@ open TestBoolToIntWithIfQualifs
 set_option maxHeartbeats 5000000
 #time def TestBoolToIntWithIf_proof : TestBoolToIntWithIf := by
   unfold TestBoolToIntWithIf
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

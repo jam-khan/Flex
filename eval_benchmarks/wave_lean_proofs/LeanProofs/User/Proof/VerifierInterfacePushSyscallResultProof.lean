@@ -68,6 +68,6 @@ open VerifierInterfacePushSyscallResultQualifs
 set_option maxHeartbeats 5000000
 #time def VerifierInterfacePushSyscallResult_proof : VerifierInterfacePushSyscallResult := by
   unfold VerifierInterfacePushSyscallResult
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

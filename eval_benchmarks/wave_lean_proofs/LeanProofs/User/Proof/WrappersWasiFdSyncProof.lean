@@ -68,6 +68,6 @@ open WrappersWasiFdSyncQualifs
 set_option maxHeartbeats 5000000
 #time def WrappersWasiFdSync_proof : WrappersWasiFdSync := by
   unfold WrappersWasiFdSync
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

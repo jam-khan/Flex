@@ -68,6 +68,6 @@ open TestTryFromConcreteQualifs
 set_option maxHeartbeats 5000000
 #time def TestTryFromConcrete_proof : TestTryFromConcrete := by
   unfold TestTryFromConcrete
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

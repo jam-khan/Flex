@@ -68,6 +68,6 @@ open CheckGe0Qualifs
 set_option maxHeartbeats 5000000
 #time def CheckGe0_proof : CheckGe0 := by
   unfold CheckGe0
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

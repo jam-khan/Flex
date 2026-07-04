@@ -68,6 +68,6 @@ open TypesImpl12EmptyQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__12__Empty_proof : TypesImpl__12__Empty := by
   unfold TypesImpl__12__Empty
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

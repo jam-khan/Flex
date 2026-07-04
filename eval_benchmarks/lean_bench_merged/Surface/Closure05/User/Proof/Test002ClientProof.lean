@@ -68,6 +68,6 @@ open Test002ClientQualifs
 set_option maxHeartbeats 5000000
 #time def Test002Client_proof : Test002Client := by
   unfold Test002Client
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

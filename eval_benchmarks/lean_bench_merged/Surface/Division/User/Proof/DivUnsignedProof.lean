@@ -68,6 +68,6 @@ open DivUnsignedQualifs
 set_option maxHeartbeats 5000000
 #time def DivUnsigned_proof : DivUnsigned := by
   unfold DivUnsigned
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

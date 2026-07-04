@@ -68,6 +68,6 @@ open NeuralDotProduct2Qualifs
 set_option maxHeartbeats 5000000
 #time def NeuralDotProduct2_proof : NeuralDotProduct2 := by
   unfold NeuralDotProduct2
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

@@ -68,6 +68,6 @@ open TypesImpl27ReadQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__27__Read_proof : TypesImpl__27__Read := by
   unfold TypesImpl__27__Read
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

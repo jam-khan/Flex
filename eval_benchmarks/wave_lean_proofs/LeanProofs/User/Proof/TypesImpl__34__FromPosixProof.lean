@@ -68,6 +68,6 @@ open TypesImpl34FromPosixQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__34__FromPosix_proof : TypesImpl__34__FromPosix := by
   unfold TypesImpl__34__FromPosix
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

@@ -68,6 +68,6 @@ open TestMapOrBranchQualifs
 set_option maxHeartbeats 5000000
 #time def TestMapOrBranch_proof : TestMapOrBranch := by
   unfold TestMapOrBranch
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

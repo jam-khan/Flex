@@ -68,6 +68,6 @@ open TestAddMutIxQualifs
 set_option maxHeartbeats 5000000
 #time def TestAddMutIx_proof : TestAddMutIx := by
   unfold TestAddMutIx
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

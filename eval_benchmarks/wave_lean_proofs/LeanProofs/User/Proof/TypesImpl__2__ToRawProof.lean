@@ -68,6 +68,6 @@ open TypesImpl2ToRawQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__2__ToRaw_proof : TypesImpl__2__ToRaw := by
   unfold TypesImpl__2__ToRaw
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

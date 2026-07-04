@@ -68,6 +68,6 @@ open SubtractF32Qualifs
 set_option maxHeartbeats 5000000
 #time def SubtractF32_proof : SubtractF32 := by
   unfold SubtractF32
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

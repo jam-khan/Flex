@@ -68,6 +68,6 @@ open NeuralImpl1NewQualifs
 set_option maxHeartbeats 5000000
 #time def NeuralImpl__1__New_proof : NeuralImpl__1__New := by
   unfold NeuralImpl__1__New
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

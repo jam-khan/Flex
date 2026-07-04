@@ -68,6 +68,6 @@ open ListsEmptyQualifs
 set_option maxHeartbeats 5000000
 #time def ListsEmpty_proof : ListsEmpty := by
   unfold ListsEmpty
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

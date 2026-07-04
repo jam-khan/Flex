@@ -68,6 +68,6 @@ open OsTraceRenameatQualifs
 set_option maxHeartbeats 5000000
 #time def OsTraceRenameat_proof : OsTraceRenameat := by
   unfold OsTraceRenameat
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

@@ -68,6 +68,6 @@ open TypesStatModeQualifs
 set_option maxHeartbeats 5000000
 #time def TypesStatMode_proof : TypesStatMode := by
   unfold TypesStatMode
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

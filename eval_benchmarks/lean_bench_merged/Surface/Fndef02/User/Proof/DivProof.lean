@@ -68,6 +68,6 @@ open DivQualifs
 set_option maxHeartbeats 5000000
 #time def Div_proof : Div := by
   unfold Div
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

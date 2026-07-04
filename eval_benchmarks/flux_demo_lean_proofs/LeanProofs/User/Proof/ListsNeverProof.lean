@@ -68,6 +68,6 @@ open ListsNeverQualifs
 set_option maxHeartbeats 5000000
 #time def ListsNever_proof : ListsNever := by
   unfold ListsNever
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

@@ -68,6 +68,6 @@ open WrappersWasiSockRecvQualifs
 set_option maxHeartbeats 5000000
 #time def WrappersWasiSockRecv_proof : WrappersWasiSockRecv := by
   unfold WrappersWasiSockRecv
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

@@ -68,6 +68,6 @@ open BobBOBQualifs
 set_option maxHeartbeats 5000000
 #time def BobBOB_proof : BobBOB := by
   unfold BobBOB
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

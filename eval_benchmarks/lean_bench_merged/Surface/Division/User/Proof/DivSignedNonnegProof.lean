@@ -68,6 +68,6 @@ open DivSignedNonnegQualifs
 set_option maxHeartbeats 5000000
 #time def DivSignedNonneg_proof : DivSignedNonneg := by
   unfold DivSignedNonneg
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

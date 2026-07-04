@@ -68,6 +68,6 @@ open SumPair2Qualifs
 set_option maxHeartbeats 5000000
 #time def SumPair2_proof : SumPair2 := by
   unfold SumPair2
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

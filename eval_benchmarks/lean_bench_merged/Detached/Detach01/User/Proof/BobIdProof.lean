@@ -68,6 +68,6 @@ open BobIdQualifs
 set_option maxHeartbeats 5000000
 #time def BobId_proof : BobId := by
   unfold BobId
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

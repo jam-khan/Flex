@@ -68,6 +68,6 @@ open I32U8LosslessReftQualifs
 set_option maxHeartbeats 5000000
 #time def I32U8LosslessReft_proof : I32U8LosslessReft := by
   unfold I32U8LosslessReft
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

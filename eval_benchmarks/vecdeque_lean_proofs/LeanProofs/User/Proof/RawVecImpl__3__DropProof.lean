@@ -68,6 +68,6 @@ open RawVecImpl3DropQualifs
 set_option maxHeartbeats 5000000
 #time def RawVecImpl__3__Drop_proof : RawVecImpl__3__Drop := by
   unfold RawVecImpl__3__Drop
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

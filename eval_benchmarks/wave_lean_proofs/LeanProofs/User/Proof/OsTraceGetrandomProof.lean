@@ -68,6 +68,6 @@ open OsTraceGetrandomQualifs
 set_option maxHeartbeats 5000000
 #time def OsTraceGetrandom_proof : OsTraceGetrandom := by
   unfold OsTraceGetrandom
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

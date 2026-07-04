@@ -68,6 +68,6 @@ open MoveOutOfBoxQualifs
 set_option maxHeartbeats 5000000
 #time def MoveOutOfBox_proof : MoveOutOfBox := by
   unfold MoveOutOfBox
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

@@ -68,6 +68,6 @@ open DemoIncrFunnyQualifs
 set_option maxHeartbeats 5000000
 #time def DemoIncrFunny_proof : DemoIncrFunny := by
   unfold DemoIncrFunny
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

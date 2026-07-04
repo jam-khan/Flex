@@ -68,6 +68,6 @@ open WrappersWasiPathSymlinkQualifs
 set_option maxHeartbeats 5000000
 #time def WrappersWasiPathSymlink_proof : WrappersWasiPathSymlink := by
   unfold WrappersWasiPathSymlink
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

@@ -68,6 +68,6 @@ open TestNeq01Qualifs
 set_option maxHeartbeats 5000000
 #time def TestNeq01_proof : TestNeq01 := by
   unfold TestNeq01
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

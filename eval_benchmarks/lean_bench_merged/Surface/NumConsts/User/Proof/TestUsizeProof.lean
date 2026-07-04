@@ -68,6 +68,6 @@ open TestUsizeQualifs
 set_option maxHeartbeats 5000000
 #time def TestUsize_proof : TestUsize := by
   unfold TestUsize
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

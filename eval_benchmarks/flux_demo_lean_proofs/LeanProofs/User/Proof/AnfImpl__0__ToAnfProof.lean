@@ -68,6 +68,6 @@ open AnfImpl0ToAnfQualifs
 set_option maxHeartbeats 5000000
 #time def AnfImpl__0__ToAnf_proof : AnfImpl__0__ToAnf := by
   unfold AnfImpl__0__ToAnf
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

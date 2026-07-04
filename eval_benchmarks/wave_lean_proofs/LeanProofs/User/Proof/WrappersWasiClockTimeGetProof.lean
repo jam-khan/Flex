@@ -68,6 +68,6 @@ open WrappersWasiClockTimeGetQualifs
 set_option maxHeartbeats 5000000
 #time def WrappersWasiClockTimeGet_proof : WrappersWasiClockTimeGet := by
   unfold WrappersWasiClockTimeGet
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

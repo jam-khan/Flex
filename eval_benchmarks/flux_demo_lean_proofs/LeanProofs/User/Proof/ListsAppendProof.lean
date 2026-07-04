@@ -68,6 +68,6 @@ open ListsAppendQualifs
 set_option maxHeartbeats 5000000
 #time def ListsAppend_proof : ListsAppend := by
   unfold ListsAppend
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

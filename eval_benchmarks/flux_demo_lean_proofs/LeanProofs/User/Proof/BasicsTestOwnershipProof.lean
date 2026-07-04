@@ -68,6 +68,6 @@ open BasicsTestOwnershipQualifs
 set_option maxHeartbeats 5000000
 #time def BasicsTestOwnership_proof : BasicsTestOwnership := by
   unfold BasicsTestOwnership
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

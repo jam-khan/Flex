@@ -68,6 +68,6 @@ open RuntimeImpl0GetHomedirQualifs
 set_option maxHeartbeats 5000000
 #time def RuntimeImpl__0__GetHomedir_proof : RuntimeImpl__0__GetHomedir := by
   unfold RuntimeImpl__0__GetHomedir
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

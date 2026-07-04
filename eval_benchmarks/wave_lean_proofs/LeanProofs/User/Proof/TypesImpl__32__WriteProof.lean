@@ -68,6 +68,6 @@ open TypesImpl32WriteQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__32__Write_proof : TypesImpl__32__Write := by
   unfold TypesImpl__32__Write
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

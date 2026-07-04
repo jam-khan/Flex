@@ -68,6 +68,6 @@ open TestShrAQualifs
 set_option maxHeartbeats 5000000
 #time def TestShrA_proof : TestShrA := by
   unfold TestShrA
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

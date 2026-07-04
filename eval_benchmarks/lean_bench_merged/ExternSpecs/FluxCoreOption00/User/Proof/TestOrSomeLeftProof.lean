@@ -68,6 +68,6 @@ open TestOrSomeLeftQualifs
 set_option maxHeartbeats 5000000
 #time def TestOrSomeLeft_proof : TestOrSomeLeft := by
   unfold TestOrSomeLeft
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

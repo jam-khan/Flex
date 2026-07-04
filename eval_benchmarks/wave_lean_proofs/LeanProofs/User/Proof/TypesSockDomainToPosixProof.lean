@@ -68,6 +68,6 @@ open TypesSockDomainToPosixQualifs
 set_option maxHeartbeats 5000000
 #time def TypesSockDomainToPosix_proof : TypesSockDomainToPosix := by
   unfold TypesSockDomainToPosix
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

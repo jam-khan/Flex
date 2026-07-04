@@ -68,6 +68,6 @@ open TcbMiscEmptyNetlistQualifs
 set_option maxHeartbeats 5000000
 #time def TcbMiscEmptyNetlist_proof : TcbMiscEmptyNetlist := by
   unfold TcbMiscEmptyNetlist
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

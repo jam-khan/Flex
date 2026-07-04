@@ -68,6 +68,6 @@ open RuntimeImpl0FitsInLinMemQualifs
 set_option maxHeartbeats 5000000
 #time def RuntimeImpl__0__FitsInLinMem_proof : RuntimeImpl__0__FitsInLinMem := by
   unfold RuntimeImpl__0__FitsInLinMem
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

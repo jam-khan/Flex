@@ -68,6 +68,6 @@ open TestShl8Qualifs
 set_option maxHeartbeats 5000000
 #time def TestShl8_proof : TestShl8 := by
   unfold TestShl8
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

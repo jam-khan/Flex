@@ -68,6 +68,6 @@ open TypesImpl28ToEventTypeQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__28__ToEventType_proof : TypesImpl__28__ToEventType := by
   unfold TypesImpl__28__ToEventType
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

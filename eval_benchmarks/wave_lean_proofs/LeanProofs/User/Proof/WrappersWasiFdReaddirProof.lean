@@ -68,6 +68,6 @@ open WrappersWasiFdReaddirQualifs
 set_option maxHeartbeats 5000000
 #time def WrappersWasiFdReaddir_proof : WrappersWasiFdReaddir := by
   unfold WrappersWasiFdReaddir
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

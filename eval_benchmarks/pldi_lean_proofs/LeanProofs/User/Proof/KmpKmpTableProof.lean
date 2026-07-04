@@ -68,6 +68,6 @@ open KmpKmpTableQualifs
 set_option maxHeartbeats 5000000
 #time def KmpKmpTable_proof : KmpKmpTable := by
   unfold KmpKmpTable
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

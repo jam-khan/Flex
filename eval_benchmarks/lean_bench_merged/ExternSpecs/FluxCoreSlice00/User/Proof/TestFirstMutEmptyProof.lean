@@ -68,6 +68,6 @@ open TestFirstMutEmptyQualifs
 set_option maxHeartbeats 5000000
 #time def TestFirstMutEmpty_proof : TestFirstMutEmpty := by
   unfold TestFirstMutEmpty
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

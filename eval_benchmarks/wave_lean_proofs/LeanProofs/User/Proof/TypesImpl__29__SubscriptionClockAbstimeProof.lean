@@ -68,6 +68,6 @@ open TypesImpl29SubscriptionClockAbstimeQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__29__SubscriptionClockAbstime_proof : TypesImpl__29__SubscriptionClockAbstime := by
   unfold TypesImpl__29__SubscriptionClockAbstime
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

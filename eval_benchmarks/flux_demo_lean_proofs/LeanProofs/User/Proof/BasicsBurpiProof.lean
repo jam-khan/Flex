@@ -68,6 +68,6 @@ open BasicsBurpiQualifs
 set_option maxHeartbeats 5000000
 #time def BasicsBurpi_proof : BasicsBurpi := by
   unfold BasicsBurpi
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

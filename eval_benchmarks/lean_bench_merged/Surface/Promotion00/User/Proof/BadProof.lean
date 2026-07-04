@@ -68,6 +68,6 @@ open BadQualifs
 set_option maxHeartbeats 5000000
 #time def Bad_proof : Bad := by
   unfold Bad
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

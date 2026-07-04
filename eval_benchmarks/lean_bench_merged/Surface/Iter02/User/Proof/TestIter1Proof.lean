@@ -68,6 +68,6 @@ open TestIter1Qualifs
 set_option maxHeartbeats 5000000
 #time def TestIter1_proof : TestIter1 := by
   unfold TestIter1
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

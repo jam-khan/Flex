@@ -68,6 +68,6 @@ open AnfLetQualifs
 set_option maxHeartbeats 5000000
 #time def AnfLet_proof : AnfLet := by
   unfold AnfLet
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

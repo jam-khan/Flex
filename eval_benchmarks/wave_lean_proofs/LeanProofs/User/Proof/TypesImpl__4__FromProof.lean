@@ -68,6 +68,6 @@ open TypesImpl4FromQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__4__From_proof : TypesImpl__4__From := by
   unfold TypesImpl__4__From
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

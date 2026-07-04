@@ -68,6 +68,6 @@ open TestExiRQualifs
 set_option maxHeartbeats 5000000
 #time def TestExiR_proof : TestExiR := by
   unfold TestExiR
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

@@ -68,6 +68,6 @@ open Client0Qualifs
 set_option maxHeartbeats 5000000
 #time def Client0_proof : Client0 := by
   unfold Client0
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

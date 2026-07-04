@@ -68,6 +68,6 @@ open TypesPlatformImpl2ToPosixQualifs
 set_option maxHeartbeats 5000000
 #time def TypesPlatformImpl__2__ToPosix_proof : TypesPlatformImpl__2__ToPosix := by
   unfold TypesPlatformImpl__2__ToPosix
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

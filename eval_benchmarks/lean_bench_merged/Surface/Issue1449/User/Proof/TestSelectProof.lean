@@ -68,6 +68,6 @@ open TestSelectQualifs
 set_option maxHeartbeats 5000000
 #time def TestSelect_proof : TestSelect := by
   unfold TestSelect
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

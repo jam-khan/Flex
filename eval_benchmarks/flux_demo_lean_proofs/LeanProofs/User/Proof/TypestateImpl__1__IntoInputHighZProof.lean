@@ -68,6 +68,6 @@ open TypestateImpl1IntoInputHighZQualifs
 set_option maxHeartbeats 5000000
 #time def TypestateImpl__1__IntoInputHighZ_proof : TypestateImpl__1__IntoInputHighZ := by
   unfold TypestateImpl__1__IntoInputHighZ
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

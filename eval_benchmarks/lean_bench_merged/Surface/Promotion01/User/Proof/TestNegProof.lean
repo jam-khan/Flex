@@ -68,6 +68,6 @@ open TestNegQualifs
 set_option maxHeartbeats 5000000
 #time def TestNeg_proof : TestNeg := by
   unfold TestNeg
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

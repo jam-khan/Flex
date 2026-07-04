@@ -68,6 +68,6 @@ open VectorsCopyWithIterQualifs
 set_option maxHeartbeats 5000000
 #time def VectorsCopyWithIter_proof : VectorsCopyWithIter := by
   unfold VectorsCopyWithIter
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

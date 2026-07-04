@@ -68,6 +68,6 @@ open TestEnumer3Qualifs
 set_option maxHeartbeats 5000000
 #time def TestEnumer3_proof : TestEnumer3 := by
   unfold TestEnumer3
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

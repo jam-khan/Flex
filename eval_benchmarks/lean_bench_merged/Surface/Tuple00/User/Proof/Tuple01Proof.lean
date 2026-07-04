@@ -68,6 +68,6 @@ open Tuple01Qualifs
 set_option maxHeartbeats 5000000
 #time def Tuple01_proof : Tuple01 := by
   unfold Tuple01
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

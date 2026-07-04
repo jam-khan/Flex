@@ -68,6 +68,6 @@ open WrappersWasiEnvironSizesGetQualifs
 set_option maxHeartbeats 5000000
 #time def WrappersWasiEnvironSizesGet_proof : WrappersWasiEnvironSizesGet := by
   unfold WrappersWasiEnvironSizesGet
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

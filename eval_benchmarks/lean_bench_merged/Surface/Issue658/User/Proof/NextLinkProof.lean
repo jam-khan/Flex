@@ -68,6 +68,6 @@ open NextLinkQualifs
 set_option maxHeartbeats 5000000
 #time def NextLink_proof : NextLink := by
   unfold NextLink
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

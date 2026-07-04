@@ -68,6 +68,6 @@ open Test64Qualifs
 set_option maxHeartbeats 5000000
 #time def Test64_proof : Test64 := by
   unfold Test64
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

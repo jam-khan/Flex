@@ -68,6 +68,6 @@ open RmatImpl0GetQualifs
 set_option maxHeartbeats 5000000
 #time def RmatImpl__0__Get_proof : RmatImpl__0__Get := by
   unfold RmatImpl__0__Get
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

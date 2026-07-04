@@ -68,6 +68,6 @@ open TestAddIxQualifs
 set_option maxHeartbeats 5000000
 #time def TestAddIx_proof : TestAddIx := by
   unfold TestAddIx
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

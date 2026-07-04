@@ -68,6 +68,6 @@ open Impl0NoiseQualifs
 set_option maxHeartbeats 5000000
 #time def Impl__0__Noise_proof : Impl__0__Noise := by
   unfold Impl__0__Noise
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

@@ -68,6 +68,6 @@ open OsPlatformTraceAllocateQualifs
 set_option maxHeartbeats 5000000
 #time def OsPlatformTraceAllocate_proof : OsPlatformTraceAllocate := by
   unfold OsPlatformTraceAllocate
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

@@ -68,6 +68,6 @@ open TestIntoLowerBoundedOkQualifs
 set_option maxHeartbeats 5000000
 #time def TestIntoLowerBoundedOk_proof : TestIntoLowerBoundedOk := by
   unfold TestIntoLowerBoundedOk
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

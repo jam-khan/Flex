@@ -68,6 +68,6 @@ open DepartVarQualifs
 set_option maxHeartbeats 5000000
 #time def DepartVar_proof : DepartVar := by
   unfold DepartVar
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

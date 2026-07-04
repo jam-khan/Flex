@@ -68,6 +68,6 @@ open WrappersWasiSockConnectQualifs
 set_option maxHeartbeats 5000000
 #time def WrappersWasiSockConnect_proof : WrappersWasiSockConnect := by
   unfold WrappersWasiSockConnect
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

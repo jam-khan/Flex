@@ -68,6 +68,6 @@ open OsTraceSeekQualifs
 set_option maxHeartbeats 5000000
 #time def OsTraceSeek_proof : OsTraceSeek := by
   unfold OsTraceSeek
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

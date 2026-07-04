@@ -68,6 +68,6 @@ open GhostCellImpl3TakeQualifs
 set_option maxHeartbeats 5000000
 #time def GhostCellImpl__3__Take_proof : GhostCellImpl__3__Take := by
   unfold GhostCellImpl__3__Take
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
 
 end F

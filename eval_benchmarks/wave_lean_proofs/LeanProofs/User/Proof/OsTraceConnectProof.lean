@@ -68,6 +68,6 @@ open OsTraceConnectQualifs
 set_option maxHeartbeats 5000000
 #time def OsTraceConnect_proof : OsTraceConnect := by
   unfold OsTraceConnect
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

@@ -68,6 +68,6 @@ open WritebackWasm2cMarshalQualifs
 set_option maxHeartbeats 5000000
 #time def WritebackWasm2cMarshal_proof : WritebackWasm2cMarshal := by
   unfold WritebackWasm2cMarshal
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F

@@ -68,6 +68,6 @@ open OsTraceRecvQualifs
 set_option maxHeartbeats 5000000
 #time def OsTraceRecv_proof : OsTraceRecv := by
   unfold OsTraceRecv
-  solve_fixpoint_combo
+  (try fusion) ; (try simp [*]) ; try solve_fixpoint
 
 end F
