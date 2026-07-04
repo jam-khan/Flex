@@ -52,14 +52,13 @@ SUITE_MACROS = {
 # ── shared regexes (same as classify_nontrivial_vcs.py / count_failures.py) ──
 
 LAST_DEF_RE = re.compile(r"(?s).*\bdef\s+(\w+)\s*:=(.*)")
-ACYCLIC_RE  = re.compile(
-    r"info: .*/(\w+)Proof\.lean:\d+:\d+: \[solve_fixpoint\] Acyclic κ:\s*\[([^\]]*)\]"
+# `fusion` (which runs before `solve_fixpoint` in the current tactic pipeline)
+# reports the κ's it started with and the κ's still unsolved afterward —
+# see LeanFixpoint/Tactic/Tactics/Fusion.lean.
+FUSION_START_RE = re.compile(
+    r"info: .*/(\w+)Proof\.lean:\d+:\d+: \[fusion\] Start κ:\s*\[([^\]]*)\]"
 )
-CYCLIC_RE   = re.compile(r"\[solve_fixpoint\] Cyclic κ:\s*\[([^\]]*)\]")
-# fusion tactic eliminates acyclic κ's before solve_fixpoint; Acyclic κ list is now always [].
-FUSION_RE   = re.compile(
-    r"info: .*/(\w+)Proof\.lean:\d+:\d+: fusion: eliminated \d+ acyclic κ"
-)
+FUSION_END_RE   = re.compile(r"\[fusion\] End κ:\s*\[([^\]]*)\]")
 ERROR_RE    = re.compile(
     r"error: LeanProofs/User/Proof/(\w+)Proof\.lean:\d+:\d+: (.+)$",
     re.MULTILINE,
@@ -90,24 +89,38 @@ def is_trivially_true(path: Path) -> bool:
 
 
 def parse_log_kappa(text: str) -> dict[str, str]:
-    # fusion eliminates acyclic κ's before solve_fixpoint in the new tactic pipeline.
-    fusion_acyclic: set[str] = {m.group(1) for m in FUSION_RE.finditer(text)}
+    """Classify each VC from fusion's Start/End κ lists.
 
+    `fusion` runs before `solve_fixpoint` and reports the κ's it started
+    with and the κ's still unsolved afterward (the rest were eliminated as
+    acyclic). Per the classification rule:
+      - no κ's to start with            -> none
+      - something before, none after    -> acyclic_only
+      - same count before and after     -> cyclic_only (fusion ate nothing)
+      - fewer after than before         -> both
+    """
     results: dict[str, str] = {}
     lines = text.splitlines()
     i = 0
     while i < len(lines):
-        m = ACYCLIC_RE.search(lines[i])
+        m = FUSION_START_RE.search(lines[i])
         if m:
             vc = m.group(1)
-            acyclic = _items(m.group(2)) or (["fusion"] if vc in fusion_acyclic else [])
-            cyclic: list[str] = []
+            start = _items(m.group(2))
+            end: list[str] = []
             if i + 1 < len(lines):
-                cm = CYCLIC_RE.search(lines[i + 1])
-                if cm:
-                    cyclic = _items(cm.group(1))
+                em = FUSION_END_RE.search(lines[i + 1])
+                if em:
+                    end = _items(em.group(1))
                     i += 1
-            results[vc] = classify(acyclic, cyclic)
+            if not start:
+                results[vc] = "none"
+            elif not end:
+                results[vc] = "acyclic_only"
+            elif len(end) == len(start):
+                results[vc] = "cyclic_only"
+            else:
+                results[vc] = "both"
         i += 1
     return results
 
@@ -201,8 +214,8 @@ def load_wick_suite(display_name: str, dir_name: str) -> SuiteStats | None:
         return None
 
     text = log_path.read_text(encoding="utf-8", errors="replace")
-    kappa   = parse_log_kappa(text)
-    failed  = parse_log_failures(text)
+    kappa  = parse_log_kappa(text)
+    failed = parse_log_failures(text)
 
     flux_time_ms = _parse_timings_ms(flux_timings_path)
     if flux_time_ms is None:

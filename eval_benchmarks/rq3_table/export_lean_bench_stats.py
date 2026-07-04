@@ -32,7 +32,9 @@ LEAN_LINE_RE = re.compile(
     r"^(?:info|error):\s+((\S+)/User/Proof/(\w+)Proof\.lean):\d+:\d+:\s+(.*)"
 )
 LAKE_FAIL_RE  = re.compile(r"^✖\s+\[\d+/\d+\]\s+Building\s+([\w.]+)")
-CYCLIC_BARE_RE = re.compile(r"^\[solve_fixpoint\] Cyclic κ:\s*\[([^\]]*)\]")
+# `fusion` (which runs before `solve_fixpoint`) reports the κ's it started
+# with and the κ's still unsolved afterward — see Fusion.lean.
+FUSION_END_BARE_RE = re.compile(r"^\[fusion\] End κ:\s*\[([^\]]*)\]")
 
 
 def is_trivially_true(path: Path) -> bool:
@@ -47,14 +49,21 @@ def is_trivially_true(path: Path) -> bool:
     return body == "True"
 
 
-def classify(acyclic: list[str], cyclic: list[str]) -> str:
-    if acyclic and cyclic:
-        return "both"
-    if acyclic:
+def classify(start: list[str] | None, end: list[str] | None) -> str:
+    """Classify a VC from fusion's Start/End κ lists.
+
+      - no κ's to start with         -> none
+      - something before, none after -> acyclic_only
+      - same count before and after  -> cyclic_only (fusion ate nothing)
+      - fewer after than before      -> both
+    """
+    if not start:
+        return "none"
+    if not end:
         return "acyclic_only"
-    if cyclic:
+    if len(end) == len(start):
         return "cyclic_only"
-    return "none"
+    return "both"
 
 
 def _items(raw: str) -> list[str]:
@@ -82,14 +91,13 @@ def parse_merged_log(log_path: Path) -> dict[str, dict]:
     Parse the raw `lake build` log from the merged project.
 
     Returns dict keyed by '<cat>/<test>/<VCName>':
-      {"failed": bool, "acyclic": [...], "cyclic": [...], "fusion": bool}
+      {"failed": bool, "start": [...], "end": [...]}
     """
     vcs: dict[str, dict] = {}
 
     def _get(key: str) -> dict:
         if key not in vcs:
-            vcs[key] = {"failed": False, "acyclic": [], "cyclic": [],
-                        "fusion": False}
+            vcs[key] = {"failed": False, "start": None, "end": None}
         return vcs[key]
 
     all_lines = log_path.read_text(encoding="utf-8", errors="replace").splitlines()
@@ -130,20 +138,18 @@ def parse_merged_log(log_path: Path) -> dict[str, dict]:
             i += 1
             continue
 
-        if "[solve_fixpoint] Acyclic" in message:
+        if "[fusion] Start" in message:
             raw = re.search(r"κ:\s*\[([^\]]*)\]", message)
-            acyclic = _items(raw.group(1)) if raw else []
-            # Cyclic line immediately follows without an info: prefix.
-            cyclic: list[str] = []
+            start = _items(raw.group(1)) if raw else []
+            # End line immediately follows without an info: prefix.
+            end: list[str] = []
             if i + 1 < len(all_lines):
-                cm = CYCLIC_BARE_RE.match(all_lines[i + 1])
-                if cm:
-                    cyclic = _items(cm.group(1))
+                em = FUSION_END_BARE_RE.match(all_lines[i + 1])
+                if em:
+                    end = _items(em.group(1))
                     i += 1
-            _get(key)["acyclic"].extend(acyclic)
-            _get(key)["cyclic"].extend(cyclic)
-        elif "fusion: eliminated" in message:
-            _get(key)["fusion"] = True
+            _get(key)["start"] = start
+            _get(key)["end"] = end
 
         i += 1
 
@@ -170,16 +176,11 @@ def run_merged(merged_dir: Path, log_path: Path) -> list[dict]:
 
         key = _vc_key(test_id, vc_name)
         info = vc_info.get(key, {})
-        acyclic = info.get("acyclic", [])
-        cyclic  = info.get("cyclic", [])
-        # fusion eliminates acyclic κ before solve_fixpoint; treat as acyclic.
-        if info.get("fusion") and not acyclic:
-            acyclic = ["fusion"]
 
         vcs.append({
             "name":    f"{test_id}/{vc_name}",
             "trivial": trivial,
-            "kappa":   classify(acyclic, cyclic),
+            "kappa":   classify(info.get("start"), info.get("end")),
             "failed":  info.get("failed", False),
         })
     return vcs
