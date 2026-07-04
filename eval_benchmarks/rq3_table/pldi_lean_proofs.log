@@ -2,201 +2,201 @@ info: toolchain not updated; already up-to-date
 info: mathlib: running post-update hooks
 ✔ [2/22] Built Cache.Init (160ms)
 ✔ [3/22] Built Cache.Lean (227ms)
-✔ [4/22] Built Cache.Init:c.o (49ms)
+✔ [4/22] Built Cache.Init:c.o (51ms)
 ✔ [5/22] Built Cache.Lean:c.o (79ms)
-✔ [8/22] Built Batteries.Data.String.Basic (202ms)
-✔ [9/22] Built Batteries.Data.String.Basic:c.o (66ms)
-✔ [10/22] Built Cache.IO (767ms)
-✔ [11/22] Built Batteries.Data.Array.Match (417ms)
-✔ [12/22] Built Batteries.Data.Array.Match:c.o (151ms)
-✔ [13/22] Built Batteries.Data.String.Matcher (194ms)
-✔ [14/22] Built Batteries.Data.String.Matcher:c.o (118ms)
-✔ [15/22] Built Cache.Hashing (420ms)
-✔ [16/22] Built Cache.Hashing:c.o (289ms)
-✔ [17/22] Built Cache.IO:c.o (945ms)
+✔ [8/22] Built Batteries.Data.String.Basic (208ms)
+✔ [9/22] Built Batteries.Data.String.Basic:c.o (62ms)
+✔ [10/22] Built Batteries.Data.Array.Match (429ms)
+✔ [11/22] Built Batteries.Data.String.Matcher (193ms)
+✔ [12/22] Built Cache.IO (784ms)
+✔ [13/22] Built Batteries.Data.Array.Match:c.o (149ms)
+✔ [14/22] Built Batteries.Data.String.Matcher:c.o (125ms)
+✔ [15/22] Built Cache.Hashing (409ms)
+✔ [16/22] Built Cache.Hashing:c.o (286ms)
+✔ [17/22] Built Cache.IO:c.o (930ms)
 ✔ [18/22] Built Cache.Requests (1.1s)
-✔ [19/22] Built Cache.Main (450ms)
-✔ [20/22] Built Cache.Main:c.o (337ms)
+✔ [19/22] Built Cache.Main (449ms)
+✔ [20/22] Built Cache.Main:c.o (338ms)
 ✔ [21/22] Built Cache.Requests:c.o (1.4s)
-✔ [22/22] Built cache:exe (455ms)
+✔ [22/22] Built cache:exe (457ms)
 Fetching ProofWidgets cloud release... done!
 Current branch: HEAD
 Using cache (Azure) from origin: leanprover-community/mathlib4
 No files to download
 Decompressing 8214 file(s) (3 already decompressed)
-Decompressed in 5536 ms
+Decompressed in 5515 ms
 Completed successfully!
-✔ [3/98] Built LeanProofs.Flux.Prelude (355ms)
-✔ [4/98] Built Aesop.Forward.PremiseIndex (349ms)
-✔ [5/98] Built Aesop.Forward.SlotIndex (346ms)
-✔ [6/98] Built Aesop.Forward.LevelIndex (330ms)
-✔ [7/120] Built Aesop.Check (473ms)
-✔ [8/120] Built Aesop.Nanos (385ms)
-✔ [9/120] Built Aesop.Percent (369ms)
-✔ [12/124] Built Aesop.Util.UnionFind (525ms)
-✔ [13/124] Built Aesop.Rule.Name (587ms)
-✔ [14/124] Built LeanProofs.Flux.VC.BsearchBinarySearch (349ms)
-✔ [15/124] Built Aesop.Index.DiscrTreeConfig (694ms)
-✔ [16/124] Built Aesop.Util.OrderedHashSet (428ms)
-✔ [17/124] Built Aesop.RuleTac.FVarIdSubst (895ms)
-✔ [18/124] Built Batteries.Lean.Meta.Expr (366ms)
-✔ [19/124] Built Batteries.Lean.PersistentHashMap (358ms)
-✔ [20/124] Built Batteries.Lean.PersistentHashSet (415ms)
-✔ [21/124] Built Aesop.Options.Public (1.0s)
-✔ [22/124] Built LeanFixpoint.Core.KVar (1.2s)
-✔ [23/124] Built LeanFixpoint.Core.Simplify (1.2s)
-✔ [24/124] Built LeanFixpoint.Tactic.Utils (1.1s)
-✔ [25/124] Built Aesop.Script.Tactic (740ms)
-✔ [26/124] Built Aesop.Script.GoalWithMVars (784ms)
-✔ [27/124] Built Aesop.ElabM (816ms)
-✔ [28/124] Built Batteries.Lean.Meta.Inaccessible (448ms)
-✔ [29/124] Built Batteries.Lean.Meta.UnusedNames (466ms)
-✔ [30/124] Built Batteries.Lean.MonadBacktrack (286ms)
-✔ [31/124] Built Aesop.RuleSet.Name (719ms)
-✔ [32/124] Built Batteries.Control.Lemmas (382ms)
-✔ [33/124] Built Batteries.Data.String.Basic (387ms)
-✔ [34/124] Built Batteries.Lean.TagAttribute (353ms)
-✔ [35/124] Built Batteries.Tactic.PermuteGoals (631ms)
-✔ [36/124] Built Aesop.Util.Unfold (1.1s)
-✔ [37/130] Built Batteries.Tactic.Unreachable (502ms)
-✔ [38/130] Built Batteries.Util.ProofWanted (600ms)
-✔ [39/130] Built Aesop.RuleTac.RuleTerm (474ms)
-✔ [40/141] Built Batteries.Lean.Expr (678ms)
-✔ [41/141] Built Batteries.Tactic.SeqFocus (724ms)
-✔ [42/141] Built Aesop.Options.Internal (816ms)
-✔ [43/145] Built Batteries.CodeAction.Deprecated (1.0s)
-✔ [44/145] Built Batteries.Lean.AttributeExtra (509ms)
-✔ [45/145] Built Batteries.Tactic.OpenPrivate (1.3s)
-✔ [46/146] Built Batteries.Tactic.Init (1.2s)
-✔ [47/146] Built Batteries.Control.LawfulMonadState (1.2s)
-✔ [48/155] Built Aesop.RuleSet.Filter (823ms)
-✔ [49/169] Built Aesop.Search.Expansion.Simp (597ms)
-✔ [50/169] Built Aesop.Constants (313ms)
-✔ [51/193] Built LeanFixpoint.Core.SubstK (1.2s)
-✔ [52/193] Built Batteries.Data.Array.Merge (1.4s)
-✔ [53/193] Built Batteries.Linter.UnreachableTactic (885ms)
-✔ [54/206] Built LeanFixpoint.Core.Pretty (1.2s)
-✔ [55/206] Built Aesop.RuleTac.ElabRuleTerm (1.1s)
-✔ [56/224] Built LeanFixpoint.Core.Monad (1.3s)
-✔ [57/224] Built Aesop.Options (702ms)
-✔ [58/224] Built Batteries.Lean.HashSet (385ms)
-✔ [59/224] Built Batteries.Control.ForInStep.Basic (305ms)
-✔ [60/226] Built Batteries.Control.OptionT (511ms)
-✔ [61/226] Built Aesop.Util.Tactic.Unfold (1.2s)
-✔ [62/226] Built Aesop.Script.OptimizeSyntax (1.1s)
-✔ [64/348] Built Aesop.Util.Tactic (771ms)
-✔ [65/348] Built Batteries.Lean.Meta.DiscrTree (415ms)
-✔ [66/348] Built Aesop.Util.UnorderedArraySet (494ms)
-✔ [67/348] Built Aesop.Exception (858ms)
-✔ [68/348] Built Aesop.Frontend.Basic (772ms)
-✔ [69/348] Built LeanProofs.Flux.VC.DotprodDotprod (312ms)
-✔ [70/348] Built LeanProofs.Flux.VC.FftFft (300ms)
-✔ [71/348] Built Batteries.Linter.UnnecessarySeqFocus (1.4s)
-✔ [72/348] Built LeanFixpoint.VCG.While.Types (625ms)
-✔ [73/348] Built LeanProofs.Flux.VC.FftLoopA (364ms)
-✔ [74/348] Built LeanProofs.Flux.VC.FftLoopC1 (302ms)
-✔ [75/348] Built Batteries.Control.AlternativeMonad (750ms)
-✔ [76/348] Built LeanProofs.Flux.VC.FftLoopB (356ms)
-✔ [77/348] Built LeanProofs.Flux.VC.FftLoopC (382ms)
-✔ [78/348] Built LeanProofs.Flux.VC.FftFftTest (379ms)
-✔ [79/348] Built LeanFixpoint.VCG.STLC.Syntax (855ms)
-✔ [80/348] Built LeanProofs.Flux.VC.FftDoit (322ms)
-✔ [81/348] Built LeanProofs.Flux.VC.HeapsortSwap (312ms)
-✔ [82/348] Built LeanFixpoint.Core (1.1s)
-✔ [83/348] Built LeanProofs.Flux.VC.HeapsortHeapSort (346ms)
-✔ [84/348] Built LeanProofs.Flux.VC.KmeansDist (283ms)
-✔ [85/348] Built LeanFixpoint.PA.Qualifier (1.2s)
-✔ [86/348] Built LeanProofs.Flux.VC.HeapsortShiftDown (337ms)
-✔ [87/348] Built LeanProofs.Flux.VC.KmeansAdd (302ms)
-✔ [88/348] Built LeanProofs.Flux.VC.KmeansNormal (306ms)
-✔ [89/348] Built LeanProofs.Flux.VC.KmeansInitCenters (319ms)
-✔ [90/348] Built Batteries.Tactic.Alias (1.9s)
-✔ [91/348] Built LeanProofs.Flux.VC.KmeansNearest (352ms)
-✔ [92/348] Built LeanProofs.Flux.VC.KmeansNormalizeCenters (298ms)
-✔ [93/348] Built LeanProofs.Flux.VC.KmeansKmeansStep (326ms)
-✔ [94/348] Built LeanProofs.Flux.VC.KmeansKmeans (333ms)
-✔ [95/348] Built LeanProofs.Flux.VC.KmpKmpTable (373ms)
-✔ [96/348] Built LeanProofs.Flux.VC.KmpKmpSearch (338ms)
-✔ [97/348] Built LeanProofs.Flux.VC.SimplexIsNeg (298ms)
-✔ [98/348] Built LeanProofs.Flux.VC.SimplexUnb1 (344ms)
-✔ [99/348] Built LeanProofs.Flux.VC.SimplexEnterVar (341ms)
-✔ [100/348] Built LeanProofs.Flux.VC.SimplexDepartVar (367ms)
-✔ [101/348] Built LeanProofs.Flux.VC.SimplexInitRatioI (319ms)
-✔ [102/348] Built LeanProofs.Flux.VC.SimplexInitRatioC (320ms)
-✔ [103/348] Built LeanProofs.Flux.VC.SimplexRowOp (284ms)
-✔ [104/348] Built LeanProofs.Flux.VC.SimplexSimplex (334ms)
+✔ [3/109] Built LeanProofs.Flux.Prelude (316ms)
+✔ [4/109] Built Aesop.Forward.PremiseIndex (297ms)
+✔ [5/109] Built Aesop.Forward.SlotIndex (325ms)
+✔ [6/109] Built Aesop.Forward.LevelIndex (319ms)
+✔ [7/109] Built Aesop.Nanos (368ms)
+✔ [8/109] Built Aesop.Percent (311ms)
+✔ [9/120] Built Aesop.Check (478ms)
+✔ [10/130] Built Aesop.Util.UnionFind (526ms)
+✔ [11/141] Built LeanProofs.Flux.VC.BsearchBinarySearch (340ms)
+✔ [12/141] Built Aesop.Rule.Name (625ms)
+✔ [13/145] Built Aesop.Index.DiscrTreeConfig (696ms)
+✔ [16/145] Built Aesop.RuleTac.FVarIdSubst (834ms)
+✔ [17/145] Built Aesop.Util.OrderedHashSet (434ms)
+✔ [18/145] Built Aesop.Options.Public (992ms)
+✔ [19/145] Built Aesop.Script.Tactic (741ms)
+✔ [20/145] Built Aesop.Script.GoalWithMVars (732ms)
+✔ [21/145] Built Aesop.ElabM (754ms)
+✔ [22/145] Built Aesop.Constants (296ms)
+✔ [23/145] Built LeanFixpoint.Core.KVar (1.1s)
+✔ [24/145] Built LeanFixpoint.Core.Simplify (1.1s)
+✔ [25/145] Built LeanFixpoint.Tactic.Utils (1.2s)
+✔ [26/145] Built Aesop.RuleTac.RuleTerm (450ms)
+✔ [27/145] Built Batteries.Lean.PersistentHashMap (358ms)
+✔ [28/145] Built Batteries.Lean.Meta.Expr (325ms)
+✔ [29/145] Built Batteries.Lean.PersistentHashSet (452ms)
+✔ [30/145] Built Aesop.RuleSet.Name (739ms)
+✔ [31/145] Built Aesop.Search.Expansion.Simp (645ms)
+✔ [32/146] Built Batteries.Lean.MonadBacktrack (320ms)
+✔ [33/146] Built Aesop.Util.Unfold (1.1s)
+✔ [34/146] Built Batteries.Lean.Meta.Inaccessible (474ms)
+✔ [35/146] Built Batteries.Lean.Meta.UnusedNames (443ms)
+✔ [36/146] Built Batteries.Lean.TagAttribute (364ms)
+✔ [37/146] Built Batteries.Control.Lemmas (391ms)
+✔ [38/146] Built Batteries.Data.String.Basic (374ms)
+✔ [39/146] Built Aesop.Script.OptimizeSyntax (1.1s)
+✔ [40/150] Built Batteries.Tactic.Unreachable (560ms)
+✔ [41/150] Built Batteries.Util.ProofWanted (582ms)
+✔ [42/150] Built Batteries.Tactic.PermuteGoals (681ms)
+✔ [43/155] Built Batteries.Tactic.SeqFocus (708ms)
+✔ [44/159] Built Aesop.Options.Internal (740ms)
+✔ [45/159] Built Batteries.Lean.Expr (692ms)
+✔ [46/190] Built Batteries.CodeAction.Deprecated (1.0s)
+✔ [47/190] Built Batteries.Lean.AttributeExtra (514ms)
+✔ [48/190] Built Batteries.Tactic.Init (1.1s)
+✔ [49/190] Built Batteries.Control.LawfulMonadState (1.1s)
+✔ [50/190] Built Batteries.Tactic.OpenPrivate (1.2s)
+✔ [51/190] Built Batteries.Lean.HashSet (341ms)
+✔ [52/208] Built Aesop.RuleTac.ElabRuleTerm (1.1s)
+✔ [53/208] Built Aesop.RuleSet.Filter (831ms)
+✔ [54/208] Built Batteries.Control.ForInStep.Basic (321ms)
+✔ [55/214] Built Batteries.Linter.UnreachableTactic (876ms)
+✔ [56/223] Built LeanFixpoint.Core.Pretty (1.2s)
+✔ [57/223] Built LeanFixpoint.Core.SubstK (1.3s)
+✔ [58/223] Built Batteries.Data.Array.Merge (1.3s)
+✔ [59/223] Built Batteries.Control.OptionT (507ms)
+✔ [60/225] Built Aesop.Options (692ms)
+✔ [62/348] Built LeanFixpoint.Core.Monad (1.2s)
+✔ [63/348] Built Aesop.Util.Tactic (751ms)
+✔ [64/348] Built Aesop.Util.Tactic.Unfold (1.3s)
+✔ [65/348] Built Aesop.Exception (817ms)
+✔ [66/348] Built Aesop.Frontend.Basic (730ms)
+✔ [67/348] Built Aesop.Util.UnorderedArraySet (480ms)
+✔ [68/348] Built Batteries.Lean.Meta.DiscrTree (408ms)
+✔ [69/348] Built LeanProofs.Flux.VC.DotprodDotprod (276ms)
+✔ [70/348] Built LeanProofs.Flux.VC.FftFft (306ms)
+✔ [71/348] Built LeanProofs.Flux.VC.FftLoopA (348ms)
+✔ [72/348] Built LeanFixpoint.VCG.While.Types (633ms)
+✔ [73/348] Built LeanProofs.Flux.VC.FftLoopB (345ms)
+✔ [74/348] Built LeanProofs.Flux.VC.FftLoopC (398ms)
+✔ [75/348] Built LeanProofs.Flux.VC.FftLoopC1 (363ms)
+✔ [76/348] Built Batteries.Linter.UnnecessarySeqFocus (1.4s)
+✔ [77/348] Built Batteries.Control.AlternativeMonad (871ms)
+✔ [78/348] Built LeanFixpoint.VCG.STLC.Syntax (784ms)
+✔ [79/348] Built LeanProofs.Flux.VC.FftFftTest (363ms)
+✔ [80/348] Built LeanProofs.Flux.VC.FftDoit (317ms)
+✔ [81/348] Built LeanFixpoint.PA.Qualifier (1.2s)
+✔ [82/348] Built LeanProofs.Flux.VC.HeapsortSwap (329ms)
+✔ [83/348] Built LeanProofs.Flux.VC.HeapsortHeapSort (314ms)
+✔ [84/348] Built LeanProofs.Flux.VC.KmeansDist (280ms)
+✔ [85/348] Built LeanProofs.Flux.VC.KmeansAdd (294ms)
+✔ [86/348] Built LeanProofs.Flux.VC.HeapsortShiftDown (357ms)
+✔ [87/348] Built LeanProofs.Flux.VC.KmeansNormal (295ms)
+✔ [88/348] Built LeanProofs.Flux.VC.KmeansInitCenters (317ms)
+✔ [89/348] Built LeanProofs.Flux.VC.KmeansNearest (304ms)
+✔ [90/348] Built LeanFixpoint.Core (1.1s)
+✔ [91/348] Built LeanProofs.Flux.VC.KmeansNormalizeCenters (318ms)
+✔ [92/348] Built LeanProofs.Flux.VC.KmeansKmeansStep (341ms)
+✔ [93/348] Built LeanProofs.Flux.VC.KmeansKmeans (346ms)
+✔ [94/348] Built LeanProofs.Flux.VC.KmpKmpTable (393ms)
+✔ [95/348] Built LeanProofs.Flux.VC.KmpKmpSearch (342ms)
+✔ [96/348] Built LeanProofs.Flux.VC.SimplexIsNeg (312ms)
+✔ [97/348] Built LeanProofs.Flux.VC.SimplexUnb1 (338ms)
+✔ [98/348] Built LeanProofs.Flux.VC.SimplexEnterVar (316ms)
+✔ [99/348] Built LeanProofs.Flux.VC.SimplexInitRatioI (336ms)
+✔ [100/348] Built Batteries.Tactic.Alias (2.1s)
+✔ [101/348] Built LeanProofs.Flux.VC.SimplexDepartVar (374ms)
+✔ [102/348] Built LeanProofs.Flux.VC.SimplexInitRatioC (328ms)
+✔ [103/348] Built LeanProofs.Flux.VC.SimplexRowOp (289ms)
+✔ [104/348] Built LeanProofs.Flux.VC.RmatImpl__0__New (276ms)
 ✔ [105/348] Built LeanFixpoint.Tactic.Tactics.Zap (1.9s)
-✔ [106/348] Built LeanProofs.Flux.VC.RmatImpl__0__New (340ms)
-✔ [107/348] Built LeanProofs.Flux.VC.RmatImpl__0__Get (307ms)
-✔ [108/348] Built LeanProofs.Flux.VC.RmatImpl__0__GetMut (289ms)
-✔ [109/348] Built LeanProofs.Flux.VC.VecFromElemN (276ms)
-✔ [110/348] Built LeanFixpoint.Tactic.Tactics.Lazy (1.8s)
-✔ [111/348] Built LeanProofs.Flux.VC.VecVecGet (299ms)
-✔ [112/348] Built LeanProofs.Flux.VC.VecVecGetMut (317ms)
-✔ [113/348] Built LeanProofs.Flux.VC.RvecImpl__0__Index (281ms)
-✔ [114/348] Built LeanFixpoint.VCG.While.Semantics (336ms)
-✔ [115/348] Built Batteries.Linter (384ms)
-✔ [116/348] Built Batteries.Lean.Meta.Basic (451ms)
-✔ [117/348] Built LeanFixpoint.Tactic.Tactics.SplitHyps (2.1s)
-✔ [118/348] Built LeanFixpoint.Tactic.Tactics.Hoist (1.0s)
-✔ [119/348] Built Batteries.Tactic.Basic (382ms)
-✔ [120/348] Built Batteries.Lean.Meta.SavedState (409ms)
-✔ [121/348] Built Batteries.Lean.Meta.InstantiateMVars (388ms)
-✔ [122/348] Built LeanFixpoint.Elab.ToExpr (1.1s)
-✔ [123/348] Built LeanFixpoint.Fusion.Flatten (1.1s)
-✔ [124/348] Built LeanFixpoint.Zap.Scope (1.2s)
-✔ [125/348] Built LeanFixpoint.Elab.FromExpr (1.1s)
-✔ [126/348] Built LeanFixpoint.Zap.Utils (1.2s)
-✔ [127/348] Built Aesop.Script.TacticState (999ms)
-✔ [128/348] Built LeanFixpoint.PA.Instantiation (1.2s)
-✔ [129/348] Built Batteries.Classes.Order (818ms)
-✔ [130/348] Built LeanFixpoint.Zap.Emit (1.6s)
-✔ [131/348] Built LeanFixpoint.Elab (1.0s)
-✔ [132/348] Built Batteries.Data.UInt (815ms)
-✔ [133/348] Built LeanFixpoint.Zap.Sol1 (1.2s)
-✔ [134/348] Built LeanFixpoint.Fusion.Graph (1.4s)
-✔ [135/348] Built Aesop.Util.Basic (2.8s)
-✔ [136/348] Built LeanFixpoint.Zap.Walk (1.2s)
-✔ [137/348] Built Aesop.Script.CtorNames (1.1s)
-✔ [138/348] Built LeanFixpoint.Fusion.Scope (1.2s)
-✔ [139/348] Built LeanFixpoint.Zap (1000ms)
-✔ [140/348] Built Aesop.Forward.Substitution (1.4s)
-✔ [141/348] Built Aesop.Util.EqualUpToIds (3.0s)
-✔ [142/348] Built Aesop.RulePattern.Cache (459ms)
-✔ [143/348] Built LeanFixpoint.Fusion.Sol1 (858ms)
-✔ [144/348] Built Aesop.Script.Util (538ms)
-✔ [145/348] Built Batteries.Data.Array.Basic (2.7s)
-✔ [146/348] Built Aesop.RuleTac.Forward.Basic (600ms)
-✔ [147/348] Built Batteries.Data.BinomialHeap.Basic (3.9s)
-✔ [148/348] Built LeanFixpoint.Fusion.Strip (782ms)
-✔ [149/348] Built Aesop.Tracing (741ms)
-✔ [150/348] Built LeanFixpoint.VCG.STLC.Substitution (5.7s)
-✔ [151/348] Built LeanFixpoint.VCG.STLC.Entailment (267ms)
-✔ [152/348] Built LeanFixpoint.VCG.STLC.Semantics (302ms)
-✔ [153/348] Built LeanFixpoint.Fusion.Elim (746ms)
-✔ [154/348] Built LeanFixpoint.Fusion.StripPres (797ms)
-✔ [155/348] Built LeanFixpoint.VCG.STLC.Typing (291ms)
-✔ [156/348] Built Aesop.Util.Tactic.Ext (700ms)
-✔ [157/348] Built Aesop.EMap (713ms)
-✔ [158/348] Built Aesop.Script.Step (874ms)
-✔ [159/348] Built Aesop.Stats.Basic (997ms)
-✔ [160/348] Built LeanFixpoint.Fusion (681ms)
-✔ [161/348] Built Aesop.Script.UScript (549ms)
-✔ [162/348] Built Aesop.Script.SScript (578ms)
-✔ [163/348] Built LeanFixpoint.VCG.STLC.VCGen (896ms)
-✔ [164/348] Built Aesop.BaseM (522ms)
-✔ [165/348] Built Aesop.Stats.Extension (556ms)
-✔ [166/348] Built Aesop.Stats.File (523ms)
-✔ [167/348] Built Aesop.Script.Check (539ms)
-✔ [168/348] Built Aesop.Script.ScriptM (564ms)
-✔ [169/348] Built Aesop.Stats.Report (714ms)
+✔ [106/348] Built LeanFixpoint.Tactic.Tactics.Lazy (1.7s)
+✔ [107/348] Built LeanProofs.Flux.VC.SimplexSimplex (343ms)
+✔ [108/348] Built LeanProofs.Flux.VC.RmatImpl__0__Get (283ms)
+✔ [109/348] Built LeanProofs.Flux.VC.RmatImpl__0__GetMut (277ms)
+✔ [110/348] Built LeanProofs.Flux.VC.VecFromElemN (291ms)
+✔ [111/348] Built LeanProofs.Flux.VC.VecVecGet (294ms)
+✔ [112/348] Built LeanProofs.Flux.VC.VecVecGetMut (293ms)
+✔ [113/348] Built LeanFixpoint.Tactic.Tactics.SplitHyps (2.2s)
+✔ [114/348] Built LeanFixpoint.Tactic.Tactics.Hoist (2.0s)
+✔ [115/348] Built LeanProofs.Flux.VC.RvecImpl__0__Index (330ms)
+✔ [116/348] Built Batteries.Linter (408ms)
+✔ [117/348] Built Batteries.Lean.Meta.Basic (474ms)
+✔ [118/348] Built LeanFixpoint.VCG.While.Semantics (338ms)
+✔ [119/348] Built Batteries.Tactic.Basic (460ms)
+✔ [120/348] Built Batteries.Lean.Meta.InstantiateMVars (380ms)
+✔ [121/348] Built Batteries.Lean.Meta.SavedState (433ms)
+✔ [122/348] Built LeanFixpoint.Zap.Scope (1.1s)
+✔ [123/348] Built LeanFixpoint.Elab.ToExpr (1.1s)
+✔ [124/348] Built LeanFixpoint.Elab.FromExpr (1.1s)
+✔ [125/348] Built LeanFixpoint.Zap.Utils (1.1s)
+✔ [126/348] Built LeanFixpoint.PA.Instantiation (1.2s)
+✔ [127/348] Built LeanFixpoint.Fusion.Flatten (1.2s)
+✔ [128/348] Built Aesop.Script.TacticState (999ms)
+✔ [129/348] Built LeanFixpoint.Zap.Emit (1.6s)
+✔ [130/348] Built Batteries.Classes.Order (808ms)
+✔ [131/348] Built LeanFixpoint.Zap.Sol1 (1.1s)
+✔ [132/348] Built LeanFixpoint.Elab (1.0s)
+✔ [133/348] Built Batteries.Data.UInt (852ms)
+✔ [134/348] Built LeanFixpoint.Fusion.Graph (1.3s)
+✔ [135/348] Built LeanFixpoint.Zap.Walk (1.2s)
+✔ [136/348] Built Aesop.Util.Basic (3.1s)
+✔ [137/348] Built LeanFixpoint.Fusion.Scope (1.1s)
+✔ [138/348] Built LeanFixpoint.Zap (928ms)
+✔ [139/348] Built Aesop.Script.CtorNames (924ms)
+✔ [140/348] Built Aesop.Forward.Substitution (1.2s)
+✔ [141/348] Built Aesop.Util.EqualUpToIds (4.1s)
+✔ [142/348] Built LeanFixpoint.Fusion.Sol1 (875ms)
+✔ [143/348] Built Aesop.RulePattern.Cache (456ms)
+✔ [144/348] Built Aesop.Script.Util (516ms)
+✔ [145/348] Built Batteries.Data.Array.Basic (2.6s)
+✔ [146/348] Built Aesop.RuleTac.Forward.Basic (593ms)
+✔ [147/348] Built LeanFixpoint.Fusion.Strip (786ms)
+✔ [148/348] Built Batteries.Data.BinomialHeap.Basic (3.8s)
+✔ [149/348] Built LeanFixpoint.VCG.STLC.Substitution (5.7s)
+✔ [150/348] Built Aesop.Tracing (763ms)
+✔ [151/348] Built LeanFixpoint.VCG.STLC.Entailment (259ms)
+✔ [152/348] Built LeanFixpoint.VCG.STLC.Semantics (287ms)
+✔ [153/348] Built LeanFixpoint.Fusion.Elim (714ms)
+✔ [154/348] Built LeanFixpoint.Fusion.StripPres (788ms)
+✔ [155/348] Built LeanFixpoint.VCG.STLC.Typing (289ms)
+✔ [156/348] Built Aesop.Util.Tactic.Ext (687ms)
+✔ [157/348] Built Aesop.EMap (766ms)
+✔ [158/348] Built Aesop.Script.Step (885ms)
+✔ [159/348] Built Aesop.Stats.Basic (988ms)
+✔ [160/348] Built LeanFixpoint.Fusion (703ms)
+✔ [161/348] Built LeanFixpoint.VCG.STLC.VCGen (907ms)
+✔ [162/348] Built Aesop.Script.UScript (527ms)
+✔ [163/348] Built Aesop.BaseM (511ms)
+✔ [164/348] Built Aesop.Script.SScript (570ms)
+✔ [165/348] Built Aesop.Stats.Extension (531ms)
+✔ [166/348] Built Aesop.Stats.File (511ms)
+✔ [167/348] Built Aesop.Script.ScriptM (529ms)
+✔ [168/348] Built Aesop.Script.Check (537ms)
+✔ [169/348] Built Aesop.Stats.Report (703ms)
 ✔ [170/348] Built LeanFixpoint.Tactic.Tactics.RewriteKs (1.2s)
-✔ [171/348] Built Aesop.RuleTac.GoalDiff (920ms)
-✔ [172/348] Built Aesop.Script.UScriptToSScript (931ms)
-✔ [173/348] Built LeanFixpoint.VCG.STLC.Declarative (1.9s)
+✔ [171/348] Built LeanFixpoint.VCG.STLC.Declarative (1.9s)
+✔ [172/348] Built Aesop.RuleTac.GoalDiff (922ms)
+✔ [173/348] Built Aesop.Script.UScriptToSScript (951ms)
 ✔ [174/348] Built Aesop.RulePattern (1.2s)
-✔ [175/348] Built Aesop.Script.StructureStatic (867ms)
-✔ [176/348] Built LeanFixpoint.Tactic.Tactics.ReorderKs (908ms)
+✔ [175/348] Built LeanFixpoint.Tactic.Tactics.ReorderKs (832ms)
+✔ [176/348] Built Aesop.Script.StructureStatic (931ms)
 ℹ [177/348] Built LeanFixpoint.Tactic.Tactics.Sol1 (1.3s)
 info: LeanFixpoint/Tactic/Tactics/Sol1.lean:174:2: rewriteKs: already in optimal order
 info: LeanFixpoint/Tactic/Tactics/Sol1.lean:186:2: rewriteKs: already in optimal order
@@ -204,7 +204,7 @@ info: LeanFixpoint/Tactic/Tactics/Sol1.lean:187:2: rewriteKs: already in optimal
 info: LeanFixpoint/Tactic/Tactics/Sol1.lean:196:2: rewriteKs: already in optimal order
 info: LeanFixpoint/Tactic/Tactics/Sol1.lean:208:2: rewriteKs: already in optimal order
 info: LeanFixpoint/Tactic/Tactics/Sol1.lean:209:2: rewriteKs: already in optimal order
-✔ [178/348] Built Aesop.Forward.RuleInfo (1.1s)
+✔ [178/348] Built Aesop.Forward.RuleInfo (1.0s)
 ℹ [179/348] Built LeanFixpoint.Tactic.Tactics.Fusion (1.4s)
 info: LeanFixpoint/Tactic/Tactics/Fusion.lean:252:0: [fusion] Start κ: [κ]
 [fusion] End κ:   []
@@ -212,127 +212,127 @@ info: LeanFixpoint/Tactic/Tactics/Fusion.lean:261:0: [fusion] Start κ: [κ1, κ
 [fusion] End κ:   []
 info: LeanFixpoint/Tactic/Tactics/Fusion.lean:274:0: [fusion] Start κ: [κ1, κ2]
 [fusion] End κ:   [κ1]
-✔ [180/348] Built Aesop.Script.SpecificTactics (1.7s)
+✔ [180/348] Built Aesop.Script.SpecificTactics (1.8s)
 ✔ [181/348] Built Aesop.Script.StructureDynamic (1.4s)
-✔ [182/348] Built Aesop.Rule.Forward (447ms)
-✔ [183/348] Built Aesop.Script.Main (527ms)
-✔ [184/348] Built Aesop.Forward.Match.Types (470ms)
-✔ [185/348] Built Aesop.Index.Basic (492ms)
-✔ [186/348] Built Aesop.RuleTac.Basic (563ms)
-✔ [187/348] Built Aesop.Index.Forward (563ms)
-✔ [188/348] Built Aesop.Index.RulePattern (639ms)
-✔ [189/348] Built Aesop.RuleTac.Descr (522ms)
-✔ [190/348] Built Aesop.Search.Expansion.Basic (522ms)
-✔ [191/348] Built Aesop.RuleTac.Preprocess (577ms)
-✔ [192/348] Built Aesop.RuleTac.Apply (700ms)
-✔ [193/348] Built Aesop.RuleTac.Tactic (664ms)
-✔ [194/348] Built Aesop.RuleTac.Cases (800ms)
-✔ [195/348] Built Aesop.Rule.Basic (430ms)
-✔ [196/348] Built Aesop.Rule (528ms)
-✔ [197/348] Built Aesop.RuleSet.Member (470ms)
-✔ [198/348] Built Aesop.Tree.UnsafeQueue (470ms)
-✔ [199/348] Built Aesop.Builder.Basic (483ms)
+✔ [182/348] Built Aesop.Rule.Forward (458ms)
+✔ [183/348] Built Aesop.Script.Main (540ms)
+✔ [184/348] Built Aesop.Forward.Match.Types (440ms)
+✔ [185/348] Built Aesop.Index.Basic (491ms)
+✔ [186/348] Built Aesop.RuleTac.Basic (548ms)
+✔ [187/348] Built Aesop.Index.Forward (547ms)
+✔ [188/348] Built Aesop.Index.RulePattern (640ms)
+✔ [189/348] Built Aesop.RuleTac.Descr (512ms)
+✔ [190/348] Built Aesop.RuleTac.Preprocess (571ms)
+✔ [191/348] Built Aesop.Search.Expansion.Basic (521ms)
+✔ [192/348] Built Aesop.RuleTac.Tactic (671ms)
+✔ [193/348] Built Aesop.RuleTac.Apply (687ms)
+✔ [194/348] Built Aesop.RuleTac.Cases (792ms)
+✔ [195/348] Built Aesop.Rule.Basic (435ms)
+✔ [196/348] Built Aesop.Rule (526ms)
+✔ [197/348] Built Aesop.RuleSet.Member (472ms)
+✔ [198/348] Built Aesop.Tree.UnsafeQueue (472ms)
+✔ [199/348] Built Aesop.Builder.Basic (490ms)
 ✔ [200/348] Built Aesop.Forward.Match (1.1s)
-✔ [201/348] Built Aesop.Builder.Unfold (575ms)
-✔ [202/348] Built Aesop.Builder.Constructors (606ms)
-✔ [203/348] Built Aesop.Builder.NormSimp (690ms)
-✔ [204/348] Built Aesop.Builder.Apply (681ms)
-✔ [205/348] Built Aesop.Builder.Tactic (702ms)
-✔ [206/348] Built Aesop.Builder.Cases (803ms)
-✔ [207/348] Built Aesop.Tree.Data.ForwardRuleMatches (816ms)
-✔ [208/348] Built Aesop.Builder.Default (549ms)
-✔ [209/348] Built Aesop.Builder.Forward (1.3s)
-✔ [210/348] Built Aesop.Index (1.2s)
-✔ [211/348] Built Aesop.RuleTac.Forward (1.5s)
-✔ [212/348] Built LeanFixpoint.VCG.STLC.Soundness (7.4s)
-✔ [213/348] Built Aesop.RuleTac (568ms)
-✔ [214/348] Built LeanFixpoint.VCG.STLC.Safety (963ms)
-✔ [215/348] Built Aesop.Frontend.RuleExpr (1.8s)
+✔ [201/348] Built Aesop.Builder.NormSimp (613ms)
+✔ [202/348] Built Aesop.Builder.Apply (606ms)
+✔ [203/348] Built Aesop.Builder.Unfold (610ms)
+✔ [204/348] Built Aesop.Builder.Constructors (731ms)
+✔ [205/348] Built Aesop.Builder.Cases (792ms)
+✔ [206/348] Built Aesop.Builder.Tactic (811ms)
+✔ [207/348] Built Aesop.Tree.Data.ForwardRuleMatches (843ms)
+✔ [208/348] Built Aesop.Index (1.2s)
+✔ [209/348] Built Aesop.Builder.Default (524ms)
+✔ [210/348] Built Aesop.Builder.Forward (1.3s)
+✔ [211/348] Built LeanFixpoint.VCG.STLC.Soundness (7.3s)
+✔ [212/348] Built Aesop.RuleTac.Forward (1.6s)
+✔ [213/348] Built Aesop.RuleTac (577ms)
+✔ [214/348] Built LeanFixpoint.VCG.STLC.Safety (967ms)
+✔ [215/348] Built Aesop.Frontend.RuleExpr (1.7s)
 ✔ [216/348] Built Aesop.RuleSet (1.0s)
-✔ [217/348] Built Aesop.Frontend.Extension.Init (498ms)
+✔ [217/348] Built Aesop.Frontend.Extension.Init (497ms)
 ✔ [218/348] Built Aesop.Forward.State (3.9s)
-✔ [219/348] Built Aesop.Frontend.Extension (667ms)
-✔ [220/348] Built Aesop.Forward.State.ApplyGoalDiff (633ms)
-✔ [221/348] Built Aesop.Forward.State.Initial (633ms)
-✔ [222/348] Built Aesop.Tree.Data (1.2s)
-✔ [223/348] Built Aesop.Frontend.Attribute (739ms)
-✔ [224/348] Built Aesop.Frontend.Tactic (1.2s)
+✔ [219/348] Built Aesop.Frontend.Extension (665ms)
+✔ [220/348] Built Aesop.Forward.State.ApplyGoalDiff (626ms)
+✔ [221/348] Built Aesop.Forward.State.Initial (626ms)
+✔ [222/348] Built Aesop.Frontend.Attribute (731ms)
+✔ [223/348] Built Aesop.Tree.Data (1.2s)
+✔ [224/348] Built Aesop.Frontend.Tactic (1.3s)
 ✔ [225/348] Built Aesop.Frontend.Command (1.4s)
-✔ [226/348] Built Aesop.Search.Queue.Class (767ms)
-✔ [227/348] Built Aesop.Tree.RunMetaM (903ms)
-✔ [228/348] Built Aesop.BuiltinRules.Intros (936ms)
-✔ [229/348] Built Aesop.BuiltinRules.Rfl (892ms)
-✔ [230/348] Built Aesop.Tree.Traversal (951ms)
-✔ [231/348] Built Aesop.BuiltinRules.ApplyHyps (986ms)
-✔ [232/348] Built Aesop.BuiltinRules.Ext (1000ms)
-✔ [233/348] Built Aesop.BuiltinRules.Split (1.0s)
+✔ [226/348] Built Aesop.Search.Queue.Class (821ms)
+✔ [227/348] Built Aesop.BuiltinRules.Intros (907ms)
+✔ [228/348] Built Aesop.BuiltinRules.Rfl (865ms)
+✔ [229/348] Built Aesop.Tree.RunMetaM (949ms)
+✔ [230/348] Built Aesop.BuiltinRules.ApplyHyps (1.0s)
+✔ [231/348] Built Aesop.BuiltinRules.Ext (974ms)
+✔ [232/348] Built Aesop.BuiltinRules.Split (1.0s)
+✔ [233/348] Built Aesop.Tree.Traversal (984ms)
 ✔ [234/348] Built Aesop.BuiltinRules.Assumption (1.1s)
 ✔ [235/348] Built Aesop.BuiltinRules.DestructProducts (1.1s)
 ✔ [236/348] Built Aesop.BuiltinRules.Subst (1.1s)
-✔ [237/348] Built Aesop.Tree.TreeM (1.2s)
-✔ [238/348] Built Aesop.BuiltinRules (656ms)
-✔ [239/348] Built Aesop.Tree.State (991ms)
-✔ [240/348] Built Aesop.Forward.State.UpdateGoal (805ms)
-✔ [241/348] Built Aesop.Tree.Free (776ms)
-✔ [242/348] Built Aesop.Search.SearchM (887ms)
-✔ [243/348] Built Aesop.Tree.Stats (903ms)
-✔ [244/348] Built Aesop.Tree.Tracing (1.4s)
+✔ [237/348] Built Aesop.Tree.TreeM (1.1s)
+✔ [238/348] Built Aesop.BuiltinRules (699ms)
+✔ [239/348] Built Aesop.Tree.State (890ms)
+✔ [240/348] Built Aesop.Tree.Free (752ms)
+✔ [241/348] Built Aesop.Forward.State.UpdateGoal (814ms)
+✔ [242/348] Built Aesop.Tree.Stats (913ms)
+✔ [243/348] Built Aesop.Search.SearchM (977ms)
+✔ [244/348] Built Aesop.Tree.Tracing (1.3s)
 ✔ [245/348] Built Aesop.Tree.ExtractProof (1.3s)
 ✔ [246/348] Built Aesop.Tree.ExtractScript (1.4s)
-✔ [247/348] Built Aesop.Search.RuleSelection (713ms)
-✔ [248/348] Built Aesop.Tree.Check (1.0s)
+✔ [247/348] Built Aesop.Search.RuleSelection (683ms)
+✔ [248/348] Built Aesop.Tree.Check (1.1s)
 ✔ [249/348] Built Aesop.Tree.AddRapp (2.0s)
-✔ [250/348] Built Aesop.Tree (487ms)
-✔ [251/348] Built Aesop.Search.Queue (563ms)
+✔ [250/348] Built Aesop.Tree (496ms)
+✔ [251/348] Built Aesop.Search.Queue (561ms)
 ✔ [252/348] Built Aesop.Saturate (4.9s)
 ✔ [253/348] Built Aesop.Search.Expansion.Norm (1.9s)
-✔ [254/348] Built Aesop.Frontend.Saturate (818ms)
-✔ [255/348] Built Aesop.Frontend (479ms)
+✔ [254/348] Built Aesop.Frontend.Saturate (820ms)
+✔ [255/348] Built Aesop.Frontend (502ms)
 ✔ [256/348] Built Aesop.Search.Expansion (1.3s)
-✔ [257/348] Built Aesop.Search.ExpandSafePrefix (754ms)
-✔ [258/348] Built Aesop.Search.Main (2.1s)
-✔ [259/348] Built Aesop.Main (773ms)
-✔ [260/348] Built Aesop (474ms)
-✔ [261/348] Built LeanFixpoint.Tactic.Closers (684ms)
-✔ [262/348] Built LeanFixpoint.PA.Check (753ms)
-✔ [263/348] Built LeanFixpoint.PA.Weaken (752ms)
-✔ [264/348] Built LeanFixpoint.PA.Fixpoint (679ms)
-✔ [265/348] Built LeanFixpoint.PA (647ms)
-✔ [266/348] Built LeanFixpoint.Tactic.Tactics.SolveFixpoint (991ms)
-✔ [267/348] Built LeanFixpoint.Tactic.Tactics.Fixpoint (887ms)
+✔ [257/348] Built Aesop.Search.ExpandSafePrefix (761ms)
+✔ [258/348] Built Aesop.Search.Main (2.2s)
+✔ [259/348] Built Aesop.Main (779ms)
+✔ [260/348] Built Aesop (481ms)
+✔ [261/348] Built LeanFixpoint.Tactic.Closers (685ms)
+✔ [262/348] Built LeanFixpoint.PA.Check (751ms)
+✔ [263/348] Built LeanFixpoint.PA.Weaken (751ms)
+✔ [264/348] Built LeanFixpoint.PA.Fixpoint (690ms)
+✔ [265/348] Built LeanFixpoint.PA (649ms)
+✔ [266/348] Built LeanFixpoint.Tactic.Tactics.SolveFixpoint (986ms)
+✔ [267/348] Built LeanFixpoint.Tactic.Tactics.Fixpoint (864ms)
 ✔ [268/348] Built LeanFixpoint.Tactic.Tactics.SolveFixpointCombo (713ms)
-✔ [269/348] Built LeanFixpoint.Tactic.Tactics (647ms)
-✔ [270/348] Built LeanFixpoint.Tactic (648ms)
+✔ [269/348] Built LeanFixpoint.Tactic.Tactics (588ms)
+✔ [270/348] Built LeanFixpoint.Tactic (644ms)
 ✔ [271/348] Built LeanFixpoint (649ms)
-ℹ [272/348] Built LeanProofs.User.Proof.VecVecGetProof (1.2s)
-info: LeanProofs/User/Proof/VecVecGetProof.lean:69:0: time: 1ms
-ℹ [273/348] Built LeanProofs.User.Proof.VecVecGetMutProof (1.2s)
-info: LeanProofs/User/Proof/VecVecGetMutProof.lean:69:0: time: 1ms
-ℹ [274/348] Built LeanProofs.User.Proof.SimplexRowOpProof (1.2s)
+ℹ [272/348] Built LeanProofs.User.Proof.SimplexRowOpProof (1.2s)
 info: LeanProofs/User/Proof/SimplexRowOpProof.lean:69:0: time: 1ms
-ℹ [275/348] Built LeanProofs.User.Proof.RmatImpl__0__GetProof (1.3s)
+ℹ [273/348] Built LeanProofs.User.Proof.RmatImpl__0__GetProof (1.3s)
 info: LeanProofs/User/Proof/RmatImpl__0__GetProof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/RmatImpl__0__GetProof.lean:69:0: time: 66ms
+info: LeanProofs/User/Proof/RmatImpl__0__GetProof.lean:69:0: time: 92ms
 info: LeanProofs/User/Proof/RmatImpl__0__GetProof.lean:69:0: [fusion] Start κ: [k0]
 [fusion] End κ:   []
 [solve_fixpoint] Acyclic κ: []
 [solve_fixpoint] Cyclic κ:  []
-ℹ [276/348] Built LeanProofs.User.Proof.RmatImpl__0__GetMutProof (1.3s)
+ℹ [274/348] Built LeanProofs.User.Proof.VecVecGetProof (1.2s)
+info: LeanProofs/User/Proof/VecVecGetProof.lean:69:0: time: 1ms
+ℹ [275/348] Built LeanProofs.User.Proof.VecVecGetMutProof (1.2s)
+info: LeanProofs/User/Proof/VecVecGetMutProof.lean:69:0: time: 1ms
+ℹ [276/348] Built LeanProofs.User.Proof.RvecImpl__0__IndexProof (1.2s)
+info: LeanProofs/User/Proof/RvecImpl__0__IndexProof.lean:69:0: time: 4ms
+ℹ [277/348] Built LeanProofs.User.Proof.SimplexInitRatioCProof (1.4s)
+info: LeanProofs/User/Proof/SimplexInitRatioCProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SimplexInitRatioCProof.lean:71:39: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SimplexInitRatioCProof.lean:69:0: time: 131ms
+info: LeanProofs/User/Proof/SimplexInitRatioCProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  []
+ℹ [278/348] Built LeanProofs.User.Proof.RmatImpl__0__GetMutProof (1.4s)
 info: LeanProofs/User/Proof/RmatImpl__0__GetMutProof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/RmatImpl__0__GetMutProof.lean:69:0: time: 97ms
+info: LeanProofs/User/Proof/RmatImpl__0__GetMutProof.lean:69:0: time: 85ms
 info: LeanProofs/User/Proof/RmatImpl__0__GetMutProof.lean:69:0: [fusion] Start κ: [k0]
 [fusion] End κ:   []
 [solve_fixpoint] Acyclic κ: []
 [solve_fixpoint] Cyclic κ:  []
-ℹ [277/348] Built LeanProofs.User.Proof.RvecImpl__0__IndexProof (1.2s)
-info: LeanProofs/User/Proof/RvecImpl__0__IndexProof.lean:69:0: time: 5ms
-ℹ [278/348] Built LeanProofs.User.Proof.SimplexInitRatioCProof (1.3s)
-info: LeanProofs/User/Proof/SimplexInitRatioCProof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/SimplexInitRatioCProof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/SimplexInitRatioCProof.lean:69:0: time: 127ms
-info: LeanProofs/User/Proof/SimplexInitRatioCProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
-[solve_fixpoint] Cyclic κ:  []
-ℹ [279/348] Built LeanProofs.User.Proof.SimplexSimplexProof (1.5s)
+ℹ [279/348] Built LeanProofs.User.Proof.SimplexSimplexProof (1.6s)
 info: LeanProofs/User/Proof/SimplexSimplexProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/SimplexSimplexProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/SimplexSimplexProof.lean:71:39: [solve_fixpoint] closed by: grind
@@ -345,12 +345,12 @@ info: LeanProofs/User/Proof/SimplexSimplexProof.lean:71:39: [solve_fixpoint] clo
 info: LeanProofs/User/Proof/SimplexSimplexProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/SimplexSimplexProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/SimplexSimplexProof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/SimplexSimplexProof.lean:69:0: time: 313ms
+info: LeanProofs/User/Proof/SimplexSimplexProof.lean:69:0: time: 351ms
 info: LeanProofs/User/Proof/SimplexSimplexProof.lean:69:0: [fusion] Start κ: [k0]
 [fusion] End κ:   []
 [solve_fixpoint] Acyclic κ: []
 [solve_fixpoint] Cyclic κ:  []
-ℹ [280/348] Built LeanProofs.User.Proof.SimplexIsNegProof (2.4s)
+ℹ [280/348] Built LeanProofs.User.Proof.SimplexIsNegProof (2.5s)
 info: LeanProofs/User/Proof/SimplexIsNegProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/SimplexIsNegProof.lean:71:39: [solve_fixpoint] closed by: native_decide
 info: LeanProofs/User/Proof/SimplexIsNegProof.lean:71:39: [solve_fixpoint] closed by: grind
@@ -369,7 +369,7 @@ info: LeanProofs/User/Proof/SimplexIsNegProof.lean:71:39: [solve_fixpoint] close
 info: LeanProofs/User/Proof/SimplexIsNegProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/SimplexIsNegProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/SimplexIsNegProof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/SimplexIsNegProof.lean:69:0: time: 1163ms
+info: LeanProofs/User/Proof/SimplexIsNegProof.lean:69:0: time: 1168ms
 info: LeanProofs/User/Proof/SimplexIsNegProof.lean:69:0: [fusion] Start κ: [k0]
 [fusion] End κ:   [k0]
 [solve_fixpoint] Acyclic κ: []
@@ -408,7 +408,7 @@ info: LeanProofs/User/Proof/VecFromElemNProof.lean:71:39: [solve_fixpoint] close
 info: LeanProofs/User/Proof/VecFromElemNProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/VecFromElemNProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/VecFromElemNProof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/VecFromElemNProof.lean:69:0: time: 1806ms
+info: LeanProofs/User/Proof/VecFromElemNProof.lean:69:0: time: 1710ms
 info: LeanProofs/User/Proof/VecFromElemNProof.lean:69:0: [fusion] Start κ: [k0]
 [fusion] End κ:   [k0]
 [solve_fixpoint] Acyclic κ: []
@@ -418,7 +418,7 @@ info: LeanProofs/User/Proof/VecFromElemNProof.lean:69:0: [fusion] Start κ: [k0]
       z0 ≥ 0) ∧
     z1 ≥ 0) ∧
   z2 ≥ 0
-ℹ [284/348] Built LeanProofs.User.Proof.KmeansNormalizeCentersProof (2.1s)
+ℹ [284/348] Built LeanProofs.User.Proof.KmeansNormalizeCentersProof (2.2s)
 info: LeanProofs/User/Proof/KmeansNormalizeCentersProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/KmeansNormalizeCentersProof.lean:71:39: [solve_fixpoint] closed by: native_decide
 info: LeanProofs/User/Proof/KmeansNormalizeCentersProof.lean:71:39: [solve_fixpoint] closed by: grind
@@ -429,30 +429,30 @@ info: LeanProofs/User/Proof/KmeansNormalizeCentersProof.lean:71:39: [solve_fixpo
 info: LeanProofs/User/Proof/KmeansNormalizeCentersProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/KmeansNormalizeCentersProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/KmeansNormalizeCentersProof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/KmeansNormalizeCentersProof.lean:69:0: time: 839ms
+info: LeanProofs/User/Proof/KmeansNormalizeCentersProof.lean:69:0: time: 847ms
 info: LeanProofs/User/Proof/KmeansNormalizeCentersProof.lean:69:0: [fusion] Start κ: [k0, k1]
 [fusion] End κ:   [k0]
 [solve_fixpoint] Acyclic κ: []
 [solve_fixpoint] Cyclic κ:  [k0]
 [solve_fixpoint] --- PA on cyclic κ's [k0] ---
 [solve_fixpoint]   PA sol for k0 = (((z2 ≥ z0 ∧ z0 ≥ 0) ∧ z1 ≥ 0) ∧ z2 ≥ 0) ∧ z0 ≤ z2
-ℹ [285/348] Built LeanProofs.User.Proof.KmeansDistProof (1.3s)
-info: LeanProofs/User/Proof/KmeansDistProof.lean:69:0: time: 6ms
-✖ [286/348] Building LeanProofs.User.Proof.RmatImpl__0__NewProof (3.9s)
+✖ [285/348] Building LeanProofs.User.Proof.RmatImpl__0__NewProof (3.8s)
 trace: .> LEAN_PATH=/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/packages/Cli/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/packages/batteries/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/packages/Qq/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/packages/importGraph/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/packages/plausible/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/packages/aesop/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/packages/mathlib/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/build/lib/lean /home/ranjit/.elan/toolchains/leanprover--lean4---v4.29.0-rc8/bin/lean /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/LeanProofs/User/Proof/RmatImpl__0__NewProof.lean -o /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/RmatImpl__0__NewProof.olean -i /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/RmatImpl__0__NewProof.ilean -c /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/RmatImpl__0__NewProof.c --setup /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/RmatImpl__0__NewProof.setup.json --json
 error: LeanProofs/User/Proof/RmatImpl__0__NewProof.lean:71:39: maximum recursion depth has been reached
 use `set_option maxRecDepth <num>` to increase limit
 use `set_option diagnostics true` to get diagnostic information
-info: LeanProofs/User/Proof/RmatImpl__0__NewProof.lean:69:0: time: 2650ms
+info: LeanProofs/User/Proof/RmatImpl__0__NewProof.lean:69:0: time: 2450ms
 info: LeanProofs/User/Proof/RmatImpl__0__NewProof.lean:69:0: [fusion] Start κ: [k0, k1, k2]
 [fusion] End κ:   [k0, k1]
 [solve_fixpoint] Acyclic κ: []
 [solve_fixpoint] Cyclic κ:  [k0, k1]
 [solve_fixpoint] --- PA on cyclic κ's [k0, k1] ---
 error: Lean exited with code 1
-ℹ [287/348] Built LeanProofs.User.Proof.HeapsortSwapProof (1.2s)
-info: LeanProofs/User/Proof/HeapsortSwapProof.lean:69:0: time: 1ms
-ℹ [288/348] Built LeanProofs.User.Proof.SimplexInitRatioIProof (4.4s)
+ℹ [286/348] Built LeanProofs.User.Proof.KmeansDistProof (1.4s)
+info: LeanProofs/User/Proof/KmeansDistProof.lean:69:0: time: 2ms
+ℹ [287/348] Built LeanProofs.User.Proof.HeapsortSwapProof (1.4s)
+info: LeanProofs/User/Proof/HeapsortSwapProof.lean:69:0: time: 2ms
+ℹ [288/348] Built LeanProofs.User.Proof.SimplexInitRatioIProof (4.5s)
 info: LeanProofs/User/Proof/SimplexInitRatioIProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/SimplexInitRatioIProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/SimplexInitRatioIProof.lean:71:39: [solve_fixpoint] closed by: grind
@@ -484,7 +484,7 @@ info: LeanProofs/User/Proof/SimplexInitRatioIProof.lean:71:39: [solve_fixpoint] 
 info: LeanProofs/User/Proof/SimplexInitRatioIProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/SimplexInitRatioIProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/SimplexInitRatioIProof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/SimplexInitRatioIProof.lean:69:0: time: 3059ms
+info: LeanProofs/User/Proof/SimplexInitRatioIProof.lean:69:0: time: 3170ms
 info: LeanProofs/User/Proof/SimplexInitRatioIProof.lean:69:0: [fusion] Start κ: [k0]
 [fusion] End κ:   [k0]
 [solve_fixpoint] Acyclic κ: []
@@ -509,14 +509,14 @@ info: LeanProofs/User/Proof/KmeansKmeansProof.lean:71:39: [solve_fixpoint] close
 info: LeanProofs/User/Proof/KmeansKmeansProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/KmeansKmeansProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/KmeansKmeansProof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/KmeansKmeansProof.lean:69:0: time: 2225ms
+info: LeanProofs/User/Proof/KmeansKmeansProof.lean:69:0: time: 2309ms
 info: LeanProofs/User/Proof/KmeansKmeansProof.lean:69:0: [fusion] Start κ: [k0, k1]
 [fusion] End κ:   [k0]
 [solve_fixpoint] Acyclic κ: []
 [solve_fixpoint] Cyclic κ:  [k0]
 [solve_fixpoint] --- PA on cyclic κ's [k0] ---
 [solve_fixpoint]   PA sol for k0 = ((z2 > 0 ∧ z0 ≥ 0) ∧ z1 ≥ 0) ∧ z2 ≥ 0
-ℹ [290/348] Built LeanProofs.User.Proof.FftDoitProof (1.0s)
+ℹ [290/348] Built LeanProofs.User.Proof.FftDoitProof (1.9s)
 info: LeanProofs/User/Proof/FftDoitProof.lean:71:39: [solve_fixpoint] closed by: native_decide
 info: LeanProofs/User/Proof/FftDoitProof.lean:71:39: [solve_fixpoint] closed by: native_decide
 info: LeanProofs/User/Proof/FftDoitProof.lean:71:39: [solve_fixpoint] closed by: native_decide
@@ -536,18 +536,18 @@ info: LeanProofs/User/Proof/FftDoitProof.lean:71:39: [solve_fixpoint] closed by:
 info: LeanProofs/User/Proof/FftDoitProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/FftDoitProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/FftDoitProof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/FftDoitProof.lean:69:0: time: 548ms
+info: LeanProofs/User/Proof/FftDoitProof.lean:69:0: time: 607ms
 info: LeanProofs/User/Proof/FftDoitProof.lean:69:0: [fusion] Start κ: [k0]
 [fusion] End κ:   [k0]
 [solve_fixpoint] Acyclic κ: []
 [solve_fixpoint] Cyclic κ:  [k0]
 [solve_fixpoint] --- PA on cyclic κ's [k0] ---
 [solve_fixpoint]   PA sol for k0 = (((((((z1 > z0 ∧ z0 < z1) ∧ z0 ≤ z1) ∧ z0 > 0) ∧ z1 > 0) ∧ z1 ≥ z0) ∧ z0 ≥ 0) ∧ z1 ≥ 0) ∧ z0 ≤ z1 - 1
-ℹ [291/348] Built LeanProofs.User.Proof.FftLoopC1Proof (1.4s)
+ℹ [291/348] Built LeanProofs.User.Proof.FftLoopC1Proof (1.5s)
 info: LeanProofs/User/Proof/FftLoopC1Proof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/FftLoopC1Proof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/FftLoopC1Proof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/FftLoopC1Proof.lean:69:0: time: 148ms
+info: LeanProofs/User/Proof/FftLoopC1Proof.lean:69:0: time: 95ms
 info: LeanProofs/User/Proof/FftLoopC1Proof.lean:69:0: [solve_fixpoint] Acyclic κ: []
 [solve_fixpoint] Cyclic κ:  []
 ℹ [292/348] Built LeanProofs.User.Proof.KmeansNearestProof (4.1s)
@@ -578,7 +578,7 @@ info: LeanProofs/User/Proof/KmeansNearestProof.lean:71:39: [solve_fixpoint] clos
 info: LeanProofs/User/Proof/KmeansNearestProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/KmeansNearestProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/KmeansNearestProof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/KmeansNearestProof.lean:69:0: time: 2780ms
+info: LeanProofs/User/Proof/KmeansNearestProof.lean:69:0: time: 2670ms
 info: LeanProofs/User/Proof/KmeansNearestProof.lean:69:0: [fusion] Start κ: [k0, k1, k2]
 [fusion] End κ:   [k0]
 [solve_fixpoint] Acyclic κ: []
@@ -641,7 +641,7 @@ info: LeanProofs/User/Proof/SimplexEnterVarProof.lean:71:39: [solve_fixpoint] cl
 info: LeanProofs/User/Proof/SimplexEnterVarProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/SimplexEnterVarProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/SimplexEnterVarProof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/SimplexEnterVarProof.lean:69:0: time: 4291ms
+info: LeanProofs/User/Proof/SimplexEnterVarProof.lean:69:0: time: 4312ms
 info: LeanProofs/User/Proof/SimplexEnterVarProof.lean:69:0: [fusion] Start κ: [k0, k1]
 [fusion] End κ:   [k0]
 [solve_fixpoint] Acyclic κ: []
@@ -662,16 +662,20 @@ info: LeanProofs/User/Proof/SimplexEnterVarProof.lean:69:0: [fusion] Start κ: [
       z1 ≥ 0) ∧
     z2 ≥ 0) ∧
   z3 ≥ 0
-ℹ [294/348] Built LeanProofs.User.Proof.FftFftProof (1.3s)
+ℹ [294/348] Built LeanProofs.User.Proof.DotprodDotprodProof (1.2s)
+info: LeanProofs/User/Proof/DotprodDotprodProof.lean:69:0: time: 1ms
+ℹ [295/348] Built LeanProofs.User.Proof.FftFftProof (1.3s)
 info: LeanProofs/User/Proof/FftFftProof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/FftFftProof.lean:69:0: time: 30ms
+info: LeanProofs/User/Proof/FftFftProof.lean:69:0: time: 16ms
 info: LeanProofs/User/Proof/FftFftProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
 [solve_fixpoint] Cyclic κ:  []
-ℹ [295/348] Built LeanProofs.User.Proof.DotprodDotprodProof (1.3s)
-info: LeanProofs/User/Proof/DotprodDotprodProof.lean:69:0: time: 1ms
-ℹ [297/348] Built LeanProofs.Flux.Checking.VecVecGet (1.2s)
+ℹ [297/348] Built LeanProofs.Flux.Checking.SimplexRowOp (1.2s)
+info: LeanProofs/Flux/Checking/SimplexRowOp.lean:4:0: F.SimplexRowOp_proof : F.SimplexRowOp
+ℹ [298/348] Built LeanProofs.Flux.Checking.VecVecGet (1.2s)
 info: LeanProofs/Flux/Checking/VecVecGet.lean:4:0: F.VecVecGet_proof : F.VecVecGet
-ℹ [298/348] Built LeanProofs.User.Proof.SimplexUnb1Proof (7.8s)
+ℹ [299/348] Built LeanProofs.Flux.Checking.RvecImpl__0__Index (1.3s)
+info: LeanProofs/Flux/Checking/RvecImpl__0__Index.lean:4:0: F.RvecImpl__0__Index_proof : F.RvecImpl__0__Index
+ℹ [300/348] Built LeanProofs.User.Proof.SimplexUnb1Proof (7.9s)
 info: LeanProofs/User/Proof/SimplexUnb1Proof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/SimplexUnb1Proof.lean:71:39: [solve_fixpoint] closed by: native_decide
 info: LeanProofs/User/Proof/SimplexUnb1Proof.lean:71:39: [solve_fixpoint] closed by: grind
@@ -723,7 +727,7 @@ info: LeanProofs/User/Proof/SimplexUnb1Proof.lean:71:39: [solve_fixpoint] closed
 info: LeanProofs/User/Proof/SimplexUnb1Proof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/SimplexUnb1Proof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/SimplexUnb1Proof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/SimplexUnb1Proof.lean:69:0: time: 6478ms
+info: LeanProofs/User/Proof/SimplexUnb1Proof.lean:69:0: time: 6607ms
 info: LeanProofs/User/Proof/SimplexUnb1Proof.lean:69:0: [fusion] Start κ: [k0, k1, k2]
 [fusion] End κ:   [k0, k2]
 [solve_fixpoint] Acyclic κ: []
@@ -737,13 +741,9 @@ info: LeanProofs/User/Proof/SimplexUnb1Proof.lean:69:0: [fusion] Start κ: [k0, 
       z3 > 0) ∧
     z3 ≤ z2 - 1) ∧
   z4
-ℹ [299/348] Built LeanProofs.Flux.Checking.VecVecGetMut (1.3s)
+ℹ [301/348] Built LeanProofs.Flux.Checking.VecVecGetMut (1.3s)
 info: LeanProofs/Flux/Checking/VecVecGetMut.lean:4:0: F.VecVecGetMut_proof : F.VecVecGetMut
-ℹ [300/348] Built LeanProofs.Flux.Checking.RvecImpl__0__Index (1.3s)
-info: LeanProofs/Flux/Checking/RvecImpl__0__Index.lean:4:0: F.RvecImpl__0__Index_proof : F.RvecImpl__0__Index
-ℹ [301/348] Built LeanProofs.Flux.Checking.SimplexRowOp (1.2s)
-info: LeanProofs/Flux/Checking/SimplexRowOp.lean:4:0: F.SimplexRowOp_proof : F.SimplexRowOp
-ℹ [302/348] Built LeanProofs.User.Proof.FftLoopCProof (4.1s)
+ℹ [302/348] Built LeanProofs.User.Proof.FftLoopCProof (4.2s)
 info: LeanProofs/User/Proof/FftLoopCProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/FftLoopCProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/FftLoopCProof.lean:71:39: [solve_fixpoint] closed by: grind
@@ -785,7 +785,7 @@ info: LeanProofs/User/Proof/FftLoopCProof.lean:71:39: [solve_fixpoint] closed by
 info: LeanProofs/User/Proof/FftLoopCProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/FftLoopCProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/FftLoopCProof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/FftLoopCProof.lean:69:0: time: 2769ms
+info: LeanProofs/User/Proof/FftLoopCProof.lean:69:0: time: 2867ms
 info: LeanProofs/User/Proof/FftLoopCProof.lean:69:0: [fusion] Start κ: [k0, k1]
 [fusion] End κ:   [k0]
 [solve_fixpoint] Acyclic κ: []
@@ -798,7 +798,7 @@ info: LeanProofs/User/Proof/FftLoopCProof.lean:69:0: [fusion] Start κ: [k0, k1]
       z0 ≥ 0) ∧
     z1 ≥ 0) ∧
   z2 ≥ 0
-ℹ [303/348] Built LeanProofs.User.Proof.HeapsortHeapSortProof (5.5s)
+ℹ [303/348] Built LeanProofs.User.Proof.HeapsortHeapSortProof (5.9s)
 info: LeanProofs/User/Proof/HeapsortHeapSortProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/HeapsortHeapSortProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/HeapsortHeapSortProof.lean:71:39: [solve_fixpoint] closed by: grind
@@ -863,7 +863,7 @@ info: LeanProofs/User/Proof/HeapsortHeapSortProof.lean:71:39: [solve_fixpoint] c
 info: LeanProofs/User/Proof/HeapsortHeapSortProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/HeapsortHeapSortProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/HeapsortHeapSortProof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/HeapsortHeapSortProof.lean:69:0: time: 4133ms
+info: LeanProofs/User/Proof/HeapsortHeapSortProof.lean:69:0: time: 4410ms
 info: LeanProofs/User/Proof/HeapsortHeapSortProof.lean:69:0: [fusion] Start κ: [k0, k1]
 [fusion] End κ:   [k0, k1]
 [solve_fixpoint] Acyclic κ: []
@@ -882,7 +882,7 @@ info: LeanProofs/User/Proof/HeapsortHeapSortProof.lean:69:0: [fusion] Start κ: 
       z0 ≥ 0) ∧
     z1 ≥ 0) ∧
   z2 ≥ 0
-ℹ [304/348] Built LeanProofs.User.Proof.KmeansKmeansStepProof (7.6s)
+ℹ [304/348] Built LeanProofs.User.Proof.KmeansKmeansStepProof (7.7s)
 info: LeanProofs/User/Proof/KmeansKmeansStepProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/KmeansKmeansStepProof.lean:71:39: [solve_fixpoint] closed by: native_decide
 info: LeanProofs/User/Proof/KmeansKmeansStepProof.lean:71:39: [solve_fixpoint] closed by: grind
@@ -915,7 +915,7 @@ info: LeanProofs/User/Proof/KmeansKmeansStepProof.lean:71:39: [solve_fixpoint] c
 info: LeanProofs/User/Proof/KmeansKmeansStepProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/KmeansKmeansStepProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/KmeansKmeansStepProof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/KmeansKmeansStepProof.lean:69:0: time: 6098ms
+info: LeanProofs/User/Proof/KmeansKmeansStepProof.lean:69:0: time: 6341ms
 info: LeanProofs/User/Proof/KmeansKmeansStepProof.lean:69:0: [fusion] Start κ: [k0, k1, k2, k3]
 [fusion] End κ:   [k0, k1]
 [solve_fixpoint] Acyclic κ: []
@@ -923,15 +923,11 @@ info: LeanProofs/User/Proof/KmeansKmeansStepProof.lean:69:0: [fusion] Start κ: 
 [solve_fixpoint] --- PA on cyclic κ's [k1, k0] ---
 [solve_fixpoint]   PA sol for k1 = (((((((((z0 ≥ z2 ∧ z2 ≥ z0) ∧ z3 > 0) ∧ z0 ≤ z2) ∧ z2 ≤ z0) ∧ z0 ≥ 0) ∧ z1 ≥ 0) ∧ z2 ≥ 0) ∧ z3 ≥ 0) ∧ z0 = z2) ∧ z2 = z0
 [solve_fixpoint]   PA sol for k0 = ((z2 > 0 ∧ z0 ≥ 0) ∧ z1 ≥ 0) ∧ z2 ≥ 0
-ℹ [305/348] Built LeanProofs.Flux.Checking.RmatImpl__0__GetMut (1.2s)
-info: LeanProofs/Flux/Checking/RmatImpl__0__GetMut.lean:4:0: F.RmatImpl__0__GetMut_proof : F.RmatImpl__0__GetMut
-ℹ [306/348] Built LeanProofs.Flux.Checking.SimplexInitRatioC (1.1s)
+ℹ [305/348] Built LeanProofs.Flux.Checking.SimplexInitRatioC (1.2s)
 info: LeanProofs/Flux/Checking/SimplexInitRatioC.lean:4:0: F.SimplexInitRatioC_proof : F.SimplexInitRatioC
-ℹ [307/348] Built LeanProofs.Flux.Checking.RmatImpl__0__Get (1.3s)
+ℹ [306/348] Built LeanProofs.Flux.Checking.RmatImpl__0__Get (1.2s)
 info: LeanProofs/Flux/Checking/RmatImpl__0__Get.lean:4:0: F.RmatImpl__0__Get_proof : F.RmatImpl__0__Get
-ℹ [308/348] Built LeanProofs.Flux.Checking.SimplexSimplex (1.2s)
-info: LeanProofs/Flux/Checking/SimplexSimplex.lean:4:0: F.SimplexSimplex_proof : F.SimplexSimplex
-ℹ [309/348] Built LeanProofs.User.Proof.HeapsortShiftDownProof (6.8s)
+ℹ [307/348] Built LeanProofs.User.Proof.HeapsortShiftDownProof (6.6s)
 info: LeanProofs/User/Proof/HeapsortShiftDownProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/HeapsortShiftDownProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/HeapsortShiftDownProof.lean:71:39: [solve_fixpoint] closed by: grind
@@ -982,7 +978,7 @@ info: LeanProofs/User/Proof/HeapsortShiftDownProof.lean:71:39: [solve_fixpoint] 
 info: LeanProofs/User/Proof/HeapsortShiftDownProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/HeapsortShiftDownProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/HeapsortShiftDownProof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/HeapsortShiftDownProof.lean:69:0: time: 5357ms
+info: LeanProofs/User/Proof/HeapsortShiftDownProof.lean:69:0: time: 5078ms
 info: LeanProofs/User/Proof/HeapsortShiftDownProof.lean:69:0: [fusion] Start κ: [k0, k1, k2]
 [fusion] End κ:   [k0]
 [solve_fixpoint] Acyclic κ: []
@@ -1003,13 +999,19 @@ info: LeanProofs/User/Proof/HeapsortShiftDownProof.lean:69:0: [fusion] Start κ:
       z1 ≥ z2) ∧
     z1 ≥ z3) ∧
   z1 > 0
+ℹ [308/348] Built LeanProofs.Flux.Checking.RmatImpl__0__GetMut (1.2s)
+info: LeanProofs/Flux/Checking/RmatImpl__0__GetMut.lean:4:0: F.RmatImpl__0__GetMut_proof : F.RmatImpl__0__GetMut
+ℹ [309/348] Built LeanProofs.Flux.Checking.SimplexSimplex (1.3s)
+info: LeanProofs/Flux/Checking/SimplexSimplex.lean:4:0: F.SimplexSimplex_proof : F.SimplexSimplex
 ℹ [310/348] Built LeanProofs.Flux.Checking.KmeansNormal (1.1s)
 info: LeanProofs/Flux/Checking/KmeansNormal.lean:4:0: F.KmeansNormal_proof : F.KmeansNormal
 ℹ [311/348] Built LeanProofs.Flux.Checking.SimplexIsNeg (1.3s)
 info: LeanProofs/Flux/Checking/SimplexIsNeg.lean:4:0: F.SimplexIsNeg_proof : F.SimplexIsNeg
-ℹ [312/348] Built LeanProofs.Flux.Checking.KmeansAdd (1.2s)
+ℹ [312/348] Built LeanProofs.Flux.Checking.KmeansAdd (1.1s)
 info: LeanProofs/Flux/Checking/KmeansAdd.lean:4:0: F.KmeansAdd_proof : F.KmeansAdd
-ℹ [313/348] Built LeanProofs.User.Proof.BsearchBinarySearchProof (4.8s)
+ℹ [313/348] Built LeanProofs.Flux.Checking.VecFromElemN (1.2s)
+info: LeanProofs/Flux/Checking/VecFromElemN.lean:4:0: F.VecFromElemN_proof : F.VecFromElemN
+ℹ [314/348] Built LeanProofs.User.Proof.BsearchBinarySearchProof (4.8s)
 info: LeanProofs/User/Proof/BsearchBinarySearchProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/BsearchBinarySearchProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/BsearchBinarySearchProof.lean:71:39: [solve_fixpoint] closed by: grind
@@ -1036,7 +1038,7 @@ info: LeanProofs/User/Proof/BsearchBinarySearchProof.lean:71:39: [solve_fixpoint
 info: LeanProofs/User/Proof/BsearchBinarySearchProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/BsearchBinarySearchProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/BsearchBinarySearchProof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/BsearchBinarySearchProof.lean:69:0: time: 3309ms
+info: LeanProofs/User/Proof/BsearchBinarySearchProof.lean:69:0: time: 3353ms
 info: LeanProofs/User/Proof/BsearchBinarySearchProof.lean:69:0: [fusion] Start κ: [k0, k1, k2]
 [fusion] End κ:   [k0]
 [solve_fixpoint] Acyclic κ: []
@@ -1044,42 +1046,40 @@ info: LeanProofs/User/Proof/BsearchBinarySearchProof.lean:69:0: [fusion] Start �
 [solve_fixpoint] --- PA on cyclic κ's [k0] ---
 [solve_fixpoint]   PA sol for k0 = (((((((((z3 > z1 ∧ z1 < z3) ∧ z3 > 0) ∧ z1 ≤ z3 - 1) ∧ z0 ≥ 0) ∧ z1 ≥ 0) ∧ z3 ≥ 0) ∧ z3 ≥ z0) ∧ z3 ≥ z1) ∧ z0 ≤ z3) ∧
   z1 ≤ z3
-ℹ [314/348] Built LeanProofs.Flux.Checking.VecFromElemN (1.1s)
-info: LeanProofs/Flux/Checking/VecFromElemN.lean:4:0: F.VecFromElemN_proof : F.VecFromElemN
-ℹ [315/348] Built LeanProofs.Flux.Checking.KmeansDist (1.2s)
-info: LeanProofs/Flux/Checking/KmeansDist.lean:4:0: F.KmeansDist_proof : F.KmeansDist
+ℹ [315/348] Built LeanProofs.Flux.Checking.HeapsortSwap (1.0s)
+info: LeanProofs/Flux/Checking/HeapsortSwap.lean:4:0: F.HeapsortSwap_proof : F.HeapsortSwap
 ℹ [316/348] Built LeanProofs.Flux.Checking.KmeansNormalizeCenters (1.2s)
 info: LeanProofs/Flux/Checking/KmeansNormalizeCenters.lean:4:0: F.KmeansNormalizeCenters_proof : F.KmeansNormalizeCenters
-ℹ [317/348] Built LeanProofs.Flux.Checking.HeapsortSwap (1.3s)
-info: LeanProofs/Flux/Checking/HeapsortSwap.lean:4:0: F.HeapsortSwap_proof : F.HeapsortSwap
-ℹ [318/348] Built LeanProofs.Flux.Checking.KmeansKmeans (1.1s)
-info: LeanProofs/Flux/Checking/KmeansKmeans.lean:4:0: F.KmeansKmeans_proof : F.KmeansKmeans
-ℹ [319/348] Built LeanProofs.Flux.Checking.SimplexInitRatioI (1.2s)
+ℹ [317/348] Built LeanProofs.Flux.Checking.KmeansDist (1.3s)
+info: LeanProofs/Flux/Checking/KmeansDist.lean:4:0: F.KmeansDist_proof : F.KmeansDist
+ℹ [318/348] Built LeanProofs.Flux.Checking.SimplexInitRatioI (1.1s)
 info: LeanProofs/Flux/Checking/SimplexInitRatioI.lean:4:0: F.SimplexInitRatioI_proof : F.SimplexInitRatioI
-ℹ [320/348] Built LeanProofs.Flux.Checking.FftDoit (1.2s)
-info: LeanProofs/Flux/Checking/FftDoit.lean:4:0: F.FftDoit_proof : F.FftDoit
-ℹ [321/348] Built LeanProofs.Flux.Checking.FftLoopC1 (1.2s)
+ℹ [319/348] Built LeanProofs.Flux.Checking.KmeansKmeans (1.2s)
+info: LeanProofs/Flux/Checking/KmeansKmeans.lean:4:0: F.KmeansKmeans_proof : F.KmeansKmeans
+ℹ [320/348] Built LeanProofs.Flux.Checking.FftLoopC1 (1.2s)
 info: LeanProofs/Flux/Checking/FftLoopC1.lean:4:0: F.FftLoopC1_proof : F.FftLoopC1
+ℹ [321/348] Built LeanProofs.Flux.Checking.FftDoit (1.3s)
+info: LeanProofs/Flux/Checking/FftDoit.lean:4:0: F.FftDoit_proof : F.FftDoit
 ℹ [322/348] Built LeanProofs.Flux.Checking.KmeansNearest (1.1s)
 info: LeanProofs/Flux/Checking/KmeansNearest.lean:4:0: F.KmeansNearest_proof : F.KmeansNearest
-ℹ [323/348] Built LeanProofs.Flux.Checking.SimplexEnterVar (1.2s)
-info: LeanProofs/Flux/Checking/SimplexEnterVar.lean:4:0: F.SimplexEnterVar_proof : F.SimplexEnterVar
-ℹ [324/348] Built LeanProofs.Flux.Checking.DotprodDotprod (1.2s)
-info: LeanProofs/Flux/Checking/DotprodDotprod.lean:4:0: F.DotprodDotprod_proof : F.DotprodDotprod
-ℹ [325/348] Built LeanProofs.Flux.Checking.FftFft (1.2s)
+ℹ [323/348] Built LeanProofs.Flux.Checking.FftFft (1.2s)
 info: LeanProofs/Flux/Checking/FftFft.lean:4:0: F.FftFft_proof : F.FftFft
-ℹ [326/348] Built LeanProofs.Flux.Checking.SimplexUnb1 (1.1s)
+ℹ [324/348] Built LeanProofs.Flux.Checking.DotprodDotprod (1.3s)
+info: LeanProofs/Flux/Checking/DotprodDotprod.lean:4:0: F.DotprodDotprod_proof : F.DotprodDotprod
+ℹ [325/348] Built LeanProofs.Flux.Checking.SimplexUnb1 (1.2s)
 info: LeanProofs/Flux/Checking/SimplexUnb1.lean:4:0: F.SimplexUnb1_proof : F.SimplexUnb1
-ℹ [327/348] Built LeanProofs.Flux.Checking.HeapsortHeapSort (1.1s)
-info: LeanProofs/Flux/Checking/HeapsortHeapSort.lean:4:0: F.HeapsortHeapSort_proof : F.HeapsortHeapSort
-ℹ [328/348] Built LeanProofs.Flux.Checking.FftLoopC (1.2s)
+ℹ [326/348] Built LeanProofs.Flux.Checking.SimplexEnterVar (1.3s)
+info: LeanProofs/Flux/Checking/SimplexEnterVar.lean:4:0: F.SimplexEnterVar_proof : F.SimplexEnterVar
+ℹ [327/348] Built LeanProofs.Flux.Checking.FftLoopC (1.1s)
 info: LeanProofs/Flux/Checking/FftLoopC.lean:4:0: F.FftLoopC_proof : F.FftLoopC
-ℹ [329/348] Built LeanProofs.Flux.Checking.KmeansKmeansStep (1.0s)
-info: LeanProofs/Flux/Checking/KmeansKmeansStep.lean:4:0: F.KmeansKmeansStep_proof : F.KmeansKmeansStep
-ℹ [330/348] Built LeanProofs.Flux.Checking.HeapsortShiftDown (963ms)
+ℹ [328/348] Built LeanProofs.Flux.Checking.HeapsortShiftDown (879ms)
 info: LeanProofs/Flux/Checking/HeapsortShiftDown.lean:4:0: F.HeapsortShiftDown_proof : F.HeapsortShiftDown
-ℹ [331/348] Built LeanProofs.Flux.Checking.BsearchBinarySearch (944ms)
+ℹ [329/348] Built LeanProofs.Flux.Checking.BsearchBinarySearch (922ms)
 info: LeanProofs/Flux/Checking/BsearchBinarySearch.lean:4:0: F.BsearchBinarySearch_proof : F.BsearchBinarySearch
+ℹ [330/348] Built LeanProofs.Flux.Checking.HeapsortHeapSort (1.2s)
+info: LeanProofs/Flux/Checking/HeapsortHeapSort.lean:4:0: F.HeapsortHeapSort_proof : F.HeapsortHeapSort
+ℹ [331/348] Built LeanProofs.Flux.Checking.KmeansKmeansStep (1.1s)
+info: LeanProofs/Flux/Checking/KmeansKmeansStep.lean:4:0: F.KmeansKmeansStep_proof : F.KmeansKmeansStep
 ℹ [332/348] Built LeanProofs.User.Proof.SimplexDepartVarProof (16s)
 info: LeanProofs/User/Proof/SimplexDepartVarProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/SimplexDepartVarProof.lean:71:39: [solve_fixpoint] closed by: grind
@@ -1167,7 +1167,7 @@ info: LeanProofs/User/Proof/SimplexDepartVarProof.lean:71:39: [solve_fixpoint] c
 info: LeanProofs/User/Proof/SimplexDepartVarProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/SimplexDepartVarProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/SimplexDepartVarProof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/SimplexDepartVarProof.lean:69:0: time: 15109ms
+info: LeanProofs/User/Proof/SimplexDepartVarProof.lean:69:0: time: 14885ms
 info: LeanProofs/User/Proof/SimplexDepartVarProof.lean:69:0: [fusion] Start κ: [k0, k1, k2]
 [fusion] End κ:   [k0]
 [solve_fixpoint] Acyclic κ: []
@@ -1208,7 +1208,9 @@ info: LeanProofs/User/Proof/SimplexDepartVarProof.lean:69:0: [fusion] Start κ: 
       z5 ≤ z0) ∧
     z5 ≤ z1) ∧
   z5 ≤ z2
-ℹ [333/348] Built LeanProofs.User.Proof.KmpKmpSearchProof (17s)
+ℹ [333/348] Built LeanProofs.Flux.Checking.SimplexDepartVar (687ms)
+info: LeanProofs/Flux/Checking/SimplexDepartVar.lean:4:0: F.SimplexDepartVar_proof : F.SimplexDepartVar
+ℹ [334/348] Built LeanProofs.User.Proof.KmpKmpSearchProof (17s)
 info: LeanProofs/User/Proof/KmpKmpSearchProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/KmpKmpSearchProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/KmpKmpSearchProof.lean:71:39: [solve_fixpoint] closed by: native_decide
@@ -1247,7 +1249,7 @@ info: LeanProofs/User/Proof/KmpKmpSearchProof.lean:71:39: [solve_fixpoint] close
 info: LeanProofs/User/Proof/KmpKmpSearchProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/KmpKmpSearchProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/KmpKmpSearchProof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/KmpKmpSearchProof.lean:69:0: time: 15844ms
+info: LeanProofs/User/Proof/KmpKmpSearchProof.lean:69:0: time: 15892ms
 info: LeanProofs/User/Proof/KmpKmpSearchProof.lean:69:0: [fusion] Start κ: [k0, k1, k2, k3]
 [fusion] End κ:   [k0]
 [solve_fixpoint] Acyclic κ: []
@@ -1262,9 +1264,7 @@ info: LeanProofs/User/Proof/KmpKmpSearchProof.lean:69:0: [fusion] Start κ: [k0,
       z2 ≤ z0) ∧
     z2 ≤ z4) ∧
   z3 ≤ z4
-ℹ [334/348] Built LeanProofs.Flux.Checking.SimplexDepartVar (707ms)
-info: LeanProofs/Flux/Checking/SimplexDepartVar.lean:4:0: F.SimplexDepartVar_proof : F.SimplexDepartVar
-ℹ [335/348] Built LeanProofs.Flux.Checking.KmpKmpSearch (671ms)
+ℹ [335/348] Built LeanProofs.Flux.Checking.KmpKmpSearch (666ms)
 info: LeanProofs/Flux/Checking/KmpKmpSearch.lean:4:0: F.KmpKmpSearch_proof : F.KmpKmpSearch
 ℹ [336/348] Built LeanProofs.User.Proof.FftLoopBProof (14s)
 info: LeanProofs/User/Proof/FftLoopBProof.lean:71:39: [solve_fixpoint] closed by: grind
@@ -1363,7 +1363,7 @@ info: LeanProofs/User/Proof/FftLoopBProof.lean:71:39: [solve_fixpoint] closed by
 info: LeanProofs/User/Proof/FftLoopBProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/FftLoopBProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/FftLoopBProof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/FftLoopBProof.lean:69:0: time: 13266ms
+info: LeanProofs/User/Proof/FftLoopBProof.lean:69:0: time: 13060ms
 info: LeanProofs/User/Proof/FftLoopBProof.lean:69:0: [fusion] Start κ: [k0, k1]
 [fusion] End κ:   [k0, k1]
 [solve_fixpoint] Acyclic κ: []
@@ -1396,7 +1396,7 @@ info: LeanProofs/User/Proof/FftLoopBProof.lean:69:0: [fusion] Start κ: [k0, k1]
       z3 < z1) ∧
     z3 < z2) ∧
   z3 < z4
-ℹ [337/348] Built LeanProofs.Flux.Checking.FftLoopB (642ms)
+ℹ [337/348] Built LeanProofs.Flux.Checking.FftLoopB (646ms)
 info: LeanProofs/Flux/Checking/FftLoopB.lean:4:0: F.FftLoopB_proof : F.FftLoopB
 ℹ [338/348] Built LeanProofs.User.Proof.FftFftTestProof (17s)
 info: LeanProofs/User/Proof/FftFftTestProof.lean:71:39: [solve_fixpoint] closed by: grind
@@ -1484,7 +1484,7 @@ info: LeanProofs/User/Proof/FftFftTestProof.lean:71:39: [solve_fixpoint] closed 
 info: LeanProofs/User/Proof/FftFftTestProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/FftFftTestProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/FftFftTestProof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/FftFftTestProof.lean:69:0: time: 15631ms
+info: LeanProofs/User/Proof/FftFftTestProof.lean:69:0: time: 15705ms
 info: LeanProofs/User/Proof/FftFftTestProof.lean:69:0: [fusion] Start κ: [k0, k1, k2, k3]
 [fusion] End κ:   [k0, k1]
 [solve_fixpoint] Acyclic κ: []
@@ -1513,7 +1513,7 @@ info: LeanProofs/User/Proof/FftFftTestProof.lean:69:0: [fusion] Start κ: [k0, k
       z4 ≥ 0) ∧
     z3 > 0) ∧
   z4 > 0
-ℹ [339/348] Built LeanProofs.Flux.Checking.FftFftTest (619ms)
+ℹ [339/348] Built LeanProofs.Flux.Checking.FftFftTest (618ms)
 info: LeanProofs/Flux/Checking/FftFftTest.lean:4:0: F.FftFftTest_proof : F.FftFftTest
 ℹ [340/348] Built LeanProofs.User.Proof.KmpKmpTableProof (29s)
 info: LeanProofs/User/Proof/KmpKmpTableProof.lean:71:39: [solve_fixpoint] closed by: grind
@@ -1610,7 +1610,7 @@ info: LeanProofs/User/Proof/KmpKmpTableProof.lean:71:39: [solve_fixpoint] closed
 info: LeanProofs/User/Proof/KmpKmpTableProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/KmpKmpTableProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/KmpKmpTableProof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/KmpKmpTableProof.lean:69:0: time: 27204ms
+info: LeanProofs/User/Proof/KmpKmpTableProof.lean:69:0: time: 27200ms
 info: LeanProofs/User/Proof/KmpKmpTableProof.lean:69:0: [fusion] Start κ: [k0, k1, k2, k3, k4, k5, k6, k7]
 [fusion] End κ:   [k1, k2]
 [solve_fixpoint] Acyclic κ: []
@@ -1646,9 +1646,9 @@ info: LeanProofs/User/Proof/KmpKmpTableProof.lean:69:0: [fusion] Start κ: [k0, 
       z0 ≥ 0) ∧
     z1 ≥ 0) ∧
   z2 ≥ 0
-ℹ [341/348] Built LeanProofs.Flux.Checking.KmpKmpTable (607ms)
+ℹ [341/348] Built LeanProofs.Flux.Checking.KmpKmpTable (609ms)
 info: LeanProofs/Flux/Checking/KmpKmpTable.lean:4:0: F.KmpKmpTable_proof : F.KmpKmpTable
-ℹ [342/348] Built LeanProofs.User.Proof.KmeansInitCentersProof (122s)
+ℹ [342/348] Built LeanProofs.User.Proof.KmeansInitCentersProof (123s)
 info: LeanProofs/User/Proof/KmeansInitCentersProof.lean:71:39: [solve_fixpoint] closed by: native_decide
 info: LeanProofs/User/Proof/KmeansInitCentersProof.lean:71:39: [solve_fixpoint] closed by: native_decide
 info: LeanProofs/User/Proof/KmeansInitCentersProof.lean:71:39: [solve_fixpoint] closed by: grind
@@ -1705,7 +1705,7 @@ info: LeanProofs/User/Proof/KmeansInitCentersProof.lean:71:39: [solve_fixpoint] 
 info: LeanProofs/User/Proof/KmeansInitCentersProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/KmeansInitCentersProof.lean:71:39: [solve_fixpoint] closed by: grind
 info: LeanProofs/User/Proof/KmeansInitCentersProof.lean:71:39: [solve_fixpoint] closed by: grind
-info: LeanProofs/User/Proof/KmeansInitCentersProof.lean:69:0: time: 121681ms
+info: LeanProofs/User/Proof/KmeansInitCentersProof.lean:69:0: time: 121938ms
 info: LeanProofs/User/Proof/KmeansInitCentersProof.lean:69:0: [fusion] Start κ: [k0, k1, k2]
 [fusion] End κ:   [k0, k1]
 [solve_fixpoint] Acyclic κ: []
@@ -1733,14 +1733,14 @@ info: LeanProofs/User/Proof/KmeansInitCentersProof.lean:69:0: [fusion] Start κ:
       z3 ≥ z0) ∧
     z4 ≥ z1) ∧
   z4 ≥ z2
-ℹ [343/348] Built LeanProofs.Flux.Checking.KmeansInitCenters (594ms)
+ℹ [343/348] Built LeanProofs.Flux.Checking.KmeansInitCenters (595ms)
 info: LeanProofs/Flux/Checking/KmeansInitCenters.lean:4:0: F.KmeansInitCenters_proof : F.KmeansInitCenters
 ✖ [344/348] Building LeanProofs.User.Proof.FftLoopAProof (125s)
 trace: .> LEAN_PATH=/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/packages/Cli/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/packages/batteries/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/packages/Qq/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/packages/proofwidgets/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/packages/importGraph/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/packages/LeanSearchClient/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/packages/plausible/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/packages/aesop/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/packages/mathlib/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/build/lib/lean /home/ranjit/.elan/toolchains/leanprover--lean4---v4.29.0-rc8/bin/lean /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/LeanProofs/User/Proof/FftLoopAProof.lean -o /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/FftLoopAProof.olean -i /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/FftLoopAProof.ilean -c /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/FftLoopAProof.c --setup /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/pldi_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/FftLoopAProof.setup.json --json
 error: LeanProofs/User/Proof/FftLoopAProof.lean:71:39: maximum recursion depth has been reached
 use `set_option maxRecDepth <num>` to increase limit
 use `set_option diagnostics true` to get diagnostic information
-info: LeanProofs/User/Proof/FftLoopAProof.lean:69:0: time: 123951ms
+info: LeanProofs/User/Proof/FftLoopAProof.lean:69:0: time: 123803ms
 info: LeanProofs/User/Proof/FftLoopAProof.lean:69:0: [fusion] Start κ: [k0, k1, k2, k3]
 [fusion] End κ:   [k1, k0, k2, k3]
 [solve_fixpoint] Acyclic κ: []

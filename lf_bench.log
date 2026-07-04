@@ -217,6 +217,8 @@
     [solve_fixpoint]   PA sol for k4 = (((((z1 ≤ z2 - 1 ∧ z1 < z2) ∧ z1 ≤ z0) ∧ z1 ≤ z2) ∧ z0 ≥ z1) ∧ z2 ≥ z1) ∧ z2 > z1
     [fixpoint] PA sol for k4 := (((((z1 ≤ z2 - 1 ∧ z1 < z2) ∧ z1 ≤ z0) ∧ z1 ≤ z2) ∧ z0 ≥ z1) ∧ z2 ≥ z1) ∧ z2 > z1
     /home/ranjit/Desktop/lean-fixpoint/Benchmarks/Liquid-fixpoint/comment.lean:59:2: warning: aesop: failed to prove the goal after exhaustive search.
+    [fusion] Start κ: [k1, k2, k3, k0, k5, k4]
+    [fusion] End κ:   [k4]
 [10/47] Building: constant.lean ... OK
     [solve_fixpoint] closed by: aesop
     [solve_fixpoint] Acyclic κ: []
@@ -253,6 +255,8 @@
     [solve] --- κ0 ---
     [solve]   sol = (∃ a0, a0 = 0 ∧ z0 = a0) ∨ ∃ a2 _x, a2 = 0 ∧ z0 = a2
     [solve]   lam = fun z0 => (∃ a0, a0 = 0 ∧ z0 = a0) ∨ ∃ a2 _x, a2 = 0 ∧ z0 = a2
+    [fusion] Start κ: [κ0]
+    [fusion] End κ:   []
 [15/47] Building: flux-no-anf-append.lean ... OK
     [solve_fixpoint] closed by: grind
     [solve_fixpoint] closed by: grind
