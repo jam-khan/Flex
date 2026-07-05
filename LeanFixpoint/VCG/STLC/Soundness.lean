@@ -76,7 +76,9 @@ theorem sub_sound (κ : KEnv) (Γ : TEnv) (s t : Ty) (c : Constraint) :
       simp only [implyBind] at hcγ
       cases s2 with
       | refine b r =>
-        have h := hcγ.2 (REnv.get b γ w) hm.2.1
+        have hsat := hm.2.1
+        rw [REnv.lookup_eq_inj_get b γ w hm.1] at hsat
+        have h := hcγ.2 (REnv.get b γ w) hsat
         rw [REnv.update_self b γ w hm.1] at h ; exact h
       | arrow _ _ => exact hcγ.2
     · apply sub_sound κ Γ s2 s1 c₁ hc₁
@@ -279,7 +281,8 @@ mutual
           simp only [implyBind] at hcγ
           cases s1 with
           | refine b r =>
-            have hsat : Refinement.interp κ r γ (REnv.get b γ x₀) := hmγ.2.1
+            have hsat : Refinement.interp κ r (γ.push (γ.lookup x₀)) := hmγ.2.1
+            rw [REnv.lookup_eq_inj_get b γ x₀ hmγ.1] at hsat
             have h := hcγ (REnv.get b γ x₀) hsat
             rw [REnv.update_self b γ x₀ hmγ.1] at h
             exact h
@@ -322,7 +325,8 @@ mutual
         simp only [implyBind] at himply
         cases s with
         | refine b r =>
-          have hsat : Refinement.interp κ r γ (REnv.get b γ x₀) := hmγ.2.1
+          have hsat : Refinement.interp κ r (γ.push (γ.lookup x₀)) := hmγ.2.1
+          rw [REnv.lookup_eq_inj_get b γ x₀ hmγ.1] at hsat
           have h := himply (REnv.get b γ x₀) hsat
           rw [REnv.update_self b γ x₀ hmγ.1] at h
           exact h

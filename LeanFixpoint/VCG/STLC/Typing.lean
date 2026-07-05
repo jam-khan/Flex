@@ -27,7 +27,8 @@ inductive Subtyp : KEnv → TEnv → Ty → Ty → Prop where
       formulas or κ-applications. -/
   | refine {κ Γ b r₁ r₂} :
       Entail κ Γ (fun γ => ∀ ν : b.interp,
-        Refinement.interp κ r₁ γ ν → Refinement.interp κ r₂ γ ν) →
+        Refinement.interp κ r₁ (γ.push (Val.inj b ν)) →
+        Refinement.interp κ r₂ (γ.push (Val.inj b ν))) →
       Subtyp κ Γ (.refine b r₁) (.refine b r₂)
 
   /-- SUB-FUN (explicit witness): contravariant input, covariant output. -/

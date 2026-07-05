@@ -247,7 +247,7 @@ example (κ : KEnv) : Hastype κ [] (.ann (.iconst 5) (prim 5)) (prim 5) := by
   constructor
   simp [Ty.WFBVars, Ty.WFBVarCtx, Refinement.hasBVar, Formula.hasBVar, Term.hasBVar]
 
-example (κ : KEnv) (Γ : TEnv) (x y : EVar) (r₁ r₂ : Refinement .int)
+example (κ : KEnv) (Γ : TEnv) (x y : EVar) (r₁ r₂ : Refinement)
     (hx : Γ.lookup x = some (.refine .int r₁))
     (hy : Γ.lookup y = some (.refine .int r₂)) :
     Hastype κ Γ (.add (.fvar x) (.fvar y))
