@@ -42,7 +42,6 @@ private theorem done_le (arr : Arr Int) (n k i j : Int)
       · have key := hsx i (k - 1) (by omega) (by omega) (by omega) (by omega); grind
     · exact hsx i j hi hij hjn (by omega)
 
-open SortInsertKVarSolutions in
 def SortInsert_proof : SortInsert := by
   unfold SortInsert
   fusion

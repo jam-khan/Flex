@@ -1,4 +1,3 @@
-import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.SortMergeSort
 import LeanProofs.User.Fun.VectorsArrEqBetween
 import LeanFixpoint
@@ -13,8 +12,6 @@ def mergesort_inv (celems : Arr Int) (clen : Int) (idx : Int) (oelems : Arr Int)
   0 ≤ idx ∧ idx ≤ olen ∧
   clen = idx ∧
   vectors_arr_eq_between celems oelems 0 idx
-
-open SortMergeSortKVarSolutions
 
 def SortMergeSort_proof : SortMergeSort := by
   unfold SortMergeSort
