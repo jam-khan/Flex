@@ -1,73 +1,38 @@
-import LeanFixpoint
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.BucketMapImpl__0__MoveElementsFromList
+import LeanFixpoint
 open Classical
-set_option linter.unusedVariables false
-
 
 namespace F
 
-namespace BucketMapImpl0MoveElementsFromListQualifs
+theorem absorb_app (v : OVec (ASeq Int Int))
+  : bucket_map_absorb_bucket v (a ++ b) = bucket_map_absorb_bucket (bucket_map_absorb_bucket v a) b := by
+  revert b v
+  induction a
+  case nil => simp
+  case cons hd tl ih =>
+    grind
 
-@[qualif]
-def EqTrue (ls₁ : Prop) : Prop :=
-  ls₁
+def moveelementsfromlist_inv :
+  ASeq Int Int → Int → Int → Int → Int → Prop → OVec (ASeq Int Int) → Int → Int → Int → Int → Prop → OVec (ASeq Int Int) → ASeq Int Int → Prop :=
+    fun tl ne num denom ml sat slots ne_orig num_orig denom_orig ml_orig sat_orig slots_orig l_orig =>
+      num = num_orig ∧ denom = denom_orig ∧ ml = ml_orig ∧ sat = sat_orig ∧
+      ne ≥ ne_orig ∧ alist_aseq_len tl ≤ alist_aseq_len l_orig ∧ ne + alist_aseq_len tl ≤ ne_orig + alist_aseq_len l_orig ∧
+      ∃ pref, pref ++ tl = l_orig ∧ slots = bucket_map_absorb_bucket slots_orig pref
 
-@[qualif]
-def EqFalse (ls₁ : Prop) : Prop :=
-  (¬ls₁)
+attribute [grind .] BucketMapFraction.ext
 
-@[qualif]
-def EqZero (ls₁ : Int) : Prop :=
-  (ls₁ = 0)
-
-@[qualif]
-def GtZero (ls₁ : Int) : Prop :=
-  (ls₁ > 0)
-
-@[qualif]
-def GeZero (ls₁ : Int) : Prop :=
-  (ls₁ ≥ 0)
-
-@[qualif]
-def LtZero (ls₁ : Int) : Prop :=
-  (ls₁ < 0)
-
-@[qualif]
-def LeZero (ls₁ : Int) : Prop :=
-  (ls₁ ≤ 0)
-
-@[qualif]
-def Eq (ls₁ : Int) (a'₁ : Int) : Prop :=
-  (ls₁ = a'₁)
-
-@[qualif]
-def Gt (ls₁ : Int) (a'₁ : Int) : Prop :=
-  (ls₁ > a'₁)
-
-@[qualif]
-def Ge (ls₁ : Int) (a'₁ : Int) : Prop :=
-  (ls₁ ≥ a'₁)
-
-@[qualif]
-def Lt (ls₁ : Int) (a'₁ : Int) : Prop :=
-  (ls₁ < a'₁)
-
-@[qualif]
-def Le (ls₁ : Int) (a'₁ : Int) : Prop :=
-  (ls₁ ≤ a'₁)
-
-@[qualif]
-def Le1 (ls₁ : Int) (a'₁ : Int) : Prop :=
-  (ls₁ ≤ (a'₁ - 1))
-
-end BucketMapImpl0MoveElementsFromListQualifs
-
-open BucketMapImpl0MoveElementsFromListQualifs
-
-set_option maxHeartbeats 5000000
-#time def BucketMapImpl__0__MoveElementsFromList_proof : BucketMapImpl__0__MoveElementsFromList := by
+def BucketMapImpl__0__MoveElementsFromList_proof : BucketMapImpl__0__MoveElementsFromList := by
   unfold BucketMapImpl__0__MoveElementsFromList
-  solve_fixpoint_combo
-
+  exists moveelementsfromlist_inv ; unfold moveelementsfromlist_inv at *
+  zap
+  · exists .nil
+  · rename_i ls1 invholds k t l0 ls1eq _ newslf _ _ _ _ _ _ _ _ _ _ _ nslotseq
+    split_hyps
+    rename_i pref peq aslotseq
+    rw [ls1eq] at peq ; exists pref ++ [(k, t)]
+    and_intros
+    simp at peq ; grind only [usr List.append_assoc, = List.cons_append]
+    rw [nslotseq, absorb_app, aslotseq]
+    grind only [= bucket_map_absorb_bucket.eq_2, = bucket_map_absorb_bucket.eq_1, insert]
 end F

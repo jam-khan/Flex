@@ -1,73 +1,17 @@
-import LeanFixpoint
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.BucketMapThmInsertInList
-open Classical
+import LeanFixpoint
+import LeanProofs.User.Proof.Theorems
 set_option linter.unusedVariables false
-
 
 namespace F
 
-namespace BucketMapThmInsertInListQualifs
+attribute [grind .] alist_set_matches key_matches_set_ne unique_nc_cons_nc unique_set_uniqe
 
-@[qualif]
-def EqTrue (ls_res₀ : Prop) : Prop :=
-  ls_res₀
-
-@[qualif]
-def EqFalse (ls_res₀ : Prop) : Prop :=
-  (¬ls_res₀)
-
-@[qualif]
-def EqZero (ls_res₀ : Int) : Prop :=
-  (ls_res₀ = 0)
-
-@[qualif]
-def GtZero (ls_res₀ : Int) : Prop :=
-  (ls_res₀ > 0)
-
-@[qualif]
-def GeZero (ls_res₀ : Int) : Prop :=
-  (ls_res₀ ≥ 0)
-
-@[qualif]
-def LtZero (ls_res₀ : Int) : Prop :=
-  (ls_res₀ < 0)
-
-@[qualif]
-def LeZero (ls_res₀ : Int) : Prop :=
-  (ls_res₀ ≤ 0)
-
-@[qualif]
-def Eq (ls_res₀ : Int) (inserted₀ : Int) : Prop :=
-  (ls_res₀ = inserted₀)
-
-@[qualif]
-def Gt (ls_res₀ : Int) (inserted₀ : Int) : Prop :=
-  (ls_res₀ > inserted₀)
-
-@[qualif]
-def Ge (ls_res₀ : Int) (inserted₀ : Int) : Prop :=
-  (ls_res₀ ≥ inserted₀)
-
-@[qualif]
-def Lt (ls_res₀ : Int) (inserted₀ : Int) : Prop :=
-  (ls_res₀ < inserted₀)
-
-@[qualif]
-def Le (ls_res₀ : Int) (inserted₀ : Int) : Prop :=
-  (ls_res₀ ≤ inserted₀)
-
-@[qualif]
-def Le1 (ls_res₀ : Int) (inserted₀ : Int) : Prop :=
-  (ls_res₀ ≤ (inserted₀ - 1))
-
-end BucketMapThmInsertInListQualifs
-
-open BucketMapThmInsertInListQualifs
-
-set_option maxHeartbeats 5000000
-#time def BucketMapThmInsertInList_proof : BucketMapThmInsertInList := by
+def BucketMapThmInsertInList_proof : BucketMapThmInsertInList := by
   unfold BucketMapThmInsertInList
-  solve_fixpoint_combo
+  intro k v ls
+  zap
+  grind [svec_len_set1]
 
 end F

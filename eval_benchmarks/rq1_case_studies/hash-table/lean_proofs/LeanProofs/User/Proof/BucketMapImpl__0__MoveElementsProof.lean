@@ -1,73 +1,35 @@
-import LeanFixpoint
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.BucketMapImpl__0__MoveElements
+import LeanFixpoint
 open Classical
-set_option linter.unusedVariables false
-
 
 namespace F
 
-namespace BucketMapImpl0MoveElementsQualifs
+abbrev moveelements_inv1 :
+  Int → Int → Int → Int → Int → Prop → OVec (ASeq Int Int) → OVec (ASeq Int Int) → Int → Int → Int → Int → Prop → OVec (ASeq Int Int) → OVec (ASeq Int Int) → Prop :=
+    fun idx _ num denom mlf sat slots stolen _ num_orig denom_orig mlf_orig sat_orig slots_orig other_orig =>
+      0 ≤ idx ∧ idx ≤ svec_len other_orig ∧
+      num = num_orig ∧ denom = denom_orig ∧ mlf = mlf_orig ∧ sat = sat_orig ∧
+      svec_len stolen = svec_len other_orig ∧ (∀ i: Nat, i < idx → stolen[i]! = .nil) ∧ (∀ i : Nat, i ≥ idx → stolen[i]! = other_orig[i]!) ∧
+      slots = bucket_map_absorb_buckets slots_orig (other_orig.take idx.toNat)
 
-@[qualif]
-def EqTrue (a'₀ : Prop) : Prop :=
-  a'₀
+abbrev moveelements_inv2 :
+  ASeq Int Int → Int → Int → Int → Int → Prop → OVec (ASeq Int Int) → OVec (ASeq Int Int) → Int → Int → Int → Int → Int → Prop → OVec (ASeq Int Int) → OVec (ASeq Int Int) → Prop :=
+    fun _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ => True
 
-@[qualif]
-def EqFalse (a'₀ : Prop) : Prop :=
-  (¬a'₀)
+theorem absorb_buckets_app (v : OVec (ASeq Int Int))
+  : bucket_map_absorb_buckets v (b1 ++ b2) = bucket_map_absorb_buckets (bucket_map_absorb_buckets v b1) b2 := by
+    fun_induction bucket_map_absorb_buckets <;> grind
 
-@[qualif]
-def EqZero (a'₀ : Int) : Prop :=
-  (a'₀ = 0)
+attribute [grind .] BucketMapFraction.ext
 
-@[qualif]
-def GtZero (a'₀ : Int) : Prop :=
-  (a'₀ > 0)
+set_option maxHeartbeats 300000
 
-@[qualif]
-def GeZero (a'₀ : Int) : Prop :=
-  (a'₀ ≥ 0)
-
-@[qualif]
-def LtZero (a'₀ : Int) : Prop :=
-  (a'₀ < 0)
-
-@[qualif]
-def LeZero (a'₀ : Int) : Prop :=
-  (a'₀ ≤ 0)
-
-@[qualif]
-def Eq (a'₀ : Int) (i₀ : Int) : Prop :=
-  (a'₀ = i₀)
-
-@[qualif]
-def Gt (a'₀ : Int) (i₀ : Int) : Prop :=
-  (a'₀ > i₀)
-
-@[qualif]
-def Ge (a'₀ : Int) (i₀ : Int) : Prop :=
-  (a'₀ ≥ i₀)
-
-@[qualif]
-def Lt (a'₀ : Int) (i₀ : Int) : Prop :=
-  (a'₀ < i₀)
-
-@[qualif]
-def Le (a'₀ : Int) (i₀ : Int) : Prop :=
-  (a'₀ ≤ i₀)
-
-@[qualif]
-def Le1 (a'₀ : Int) (i₀ : Int) : Prop :=
-  (a'₀ ≤ (i₀ - 1))
-
-end BucketMapImpl0MoveElementsQualifs
-
-open BucketMapImpl0MoveElementsQualifs
-
-set_option maxHeartbeats 5000000
-#time def BucketMapImpl__0__MoveElements_proof : BucketMapImpl__0__MoveElements := by
+def BucketMapImpl__0__MoveElements_proof : BucketMapImpl__0__MoveElements := by
   unfold BucketMapImpl__0__MoveElements
-  solve_fixpoint_combo
-
+  rewriteKs ; fusion
+  exists moveelements_inv2, moveelements_inv1
+  zap
+  · grind [bucket_map_empties, List.eq_replicate_iff,List.mem_iff_get]
+  · grind [Int.toNat_add, List.take_add_one, List.getElem?_eq_getElem, absorb_buckets_app]
 end F

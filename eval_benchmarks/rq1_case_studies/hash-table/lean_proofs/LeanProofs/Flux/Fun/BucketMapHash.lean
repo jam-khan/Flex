@@ -3,8 +3,8 @@ open Classical
 
 namespace F
 
+noncomputable def bucket_map_hash (a'₇ : Int) : Int :=
+  a'₇
 
 
-def BucketMapHashKey := 
- True
 end F

@@ -1,73 +1,55 @@
-import LeanFixpoint
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.BucketMapImpl__0__Clear
+-- import LeanProofs.Tactics.Tactics
+import LeanFixpoint
 open Classical
-set_option linter.unusedVariables false
-
 
 namespace F
 
-namespace BucketMapImpl0ClearQualifs
+@[simp]
+abbrev clear_inv : Int → OVec (ASeq Int Int) → Int → Int → Int → Int → Prop → OVec (ASeq Int Int) → Prop :=
+  fun idx curr _ _ _ _ _ orig =>
+    idx ≤ curr.length ∧
+    0 < svec_len curr ∧
+    svec_len curr = svec_len orig ∧
+    ∀ x : Nat, 0 ≤ x ∧ x < idx → curr[x]! = .nil
 
-@[qualif]
-def EqTrue (i₀ : Prop) : Prop :=
-  i₀
 
-@[qualif]
-def EqFalse (i₀ : Prop) : Prop :=
-  (¬i₀)
+theorem zero_elem_zero_sum (l : List Nat) : (∀ x ∈ l, x = 0) → l.sum = 0 := by
+  induction l with
+  | nil => grind
+  | cons h t ih =>
+    intro h ; simp
+    and_intros
+    · apply_assumption
+      simp
+    · grind
 
-@[qualif]
-def EqZero (i₀ : Int) : Prop :=
-  (i₀ = 0)
+theorem empty_total_sum (v : OVec (ASeq Int Int)) (i : Int) (h1 : ∀ x : Nat, 0 ≤ x ∧ x < i → v[x]! = List.nil) (h2 : i = svec_len v) : (v.map List.length).sum = 0 := by
+  apply zero_elem_zero_sum
+  intros x xelem
+  rcases (List.mem_iff_getElem.mp xelem) with ⟨x, h, foo⟩
+  rw [List.getElem_map] at foo
+  rw [←foo]
+  simp at h1
+  have : v[x]!.length = 0 := by grind
+  grind
 
-@[qualif]
-def GtZero (i₀ : Int) : Prop :=
-  (i₀ > 0)
-
-@[qualif]
-def GeZero (i₀ : Int) : Prop :=
-  (i₀ ≥ 0)
-
-@[qualif]
-def LtZero (i₀ : Int) : Prop :=
-  (i₀ < 0)
-
-@[qualif]
-def LeZero (i₀ : Int) : Prop :=
-  (i₀ ≤ 0)
-
-@[qualif]
-def Eq (i₀ : Int) (a'₁ : Int) : Prop :=
-  (i₀ = a'₁)
-
-@[qualif]
-def Gt (i₀ : Int) (a'₁ : Int) : Prop :=
-  (i₀ > a'₁)
-
-@[qualif]
-def Ge (i₀ : Int) (a'₁ : Int) : Prop :=
-  (i₀ ≥ a'₁)
-
-@[qualif]
-def Lt (i₀ : Int) (a'₁ : Int) : Prop :=
-  (i₀ < a'₁)
-
-@[qualif]
-def Le (i₀ : Int) (a'₁ : Int) : Prop :=
-  (i₀ ≤ a'₁)
-
-@[qualif]
-def Le1 (i₀ : Int) (a'₁ : Int) : Prop :=
-  (i₀ ≤ (a'₁ - 1))
-
-end BucketMapImpl0ClearQualifs
-
-open BucketMapImpl0ClearQualifs
-
-set_option maxHeartbeats 5000000
-#time def BucketMapImpl__0__Clear_proof : BucketMapImpl__0__Clear := by
+attribute [grind .] List.eq_replicate_iff List.mem_iff_getElem in
+def BucketMapImpl__0__Clear_proof : BucketMapImpl__0__Clear := by
   unfold BucketMapImpl__0__Clear
-  solve_fixpoint_combo
+  exists clear_inv ; unfold clear_inv at *
+  zap
+  · split_hyp_ands
+    apply Eq.symm ; simp
+    apply empty_total_sum
+    assumption
+    grind only [= svec_len.eq_1]
+  · unfold bucket_map_unique_keys alist_aseq_unique_keys at *
+    intros b belem
+    have : b = List.nil := by
+      rw [List.mem_iff_getElem] at belem
+      grind only [= svec_len.eq_1, = getElem!_pos]
+    simp_all
 
 end F
