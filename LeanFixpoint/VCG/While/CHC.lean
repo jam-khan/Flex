@@ -95,7 +95,7 @@ theorem whileCHC_sound (inScope : List CVar) (consts : List (State → Int))
 
 /-! # Examples -/
 
-macro "solve" : tactic => `(tactic| (solve_fixpoint))
+macro "fix" : tactic => `(tactic| (pa_cert ; try grind))
 
 -- Program: x := 0; while x < n do x := x + 1 end
 -- Pre: 0 ≤ n, Post: x = n
@@ -106,8 +106,8 @@ abbrev countToN : Cmd :=
 
 -- vars=["n","x"]: inScope expands from ["n"] to ["n","x"] after first assignment
 example : {| 0 ≤ n |} countToN {| x = n |} := by
-  imp_vcgen
-  solve
+  generate
+  fix
 
 -- Program: while x ≠ 0 do x := x - 1 end
 -- Pre: True, Post: x = 0
@@ -119,7 +119,7 @@ def reduceToZero : Cmd :=
 theorem reduceToZero_correct :
     {| ⊤ |} reduceToZero {| x = 0 |} := by
   generate
-  solve
+  pa_cert
 
 @[qualif]
 def sumEq (i1 i2 i3 : Int) : Prop :=
@@ -143,7 +143,7 @@ abbrev slowAssign : Cmd :=
 theorem slowAssign_correct :
     {| 0 ≤ n |} slowAssign {| y = n |} := by
   generate
-  solve
+  fix
 
 
 @[grind]
@@ -166,4 +166,4 @@ theorem fibLoop_correct (n : Int) :
       i := i + 1) |>
   (fun s => s "x" = fib_spec n) := by
   generate
-  solve
+  fix

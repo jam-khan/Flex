@@ -100,7 +100,7 @@ attribute [simp] Refinement.openBVar Formula.openBVar Term.openBVar String.lengt
 attribute [simp] List.lookup TEnv.tyFv
 
 macro "generate" : tactic => `(tactic| (vc_generate ; vc_reify))
-macro "solve" : tactic => `(tactic| solve_fixpoint)
+macro "zap" : tactic => `(tactic| fusion)
 
 @[qualif]
 def Ge1 (i : Int) : Prop := 1 ≤ i
@@ -111,7 +111,8 @@ example :
         (.letin (.iconst 99) (.app (.ann exId (ty_k "k")) (.bvar 0)))
         Pos := by
   generate
-  solve
+  zap
+  grind
 
 /-! ## κ-example with `ty_xk`: same shape, output type `IntN 99` -/
 
@@ -121,7 +122,8 @@ example :
         (.letin (.iconst 99) (.app (.ann exId (ty_xk "k")) (.bvar 0)))
         (IntN 99) := by
   generate
-  solve
+  zap
+  grind
 
 -- /-! ## Example 3 again: prove `topVC` without solver -/
 
@@ -203,7 +205,8 @@ example :
           (.eq .int (.bvar .int 0) (.const .int 100))
           (.eq .int (.bvar .int 0) (.const .int  99))))) := by
   generate
-  solve
+  zap
+  grind
 
 /-! ## Arithmetic: `let a = 3 in let b = 4 in a + b ⇐ IntN 7` -/
 
