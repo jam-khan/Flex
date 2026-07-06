@@ -1,6 +1,7 @@
 import LeanFixpoint.VCG.STLC.Syntax
 import LeanFixpoint.VCG.STLC.Substitution
 import LeanFixpoint.VCG.STLC.Typing
+import LeanFixpoint.VCG.STLC.Notation
 
 open STLC
 
@@ -20,30 +21,28 @@ abbrev Constraint := KEnv → REnv → Prop
     quantification. -/
 @[simp, reducible]
 def implyBind (x : EVar) (t : Ty) (c : Constraint) : Constraint :=
-  fun κ ρ =>
+  fun κ γ =>
     match t with
     | .refine b r => ∀ v : b.interp,
-                       Refinement.interp κ r ρ v → c κ (REnv.update b ρ x v)
-    | .arrow _ _  => c κ ρ
+                       Refinement.interp κ r γ v → c κ (REnv.update b γ x v)
+    | .arrow _ _  => c κ γ
 
 /-- Algorithmic subtyping. Returns `none` on shape mismatch. Termination
     by `Ty.skel` (preserved under `openVar`). Takes `Γ` so the fresh name
     for the arrow case is picked away from the context domain. -/
 def sub (Γ : TEnv) : Ty → Ty → Option Constraint
   | .refine .int  r₁, .refine .int  r₂ =>
-      some (fun κ ρ => ∀ v : Int,
-              Refinement.interp κ r₁ ρ v → Refinement.interp κ r₂ ρ v)
+      some (fun κ γ => ∀ v : Int,
+              Refinement.interp κ r₁ γ v → Refinement.interp κ r₂ γ v)
   | .refine .bool r₁, .refine .bool r₂ =>
-      some (fun κ ρ => ∀ v : Bool,
-              Refinement.interp κ r₁ ρ v → Refinement.interp κ r₂ ρ v)
+      some (fun κ γ => ∀ v : Bool,
+              Refinement.interp κ r₁ γ v → Refinement.interp κ r₂ γ v)
   | .arrow s₁ t₁, .arrow s₂ t₂ =>
-      let x := EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
-                            ++ s₁.fv ++ s₂.fv ++ t₁.fv ++ t₂.fv
-                            ++ Ty.named s₁ ++ Ty.named s₂
-                            ++ Ty.named t₁ ++ Ty.named t₂ ++ [nuName])
+      let x := EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ
+                            ++ s₁.fv ++ s₂.fv ++ t₁.fv ++ t₂.fv)
       match sub Γ s₂ s₁, sub ((x, s₂) :: Γ) (t₁.openVar 0 x) (t₂.openVar 0 x) with
       | some c₁, some c₂ =>
-          some (fun κ ρ => c₁ κ ρ ∧ implyBind x s₂ c₂ κ ρ)
+          some (fun κ γ => c₁ κ γ ∧ implyBind x s₂ c₂ κ γ)
       | _, _ => none
   | _, _ => none
 termination_by s t => s.skel + t.skel
@@ -66,40 +65,30 @@ mutual
         match synth Γ e₁ with
         | some (c, .arrow s t) =>
             -- Hygiene: `y` must not capture into `t` when we open `t.openVar 0 y`.
-            if y ∈ t.fv ∨ y ∈ Ty.named t ∨ y = nuName then none
+            if y ∈ t.fv then none
             else
               match check Γ (.fvar y) s with
-              | some c' => some ((fun κ ρ => c κ ρ ∧ c' κ ρ), t.openVar 0 y)
+              | some c' => some ((fun κ γ => c κ γ ∧ c' κ γ), t.openVar 0 y)
               | none    => none
         | _ => none
     | .leq (.fvar x) (.fvar y) =>
         match Γ.lookup x, Γ.lookup y with
         | some (.refine .int _), some (.refine .int _) =>
-            some ((fun _ _ => True),
-              .refine .bool ⟨.and
-                (.imp (.eqB (.fvar .bool nuName) (.const .bool true))
-                      (.leqI (.fvar .int x) (.fvar .int y)))
-                (.imp (.leqI (.fvar .int x) (.fvar .int y))
-                      (.eqB (.fvar .bool nuName) (.const .bool true)))⟩)
+            some ((fun _ _ => True), <ty| Bool{ν : (ν = true → x ≤ y) ∧ (x ≤ y → ν = true)} |>)
         | _, _ => none
     | .add (.fvar x) (.fvar y) =>
         match Γ.lookup x, Γ.lookup y with
         | some (.refine .int _), some (.refine .int _) =>
-            some ((fun _ _ => True),
-              .refine .int ⟨.eqI (.fvar .int nuName)
-                                 (.add (.fvar .int x) (.fvar .int y))⟩)
+            some ((fun _ _ => True), <ty| Int{ν : ν = x + y}|>)
         | _, _ => none
     | .not (.fvar x) =>
         match Γ.lookup x with
-        | some (.refine .bool _) =>
-            some ((fun _ _ => True),
-              .refine .bool ⟨.eqB (.fvar .bool nuName) (.not (.fvar .bool x))⟩)
+        | some (.refine .bool _) => some ((fun _ _ => True), <ty| Bool{ν : ν = ¬x}|>)
         | _ => none
     | .and (.fvar x) (.fvar y) =>
         match Γ.lookup x, Γ.lookup y with
         | some (.refine .bool _), some (.refine .bool _) =>
-            some ((fun _ _ => True),
-              .refine .bool ⟨.eqB (.fvar .bool nuName) (.and (.fvar .bool x) (.fvar .bool y))⟩)
+            some ((fun _ _ => True), <ty| Bool{ν : ν = x ∧ y} |>)
         | _, _ => none
     | _ => none
   termination_by e => 2 * e.skel
@@ -109,40 +98,37 @@ mutual
 
   def check (Γ : TEnv) : Exp → Ty → Option Constraint
     | .lam e, .arrow s₁ s₂ =>
-        let x := EVar.fresh (TEnv.dom Γ ++ e.fv ++ s₁.fv ++ s₂.fv
-                              ++ Ty.named s₁ ++ Ty.named s₂
-                              ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ ++ [nuName])
+        let x := EVar.fresh (TEnv.dom Γ ++ e.fv ++ s₁.fv ++ s₂.fv ++ TEnv.tyFv Γ)
         match check ((x, s₁) :: Γ) (e.openVar 0 x) (s₂.openVar 0 x) with
         | some c => some (implyBind x s₁ c)
         | none   => none
     | .letin e₁ e₂, t =>
         match synth Γ e₁ with
         | some (c₁, s) =>
-            let x := EVar.fresh (TEnv.dom Γ ++ e₂.fv ++ s.fv ++ t.fv
-                                  ++ Ty.named s ++ Ty.named t
-                                  ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ ++ [nuName])
+            let x := EVar.fresh (TEnv.dom Γ ++ e₂.fv ++ s.fv ++ t.fv ++ TEnv.tyFv Γ)
             match check ((x, s) :: Γ) (e₂.openVar 0 x) t with
-            | some c₂ => some (fun κ ρ => c₁ κ ρ ∧ implyBind x s c₂ κ ρ)
+            | some c₂ => some (fun κ γ => c₁ κ γ ∧ implyBind x s c₂ κ γ)
             | none    => none
         | none => none
     | .ite e₀ e₁ e₂, t =>
         match e₀ with
         | .fvar x =>
-            -- Hygiene: `x` must not clash with the ν-reserved name.
-            if x = nuName then none
-            else
               match Γ.lookup x with
-              | some (.refine .bool r) =>
-                  let r_true  : Ty := .refine .bool ⟨.and r.fmla
-                    (.eqB (.fvar .bool nuName) (.const .bool true))⟩
-                  let r_false : Ty := .refine .bool ⟨.and r.fmla
-                    (.eqB (.fvar .bool nuName) (.const .bool false))⟩
-                  match check ((x, r_true) :: Γ) e₁ t,
-                        check ((x, r_false) :: Γ) e₂ t with
+              | some (.refine .bool _) =>
+                  -- Fresh guard variable `y` (standard `if`-rule): keep `x : {ν|r}` in
+                  -- scope and add the path condition `x = true/false` via a fresh
+                  -- binding whose refinement mentions `x` free. This preserves `r`
+                  -- in each branch without conjoining into the (atomic) refinement.
+                  let y := EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ
+                                        ++ e₁.fv ++ e₂.fv ++ t.fv ++ [x])
+                  let r_true  : Ty := <ty| Bool{ν : x = true}|>
+                  let r_false : Ty := <ty| Bool{ν : x = false}|>
+                  match check ((y, r_true) :: Γ) e₁ t,
+                        check ((y, r_false) :: Γ) e₂ t with
                   | some c₁, some c₂ =>
-                      some (fun κ ρ =>
-                        implyBind x r_true  c₁ κ ρ ∧
-                        implyBind x r_false c₂ κ ρ)
+                      some (fun κ γ =>
+                        implyBind y r_true  c₁ κ γ ∧
+                        implyBind y r_false c₂ κ γ)
                   | _, _ => none
               | _ => none
         | _ => none
@@ -151,7 +137,7 @@ mutual
         match synth Γ e with
         | some (c, s) =>
             match sub Γ s t with
-            | some c' => some (fun κ ρ => c κ ρ ∧ c' κ ρ)
+            | some c' => some (fun κ γ => c κ γ ∧ c' κ γ)
             | none    => none
         | none => none
   termination_by e _ => 2 * e.skel + 1
@@ -164,5 +150,5 @@ end
 @[simp]
 def topVC (κ : KEnv) (Γ : TEnv) (e : Exp) (t : Ty) : Prop :=
   match check Γ e t with
-  | some c => ∀ ρ : REnv, c κ ρ
+  | some c => ∀ γ : REnv, c κ γ
   | none   => False

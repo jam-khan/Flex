@@ -1,6 +1,7 @@
 import LeanFixpoint.VCG.STLC.Syntax
 import LeanFixpoint.VCG.STLC.Substitution
 import LeanFixpoint.VCG.STLC.Entailment
+import LeanFixpoint.VCG.STLC.Notation
 
 open STLC
 
@@ -10,8 +11,7 @@ open STLC
   picks). The user typically writes `∃ κ, Check κ [] e t`.
 
   Binding sites use locally-nameless: `Exp.lam`/`letin` carry no binder name;
-  the body has `BVar 0` for the parameter. Cofinite quantification picks fresh
-  free names for opening.
+  the body has `BVar 0` for the parameter.
 
   Refinements are deeply-embedded `Formula`s; `Subtyp.refine`'s constraint is
   expressed via `Refinement.subImp` (a `Formula.allI`/`allB` over `ν`).
@@ -21,17 +21,19 @@ open STLC
 /-! ## Subtyping  κ; Γ ⊢ s <: t -/
 
 inductive Subtyp : KEnv → TEnv → Ty → Ty → Prop where
-  /-- SUB-BASE:  `κ; Γ ⊢ ∀ν. r₁(ν) → r₂(ν)`  ⟹  `κ; Γ ⊢ {ν:b|r₁} <: {ν:b|r₂}` -/
+  /-- SUB-BASE: `κ; Γ ⊢ ∀ν. r₁(ν) → r₂(ν)`  ⟹  `κ; Γ ⊢ {ν:b|r₁} <: {ν:b|r₂}`.
+      Stated *semantically* over `Refinement.interp` (matching what the
+      algorithmic `sub` produces), so it works uniformly whether `r₁`/`r₂` are
+      formulas or κ-applications. -/
   | refine {κ Γ b r₁ r₂} :
-      EntailF κ Γ (Refinement.subImp r₁ r₂) →
+      Entail κ Γ (fun γ => ∀ ν : b.interp,
+        Refinement.interp κ r₁ γ ν → Refinement.interp κ r₂ γ ν) →
       Subtyp κ Γ (.refine b r₁) (.refine b r₂)
 
   /-- SUB-FUN (explicit witness): contravariant input, covariant output. -/
   | arrow {κ Γ s₁ t₁ s₂ t₂ x} :
       Subtyp κ Γ s₂ s₁ →
-      x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
-          ++ s₁.fv ++ s₂.fv ++ t₁.fv ++ t₂.fv
-          ++ Ty.named s₁ ++ Ty.named s₂ ++ Ty.named t₁ ++ Ty.named t₂ ++ [nuName] →
+      x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ s₁.fv ++ s₂.fv ++ t₁.fv ++ t₂.fv →
       Subtyp κ ((x, s₂) :: Γ) (t₁.openVar 0 x) (t₂.openVar 0 x) →
       Subtyp κ Γ (.arrow s₁ t₁) (.arrow s₂ t₂)
 
@@ -58,37 +60,27 @@ mutual
         Synth κ Γ e₁ (.arrow s t) →
         Check κ Γ (.fvar y) s        →
         y ∉ t.fv →
-        y ∉ Ty.named t →
-        y ≠ nuName →
         Synth κ Γ (.app e₁ (.fvar y)) (t.openVar 0 y)
 
     | leq_var {κ Γ x y r₁ r₂} :
         Γ.lookup x = some (.refine .int r₁) →
         Γ.lookup y = some (.refine .int r₂) →
         Synth κ Γ (.leq (.fvar x) (.fvar y))
-          (.refine .bool ⟨.and
-            (.imp (.eqB (.fvar .bool nuName) (.const .bool true))
-                  (.leqI (.fvar .int x) (.fvar .int y)))
-            (.imp (.leqI (.fvar .int x) (.fvar .int y))
-                  (.eqB (.fvar .bool nuName) (.const .bool true)))⟩)
+           <ty|Bool{ν : (ν = true → x ≤ y) ∧ (x ≤ y → ν = true)}|>
 
     | add_var {κ Γ x y r₁ r₂} :
         Γ.lookup x = some (.refine .int r₁) →
         Γ.lookup y = some (.refine .int r₂) →
-        Synth κ Γ (.add (.fvar x) (.fvar y))
-          (.refine .int ⟨.eqI (.fvar .int nuName)
-                              (.add (.fvar .int x) (.fvar .int y))⟩)
+        Synth κ Γ (.add (.fvar x) (.fvar y)) <ty| Int{ν : ν = x + y}|>
 
     | not_var {κ Γ x r} :
         Γ.lookup x = some (.refine .bool r) →
-        Synth κ Γ (.not (.fvar x))
-          (.refine .bool ⟨.eqB (.fvar .bool nuName) (.not (.fvar .bool x))⟩)
+        Synth κ Γ (.not (.fvar x)) <ty|Bool{ν : ν = ¬x}|>
 
     | and_var {κ Γ x y rx ry} :
         Γ.lookup x = some (.refine .bool rx) →
         Γ.lookup y = some (.refine .bool ry) →
-        Synth κ Γ (.and (.fvar x) (.fvar y))
-          (.refine .bool ⟨.eqB (.fvar .bool nuName) (.and (.fvar .bool x) (.fvar .bool y))⟩)
+        Synth κ Γ (.and (.fvar x) (.fvar y)) <ty|Bool{ν : ν = x ∧ y} |>
 
   -- κ; Γ ⊢ e ⇐ t : "e checks against type t under κ"
   inductive Check : KEnv → TEnv → Exp → Ty → Prop where
@@ -98,26 +90,20 @@ mutual
         Check κ Γ e t
 
     | lam {κ Γ e s₁ s₂ x} :
-        x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
-            ++ e.fv ++ s₁.fv ++ s₂.fv
-            ++ Ty.named s₁ ++ Ty.named s₂ ++ [nuName] →
+        x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ e.fv ++ s₁.fv ++ s₂.fv →
         Check κ ((x, s₁) :: Γ) (e.openVar 0 x) (s₂.openVar 0 x) →
         Check κ Γ (.lam e) (.arrow s₁ s₂)
 
     | letin {κ Γ e₁ e₂ s t x} :
         Synth κ Γ e₁ s →
-        x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ
-            ++ e₂.fv ++ s.fv ++ t.fv
-            ++ Ty.named s ++ Ty.named t ++ [nuName] →
+        x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ e₂.fv ++ s.fv ++ t.fv →
         Check κ ((x, s) :: Γ) (e₂.openVar 0 x) t →
         Check κ Γ (.letin e₁ e₂) t
 
-    | ite {κ Γ x e₁ e₂ r t} :
+    | ite {κ Γ x y e₁ e₂ r t} :
         Γ.lookup x = some (.refine .bool r) →
-        x ≠ nuName →
-        Check κ ((x, .refine .bool ⟨.and r.fmla
-                  (.eqB (.fvar .bool nuName) (.const .bool true))⟩) :: Γ) e₁ t →
-        Check κ ((x, .refine .bool ⟨.and r.fmla
-                  (.eqB (.fvar .bool nuName) (.const .bool false))⟩) :: Γ) e₂ t →
+        y ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ e₁.fv ++ e₂.fv ++ t.fv ++ [x] →
+        Check κ ((y, <ty|Bool{ν : x = true }|>) :: Γ) e₁ t →
+        Check κ ((y, <ty|Bool{ν : x = false}|>) :: Γ) e₂ t →
         Check κ Γ (.ite (.fvar x) e₁ e₂) t
 end

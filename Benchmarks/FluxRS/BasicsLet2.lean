@@ -1,8 +1,8 @@
 import LeanFixpoint
 
 /-!
-  Reproducer / regression for the **scope-fold over-approximation** (Petros's
-  `BasicsLet2`).  One acyclic κ (`k0`) whose scope binders are a mix of `Int`
+  Reproducer / regression for the **scope-fold over-approximation**
+  (`BasicsLet2`).  One acyclic κ (`k0`) whose scope binders are a mix of `Int`
   and `Prop`, each pinned by a guard:
 
     ∀ n₀.  ∀ a'₀:Prop. a'₀ = True →  ∀ a'₁:Int. n₀ < a'₁ →

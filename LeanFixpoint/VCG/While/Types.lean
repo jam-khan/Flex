@@ -26,6 +26,7 @@ inductive Cmd where
   | cwhile : (State → Bool) → Cmd → Cmd
 
 /-- Collect all assignment-target variable names in first-appearance order. -/
+@[simp]
 def Cmd.assignedVars : Cmd → List CVar
   | .skip        => []
   | .assign x _  => [x]
@@ -42,3 +43,12 @@ def Cmd.assignedVars : Cmd → List CVar
 @[simp] def applyNary : (xs : List CVar) → NaryProp xs.length → State → Prop
   | [],      p, _ => p
   | x :: xs, f, s => applyNary xs (f (s x)) s
+
+/-- Apply an n-ary predicate first to each constant expression (evaluated in the state),
+    then to the state-variable values of `vars`.  Recurses on `cs` so that the
+    `vars.length + (c :: cs).length = (vars.length + cs.length).succ` unfolding
+    stays definitionally valid via `Nat.add_succ`. -/
+@[simp] def applyNaryConsts (vars : List CVar) :
+    (cs : List (State → Int)) → NaryProp (vars.length + cs.length) → State → Prop
+  | [],      κ, s => applyNary vars κ s
+  | c :: cs, κ, s => applyNaryConsts vars cs (κ (c s)) s
