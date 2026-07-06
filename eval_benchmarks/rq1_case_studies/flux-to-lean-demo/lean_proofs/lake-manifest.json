@@ -5,7 +5,7 @@
    "type": "git",
    "subDir": null,
    "scope": "",
-   "rev": "af2bc57f5a3fd47ea7a7092fcf7d68513e36fb40",
+   "rev": "6df0c7eea1e95907dc103f51d296ca08c5e809bd",
    "name": "LeanFixpoint",
    "manifestFile": "lake-manifest.json",
    "inputRev": "main",

@@ -137,7 +137,7 @@ example :
     Pos := by
   simp [topVC]
   intro_kenv
-  simp [mkKEnv, List.lookup, liftK1]
+  simp [mkKEnv, List.lookup]
   solve_fixpoint
 
 -- /-! ## Example 3 again: prove `topVC` without solver -/
