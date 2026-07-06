@@ -1,0 +1,4 @@
+import LeanProofs.Flux.VC.BucketMapImpl__0__NewWithCapacity
+import LeanProofs.User.Proof.BucketMapImpl__0__NewWithCapacityProof
+
+#check (F.BucketMapImpl__0__NewWithCapacity_proof : F.BucketMapImpl__0__NewWithCapacity)

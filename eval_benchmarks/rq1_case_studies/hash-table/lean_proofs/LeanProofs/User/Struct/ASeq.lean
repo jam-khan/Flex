@@ -1,0 +1,10 @@
+import LeanProofs.Flux.Prelude
+open Classical
+set_option linter.unusedVariables false
+
+
+namespace F
+
+def ASeq (t0 : Type) [Inhabited t0] (t1 : Type) [Inhabited t1] : Type := sorry
+
+end F

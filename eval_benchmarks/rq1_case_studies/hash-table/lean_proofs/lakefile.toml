@@ -1,0 +1,10 @@
+name = "lean_proofs"
+version = "0.1.0"
+defaultTargets = ["LeanProofs"]
+
+[[lean_lib]]
+name = "LeanProofs"
+
+[[require]]
+name = "LeanFixpoint"
+path = "/Users/petros/Documents/UCSD/Work/lean-fixpoint"
