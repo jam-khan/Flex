@@ -32,23 +32,26 @@ theorem Exp.WFBVars_openVar (e : Exp) (k : Nat) (x : EVar) :
   | add e₁ e₂ ih₁ ih₂ => simp [Exp.openVar, Exp.WFBVars, ih₁, ih₂]
 
 
-theorem sub_sound (κ : KEnv) (Γ : TEnv) (s t : Ty) (c : Constraint) :
-    sub Γ s t = some c → Entail κ Γ (c κ) → Subtyp κ Γ s t := by
+theorem sub_sound (κ : KEnv) (Γ : TEnv) (s t : Ty) (c : Cstr) :
+    sub Γ s t = some c → Entail κ Γ (c.interp κ) → Subtyp κ Γ s t := by
   intro hsub hent
   match s, t with
   | .refine .int r1, .refine .int r2 =>
-    simp_all [sub]
-    rw [← hsub] at hent
-    exact Subtyp.refine hent
-  | .refine .bool r1, .refine .bool r2 =>
-    simp_all [sub]
-    rw [← hsub] at hent
+    have hfr := EVar.fresh_not_mem (TEnv.dom Γ ++ TEnv.tyFv Γ ++ r1.fv ++ r2.fv)
+    simp only [List.mem_append, not_or] at hfr
+    simp only [sub, Option.some.injEq] at hsub
+    subst hsub
     apply Subtyp.refine
-    intro γ hm ν hpre
-    have hb := hent γ hm
-    cases ν
-    · exact hb.1 hpre
-    · exact hb.2 hpre
+    intro γ hm
+    exact (sub_refine_interp κ _ .int r1 r2 γ hfr.1.2 hfr.2).mp (hent γ hm)
+  | .refine .bool r1, .refine .bool r2 =>
+    have hfr := EVar.fresh_not_mem (TEnv.dom Γ ++ TEnv.tyFv Γ ++ r1.fv ++ r2.fv)
+    simp only [List.mem_append, not_or] at hfr
+    simp only [sub, Option.some.injEq] at hsub
+    subst hsub
+    apply Subtyp.refine
+    intro γ hm
+    exact (sub_refine_interp κ _ .bool r1 r2 γ hfr.1.2 hfr.2).mp (hent γ hm)
   | .arrow s1 t1, .arrow s2 t2 =>
     simp_all [sub]
     let w := (EVar.fresh (Γ.dom ++ (Γ.tyFv ++ (s1.fv ++ (s2.fv ++ (t1.fv ++ t2.fv))))))
@@ -72,19 +75,23 @@ theorem sub_sound (κ : KEnv) (Γ : TEnv) (s t : Ty) (c : Constraint) :
       have hΓγ : ModelsEnv κ γ Γ := by
         cases s2 with | refine _ _ => exact hm.2.2 | arrow _ _ => exact hm
       rw [←hsub] at hent
-      have hcγ : c₁ κ γ ∧ implyBind w s2 c₂ κ γ := by grind [hent γ hΓγ]
-      simp only [implyBind] at hcγ
+      have hcγ := hent γ hΓγ
+      simp only [Cstr.interp] at hcγ
       cases s2 with
       | refine b r =>
+        have hwr : w ∉ r.fv := by
+          have := hw; simp only [Ty.fv, List.mem_append, not_or] at this
+          exact this.1.1.2
+        have hb := (implyBindCstr_interp κ w b r c₂ γ hwr).mp hcγ.2
         have hsat := hm.2.1
         rw [REnv.lookup_eq_inj_get b γ w hm.1] at hsat
-        have h := hcγ.2 (REnv.get b γ w) hsat
+        have h := hb (REnv.get b γ w) hsat
         rw [REnv.update_self b γ w hm.1] at h ; exact h
       | arrow _ _ => exact hcγ.2
     · apply sub_sound κ Γ s2 s1 c₁ hc₁
       intro γ hm
       rw [←hsub] at hent
-      grind
+      exact (hent γ hm).1
   | .refine _ _ , .arrow _ _ | .arrow _ _, .refine _ _ | .refine .int _, .refine .bool _ | .refine .bool _, .refine .int _=>
     simp_all [sub]
   termination_by s.skel + t.skel
@@ -92,8 +99,8 @@ theorem sub_sound (κ : KEnv) (Γ : TEnv) (s t : Ty) (c : Constraint) :
 /-! ## Synth / Check soundness (mutual) -/
 
 mutual
-  theorem synth_sound (κ : KEnv) (Γ : TEnv) (e : Exp) (c : Constraint) (t : Ty) :
-      synth Γ e = some (c, t) → Entail κ Γ (c κ) → Synth κ Γ e t := by
+  theorem synth_sound (κ : KEnv) (Γ : TEnv) (e : Exp) (c : Cstr) (t : Ty) :
+      synth Γ e = some (c, t) → Entail κ Γ (c.interp κ) → Synth κ Γ e t := by
     intro hsynth hent
     match e with
     | .bvar i =>
@@ -175,8 +182,8 @@ mutual
       => simp_all [synth]
   termination_by 2*e.skel
 
-  theorem check_sound (κ : KEnv) (Γ : TEnv) (e : Exp) (t : Ty) (c : Constraint) :
-      check Γ e t = some c → Entail κ Γ (c κ) → Check κ Γ e t := by
+  theorem check_sound (κ : KEnv) (Γ : TEnv) (e : Exp) (t : Ty) (c : Cstr) :
+      check Γ e t = some c → Entail κ Γ (c.interp κ) → Check κ Γ e t := by
     intro hcheck hent
     match e with
     | .bvar i =>
@@ -234,25 +241,28 @@ mutual
       -- `y` is the fresh guard; freshness discharges by `EVar.fresh_not_mem`. The
       -- guard refinement reads `cn` (not `ν`), so the branch obligation is exactly
       -- the matching conjunct of `hent` — no case split on `v` needed.
+      have hyf := EVar.fresh_not_mem (TEnv.dom Γ ++ TEnv.tyFv Γ ++ bt.fv ++ bf.fv ++ t.fv ++ [cn])
       refine Check.ite hr (EVar.fresh_not_mem _) ?_ ?_
       · simp only [List.append_assoc]
         apply check_sound _ _ _ _ _ hc₁
         apply Entail.ext
         intro γ hm
-        have hconj := (hent γ hm).1
-        intro v hv
-        cases v
-        · simpa [REnv.update] using hconj.1 hv
-        · simpa [REnv.update] using hconj.2 hv
+        have hb := (hent γ hm).1
+        rw [implyBindCstr_interp_gen κ _ _ c₁ γ
+              (by simp only [Ty.fv, Refinement.fv, Formula.fv, Term.fv, List.append_nil,
+                    List.mem_append, List.mem_singleton, not_or] at hyf ⊢
+                  grind)] at hb
+        simpa only [implyBindSem] using hb
       · simp only [List.append_assoc]
         apply check_sound _ _ _ _ _ hc₂
         apply Entail.ext
         intro γ hm
-        have hconj := (hent γ hm).2
-        intro v hv
-        cases v
-        · simpa [REnv.update] using hconj.1 hv
-        · simpa [REnv.update] using hconj.2 hv
+        have hb := (hent γ hm).2
+        rw [implyBindCstr_interp_gen κ _ _ c₂ γ
+              (by simp only [Ty.fv, Refinement.fv, Formula.fv, Term.fv, List.append_nil,
+                    List.mem_append, List.mem_singleton, not_or] at hyf ⊢
+                  grind)] at hb
+        simpa only [implyBindSem] using hb
     | .lam e =>
       match t with
       | .refine _ r =>
@@ -276,9 +286,14 @@ mutual
             cases s1 with
             | refine _ _ => exact hmγ.2.2
             | arrow _ _  => exact hmγ
-          have hcγ : c κ γ := hent γ hΓγ
+          have hcγ : c.interp κ γ := hent γ hΓγ
           rw [← hcheck] at hcγ
-          simp only [implyBind] at hcγ
+          have hx₀s : x₀ ∉ s1.fv := by
+            have h := EVar.fresh_not_mem L₀
+            simp only [L₀, List.mem_append, not_or] at h
+            exact h.2.2.1
+          rw [implyBindCstr_interp_gen κ x₀ s1 c₁ γ hx₀s] at hcγ
+          simp only [implyBindSem] at hcγ
           cases s1 with
           | refine b r =>
             have hsat : Refinement.interp κ r (γ.push (γ.lookup x₀)) := hmγ.2.1
@@ -317,12 +332,14 @@ mutual
           cases s with
           | refine _ _ => exact hmγ.2.2
           | arrow _ _  => exact hmγ
-        have hcγ : c κ γ := hent γ hΓγ
+        have hcγ : c.interp κ γ := hent γ hΓγ
         rw [← hcheck] at hcγ
-        have himply : implyBind x₀ s c₂ κ γ := by
-          have := hcγ.2
-          grind
-        simp only [implyBind] at himply
+        have hx₀s : x₀ ∉ s.fv := by
+          have h := EVar.fresh_not_mem L₀
+          simp only [L₀, List.mem_append, not_or] at h
+          exact h.2.2.1
+        have himply := (implyBindCstr_interp_gen κ x₀ s c₂ γ hx₀s).mp hcγ.2
+        simp only [implyBindSem] at himply
         cases s with
         | refine b r =>
           have hsat : Refinement.interp κ r (γ.push (γ.lookup x₀)) := hmγ.2.1
@@ -486,14 +503,14 @@ mutual
       exact .ite hlk hfresh ht hht1 hht2
 end
 
-theorem synth_decl_sound (κ : KEnv) (Γ : TEnv) (e : Exp) (c : Constraint) (t : Ty)
+theorem synth_decl_sound (κ : KEnv) (Γ : TEnv) (e : Exp) (c : Cstr) (t : Ty)
     (hΓ : TEnv.WFBVars Γ) (hE : Exp.WFBVars e) :
-    synth Γ e = some (c, t) → Entail κ Γ (c κ) → Hastype κ Γ e t :=
+    synth Γ e = some (c, t) → Entail κ Γ (c.interp κ) → Hastype κ Γ e t :=
   fun h hc => (synth_to_hastype hΓ hE (synth_sound κ Γ e c t h hc)).1
 
-theorem check_decl_sound (κ : KEnv) (Γ : TEnv) (e : Exp) (t : Ty) (c : Constraint)
+theorem check_decl_sound (κ : KEnv) (Γ : TEnv) (e : Exp) (t : Ty) (c : Cstr)
     (hΓ : TEnv.WFBVars Γ) (hE : Exp.WFBVars e) (ht : Ty.WFBVars t) :
-    check Γ e t = some c → Entail κ Γ (c κ) → Hastype κ Γ e t :=
+    check Γ e t = some c → Entail κ Γ (c.interp κ) → Hastype κ Γ e t :=
   fun h hc => check_to_hastype hΓ hE ht (check_sound κ Γ e t c h hc)
 
 theorem topVC_decl_sound (κ : KEnv) (e : Exp) (t : Ty)

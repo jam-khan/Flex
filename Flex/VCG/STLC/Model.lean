@@ -41,6 +41,18 @@ def Refinement.interp (κ : KEnv) (r : Refinement) (γ : REnv) : Prop :=
   | .kapp kn args =>
       κ kn (args.map (fun a => ⟨a.1, Term.interp γ a.2⟩))
 
+/-- Interpret a syntactic constraint (`Cstr`, declared in `Syntax.lean`) as a
+    `κ`-indexed `REnv` predicate. Binders are *named*: `.all x b c` quantifies
+    `x` and writes it into the name map; the de Bruijn stack is never used. Not a
+    global `@[simp]` lemma (that would make `simp` in the soundness proofs unfold
+    constraints under the bridge lemmas); unfold it explicitly (see
+    `Examples.lean` / `vc_generate`). -/
+def Cstr.interp : Cstr → KEnv → REnv → Prop
+  | .head r,     κ, γ => Refinement.interp κ r γ
+  | .imp r c,    κ, γ => Refinement.interp κ r γ → c.interp κ γ
+  | .all x b c,  κ, γ => ∀ v : b.interp, c.interp κ (REnv.update b γ x v)
+  | .conj c₁ c₂, κ, γ => c₁.interp κ γ ∧ c₂.interp κ γ
+
 /-! ## Logical relation: ⟦τ⟧ as a predicate on values, κ-indexed and parameterized by γ. -/
 def TyDenote : KEnv → Ty → REnv → Val → Prop
   | κ, .refine b r, γ, v => ∃ ν : b.interp, v = Val.inj b ν ∧

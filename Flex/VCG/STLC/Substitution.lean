@@ -591,6 +591,20 @@ theorem EVar.fresh_not_mem (L : List EVar) : EVar.fresh L ∉ L := by
   rw [h₁] at h₂
   omega
 
+/-- A fresh name is `≠` any member of the list it was drawn from — decided by
+    *length* (`EVar.maxLen`), not by comparing the `x`-strings character by
+    character (which is prohibitively deep for nested contexts). Stated as
+    `beq = false` so it fires as a `simp` rewrite on `if · == · …`. -/
+@[simp] theorem EVar.fresh_beq_mem_left (L : List EVar) (x : EVar) (h : x ∈ L) :
+    (EVar.fresh L == x) = false := by
+  apply beq_eq_false_iff_ne.mpr
+  intro heq; subst heq; exact EVar.fresh_not_mem L h
+
+@[simp] theorem EVar.fresh_beq_mem_right (L : List EVar) (x : EVar) (h : x ∈ L) :
+    (x == EVar.fresh L) = false := by
+  apply beq_eq_false_iff_ne.mpr
+  intro heq; subst heq; exact EVar.fresh_not_mem L h
+
 /-! ## 15. `Exp.substEnv` push-through lemmas
 
   Under the structural definition each constructor case is *definitional*

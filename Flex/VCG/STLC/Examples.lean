@@ -63,6 +63,8 @@ def ex1Ty  : Ty  := Pos
 
 example (κ : KEnv) : topVC κ [] ex1Exp ex1Ty := by
   simp only [topVC, check, synth, sub, ex1Exp, ex1Ty, Pos, prim,
+             Cstr.interp, Cstr.triv, Refinement.instNu,
+             Formula.instNuAt, Term.instNuAt, REnv.update, REnv.write,
              Refinement.interp, Formula.interp, Term.interp]
   solve_fixpoint
 
@@ -73,8 +75,10 @@ def ex2Ty  : Ty  := .arrow Pos Pos
 
 set_option maxHeartbeats 800000 in
 example (κ : KEnv) : topVC κ [] ex2Exp ex2Ty := by
-  simp [topVC, check, synth, sub, implyBind, ex2Exp, exId, ex2Ty, Pos, self,
-        Refinement.interp, Formula.interp, Term.interp, REnv.get,
+  simp [topVC, check, synth, sub, implyBindCstr, Cstr.interp, Cstr.triv,
+        Refinement.instNu, Formula.instNuAt, Term.instNuAt, ex2Exp, exId, ex2Ty,
+        Pos, self, Refinement.interp, Formula.interp, Term.interp, REnv.get,
+        TEnv.dom, TEnv.tyFv, Ty.fv, Refinement.fv, Formula.fv, Term.fv,
         Exp.openVar, Ty.openVar, Refinement.openBVar, Formula.openBVar,
         Term.openBVar]
 
@@ -84,8 +88,10 @@ def ex3Exp : Exp := .letin (.iconst 5) (.bvar 0)
 def ex3Ty  : Ty  := Pos
 
 example (κ : KEnv) : topVC κ [] ex3Exp ex3Ty := by
-  simp [topVC, check, synth, sub, implyBind, ex3Exp, ex3Ty, Pos, prim, self,
-        Refinement.interp, Formula.interp, Term.interp, REnv.get,
+  simp [topVC, check, synth, sub, implyBindCstr, Cstr.interp, Cstr.triv,
+        Refinement.instNu, Formula.instNuAt, Term.instNuAt, ex3Exp, ex3Ty, Pos,
+        prim, self, Refinement.interp, Formula.interp, Term.interp, REnv.get,
+        TEnv.dom, TEnv.tyFv, Ty.fv, Refinement.fv, Formula.fv, Term.fv,
         Exp.openVar]
 
 /-! ## κ-example with `ty_k`: `let z = 99 in (λx. x : IntK k → IntK k) z ⇐ Pos`
@@ -94,7 +100,8 @@ example (κ : KEnv) : topVC κ [] ex3Exp ex3Ty := by
   Here the κ surfaces from `Refinement.interp`'s `.kapp` case (post-stratification)
   and is discharged via the now fully-proven `check_sound` + `solve_fixpoint`. -/
 
-attribute [simp] check synth sub EVar.fresh implyBind prim self Refinement.interp Formula.interp TEnv.dom
+attribute [simp] check synth sub EVar.fresh implyBindCstr prim self Refinement.interp Formula.interp TEnv.dom
+attribute [simp] Cstr.interp Cstr.triv Refinement.instNu Formula.instNuAt Term.instNuAt REnv.update REnv.write
 attribute [simp] Term.interp REnv.get Exp.openVar Ty.openVar Exp.fv Refinement.fv Formula.fv Term.fv Ty.fv
 attribute [simp] Refinement.openBVar Formula.openBVar Term.openBVar String.length EVar.maxLen
 attribute [simp] List.lookup TEnv.tyFv
@@ -233,8 +240,9 @@ example (κ : KEnv) : Hastype κ [] ex2Exp ex2Ty := by
 -- let z = 5 in z is declaratively typeable at Pos.
 example (κ : KEnv) : Hastype κ [] ex3Exp ex3Ty := by
   apply topVC_decl_sound <;>
-  simp [topVC, check, synth, sub, implyBind, ex3Exp, ex3Ty, Pos, prim, self,
-        Refinement.interp, Formula.interp, Term.interp, REnv.get,
+  simp [topVC, check, synth, sub, implyBindCstr, Cstr.interp, Cstr.triv,
+        Refinement.instNu, Formula.instNuAt, Term.instNuAt, ex3Exp, ex3Ty, Pos,
+        prim, self, Refinement.interp, Formula.interp, Term.interp, REnv.get,
         Exp.openVar, Exp.WFBVars, Ty.WFBVars, Ty.WFBVarCtx, Refinement.hasBVar,
         Formula.hasBVar, Term.hasBVar]
 
