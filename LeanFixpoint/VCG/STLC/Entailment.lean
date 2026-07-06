@@ -24,7 +24,7 @@ open STLC
 def ModelsEnv (κ : KEnv) : REnv → TEnv → Prop
   | _, []                    => True
   | γ, (x, .refine b r) :: Γ => REnv.HasBase γ x b
-                                 ∧ Refinement.interp κ r γ (REnv.get b γ x)
+                                 ∧ Refinement.interp κ r (γ.push (γ.lookup x))
                                  ∧ ModelsEnv κ γ Γ
   | γ, (_, .arrow _ _)  :: Γ => ModelsEnv κ γ Γ
 
@@ -33,6 +33,16 @@ def ModelsEnv (κ : KEnv) : REnv → TEnv → Prop
 @[simp]
 def Entail (κ : KEnv) (Γ : TEnv) (c : REnv → Prop) : Prop :=
   ∀ γ, ModelsEnv κ γ Γ → c γ
+
+/-- Under `HasBase`, the raw stored `Val` *is* the injected base-`b` read:
+    `γ.lookup x = Val.inj b (get b γ x)`. Bridges `ModelsEnv`'s `push (γ.lookup x)`
+    to the `push (Val.inj b v)` form the `∀ v` consumers (`Entail.ext`, `implyBind`)
+    expect. -/
+theorem REnv.lookup_eq_inj_get (b : Base) (γ : REnv) (x : EVar) (hb : γ.HasBase x b) :
+    γ.lookup x = Val.inj b (REnv.get b γ x) := by
+  cases b with
+  | int  => obtain ⟨n, hn⟩ := hb; simp [REnv.lookup, REnv.get, hn]
+  | bool => obtain ⟨c, hc⟩ := hb; simp [REnv.lookup, REnv.get, hc]
 
 /-- Updating slot `x` with its current value is the identity — provided the cell
     actually holds a base-`b` value (otherwise the read defaults and the write
@@ -60,12 +70,13 @@ theorem Entail.emp {κ : KEnv} {c : REnv → Prop} (h : ∀ γ, c γ) :
 /-- ENT-EXT (predicate form): `κ; Γ ⊢ ∀v:b. r v → c[x↦v]  ⟹  κ; Γ, x:{ν:b|r} ⊢ c`.
     Instantiate with `REnv.get b γ x`, then close by `REnv.update_self`. -/
 @[simp]
-theorem Entail.ext {κ : KEnv} {Γ : TEnv} {x : EVar} {b : Base} {r : Refinement b}
+theorem Entail.ext {κ : KEnv} {Γ : TEnv} {x : EVar} {b : Base} {r : Refinement}
     {c : REnv → Prop}
     (h : Entail κ Γ (fun γ => ∀ v : b.interp,
-              Refinement.interp κ r γ v → c (REnv.update b γ x v))) :
+              Refinement.interp κ r (γ.push (Val.inj b v)) → c (REnv.update b γ x v))) :
     Entail κ ((x, .refine b r) :: Γ) c := by
   intro γ ⟨hb, hr, hΓ⟩
+  rw [REnv.lookup_eq_inj_get b γ x hb] at hr
   have key := h γ hΓ (REnv.get b γ x) hr
   rw [REnv.update_self b γ x hb] at key
   exact key

@@ -63,13 +63,13 @@ def Formula.openBVar (b' : Base) (k : Nat) (x : EVar) : Formula → Formula
 
 /-- Free variables of a refinement. ν is a `BVar` (level 0), never an `fvar`,
     so the formula's fv already excludes it — no filtering needed. -/
-def Refinement.fv {b : Base} (r : Refinement b) : List EVar :=
+def Refinement.fv (r : Refinement) : List EVar :=
   match r with
   | .fmla φ      => φ.fv
   | .kapp _ args => args.flatMap (fun a => Term.fv a.2)
 
 def Refinement.openBVar (b' : Base) (k : Nat) (x : EVar)
-    {b : Base} (r : Refinement b) : Refinement b :=
+    (r : Refinement) : Refinement :=
   match r with
   | .fmla φ       => .fmla (φ.openBVar b' k x)
   | .kapp kn args => .kapp kn (args.map (fun a => ⟨a.1, Term.openBVar b' k x a.2⟩))
@@ -155,7 +155,7 @@ def Formula.hasBVar (b : Base) (k : Nat) : Formula → Prop
 
 /-- `Refinement.hasBVar b k r`: r mentions `Term.bvar b k` — in its formula, or
     in the arguments of a κ-application. -/
-def Refinement.hasBVar (b : Base) (k : Nat) {b' : Base} (r : Refinement b') : Prop :=
+def Refinement.hasBVar (b : Base) (k : Nat) (r : Refinement) : Prop :=
   match r with
   | .fmla φ      => Formula.hasBVar b k φ
   | .kapp _ args => ∃ a ∈ args, Term.hasBVar b k a.2
@@ -325,7 +325,7 @@ theorem Formula.hasBVar_openBVar_other (φ : Formula) (b b' : Base) (k j : Nat) 
 /-! Refinement-level analogues of the `Formula.*` openBVar BVar lemmas: case-split
     the enum and dispatch κ-application arguments via the `Term.*` lemmas. -/
 
-theorem Refinement.not_hasBVar_openBVar_same {b'' : Base} (r : Refinement b'')
+theorem Refinement.not_hasBVar_openBVar_same (r : Refinement)
     (b : Base) (k : Nat) (x : EVar) : ¬Refinement.hasBVar b k (r.openBVar b k x) := by
   cases r with
   | fmla φ => exact Formula.not_hasBVar_openBVar_same φ b k x
@@ -336,7 +336,7 @@ theorem Refinement.not_hasBVar_openBVar_same {b'' : Base} (r : Refinement b'')
     obtain ⟨a', _, rfl⟩ := hmem
     exact Term.not_hasBVar_openBVar_same b k x a'.2 hbv
 
-theorem Refinement.hasBVar_openBVar_other {b'' : Base} (r : Refinement b'')
+theorem Refinement.hasBVar_openBVar_other (r : Refinement)
     (b b' : Base) (k j : Nat) (x : EVar) (hne : b ≠ b' ∨ k ≠ j) :
     Refinement.hasBVar b k (r.openBVar b' j x) ↔ Refinement.hasBVar b k r := by
   cases r with
@@ -355,7 +355,7 @@ theorem Refinement.hasBVar_openBVar_other {b'' : Base} (r : Refinement b'')
 
 /-- Refinement-level `openBVar_noop`: opening at a base/level with no occurrence
     is the identity. -/
-theorem Refinement.openBVar_noop {b' : Base} (r : Refinement b') (b : Base) (k : Nat)
+theorem Refinement.openBVar_noop (r : Refinement) (b : Base) (k : Nat)
     (x : EVar) (h : ¬Refinement.hasBVar b k r) : Refinement.openBVar b k x r = r := by
   cases r with
   | fmla φ =>

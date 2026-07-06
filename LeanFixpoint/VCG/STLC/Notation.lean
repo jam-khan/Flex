@@ -15,8 +15,8 @@ import LeanFixpoint.VCG.STLC.Syntax
     space (see `Syntax.lean`).
 
   A refinement type names its base explicitly, `int { v : ... }` or
-  `bool { v : ... }`, since `Term`/`Refinement` are `Base`-indexed and the
-  base cannot otherwise be inferred from the surface syntax. `Term.add` is
+  `bool { v : ... }`, since `Term` is `Base`-indexed (and `Ty.refine` records
+  the base) — it cannot otherwise be inferred from the surface syntax. `Term.add` is
   int-only and `Term.not`/`Term.and` are bool-only; `Formula.leqI` is always
   over `Term .int` regardless of the enclosing refinement's base, matching
   `Syntax.lean`.
@@ -115,8 +115,8 @@ syntax (name := stlcTyProg) "<ty|" stlcTy "|>" : term
 
   `eTerm`/`eFormula`/`eRefine` additionally take `base : TSyntax `term`, a
   spliceable `Base.int`/`Base.bool` term fixed by the enclosing
-  `int {...}`/`bool {...}` refinement, since `Term`/`Refinement` are
-  `Base`-indexed and the surface syntax has no other way to pin the index.
+  `int {...}`/`bool {...}` refinement, since `Term` is `Base`-indexed and the
+  surface syntax has no other way to pin the index.
   `Formula.leqI` is always over `Term .int` regardless of `base`. -/
 
 class ToTerm (α : Type) (b : outParam Base) where

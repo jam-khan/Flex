@@ -95,9 +95,9 @@ inductive Formula where
     a Constrained Horn Clause by construction. `Refinement.interp` (in
     `Substitution.lean`) is the only interpretation that needs the κ-assignment.
     (The κ name is an `EVar`; see `KVar` below, defined to be `EVar`.) -/
-inductive Refinement (b : Base) where
-  | fmla : Formula → Refinement b
-  | kapp : EVar → List (Σ b : Base, Term b) → Refinement b
+inductive Refinement where
+  | fmla : Formula → Refinement
+  | kapp : EVar → List (Σ b : Base, Term b) → Refinement
 
 /-! ## κ-assignments
 
@@ -155,7 +155,7 @@ theorem exists_kenv_curried {P : KEnv → Prop}
 /-! ## Types — locally nameless -/
 
 inductive Ty where
-  | refine : (b : Base) → Refinement b → Ty -- `{ν: b | r}`
+  | refine : (b : Base) → Refinement → Ty -- `{ν: b | r}`
   | arrow  : Ty → Ty → Ty                   -- `x:s -> t`
 
 /-! ## Expressions — locally nameless

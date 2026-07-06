@@ -24,7 +24,7 @@ def implyBind (x : EVar) (t : Ty) (c : Constraint) : Constraint :=
   fun κ γ =>
     match t with
     | .refine b r => ∀ v : b.interp,
-                       Refinement.interp κ r γ v → c κ (REnv.update b γ x v)
+                       Refinement.interp κ r (γ.push (Val.inj b v)) → c κ (REnv.update b γ x v)
     | .arrow _ _  => c κ γ
 
 /-- Algorithmic subtyping. Returns `none` on shape mismatch. Termination
@@ -33,10 +33,12 @@ def implyBind (x : EVar) (t : Ty) (c : Constraint) : Constraint :=
 def sub (Γ : TEnv) : Ty → Ty → Option Constraint
   | .refine .int  r₁, .refine .int  r₂ =>
       some (fun κ γ => ∀ v : Int,
-              Refinement.interp κ r₁ γ v → Refinement.interp κ r₂ γ v)
+              Refinement.interp κ r₁ (γ.push (Val.inj .int v)) →
+              Refinement.interp κ r₂ (γ.push (Val.inj .int v)))
   | .refine .bool r₁, .refine .bool r₂ =>
       some (fun κ γ => ∀ v : Bool,
-              Refinement.interp κ r₁ γ v → Refinement.interp κ r₂ γ v)
+              Refinement.interp κ r₁ (γ.push (Val.inj .bool v)) →
+              Refinement.interp κ r₂ (γ.push (Val.inj .bool v)))
   | .arrow s₁ t₁, .arrow s₂ t₂ =>
       let x := EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ
                             ++ s₁.fv ++ s₂.fv ++ t₁.fv ++ t₂.fv)
