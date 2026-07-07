@@ -62,7 +62,7 @@ partial def buildEqProof
       residualOut.modify (·.push m.mvarId!)
       return m
 
-/-- Walk `lamBody` (a β-reduced sol expression: an ∃-∧-∨ tree ending in an
+/-- Nav `lamBody` (a β-reduced sol expression: an ∃-∧-∨ tree ending in an
     Eq-conjunction or False), emitting the proof term that inhabits it.
     Consumes `binders` at ∃-nodes, `guards` at guard-Ands, and `orPath`
     bits at ∨-nodes. -/
@@ -225,4 +225,3 @@ partial def collapseInert (e : Expr) : MetaM (Expr × Expr) := do
           return (Expr.forallE nm dom (body'.abstract #[fv]) bi, cg)
   else
     return (e, ← mkAppM ``Iff.refl #[e])
-

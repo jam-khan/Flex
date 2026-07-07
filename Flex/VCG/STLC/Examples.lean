@@ -100,7 +100,6 @@ attribute [simp] Refinement.openBVar Formula.openBVar Term.openBVar String.lengt
 attribute [simp] List.lookup TEnv.tyFv
 
 macro "generate" : tactic => `(tactic| (vc_generate ; vc_reify))
-macro "zap" : tactic => `(tactic| fusion)
 
 @[qualif]
 def Ge1 (i : Int) : Prop := 1 ≤ i

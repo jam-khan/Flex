@@ -80,7 +80,7 @@ private def solK1Impl (κName? : Option (TSyntax `ident)) : TacticM Unit :=
             throwError "solK1: κ '{n}' is not in the acyclic list \
               (acyclic: {acyclic.map (·.name)}, cyclic: {cyclic.map (·.name)})"
 
-      -- 5. Walk candidates; pick the first whose witness is closed
+      -- 5. Nav candidates; pick the first whose witness is closed
       --    (no references back to scratch κ-mvars).
       let mut chosen? : Option (KVar × Expr) := none
       for cand in candidates do

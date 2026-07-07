@@ -14,7 +14,7 @@ open Lean Meta Elab Tactic
   Strategy: `rintro ⟨src…, h⟩; exact ⟨dst…, h⟩`.
 -/
 
-/-- Walk the head ∃-chain, returning the binder names in source order. -/
+/-- Nav the head ∃-chain, returning the binder names in source order. -/
 private partial def collectExNames (e : Expr) : MetaM (List Name) := do
   let e ← whnf e
   if e.isAppOfArity ``Exists 2 then
@@ -114,7 +114,7 @@ def mkExistsChain (binders : Array (Name × Expr × Expr))
     result ← mkAppM ``Exists #[pred]
   return result
 
-/-- Walk a curried function type `T₁ → T₂ → … → Tₙ → Sort` and return
+/-- Nav a curried function type `T₁ → T₂ → … → Tₙ → Sort` and return
     the parameter types `[T₁, …, Tₙ]`. -/
 partial def collectArrowTypes (ty : Expr) : MetaM (List Expr) := do
   let ty ← whnf ty

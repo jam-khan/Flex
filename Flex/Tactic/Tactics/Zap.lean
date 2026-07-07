@@ -30,8 +30,9 @@ private partial def zapCore : TacticM Unit := do
 
 /-- decomposes implications (`p → q`) and conjunctions (`p ∧ q`)
     recursively via `intro` and `and_intros`, and applies `grind`
-    (falling back to `rfl`) at leaf goals. -/
-elab "zap" : tactic => zapCore
+    (falling back to `rfl`) at leaf goals. (Formerly `zap`; renamed so the
+    paper name `zap` can denote the acyclic κ-eliminator.) -/
+elab "elim_leaves" : tactic => zapCore
 
 
 -- Build `fun x₁ x₂ … xₙ => True` for a type of the form `t₁ → t₂ → … → tₙ → Prop`.
@@ -71,8 +72,8 @@ private partial def trivialkCore : TacticM Unit := do
     until the top-level goal is no longer such an existential. -/
 elab "trivialk" : tactic => trivialkCore
 
-/-- Sequences `trivialk`, `simp`, and `zap`. -/
-macro "elimT" : tactic => `(tactic| (trivialk; simp; zap))
+/-- Sequences `trivialk`, `simp`, and `elim_leaves`. -/
+macro "elimT" : tactic => `(tactic| (trivialk; simp; elim_leaves))
 
 -- ---------------------------------------------------------------------------
 -- zapTrue: simplify a goal by replacing grind-provable conjuncts with True

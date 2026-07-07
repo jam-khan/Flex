@@ -25,18 +25,17 @@ initialize registerTraceClass `Fusion.debug
   2. for each acyclic κ in topological order, computes its strongest solution
      `σ̂` (`sol`) and eliminates it (`elim*`): head-position κ-apps collapse to
      `True`, hypothesis-position κ-apps are replaced by `σ̂`;
-  3. rebuilds the proof (the `destructAndBuild`/`walkPhase5` bridge) and leaves
+  3. rebuilds the proof (the `destructAndBuild`/`nav` bridge) and leaves
      the residual `∃ κ_cyclic, P'` — body with every acyclic κ gone, cyclic κ's
      still bound — plus any leaf obligations fusion could not discharge.
 
-  Hand the residual to `fixpoint`, or use `solve_fixpoint` (= `fusion` then
-  `fixpoint`). -/
-syntax "fusion" : tactic
+  Hand the residual to `fix`, or use `solve` (= `zap` then `fix`). -/
+syntax "zap" : tactic
 
 /-- Build the bridge proof `(∃ κ_cyclic, P') → (∃ κ₁ … κₙ, P)`: ∃-eliminate the
     cyclic-κ witnesses out of the supplied proof (recursing over `cycRem`), then
     re-introduce all κ's over the original ∃-chain — acyclic κ's via their
-    solutions `kLams`, cyclic κ's via the eliminated fvars — with `walkPhase5`
+    solutions `kLams`, cyclic κ's via the eliminated fvars — with `nav`
     supplying the body proof. -/
 partial def destructAndBuild
     (kvars : Array KVar)
@@ -51,7 +50,7 @@ partial def destructAndBuild
     MetaM Expr := do
   match cycRem with
   | [] =>
-    -- curWit : c′_with_cyclic_fvars. Use it as h_c' for walkPhase5.
+    -- curWit : c′_with_cyclic_fvars. Use it as h_c' for nav.
     -- An acyclic κ's solution σ̂ may reference a cyclic κ (e.g. σ̂(k1) mentions
     -- k0 for the clause `k0 i → k1 i`). Here the cyclic κ is in scope only as
     -- its fvar `fv` (bound by the enclosing `Exists.elim`), not as its mvar, so
@@ -68,7 +67,7 @@ partial def destructAndBuild
     -- analysis time (before `κfv` existed) baked in the cyclic mvar and made
     -- k-use/guard types disagree with `curWit` (`h_c'`).
     for (κ, lam) in kLams do κ.mvarId.assign lam
-    let bodyProof ← walkPhase5 kLams bodyFV curWit [] [] [] prefixInfo residualOut
+    let bodyProof ← nav kLams bodyFV curWit [] [] [] prefixInfo residualOut
     -- Build Exists.intro chain in ORIGINAL κ-order over originalType.
     let kLamMap : Std.HashMap MVarId Expr :=
       kLams.foldl (fun m (κ, lam) => m.insert κ.mvarId lam)
@@ -110,7 +109,7 @@ partial def destructAndBuild
           #[some α, some pred, none, some curWit, some elimLam]
 
 elab_rules : tactic
-  | `(tactic| fusion) => withMainContext do
+  | `(tactic| zap) => withMainContext do
       let goal ← getMainGoal
       let originalType ← goal.getType
 
@@ -201,7 +200,7 @@ elab_rules : tactic
       let newGoalM  ← mkFreshExprMVar (some newGoalType) (kind := .syntheticOpaque)
       goal.assign (mkApp bridgeMvar newGoalM)
 
-      -- ─── Construct bridge term: λ h => Exists.elim … walkPhase5 ──────
+      -- ─── Construct bridge term: λ h => Exists.elim … nav ──────
       let residualOut ← IO.mkRef #[]
 
       let bridge ← benchPhase "fusion" "build" <|
@@ -234,8 +233,12 @@ elab_rules : tactic
                 {residuals.length} residual obligation(s)"
       replaceMainGoal cleanGoals
 
+/-- Backward-compatible alias — `fusion` is the former name of the acyclic
+    κ-eliminator now called `zap`. -/
+macro "fusion" : tactic => `(tactic| zap)
+
 -- ───────────────────────────────────────────────────────────────────────
--- Tests for fusion
+-- Tests for zap (also exercises the `fusion` alias)
 -- ───────────────────────────────────────────────────────────────────────
 
 /-- A-test: one acyclic κ. fusion should leave only the non-κ leaf. -/

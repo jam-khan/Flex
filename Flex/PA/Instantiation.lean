@@ -3,7 +3,7 @@ import Flex.PA.Qualifier
 
 open Lean Meta
 
--- Walk outer `∀`-chain of a type,
+-- Nav outer `∀`-chain of a type,
 -- collect the domain types.
 -- Stop at the first non-forall.
 private partial def qualifParamTypes (ty : Expr) : List Expr :=

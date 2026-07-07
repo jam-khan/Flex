@@ -182,6 +182,10 @@ def solveFixpointImpl : TacticM Unit := withMainContext do
     logInfo m!"[solve_fixpoint] {unfilled.length} κ(s) left as user goal(s) — \
                  fill each with `exact (fun z0 z1 ... => ...)`."
 
-syntax "solve_fixpoint" : tactic
+syntax "solve" : tactic
 elab_rules : tactic
-  | `(tactic| solve_fixpoint) => solveFixpointImpl
+  | `(tactic| solve) => solveFixpointImpl
+
+/-- Backward-compatible alias — `solve_fixpoint` is the former name of the
+    dispatcher now called `solve` (partition, then `zap` acyclic + `fix` cyclic). -/
+macro "solve_fixpoint" : tactic => `(tactic| solve)

@@ -64,12 +64,12 @@ def tryTacProve (prop : Expr) (closer : SearchCloser) : TermElabM (Option Expr) 
     Core.setMessageLog savedMsgs
     return none
 
-/-- Copy of `walkPhase5` (`Zap/Walk.lean`) whose head-acyclic-κ leaf is
+/-- Copy of `nav` (`Zap/Nav.lean`) whose head-acyclic-κ leaf is
     discharged by SEARCH (`closer`) instead of `emitKLeaf`. Branches (b)–(d) are
     identical to the original. On search failure the clause is pushed as a
     residual mvar (handed to the outer closer), exactly as `fusion` does for the
     leaves it cannot place. -/
-partial def walkPhase5Search
+partial def navSearch
     (closer : SearchCloser)
     (kLams : List (KVar × Expr))
     (goal  : Expr)
@@ -99,24 +99,24 @@ partial def walkPhase5Search
       let hCprime' := mkApp hCprime fv
       let inner ←
         if domSort.isProp then
-          walkPhase5Search closer kLams body hCprime' binders
+          navSearch closer kLams body hCprime' binders
             (guards ++ [(name, dom, fv.fvarId!)]) orPath prefixInfo residualOut
         else
-          walkPhase5Search closer kLams body hCprime'
+          navSearch closer kLams body hCprime'
             (binders ++ [(name, dom, fv.fvarId!)]) guards orPath prefixInfo residualOut
       mkLambdaFVars #[fv] inner
   -- (c) ∧ — project hCprime via And.left / And.right, recurse, And.intro.
   if let some (l, r) := goal.and? then
     let hL ← mkAppM ``And.left  #[hCprime]
     let hR ← mkAppM ``And.right #[hCprime]
-    let pL ← walkPhase5Search closer kLams l hL binders guards (orPath ++ [false]) prefixInfo residualOut
-    let pR ← walkPhase5Search closer kLams r hR binders guards (orPath ++ [true])  prefixInfo residualOut
+    let pL ← navSearch closer kLams l hL binders guards (orPath ++ [false]) prefixInfo residualOut
+    let pR ← navSearch closer kLams r hR binders guards (orPath ++ [true])  prefixInfo residualOut
     return mkAndIntro l r pL pR
   -- (d) Anything else (non-κ atom OR cyclic-κ-head app) — direct transfer.
   return hCprime
 
 /-- Copy of `destructAndBuild` (`Tactic/Tactics/Fusion.lean`) that drives
-    `walkPhase5Search` (search leaves) instead of `walkPhase5`. -/
+    `navSearch` (search leaves) instead of `nav`. -/
 partial def destructAndBuildSearch
     (closer : SearchCloser)
     (kvars : Array KVar)
@@ -136,7 +136,7 @@ partial def destructAndBuildSearch
     let kLams  := kLams.map fun (κ, lam) =>
       (κ, replaceKMvarsWithFvars cycSubst lam)
     for (κ, lam) in kLams do κ.mvarId.assign lam
-    let bodyProof ← walkPhase5Search closer kLams bodyFV curWit [] [] [] prefixInfo residualOut
+    let bodyProof ← navSearch closer kLams bodyFV curWit [] [] [] prefixInfo residualOut
     let kLamMap : Std.HashMap MVarId Expr :=
       kLams.foldl (fun m (κ, lam) => m.insert κ.mvarId lam)
         (∅ : Std.HashMap MVarId Expr)

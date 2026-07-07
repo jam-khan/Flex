@@ -95,8 +95,6 @@ theorem whileCHC_sound (inScope : List CVar) (consts : List (State → Int))
 
 /-! # Examples -/
 
-macro "fix" : tactic => `(tactic| (pa_cert ; try grind))
-
 -- Program: x := 0; while x < n do x := x + 1 end
 -- Pre: 0 ≤ n, Post: x = n
 abbrev countToN : Cmd :=

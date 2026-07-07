@@ -88,3 +88,7 @@ def paCertImpl : TacticM Unit := withMainContext do
 syntax "pa_cert" : tactic
 elab_rules : tactic
   | `(tactic| pa_cert) => paCertImpl
+
+/-- `fix` — the paper's cyclic-κ solver: certifying predicate abstraction
+    (`pa_cert`) followed by `grind` to discharge the κ-free residual. -/
+macro "fix" : tactic => `(tactic| (pa_cert ; try grind))

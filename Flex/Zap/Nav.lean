@@ -6,7 +6,7 @@ import Flex.Zap.Emit
 open Lean Meta Elab
 
 
-/-- Walk `goal` (the body of the proof obligation), emitting the proof
+/-- Nav `goal` (the body of the proof obligation), emitting the proof
     term inline. ∀-binders become λ-abstractions; ∧-splits become
     `And.intro` with `orPath` extended on each branch; κᵢ-headed leaves
     dispatch to `emitKLeaf`; non-κ leaves become residual mvars. -/
@@ -48,12 +48,12 @@ partial def walkProof
   residualOut.modify (·.push m.mvarId!)
   return m
 
--- walkPhase5 — lockstep traversal of original c against c′-witness.
+-- nav — lockstep traversal of original c against c′-witness.
 --
 -- Same shape as walkProof. At every position that is NOT a head-acyclic
 -- κ-app, we transfer the matching position of `hCprime` (a witness of c′
 -- threaded through the recursion) instead of creating a residual mvar.
-partial def walkPhase5
+partial def nav
     (kLams : List (KVar × Expr))
     (goal  : Expr)
     (hCprime : Expr)
@@ -81,18 +81,18 @@ partial def walkPhase5
       let hCprime' := mkApp hCprime fv
       let inner ←
         if domSort.isProp then
-          walkPhase5 kLams body hCprime' binders
+          nav kLams body hCprime' binders
             (guards ++ [(name, dom, fv.fvarId!)]) orPath prefixInfo residualOut
         else
-          walkPhase5 kLams body hCprime'
+          nav kLams body hCprime'
             (binders ++ [(name, dom, fv.fvarId!)]) guards orPath prefixInfo residualOut
       mkLambdaFVars #[fv] inner
   -- (c) ∧ — project hCprime via And.left / And.right, recurse, And.intro.
   if let some (l, r) := goal.and? then
     let hL ← mkAppM ``And.left  #[hCprime]
     let hR ← mkAppM ``And.right #[hCprime]
-    let pL ← walkPhase5 kLams l hL binders guards (orPath ++ [false]) prefixInfo residualOut
-    let pR ← walkPhase5 kLams r hR binders guards (orPath ++ [true])  prefixInfo residualOut
+    let pL ← nav kLams l hL binders guards (orPath ++ [false]) prefixInfo residualOut
+    let pR ← nav kLams r hR binders guards (orPath ++ [true])  prefixInfo residualOut
     return mkAndIntro l r pL pR
   -- (d) Anything else (non-κ atom OR cyclic-κ-head app) — direct transfer.
   return hCprime

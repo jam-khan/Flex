@@ -7,7 +7,7 @@ One paragraph and one minimal example per user-facing tactic. Tactics live in [F
 ## 1. Constraint solvers
 
 ### `fusion`
-Source: [Tactics/Fusion.lean:10](../Flex/Tactic/Tactics/Fusion.lean#L10). Peels every `∃ κᵢ`, classifies the κ's as *acyclic* / *cyclic*, eliminates the acyclic ones via `sol1 + elim*` and emits a bridge term `λ h. Exists.elim … (walkPhase5 …)`. Residual obligations from the elimination are exposed alongside a new main goal of the form `∃ <cyclic κ's>, c′`. Acyclic-only inputs collapse to pure leaf obligations.
+Source: [Tactics/Fusion.lean:10](../Flex/Tactic/Tactics/Fusion.lean#L10). Peels every `∃ κᵢ`, classifies the κ's as *acyclic* / *cyclic*, eliminates the acyclic ones via `sol1 + elim*` and emits a bridge term `λ h. Exists.elim … (nav …)`. Residual obligations from the elimination are exposed alongside a new main goal of the form `∃ <cyclic κ's>, c′`. Acyclic-only inputs collapse to pure leaf obligations.
 
 ```lean
 example : ∃ κ : Int → Int → Prop,

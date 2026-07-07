@@ -18,7 +18,7 @@ open Lean Meta Elab Term Tactic
   as a residual obligation (a query of `c′`).
 
   Structurally `walkPAProof` mirrors Zap's `walkProof`
-  (`Flex/Zap/Walk.lean`) — ∀↦λ, ∧↦`And.intro`, κ-free leaf↦residual
+  (`Flex/Zap/Nav.lean`) — ∀↦λ, ∧↦`And.intro`, κ-free leaf↦residual
   mvar — differing only at the κ-head leaf, where Zap emits its strongest
   ∃-tree solution (`emitKLeaf`) and PA emits the survivor conjunction
   (`emitPALeaf`). No binder/guard bookkeeping is needed: each survivor
@@ -79,7 +79,7 @@ def emitPALeaf
         at head κ '{κ.name}' — weakening fixpoint and glue oracle disagree."
   return conjProofs pairs
 
-/-- The §5 `glue`. Walk the body `goal` (with cut κ-mvars still SYNTACTICALLY
+/-- The §5 `glue`. Nav the body `goal` (with cut κ-mvars still SYNTACTICALLY
     present — never `instantiateMVars` it), emitting the bridge proof term:
 
     · κ-head leaf `?κ x̄`   → `emitPALeaf` (survivor conjunction via oracle)
