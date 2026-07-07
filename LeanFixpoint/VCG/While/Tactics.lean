@@ -308,4 +308,4 @@ elab "replace_state" : tactic => do
     replaceMainGoal [newGoalMVar.mvarId!]
 
 macro "reify" : tactic => `(tactic| (simp_scopes; replace_state))
-macro "imp_vcgen" : tactic => `(tactic| (imp_vc_sound ; reify))
+macro "generate" : tactic => `(tactic| (imp_vc_sound ; reify))
