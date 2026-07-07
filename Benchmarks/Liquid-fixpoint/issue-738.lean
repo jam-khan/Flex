@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Mathlib.Data.Set.Basic
 
 structure MyData (α : Type) where

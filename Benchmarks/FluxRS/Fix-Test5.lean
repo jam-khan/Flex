@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 /-!
   Reproducer: Pop2 — acyclic κ-vars (k0..k3), but `solve_fixpoint` leaves a

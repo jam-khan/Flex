@@ -1,5 +1,5 @@
 import Mathlib
-import LeanFixpoint
+import Flex
 
 def maps00Prop : Prop :=
   ∀ m1 : Int → Int, m1 = (fun _ => 0) →

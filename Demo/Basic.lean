@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 def ex1 : Prop :=
   ∃ κ : Int → Int → Prop,

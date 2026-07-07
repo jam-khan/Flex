@@ -1,7 +1,7 @@
 import Lake
 open Lake DSL
 
-package «LeanFixpoint» where
+package «Flex» where
   version := v!"0.1.0"
 
 -- Core dependency: aesop is used as a goal-closer fallback in the tactics.
@@ -11,7 +11,7 @@ require aesop from git
   "https://github.com/leanprover-community/aesop" @ "3426969888a264d3f69b6f30ab50aa11f28eb38d"
 
 -- Mathlib is needed ONLY by the handful of Liquid-fixpoint benchmarks that use
--- `Set`/`Finset`. It is opt-in so that downstream users of the LeanFixpoint
+-- `Set`/`Finset`. It is opt-in so that downstream users of the Flex
 -- solver never have to fetch or build mathlib.
 --   Enable with:  lake -Kbench update     (once, to fetch + pin mathlib)
 --   then build/check benchmarks, e.g.:
@@ -21,11 +21,11 @@ require mathlib from git
   "https://github.com/leanprover-community/mathlib4" @ "251d9c0ff4b58979698a7ec9f4ac58a92b95c01f"
 
 @[default_target]
-lean_lib «LeanFixpoint» where
+lean_lib «Flex» where
 
 lean_lib «Demo» where
 
 lean_lib «Benchmarks» where
 
-lean_exe «lean-fixpoint» where
+lean_exe «flex» where
   root := `Main

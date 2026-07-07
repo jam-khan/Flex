@@ -1,4 +1,4 @@
-# Lean-Fixpoint
+# Flex
 
 A Lean 4 library implementing a fixpoint-based constraint solving framework with predicate abstraction, fusion algorithms, and meta-programming support for refinement types.
 
@@ -17,7 +17,7 @@ A Lean 4 library implementing a fixpoint-based constraint solving framework with
 
 ```toml
 [[require]]
-name = "LeanFixpoint"
+name = "Flex"
 git = "https://github.com/jam-khan/lean-fixpoint"
 rev = "main"
 ```
@@ -28,7 +28,7 @@ rev = "main"
 lake update
 ```
 
-This clones the repo into `.lake/packages/LeanFixpoint/` using your local Git credentials.
+This clones the repo into `.lake/packages/Flex/` using your local Git credentials.
 
 ### Step 3 — Build
 
@@ -45,7 +45,7 @@ lake build
 A single import gives you everything:
 
 ```lean4
-import LeanFixpoint
+import Flex
 ```
 
 This includes all core types, tactics, elaboration, and the solver.
@@ -53,7 +53,7 @@ This includes all core types, tactics, elaboration, and the solver.
 ### Example
 
 ```lean4
-import LeanFixpoint
+import Flex
 
 def ex1 : Prop :=
   ∃ κ : Int → Prop,

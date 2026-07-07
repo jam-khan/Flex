@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 set_option Elab.async false
 set_option maxHeartbeats 6400000
 open Lean Elab Command

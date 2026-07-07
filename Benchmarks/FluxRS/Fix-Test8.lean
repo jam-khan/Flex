@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 @[qualif] def MinIdx.q_lt      (a b : Int) : Prop := a < b
 @[qualif] def MinIdx.q_le      (a b : Int) : Prop := a ≤ b

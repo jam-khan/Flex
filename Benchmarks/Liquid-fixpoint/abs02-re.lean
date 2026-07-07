@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 /-
   Liquid Haskell test
   `https://github.com/ucsd-progsys/liquid-fixpoint/blob/develop/tests/horn/pos/abs02-re.smt2`

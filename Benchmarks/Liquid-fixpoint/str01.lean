@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 def str01Prop : Prop :=
   -- strLen

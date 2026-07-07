@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 open Lean Meta Elab Term
 

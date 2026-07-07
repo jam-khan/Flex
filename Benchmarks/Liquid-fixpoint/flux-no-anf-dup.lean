@@ -1,5 +1,5 @@
 import Mathlib.Data.Set.Basic
-import LeanFixpoint
+import Flex
 /-
   Liquid-fixpoint test — restrictable-variants dispatch (Rust enum over 6 cases).
   Source: tests/pos/surface/restrictable_variants.rs:34.

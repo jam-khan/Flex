@@ -1,5 +1,5 @@
 
-import LeanFixpoint
+import Flex
 
 @[qualif]
 def q1 (a : Int) (b : Int) (c : Int) := a = b - c

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 /-
   Demo: prove comment_vc by hoisting cut kvars to the front, then refining
   with metavariables for them. Cut kvars become outer mvars; the inner ∃'s

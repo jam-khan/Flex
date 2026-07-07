@@ -1,5 +1,5 @@
 import Mathlib.Data.Finset.Basic
-import LeanFixpoint
+import Flex
 
 /-
   Liquid-fixpoint test — ground set property:
@@ -7,7 +7,7 @@ import LeanFixpoint
       (xs = ∅ → xs = ∅)                             -- trivial
     ∧ (∀ a0 a1, xs = {a0} ∪ a1 → xs ≠ ∅)            -- nonempty if it has an element
 
-  `∅` is disambiguated as `Finset Int` (the ambient `State` from LeanFixpoint
+  `∅` is disambiguated as `Finset Int` (the ambient `State` from Flex
   has its own `∅` that conflicts otherwise).
 -/
 

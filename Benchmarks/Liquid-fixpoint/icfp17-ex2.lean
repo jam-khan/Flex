@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 
 def icfp17Ex2Prop : Prop :=

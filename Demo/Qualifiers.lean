@@ -1,7 +1,7 @@
 import Lean
-import LeanFixpoint.PA.Qualifier
-import LeanFixpoint.PA.Instantiation
-import LeanFixpoint.PA.Check
+import Flex.PA.Qualifier
+import Flex.PA.Instantiation
+import Flex.PA.Check
 
 open Lean Meta
 

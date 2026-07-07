@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 /-!
   Reproducer: Append — `solve_fixpoint`'s κ-solutions differ from those

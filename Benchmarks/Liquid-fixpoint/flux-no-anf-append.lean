@@ -1,5 +1,5 @@
 import Mathlib.Data.Set.Basic
-import LeanFixpoint
+import Flex
 /-
   Liquid-fixpoint test — list append (as sets).
   Source: Rust tests/pos/enums/list01.rs:51.

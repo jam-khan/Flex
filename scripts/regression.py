@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regression anchor for LeanFixpoint.
+"""Regression anchor for Flex.
 
 Compiles every benchmark / demo file individually with `lake env lean` and
 reports a green ✓ (pass) or red ✗ (fail) per file. A file passes iff Lean
@@ -137,7 +137,7 @@ def check_file(path: Path, strict_sorry: bool, runner=None,
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="LeanFixpoint regression anchor")
+    ap = argparse.ArgumentParser(description="Flex regression anchor")
     ap.add_argument("--jobs", type=int, default=max(1, (os.cpu_count() or 2) // 2),
                     help="parallel lean processes (default: cpu/2)")
     ap.add_argument("--filter", default=None,

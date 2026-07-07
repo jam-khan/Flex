@@ -5,7 +5,7 @@ Liquid-fixpoint and FluxRS (real Rust VC) benchmarks with ≥1 **acyclic** κ (w
 - **A** = `unfold; solve_fixpoint` — acyclic κ → σ̂-assign, body closed by **grind** (`tryClosers`).
 - **B** = `unfold; fusion; all_goals solve_fixpoint` — acyclic κ → **deterministic kernel-checked proof term** (Zap), then PA+close on the residual.
 
-Heartbeats (`hb`, thousands) are deterministic; `ms` indicative. Per-phase heartbeats from the gated `leanfixpoint.benchPhases` instrumentation.
+Heartbeats (`hb`, thousands) are deterministic; `ms` indicative. Per-phase heartbeats from the gated `flex.benchPhases` instrumentation.
 
 ## Totals & speedup
 

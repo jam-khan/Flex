@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 /-
 NOTE: THIS REQUIRES
   1. QUALIFIER INFERENCE (sort of loop invariant inference)

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 /-!
   Reproducer / regression for the **scope-fold over-approximation**

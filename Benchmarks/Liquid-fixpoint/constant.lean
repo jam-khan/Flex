@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 def constantProp : Prop :=
   ∀ f : Int → Int,

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 inductive Vec (α : Type) where
   | vnil  : Vec α

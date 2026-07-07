@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Mathlib.Data.Set.Basic
 
 -- (datatype (MyData 1) ((mkdata ((field1 @(0))))))

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 /-!
   # Demo — `pa_cert`, the certifying Predicate Abstraction tactic (paper §5)

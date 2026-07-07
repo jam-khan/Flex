@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 /-!
   Reproducer: MinIndex — originally `solve_fixpoint` identified ALL of k0..k3

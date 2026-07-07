@@ -58,7 +58,7 @@ def main() -> int:
     W("- **B** = `unfold; fusion; all_goals solve_fixpoint` — acyclic κ → "
       "**deterministic kernel-checked proof term** (Zap), then PA+close on the residual.\n")
     W("Heartbeats (`hb`, thousands) are deterministic; `ms` indicative. Per-phase "
-      "heartbeats from the gated `leanfixpoint.benchPhases` instrumentation.\n")
+      "heartbeats from the gated `flex.benchPhases` instrumentation.\n")
 
     # ── headline table ────────────────────────────────────────────────────
     W("## Totals & speedup\n")
