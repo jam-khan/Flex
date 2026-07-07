@@ -34,6 +34,9 @@ import tempfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from kappa_classify import parse_log_kappa  # noqa: E402
+
 # ── paths ─────────────────────────────────────────────────────────────────────
 
 SCRIPT_DIR = Path(__file__).parent.resolve()
@@ -65,21 +68,11 @@ CONFIGS = [
 PROOF_DEF_RE = re.compile(
     r"(?m)^set_option maxHeartbeats \d+\n(?:#time\s+)?def (\w+)\s*:\s*(\w+)\s*:=\s*by\b"
 )
-FUSION_RE  = re.compile(
-    r"info: .*/(\w+)Proof\.lean:\d+:\d+: fusion: eliminated \d+ acyclic κ"
-)
-ACYCLIC_RE = re.compile(
-    r"info: .*/(\w+)Proof\.lean:\d+:\d+: \[solve_fixpoint\] Acyclic κ:\s*\[([^\]]*)\]"
-)
 BL2_RE = re.compile(
     r"BENCHLINE2\s+(\S+)\s+status=(\S+)\s+hb=(\d+)\s+ms=(\d+)\s+"
     r"depth=(\d+)\s+nconst=(\d+)\s+kerus=(\d+)"
 )
 PHASE_RE = re.compile(r"\[phase\]\s+(\w+):(\w+)=(\d+)")
-
-
-def _items(raw: str) -> list[str]:
-    return [k.strip() for k in raw.split(",") if k.strip()]
 
 
 # ── prelude ───────────────────────────────────────────────────────────────────
@@ -92,13 +85,10 @@ def prelude_body() -> str:
 # ── acyclic-κ detection ───────────────────────────────────────────────────────
 
 def acyclic_vcs_from_log(log_text: str) -> set[str]:
-    result: set[str] = set()
-    for m in FUSION_RE.finditer(log_text):
-        result.add(m.group(1))
-    for m in ACYCLIC_RE.finditer(log_text):
-        if _items(m.group(2)):
-            result.add(m.group(1))
-    return result
+    """VCs with >=1 acyclic κ to eliminate, per fusion's Start/End κ logging
+    (see kappa_classify.parse_log_kappa)."""
+    kappa = parse_log_kappa(log_text)
+    return {vc for vc, kind in kappa.items() if kind in ("acyclic_only", "both")}
 
 
 # ── proof file parsing ────────────────────────────────────────────────────────

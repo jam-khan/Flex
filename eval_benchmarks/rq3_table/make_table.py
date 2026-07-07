@@ -25,6 +25,9 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from kappa_classify import parse_log_kappa  # noqa: E402
+
 # ── paths ────────────────────────────────────────────────────────────────────
 
 ROOT = Path(__file__).parent
@@ -52,31 +55,10 @@ SUITE_MACROS = {
 # ── shared regexes (same as classify_nontrivial_vcs.py / count_failures.py) ──
 
 LAST_DEF_RE = re.compile(r"(?s).*\bdef\s+(\w+)\s*:=(.*)")
-# `fusion` (which runs before `solve_fixpoint` in the current tactic pipeline)
-# reports the κ's it started with and the κ's still unsolved afterward —
-# see LeanFixpoint/Tactic/Tactics/Fusion.lean.
-FUSION_START_RE = re.compile(
-    r"info: .*/(\w+)Proof\.lean:\d+:\d+: \[fusion\] Start κ:\s*\[([^\]]*)\]"
-)
-FUSION_END_RE   = re.compile(r"\[fusion\] End κ:\s*\[([^\]]*)\]")
 ERROR_RE    = re.compile(
     r"error: LeanProofs/User/Proof/(\w+)Proof\.lean:\d+:\d+: (.+)$",
     re.MULTILINE,
 )
-
-
-def _items(raw: str) -> list[str]:
-    return [k.strip() for k in raw.split(",") if k.strip()]
-
-
-def classify(acyclic: list[str], cyclic: list[str]) -> str:
-    if acyclic and cyclic:
-        return "both"
-    if acyclic:
-        return "acyclic_only"
-    if cyclic:
-        return "cyclic_only"
-    return "none"
 
 
 def is_trivially_true(path: Path) -> bool:
@@ -86,43 +68,6 @@ def is_trivially_true(path: Path) -> bool:
         return False
     body = re.sub(r"\bend\s+F\b", "", m.group(2)).strip()
     return body == "True"
-
-
-def parse_log_kappa(text: str) -> dict[str, str]:
-    """Classify each VC from fusion's Start/End κ lists.
-
-    `fusion` runs before `solve_fixpoint` and reports the κ's it started
-    with and the κ's still unsolved afterward (the rest were eliminated as
-    acyclic). Per the classification rule:
-      - no κ's to start with            -> none
-      - something before, none after    -> acyclic_only
-      - same count before and after     -> cyclic_only (fusion ate nothing)
-      - fewer after than before         -> both
-    """
-    results: dict[str, str] = {}
-    lines = text.splitlines()
-    i = 0
-    while i < len(lines):
-        m = FUSION_START_RE.search(lines[i])
-        if m:
-            vc = m.group(1)
-            start = _items(m.group(2))
-            end: list[str] = []
-            if i + 1 < len(lines):
-                em = FUSION_END_RE.search(lines[i + 1])
-                if em:
-                    end = _items(em.group(1))
-                    i += 1
-            if not start:
-                results[vc] = "none"
-            elif not end:
-                results[vc] = "acyclic_only"
-            elif len(end) == len(start):
-                results[vc] = "cyclic_only"
-            else:
-                results[vc] = "both"
-        i += 1
-    return results
 
 
 def parse_log_failures(text: str) -> set[str]:
