@@ -33,20 +33,18 @@ def Formula.interp (γ : REnv) : Formula → Prop
   | .ex b φ       => ∃ x : b.interp,  Formula.interp (γ.push (Val.inj b x)) φ
   | .all b φ      => ∀ x : b.interp,  Formula.interp (γ.push (Val.inj b x)) φ
 
-/-- Interpret a refinement at value ν under κ-assignment: `push` ν as the
-    innermost de Bruijn slot (ν = `BVar 0`), then either interpret the formula
-    or apply κ. This is the *only* interpretation that consults the κ-assignment. -/
-def Refinement.interp (κ : KEnv) {b : Base} (r : Refinement b)
-    (γ : REnv) (ν : b.interp) : Prop :=
+/-- Interpret a refinement under `γ`. This is the *only* interpretation
+    that consults the κ-assignment. -/
+def Refinement.interp (κ : KEnv) (r : Refinement) (γ : REnv) : Prop :=
   match r with
-  | .fmla φ       => Formula.interp (γ.push (Val.inj b ν)) φ
+  | .fmla φ       => Formula.interp γ φ
   | .kapp kn args =>
-      κ kn (args.map (fun a => ⟨a.1, Term.interp (γ.push (Val.inj b ν)) a.2⟩))
+      κ kn (args.map (fun a => ⟨a.1, Term.interp γ a.2⟩))
 
 /-! ## Logical relation: ⟦τ⟧ as a predicate on values, κ-indexed and parameterized by γ. -/
 def TyDenote : KEnv → Ty → REnv → Val → Prop
-  | κ, .refine .int  r, γ, v => ∃ n : Int,  v = .iconst n ∧ Refinement.interp κ r γ n
-  | κ, .refine .bool r, γ, v => ∃ b : Bool, v = .bconst b ∧ Refinement.interp κ r γ b
+  | κ, .refine b r, γ, v => ∃ ν : b.interp, v = Val.inj b ν ∧
+                              Refinement.interp κ r (γ.push (Val.inj b ν))
   | κ, .arrow s t,      γ, v =>
       ∃ body, v = .clos body ∧
         Val.lc (.clos body) ∧ Val.closed (.clos body) ∧

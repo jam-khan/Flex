@@ -99,6 +99,9 @@ attribute [simp] Term.interp REnv.get Exp.openVar Ty.openVar Exp.fv Refinement.f
 attribute [simp] Refinement.openBVar Formula.openBVar Term.openBVar String.length EVar.maxLen
 attribute [simp] List.lookup TEnv.tyFv
 
+macro "generate" : tactic => `(tactic| (vc_generate ; vc_reify))
+macro "zap" : tactic => `(tactic| fusion)
+
 @[qualif]
 def Ge1 (i : Int) : Prop := 1 ≤ i
 
@@ -107,9 +110,9 @@ example :
       Check κ []
         (.letin (.iconst 99) (.app (.ann exId (ty_k "k")) (.bvar 0)))
         Pos := by
-  vc_generate
-  vc_reify
-  solve_fixpoint
+  generate
+  zap
+  grind
 
 /-! ## κ-example with `ty_xk`: same shape, output type `IntN 99` -/
 
@@ -118,9 +121,9 @@ example :
       Check κ []
         (.letin (.iconst 99) (.app (.ann exId (ty_xk "k")) (.bvar 0)))
         (IntN 99) := by
-  vc_generate
-  vc_reify
-  solve_fixpoint
+  generate
+  zap
+  grind
 
 example :
   ∃ κ : KEnv,
@@ -210,9 +213,9 @@ example :
         (.refine .int (.fmla (.or
           (.eq .int (.bvar .int 0) (.const .int 100))
           (.eq .int (.bvar .int 0) (.const .int  99))))) := by
-  vc_generate
-  vc_reify
-  solve_fixpoint
+  generate
+  zap
+  grind
 
 /-! ## Arithmetic: `let a = 3 in let b = 4 in a + b ⇐ IntN 7` -/
 
@@ -256,7 +259,7 @@ example (κ : KEnv) : Hastype κ [] (.ann (.iconst 5) (prim 5)) (prim 5) := by
   constructor
   simp [Ty.WFBVars, Ty.WFBVarCtx, Refinement.hasBVar, Formula.hasBVar, Term.hasBVar]
 
-example (κ : KEnv) (Γ : TEnv) (x y : EVar) (r₁ r₂ : Refinement .int)
+example (κ : KEnv) (Γ : TEnv) (x y : EVar) (r₁ r₂ : Refinement)
     (hx : Γ.lookup x = some (.refine .int r₁))
     (hy : Γ.lookup y = some (.refine .int r₂)) :
     Hastype κ Γ (.add (.fvar x) (.fvar y))
