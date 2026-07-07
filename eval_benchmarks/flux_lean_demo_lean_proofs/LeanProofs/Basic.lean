@@ -16,6 +16,9 @@ import LeanProofs.Flux.Checking.RingbufferImpl__1__Len
 import LeanProofs.Flux.Checking.RingbufferImpl__1__IsValid
 import LeanProofs.Flux.Checking.RingbufferImpl__1__Enqueue
 import LeanProofs.Flux.Checking.RingbufferImpl__1__Dequeue
+import LeanProofs.Flux.Checking.RingbufferImpl__1__Push
+import LeanProofs.Flux.Checking.RingbufferVecQueuePushCorrect
+import LeanProofs.Flux.Checking.RingbufferVecQueuePopCorrect
 import LeanProofs.Flux.Checking.SortTest1
 import LeanProofs.Flux.Checking.SortTest2
 import LeanProofs.Flux.Checking.SortInitUp

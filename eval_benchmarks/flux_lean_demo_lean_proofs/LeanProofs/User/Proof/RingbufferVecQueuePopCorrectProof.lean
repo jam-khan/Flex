@@ -1,13 +1,13 @@
 import LeanFixpoint
 import LeanProofs.Flux.Prelude
-import LeanProofs.Flux.VC.RingbufferImpl__1__Enqueue
+import LeanProofs.Flux.VC.RingbufferVecQueuePopCorrect
 open Classical
 set_option linter.unusedVariables false
 
 
 namespace F
 
-namespace RingbufferImpl1EnqueueQualifs
+namespace RingbufferVecQueuePopCorrectQualifs
 
 @[qualif]
 def EqTrue (a'₀ : Prop) : Prop :=
@@ -61,13 +61,13 @@ def Le (a'₀ : Int) (a'₁ : Int) : Prop :=
 def Le1 (a'₀ : Int) (a'₁ : Int) : Prop :=
   (a'₀ ≤ (a'₁ - 1))
 
-end RingbufferImpl1EnqueueQualifs
+end RingbufferVecQueuePopCorrectQualifs
 
-open RingbufferImpl1EnqueueQualifs
+open RingbufferVecQueuePopCorrectQualifs
 
 set_option maxHeartbeats 5000000
-#time def RingbufferImpl__1__Enqueue_proof : RingbufferImpl__1__Enqueue := by
-  unfold RingbufferImpl__1__Enqueue
+#time def RingbufferVecQueuePopCorrect_proof : RingbufferVecQueuePopCorrect := by
+  unfold RingbufferVecQueuePopCorrect
   solve_fixpoint_combo
 
 end F
