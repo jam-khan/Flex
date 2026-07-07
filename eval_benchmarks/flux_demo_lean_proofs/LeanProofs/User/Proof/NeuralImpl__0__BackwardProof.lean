@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.NeuralImpl__0__Backward
 open Classical
@@ -68,6 +68,6 @@ open NeuralImpl0BackwardQualifs
 set_option maxHeartbeats 5000000
 #time def NeuralImpl__0__Backward_proof : NeuralImpl__0__Backward := by
   unfold NeuralImpl__0__Backward
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

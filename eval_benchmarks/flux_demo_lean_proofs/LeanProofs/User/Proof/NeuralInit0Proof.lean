@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.NeuralInit0
 open Classical
@@ -68,6 +68,6 @@ open NeuralInit0Qualifs
 set_option maxHeartbeats 5000000
 #time def NeuralInit0_proof : NeuralInit0 := by
   unfold NeuralInit0
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

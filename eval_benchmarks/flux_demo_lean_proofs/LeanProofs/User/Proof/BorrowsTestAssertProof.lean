@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.BorrowsTestAssert
 open Classical
@@ -68,6 +68,6 @@ open BorrowsTestAssertQualifs
 set_option maxHeartbeats 5000000
 #time def BorrowsTestAssert_proof : BorrowsTestAssert := by
   unfold BorrowsTestAssert
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

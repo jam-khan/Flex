@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.SimplexInitRatioC
 open Classical
@@ -68,6 +68,6 @@ open SimplexInitRatioCQualifs
 set_option maxHeartbeats 5000000
 #time def SimplexInitRatioC_proof : SimplexInitRatioC := by
   unfold SimplexInitRatioC
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

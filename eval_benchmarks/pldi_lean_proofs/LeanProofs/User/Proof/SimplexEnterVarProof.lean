@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.SimplexEnterVar
 open Classical
@@ -68,6 +68,6 @@ open SimplexEnterVarQualifs
 set_option maxHeartbeats 5000000
 #time def SimplexEnterVar_proof : SimplexEnterVar := by
   unfold SimplexEnterVar
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.AnfImpl__0__IsAnf
 open Classical
@@ -68,6 +68,6 @@ open AnfImpl0IsAnfQualifs
 set_option maxHeartbeats 5000000
 #time def AnfImpl__0__IsAnf_proof : AnfImpl__0__IsAnf := by
   unfold AnfImpl__0__IsAnf
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

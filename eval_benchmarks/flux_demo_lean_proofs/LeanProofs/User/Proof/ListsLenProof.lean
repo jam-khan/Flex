@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.ListsLen
 open Classical
@@ -68,6 +68,6 @@ open ListsLenQualifs
 set_option maxHeartbeats 5000000
 #time def ListsLen_proof : ListsLen := by
   unfold ListsLen
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.DotproductGet
 open Classical
@@ -68,6 +68,6 @@ open DotproductGetQualifs
 set_option maxHeartbeats 5000000
 #time def DotproductGet_proof : DotproductGet := by
   unfold DotproductGet
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

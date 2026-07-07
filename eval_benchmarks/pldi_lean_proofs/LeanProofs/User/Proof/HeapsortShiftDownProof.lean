@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.HeapsortShiftDown
 open Classical
@@ -68,6 +68,6 @@ open HeapsortShiftDownQualifs
 set_option maxHeartbeats 5000000
 #time def HeapsortShiftDown_proof : HeapsortShiftDown := by
   unfold HeapsortShiftDown
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

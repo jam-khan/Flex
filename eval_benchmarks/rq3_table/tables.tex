@@ -5,12 +5,12 @@
 \toprule
 Benchmark & \#CHCs & Success & Success (cyclic) & LF time & \sys Time \\
 \midrule
-\fluxmedium & 148 & 89.2\% & 60 (78.3\%) & — & 9.2m \\
+\fluxmedium & 148 & 89.2\% & 60 (78.3\%) & — & 9.5m \\
 \wavesuite & 77 & 96.1\% & 10 (70.0\%) & — & 4.0m \\
-\fluxtests & 620 & 96.6\% & 80 (83.8\%) & — & 7.4m \\
-\lfsuite & 47 & 95.7\% & 14 (100.0\%) & — & 1.3m \\
+\fluxtests & 614 & 96.6\% & 80 (83.8\%) & — & 7.4m \\
+\lfsuite & 47 & 95.7\% & 14 (100.0\%) & — & 58.0s \\
 \midrule
-\textbf{Total} & 892 & 95.3\% & 164 (82.3\%) & — & 21.9m \\
+\textbf{Total} & 886 & 95.3\% & 164 (82.3\%) & — & 21.8m \\
 \bottomrule
 \end{tabular}
 \caption{Automation coverage of the full solver pipeline (\zap{} followed by
@@ -30,9 +30,9 @@ Benchmark & none & acyclic & cyclic & both & Total \\
 \midrule
 flux-medium & 52 & 36 & 16 & 44 & 148 \\
 wave & 41 & 26 & 1 & 9 & 77 \\
-Flux lean-bench & 355 & 185 & 30 & 50 & 620 \\
-Liquid-fixpoint & 22 & 11 & 12 & 2 & 47 \\
+Flux lean-bench & 352 & 182 & 31 & 49 & 614 \\
+Liquid-fixpoint & 22 & 11 & 13 & 1 & 47 \\
 \midrule
-\textbf{Total} & 470 & 258 & 59 & 105 & 892 \\
+\textbf{Total} & 467 & 255 & 61 & 103 & 886 \\
 \bottomrule
 \end{tabular}

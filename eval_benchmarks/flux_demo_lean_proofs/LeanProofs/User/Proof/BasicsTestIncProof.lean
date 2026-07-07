@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.BasicsTestInc
 open Classical
@@ -68,6 +68,6 @@ open BasicsTestIncQualifs
 set_option maxHeartbeats 5000000
 #time def BasicsTestInc_proof : BasicsTestInc := by
   unfold BasicsTestInc
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

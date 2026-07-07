@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.KmeansMinIndex
 open Classical
@@ -68,6 +68,6 @@ open KmeansMinIndexQualifs
 set_option maxHeartbeats 5000000
 #time def KmeansMinIndex_proof : KmeansMinIndex := by
   unfold KmeansMinIndex
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.RawVecImpl__0__WithCapacity
 open Classical
@@ -68,6 +68,6 @@ open RawVecImpl0WithCapacityQualifs
 set_option maxHeartbeats 5000000
 #time def RawVecImpl__0__WithCapacity_proof : RawVecImpl__0__WithCapacity := by
   unfold RawVecImpl__0__WithCapacity
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

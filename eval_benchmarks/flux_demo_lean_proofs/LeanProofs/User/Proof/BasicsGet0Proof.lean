@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.BasicsGet0
 open Classical
@@ -68,6 +68,6 @@ open BasicsGet0Qualifs
 set_option maxHeartbeats 5000000
 #time def BasicsGet0_proof : BasicsGet0 := by
   unfold BasicsGet0
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

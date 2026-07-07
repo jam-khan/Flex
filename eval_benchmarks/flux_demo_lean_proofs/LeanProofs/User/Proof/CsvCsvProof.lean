@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.CsvCsv
 open Classical
@@ -68,6 +68,6 @@ open CsvCsvQualifs
 set_option maxHeartbeats 5000000
 #time def CsvCsv_proof : CsvCsv := by
   unfold CsvCsv
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

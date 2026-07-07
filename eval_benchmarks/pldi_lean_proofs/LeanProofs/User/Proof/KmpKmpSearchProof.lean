@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.KmpKmpSearch
 open Classical
@@ -68,6 +68,6 @@ open KmpKmpSearchQualifs
 set_option maxHeartbeats 5000000
 #time def KmpKmpSearch_proof : KmpKmpSearch := by
   unfold KmpKmpSearch
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.SimplexIsNeg
 open Classical
@@ -68,6 +68,6 @@ open SimplexIsNegQualifs
 set_option maxHeartbeats 5000000
 #time def SimplexIsNeg_proof : SimplexIsNeg := by
   unfold SimplexIsNeg
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

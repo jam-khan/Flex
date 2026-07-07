@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.RingbufferImpl__2__Enqueue
 open Classical
@@ -68,6 +68,6 @@ open RingbufferImpl2EnqueueQualifs
 set_option maxHeartbeats 5000000
 #time def RingbufferImpl__2__Enqueue_proof : RingbufferImpl__2__Enqueue := by
   unfold RingbufferImpl__2__Enqueue
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

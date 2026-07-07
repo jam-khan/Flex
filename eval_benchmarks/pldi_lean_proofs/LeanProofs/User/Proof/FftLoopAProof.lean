@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.FftLoopA
 open Classical
@@ -68,6 +68,6 @@ open FftLoopAQualifs
 set_option maxHeartbeats 5000000
 #time def FftLoopA_proof : FftLoopA := by
   unfold FftLoopA
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

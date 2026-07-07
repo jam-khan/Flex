@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.SimplexRowOp
 open Classical
@@ -68,6 +68,6 @@ open SimplexRowOpQualifs
 set_option maxHeartbeats 5000000
 #time def SimplexRowOp_proof : SimplexRowOp := by
   unfold SimplexRowOp
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.FftFftTest
 open Classical
@@ -68,6 +68,6 @@ open FftFftTestQualifs
 set_option maxHeartbeats 5000000
 #time def FftFftTest_proof : FftFftTest := by
   unfold FftFftTest
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.VectorsDot
 open Classical
@@ -68,6 +68,6 @@ open VectorsDotQualifs
 set_option maxHeartbeats 5000000
 #time def VectorsDot_proof : VectorsDot := by
   unfold VectorsDot
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

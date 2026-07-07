@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.UninitFillFromAndVec
 open Classical
@@ -68,6 +68,6 @@ open UninitFillFromAndVecQualifs
 set_option maxHeartbeats 5000000
 #time def UninitFillFromAndVec_proof : UninitFillFromAndVec := by
   unfold UninitFillFromAndVec
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

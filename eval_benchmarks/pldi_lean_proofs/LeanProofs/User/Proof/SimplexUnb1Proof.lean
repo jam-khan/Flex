@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.SimplexUnb1
 open Classical
@@ -68,6 +68,6 @@ open SimplexUnb1Qualifs
 set_option maxHeartbeats 5000000
 #time def SimplexUnb1_proof : SimplexUnb1 := by
   unfold SimplexUnb1
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

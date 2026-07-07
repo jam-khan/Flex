@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.VectorsCopyWithRange
 open Classical
@@ -68,6 +68,6 @@ open VectorsCopyWithRangeQualifs
 set_option maxHeartbeats 5000000
 #time def VectorsCopyWithRange_proof : VectorsCopyWithRange := by
   unfold VectorsCopyWithRange
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

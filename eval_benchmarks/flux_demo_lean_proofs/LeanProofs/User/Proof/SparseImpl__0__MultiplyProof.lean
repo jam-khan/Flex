@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.SparseImpl__0__Multiply
 open Classical
@@ -68,6 +68,6 @@ open SparseImpl0MultiplyQualifs
 set_option maxHeartbeats 5000000
 #time def SparseImpl__0__Multiply_proof : SparseImpl__0__Multiply := by
   unfold SparseImpl__0__Multiply
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

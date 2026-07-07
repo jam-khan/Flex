@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.BorrowsIncMut
 open Classical
@@ -68,6 +68,6 @@ open BorrowsIncMutQualifs
 set_option maxHeartbeats 5000000
 #time def BorrowsIncMut_proof : BorrowsIncMut := by
   unfold BorrowsIncMut
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

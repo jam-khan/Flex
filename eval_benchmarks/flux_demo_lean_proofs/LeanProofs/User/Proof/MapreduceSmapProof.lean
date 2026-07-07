@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.MapreduceSmap
 open Classical
@@ -68,6 +68,6 @@ open MapreduceSmapQualifs
 set_option maxHeartbeats 5000000
 #time def MapreduceSmap_proof : MapreduceSmap := by
   unfold MapreduceSmap
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

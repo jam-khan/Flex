@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.RangeImpl__3__Next
 open Classical
@@ -68,6 +68,6 @@ open RangeImpl3NextQualifs
 set_option maxHeartbeats 5000000
 #time def RangeImpl__3__Next_proof : RangeImpl__3__Next := by
   unfold RangeImpl__3__Next
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

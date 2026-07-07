@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.RawVecImpl__2__NeedsToGrow
 open Classical
@@ -68,6 +68,6 @@ open RawVecImpl2NeedsToGrowQualifs
 set_option maxHeartbeats 5000000
 #time def RawVecImpl__2__NeedsToGrow_proof : RawVecImpl__2__NeedsToGrow := by
   unfold RawVecImpl__2__NeedsToGrow
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.VecDequeImpl__1__CopyNonoverlapping
 open Classical
@@ -68,6 +68,6 @@ open VecDequeImpl1CopyNonoverlappingQualifs
 set_option maxHeartbeats 5000000
 #time def VecDequeImpl__1__CopyNonoverlapping_proof : VecDequeImpl__1__CopyNonoverlapping := by
   unfold VecDequeImpl__1__CopyNonoverlapping
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

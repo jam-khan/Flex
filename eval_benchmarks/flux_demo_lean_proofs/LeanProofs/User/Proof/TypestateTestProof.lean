@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.TypestateTest
 open Classical
@@ -68,6 +68,6 @@ open TypestateTestQualifs
 set_option maxHeartbeats 5000000
 #time def TypestateTest_proof : TypestateTest := by
   unfold TypestateTest
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

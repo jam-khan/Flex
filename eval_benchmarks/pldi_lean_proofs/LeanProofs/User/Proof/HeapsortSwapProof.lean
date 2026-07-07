@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.HeapsortSwap
 open Classical
@@ -68,6 +68,6 @@ open HeapsortSwapQualifs
 set_option maxHeartbeats 5000000
 #time def HeapsortSwap_proof : HeapsortSwap := by
   unfold HeapsortSwap
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

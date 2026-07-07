@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.BasicsIsPos
 open Classical
@@ -68,6 +68,6 @@ open BasicsIsPosQualifs
 set_option maxHeartbeats 5000000
 #time def BasicsIsPos_proof : BasicsIsPos := by
   unfold BasicsIsPos
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

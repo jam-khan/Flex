@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.VectorsCountGood
 open Classical
@@ -68,6 +68,6 @@ open VectorsCountGoodQualifs
 set_option maxHeartbeats 5000000
 #time def VectorsCountGood_proof : VectorsCountGood := by
   unfold VectorsCountGood
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

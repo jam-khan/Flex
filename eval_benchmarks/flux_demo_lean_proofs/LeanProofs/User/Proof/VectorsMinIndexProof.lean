@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.VectorsMinIndex
 open Classical
@@ -68,6 +68,6 @@ open VectorsMinIndexQualifs
 set_option maxHeartbeats 5000000
 #time def VectorsMinIndex_proof : VectorsMinIndex := by
   unfold VectorsMinIndex
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

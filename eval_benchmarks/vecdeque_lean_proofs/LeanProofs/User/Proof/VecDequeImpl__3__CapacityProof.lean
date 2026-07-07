@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.VecDequeImpl__3__Capacity
 open Classical
@@ -68,6 +68,6 @@ open VecDequeImpl3CapacityQualifs
 set_option maxHeartbeats 5000000
 #time def VecDequeImpl__3__Capacity_proof : VecDequeImpl__3__Capacity := by
   unfold VecDequeImpl__3__Capacity
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

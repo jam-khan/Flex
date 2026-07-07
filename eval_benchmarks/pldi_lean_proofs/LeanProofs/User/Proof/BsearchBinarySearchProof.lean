@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.BsearchBinarySearch
 open Classical
@@ -68,6 +68,6 @@ open BsearchBinarySearchQualifs
 set_option maxHeartbeats 5000000
 #time def BsearchBinarySearch_proof : BsearchBinarySearch := by
   unfold BsearchBinarySearch
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

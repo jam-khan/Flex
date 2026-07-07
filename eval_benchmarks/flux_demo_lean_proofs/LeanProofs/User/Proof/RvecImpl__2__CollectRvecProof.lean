@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.RvecImpl__2__CollectRvec
 open Classical
@@ -68,6 +68,6 @@ open RvecImpl2CollectRvecQualifs
 set_option maxHeartbeats 5000000
 #time def RvecImpl__2__CollectRvec_proof : RvecImpl__2__CollectRvec := by
   unfold RvecImpl__2__CollectRvec
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

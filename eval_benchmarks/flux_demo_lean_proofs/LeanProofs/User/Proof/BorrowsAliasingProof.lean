@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.BorrowsAliasing
 open Classical
@@ -68,6 +68,6 @@ open BorrowsAliasingQualifs
 set_option maxHeartbeats 5000000
 #time def BorrowsAliasing_proof : BorrowsAliasing := by
   unfold BorrowsAliasing
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

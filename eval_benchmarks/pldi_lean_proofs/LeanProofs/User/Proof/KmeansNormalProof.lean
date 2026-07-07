@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.KmeansNormal
 open Classical
@@ -68,6 +68,6 @@ open KmeansNormalQualifs
 set_option maxHeartbeats 5000000
 #time def KmeansNormal_proof : KmeansNormal := by
   unfold KmeansNormal
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

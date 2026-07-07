@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.VecDequeImpl__1__BufferWrite
 open Classical
@@ -68,6 +68,6 @@ open VecDequeImpl1BufferWriteQualifs
 set_option maxHeartbeats 5000000
 #time def VecDequeImpl__1__BufferWrite_proof : VecDequeImpl__1__BufferWrite := by
   unfold VecDequeImpl__1__BufferWrite
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

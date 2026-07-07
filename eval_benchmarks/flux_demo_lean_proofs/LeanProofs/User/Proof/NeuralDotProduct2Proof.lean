@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.NeuralDotProduct2
 open Classical
@@ -68,6 +68,6 @@ open NeuralDotProduct2Qualifs
 set_option maxHeartbeats 5000000
 #time def NeuralDotProduct2_proof : NeuralDotProduct2 := by
   unfold NeuralDotProduct2
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

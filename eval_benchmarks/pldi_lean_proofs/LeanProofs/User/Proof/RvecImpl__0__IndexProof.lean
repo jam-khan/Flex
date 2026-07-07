@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.RvecImpl__0__Index
 open Classical
@@ -68,6 +68,6 @@ open RvecImpl0IndexQualifs
 set_option maxHeartbeats 5000000
 #time def RvecImpl__0__Index_proof : RvecImpl__0__Index := by
   unfold RvecImpl__0__Index
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.TypestateImpl__1__IntoInputHighZ
 open Classical
@@ -68,6 +68,6 @@ open TypestateImpl1IntoInputHighZQualifs
 set_option maxHeartbeats 5000000
 #time def TypestateImpl__1__IntoInputHighZ_proof : TypestateImpl__1__IntoInputHighZ := by
   unfold TypestateImpl__1__IntoInputHighZ
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

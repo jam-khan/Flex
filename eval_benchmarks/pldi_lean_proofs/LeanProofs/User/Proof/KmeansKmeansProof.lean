@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.KmeansKmeans
 open Classical
@@ -68,6 +68,6 @@ open KmeansKmeansQualifs
 set_option maxHeartbeats 5000000
 #time def KmeansKmeans_proof : KmeansKmeans := by
   unfold KmeansKmeans
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

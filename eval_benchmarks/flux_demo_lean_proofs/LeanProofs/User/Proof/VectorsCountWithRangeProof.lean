@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.VectorsCountWithRange
 open Classical
@@ -68,6 +68,6 @@ open VectorsCountWithRangeQualifs
 set_option maxHeartbeats 5000000
 #time def VectorsCountWithRange_proof : VectorsCountWithRange := by
   unfold VectorsCountWithRange
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

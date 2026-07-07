@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.KmpKmpTable
 open Classical
@@ -68,6 +68,6 @@ open KmpKmpTableQualifs
 set_option maxHeartbeats 5000000
 #time def KmpKmpTable_proof : KmpKmpTable := by
   unfold KmpKmpTable
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

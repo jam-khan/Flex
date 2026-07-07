@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.ArraysAdd2N
 open Classical
@@ -68,6 +68,6 @@ open ArraysAdd2NQualifs
 set_option maxHeartbeats 5000000
 #time def ArraysAdd2N_proof : ArraysAdd2N := by
   unfold ArraysAdd2N
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

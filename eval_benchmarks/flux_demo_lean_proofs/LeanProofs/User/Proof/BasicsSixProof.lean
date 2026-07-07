@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.BasicsSix
 open Classical
@@ -68,6 +68,6 @@ open BasicsSixQualifs
 set_option maxHeartbeats 5000000
 #time def BasicsSix_proof : BasicsSix := by
   unfold BasicsSix
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

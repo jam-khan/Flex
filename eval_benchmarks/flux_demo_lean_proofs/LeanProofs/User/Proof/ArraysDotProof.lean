@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.ArraysDot
 open Classical
@@ -68,6 +68,6 @@ open ArraysDotQualifs
 set_option maxHeartbeats 5000000
 #time def ArraysDot_proof : ArraysDot := by
   unfold ArraysDot
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.VecDequeImpl__0__Default
 open Classical
@@ -68,6 +68,6 @@ open VecDequeImpl0DefaultQualifs
 set_option maxHeartbeats 5000000
 #time def VecDequeImpl__0__Default_proof : VecDequeImpl__0__Default := by
   unfold VecDequeImpl__0__Default
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

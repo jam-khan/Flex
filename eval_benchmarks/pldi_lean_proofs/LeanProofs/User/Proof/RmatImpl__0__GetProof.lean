@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.RmatImpl__0__Get
 open Classical
@@ -68,6 +68,6 @@ open RmatImpl0GetQualifs
 set_option maxHeartbeats 5000000
 #time def RmatImpl__0__Get_proof : RmatImpl__0__Get := by
   unfold RmatImpl__0__Get
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

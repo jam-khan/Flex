@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.VecVecGetMut
 open Classical
@@ -68,6 +68,6 @@ open VecVecGetMutQualifs
 set_option maxHeartbeats 5000000
 #time def VecVecGetMut_proof : VecVecGetMut := by
   unfold VecVecGetMut
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,0 @@
-import LeanProofs.Flux.VC.VecDequeImpl__3__WithCapacityIn
-import LeanProofs.User.Proof.VecDequeImpl__3__WithCapacityInProof
-
-#check (F.VecDequeImpl__3__WithCapacityIn_proof : F.VecDequeImpl__3__WithCapacityIn)

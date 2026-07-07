@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.VectorsTestRvec0
 open Classical
@@ -68,6 +68,6 @@ open VectorsTestRvec0Qualifs
 set_option maxHeartbeats 5000000
 #time def VectorsTestRvec0_proof : VectorsTestRvec0 := by
   unfold VectorsTestRvec0
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

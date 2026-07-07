@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.DemoGet
 open Classical
@@ -68,6 +68,6 @@ open DemoGetQualifs
 set_option maxHeartbeats 5000000
 #time def DemoGet_proof : DemoGet := by
   unfold DemoGet
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

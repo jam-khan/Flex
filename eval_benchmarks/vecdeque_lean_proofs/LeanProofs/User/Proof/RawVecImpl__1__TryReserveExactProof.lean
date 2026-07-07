@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.RawVecImpl__1__TryReserveExact
 open Classical
@@ -68,6 +68,6 @@ open RawVecImpl1TryReserveExactQualifs
 set_option maxHeartbeats 5000000
 #time def RawVecImpl__1__TryReserveExact_proof : RawVecImpl__1__TryReserveExact := by
   unfold RawVecImpl__1__TryReserveExact
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

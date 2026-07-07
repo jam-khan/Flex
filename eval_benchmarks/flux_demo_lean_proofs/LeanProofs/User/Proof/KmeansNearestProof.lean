@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.KmeansNearest
 open Classical
@@ -68,6 +68,6 @@ open KmeansNearestQualifs
 set_option maxHeartbeats 5000000
 #time def KmeansNearest_proof : KmeansNearest := by
   unfold KmeansNearest
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

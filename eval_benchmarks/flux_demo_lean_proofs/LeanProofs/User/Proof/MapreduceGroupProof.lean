@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.MapreduceGroup
 open Classical
@@ -68,6 +68,6 @@ open MapreduceGroupQualifs
 set_option maxHeartbeats 5000000
 #time def MapreduceGroup_proof : MapreduceGroup := by
   unfold MapreduceGroup
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

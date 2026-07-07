@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.KmeansCentroid
 open Classical
@@ -68,6 +68,6 @@ open KmeansCentroidQualifs
 set_option maxHeartbeats 5000000
 #time def KmeansCentroid_proof : KmeansCentroid := by
   unfold KmeansCentroid
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

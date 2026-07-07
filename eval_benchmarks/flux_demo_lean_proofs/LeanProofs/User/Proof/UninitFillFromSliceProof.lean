@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.UninitFillFromSlice
 open Classical
@@ -68,6 +68,6 @@ open UninitFillFromSliceQualifs
 set_option maxHeartbeats 5000000
 #time def UninitFillFromSlice_proof : UninitFillFromSlice := by
   unfold UninitFillFromSlice
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

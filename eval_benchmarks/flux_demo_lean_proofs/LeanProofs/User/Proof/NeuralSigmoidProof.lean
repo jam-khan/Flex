@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.NeuralSigmoid
 open Classical
@@ -68,6 +68,6 @@ open NeuralSigmoidQualifs
 set_option maxHeartbeats 5000000
 #time def NeuralSigmoid_proof : NeuralSigmoid := by
   unfold NeuralSigmoid
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

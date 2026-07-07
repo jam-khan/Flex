@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.ArraysAverageColor
 open Classical
@@ -68,6 +68,6 @@ open ArraysAverageColorQualifs
 set_option maxHeartbeats 5000000
 #time def ArraysAverageColor_proof : ArraysAverageColor := by
   unfold ArraysAverageColor
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

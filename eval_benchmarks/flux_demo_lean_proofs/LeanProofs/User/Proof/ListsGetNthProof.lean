@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.ListsGetNth
 open Classical
@@ -68,6 +68,6 @@ open ListsGetNthQualifs
 set_option maxHeartbeats 5000000
 #time def ListsGetNth_proof : ListsGetNth := by
   unfold ListsGetNth
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

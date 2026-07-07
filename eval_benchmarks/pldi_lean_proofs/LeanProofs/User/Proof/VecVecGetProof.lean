@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.VecVecGet
 open Classical
@@ -68,6 +68,6 @@ open VecVecGetQualifs
 set_option maxHeartbeats 5000000
 #time def VecVecGet_proof : VecVecGet := by
   unfold VecVecGet
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

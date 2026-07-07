@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.VecDequeImpl__3__FrontMut
 open Classical
@@ -68,6 +68,6 @@ open VecDequeImpl3FrontMutQualifs
 set_option maxHeartbeats 5000000
 #time def VecDequeImpl__3__FrontMut_proof : VecDequeImpl__3__FrontMut := by
   unfold VecDequeImpl__3__FrontMut
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

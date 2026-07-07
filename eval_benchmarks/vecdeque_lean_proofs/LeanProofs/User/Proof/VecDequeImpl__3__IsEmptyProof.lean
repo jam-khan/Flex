@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.VecDequeImpl__3__IsEmpty
 open Classical
@@ -68,6 +68,6 @@ open VecDequeImpl3IsEmptyQualifs
 set_option maxHeartbeats 5000000
 #time def VecDequeImpl__3__IsEmpty_proof : VecDequeImpl__3__IsEmpty := by
   unfold VecDequeImpl__3__IsEmpty
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F
