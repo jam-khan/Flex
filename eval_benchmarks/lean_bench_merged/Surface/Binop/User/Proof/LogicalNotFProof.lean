@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Binop.Flux.Prelude
 import Surface.Binop.Flux.VC.LogicalNotF
 open Classical
@@ -68,6 +68,6 @@ open LogicalNotFQualifs
 set_option maxHeartbeats 5000000
 #time def LogicalNotF_proof : LogicalNotF := by
   unfold LogicalNotF
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

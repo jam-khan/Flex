@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ImplTrait.ImplTrait00.Flux.Prelude
 import ImplTrait.ImplTrait00.Flux.VC.TestClient
 open Classical
@@ -68,6 +68,6 @@ open TestClientQualifs
 set_option maxHeartbeats 5000000
 #time def TestClient_proof : TestClient := by
   unfold TestClient
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

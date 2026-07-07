@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Issue899a.Flux.Prelude
 import Surface.Issue899a.Flux.VC.Impl__0__Enqueue
 open Classical
@@ -68,6 +68,6 @@ open Impl0EnqueueQualifs
 set_option maxHeartbeats 5000000
 #time def Impl__0__Enqueue_proof : Impl__0__Enqueue := by
   unfold Impl__0__Enqueue
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

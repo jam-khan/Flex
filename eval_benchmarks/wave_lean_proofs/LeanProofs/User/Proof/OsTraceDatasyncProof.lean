@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.OsTraceDatasync
 open Classical
@@ -68,6 +68,6 @@ open OsTraceDatasyncQualifs
 set_option maxHeartbeats 5000000
 #time def OsTraceDatasync_proof : OsTraceDatasync := by
   unfold OsTraceDatasync
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

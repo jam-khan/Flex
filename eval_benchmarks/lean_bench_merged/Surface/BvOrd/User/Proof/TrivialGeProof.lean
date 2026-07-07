@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.BvOrd.Flux.Prelude
 import Surface.BvOrd.Flux.VC.TrivialGe
 open Classical
@@ -68,6 +68,6 @@ open TrivialGeQualifs
 set_option maxHeartbeats 5000000
 #time def TrivialGe_proof : TrivialGe := by
   unfold TrivialGe
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

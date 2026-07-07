@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.MutAsStrg00.Flux.Prelude
 import Surface.MutAsStrg00.Flux.VC.Bincr
 open Classical
@@ -68,6 +68,6 @@ open BincrQualifs
 set_option maxHeartbeats 5000000
 #time def Bincr_proof : Bincr := by
   unfold Bincr
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

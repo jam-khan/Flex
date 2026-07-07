@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.TypesStatMode
 open Classical
@@ -68,6 +68,6 @@ open TypesStatModeQualifs
 set_option maxHeartbeats 5000000
 #time def TypesStatMode_proof : TypesStatMode := by
   unfold TypesStatMode
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

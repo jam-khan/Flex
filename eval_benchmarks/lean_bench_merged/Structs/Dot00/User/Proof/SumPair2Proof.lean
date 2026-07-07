@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Structs.Dot00.Flux.Prelude
 import Structs.Dot00.Flux.VC.SumPair2
 open Classical
@@ -68,6 +68,6 @@ open SumPair2Qualifs
 set_option maxHeartbeats 5000000
 #time def SumPair2_proof : SumPair2 := by
   unfold SumPair2
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

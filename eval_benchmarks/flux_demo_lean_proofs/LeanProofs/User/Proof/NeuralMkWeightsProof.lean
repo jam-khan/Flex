@@ -68,6 +68,6 @@ open NeuralMkWeightsQualifs
 set_option maxHeartbeats 5000000
 #time def NeuralMkWeights_proof : NeuralMkWeights := by
   unfold NeuralMkWeights
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

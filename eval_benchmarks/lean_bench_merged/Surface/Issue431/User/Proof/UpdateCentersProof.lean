@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Issue431.Flux.Prelude
 import Surface.Issue431.Flux.VC.UpdateCenters
 open Classical
@@ -68,6 +68,6 @@ open UpdateCentersQualifs
 set_option maxHeartbeats 5000000
 #time def UpdateCenters_proof : UpdateCenters := by
   unfold UpdateCenters
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

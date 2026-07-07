@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Array.Array04.Flux.Prelude
 import Array.Array04.Flux.VC.TestRepeatArrayIndexRead
 open Classical
@@ -68,6 +68,6 @@ open TestRepeatArrayIndexReadQualifs
 set_option maxHeartbeats 5000000
 #time def TestRepeatArrayIndexRead_proof : TestRepeatArrayIndexRead := by
   unfold TestRepeatArrayIndexRead
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

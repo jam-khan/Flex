@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Const02.Flux.Prelude
 import Surface.Const02.Flux.VC.BkSilly
 open Classical
@@ -68,6 +68,6 @@ open BkSillyQualifs
 set_option maxHeartbeats 5000000
 #time def BkSilly_proof : BkSilly := by
   unfold BkSilly
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

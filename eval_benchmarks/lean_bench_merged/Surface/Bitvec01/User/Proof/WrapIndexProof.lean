@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Bitvec01.Flux.Prelude
 import Surface.Bitvec01.Flux.VC.WrapIndex
 open Classical
@@ -68,6 +68,6 @@ open WrapIndexQualifs
 set_option maxHeartbeats 5000000
 #time def WrapIndex_proof : WrapIndex := by
   unfold WrapIndex
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

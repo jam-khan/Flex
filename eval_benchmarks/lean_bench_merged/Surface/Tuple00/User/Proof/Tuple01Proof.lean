@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Tuple00.Flux.Prelude
 import Surface.Tuple00.Flux.VC.Tuple01
 open Classical
@@ -68,6 +68,6 @@ open Tuple01Qualifs
 set_option maxHeartbeats 5000000
 #time def Tuple01_proof : Tuple01 := by
   unfold Tuple01
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

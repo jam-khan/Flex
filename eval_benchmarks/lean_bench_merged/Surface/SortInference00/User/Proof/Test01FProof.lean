@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.SortInference00.Flux.Prelude
 import Surface.SortInference00.Flux.VC.Test01F
 open Classical
@@ -68,6 +68,6 @@ open Test01FQualifs
 set_option maxHeartbeats 5000000
 #time def Test01F_proof : Test01F := by
   unfold Test01F
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

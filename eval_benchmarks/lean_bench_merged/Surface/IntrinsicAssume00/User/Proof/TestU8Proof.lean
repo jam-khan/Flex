@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.IntrinsicAssume00.Flux.Prelude
 import Surface.IntrinsicAssume00.Flux.VC.TestU8
 open Classical
@@ -68,6 +68,6 @@ open TestU8Qualifs
 set_option maxHeartbeats 5000000
 #time def TestU8_proof : TestU8 := by
   unfold TestU8
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

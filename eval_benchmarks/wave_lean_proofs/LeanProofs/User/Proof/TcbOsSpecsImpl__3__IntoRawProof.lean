@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.TcbOsSpecsImpl__3__IntoRaw
 open Classical
@@ -68,6 +68,6 @@ open TcbOsSpecsImpl3IntoRawQualifs
 set_option maxHeartbeats 5000000
 #time def TcbOsSpecsImpl__3__IntoRaw_proof : TcbOsSpecsImpl__3__IntoRaw := by
   unfold TcbOsSpecsImpl__3__IntoRaw
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

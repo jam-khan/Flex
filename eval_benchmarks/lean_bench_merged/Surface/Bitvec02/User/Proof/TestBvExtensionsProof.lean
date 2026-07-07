@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Bitvec02.Flux.Prelude
 import Surface.Bitvec02.Flux.VC.TestBvExtensions
 open Classical
@@ -68,6 +68,6 @@ open TestBvExtensionsQualifs
 set_option maxHeartbeats 5000000
 #time def TestBvExtensions_proof : TestBvExtensions := by
   unfold TestBvExtensions
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

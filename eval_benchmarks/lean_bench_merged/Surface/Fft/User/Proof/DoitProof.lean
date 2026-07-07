@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Fft.Flux.Prelude
 import Surface.Fft.Flux.VC.Doit
 open Classical
@@ -68,6 +68,6 @@ open DoitQualifs
 set_option maxHeartbeats 5000000
 #time def Doit_proof : Doit := by
   unfold Doit
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

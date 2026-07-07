@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.OsTraceRead
 open Classical
@@ -68,6 +68,6 @@ open OsTraceReadQualifs
 set_option maxHeartbeats 5000000
 #time def OsTraceRead_proof : OsTraceRead := by
   unfold OsTraceRead
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

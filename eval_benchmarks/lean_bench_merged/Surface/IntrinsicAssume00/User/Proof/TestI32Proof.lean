@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.IntrinsicAssume00.Flux.Prelude
 import Surface.IntrinsicAssume00.Flux.VC.TestI32
 open Classical
@@ -68,6 +68,6 @@ open TestI32Qualifs
 set_option maxHeartbeats 5000000
 #time def TestI32_proof : TestI32 := by
   unfold TestI32
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Issue977.Flux.Prelude
 import Surface.Issue977.Flux.VC.Map
 open Classical
@@ -68,6 +68,6 @@ open MapQualifs
 set_option maxHeartbeats 5000000
 #time def Map_proof : Map := by
   unfold Map
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

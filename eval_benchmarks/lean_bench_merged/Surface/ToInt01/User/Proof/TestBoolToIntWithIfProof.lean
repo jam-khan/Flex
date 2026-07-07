@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.ToInt01.Flux.Prelude
 import Surface.ToInt01.Flux.VC.TestBoolToIntWithIf
 open Classical
@@ -68,6 +68,6 @@ open TestBoolToIntWithIfQualifs
 set_option maxHeartbeats 5000000
 #time def TestBoolToIntWithIf_proof : TestBoolToIntWithIf := by
   unfold TestBoolToIntWithIf
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

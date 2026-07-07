@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.BoundedQuant00.Flux.Prelude
 import Surface.BoundedQuant00.Flux.VC.TestAllR
 open Classical
@@ -68,6 +68,6 @@ open TestAllRQualifs
 set_option maxHeartbeats 5000000
 #time def TestAllR_proof : TestAllR := by
   unfold TestAllR
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

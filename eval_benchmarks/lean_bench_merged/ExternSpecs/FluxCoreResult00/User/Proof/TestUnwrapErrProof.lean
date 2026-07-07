@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ExternSpecs.FluxCoreResult00.Flux.Prelude
 import ExternSpecs.FluxCoreResult00.Flux.VC.TestUnwrapErr
 open Classical
@@ -68,6 +68,6 @@ open TestUnwrapErrQualifs
 set_option maxHeartbeats 5000000
 #time def TestUnwrapErr_proof : TestUnwrapErr := by
   unfold TestUnwrapErr
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

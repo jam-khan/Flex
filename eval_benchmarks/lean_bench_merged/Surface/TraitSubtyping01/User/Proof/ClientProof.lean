@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.TraitSubtyping01.Flux.Prelude
 import Surface.TraitSubtyping01.Flux.VC.Client
 open Classical
@@ -68,6 +68,6 @@ open ClientQualifs
 set_option maxHeartbeats 5000000
 #time def Client_proof : Client := by
   unfold Client
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

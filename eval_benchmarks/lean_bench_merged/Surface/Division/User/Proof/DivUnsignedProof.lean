@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Division.Flux.Prelude
 import Surface.Division.Flux.VC.DivUnsigned
 open Classical
@@ -68,6 +68,6 @@ open DivUnsignedQualifs
 set_option maxHeartbeats 5000000
 #time def DivUnsigned_proof : DivUnsigned := by
   unfold DivUnsigned
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

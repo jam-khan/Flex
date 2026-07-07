@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.VerifierInterfacePushSyscallResult
 open Classical
@@ -68,6 +68,6 @@ open VerifierInterfacePushSyscallResultQualifs
 set_option maxHeartbeats 5000000
 #time def VerifierInterfacePushSyscallResult_proof : VerifierInterfacePushSyscallResult := by
   unfold VerifierInterfacePushSyscallResult
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.RefinedFnInTrait02.Flux.Prelude
 import Surface.RefinedFnInTrait02.Flux.VC.Impl__1__Bloop
 open Classical
@@ -68,6 +68,6 @@ open Impl1BloopQualifs
 set_option maxHeartbeats 5000000
 #time def Impl__1__Bloop_proof : Impl__1__Bloop := by
   unfold Impl__1__Bloop
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

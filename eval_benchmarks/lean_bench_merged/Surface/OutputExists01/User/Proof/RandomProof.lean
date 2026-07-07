@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.OutputExists01.Flux.Prelude
 import Surface.OutputExists01.Flux.VC.Random
 open Classical
@@ -68,6 +68,6 @@ open RandomQualifs
 set_option maxHeartbeats 5000000
 #time def Random_proof : Random := by
   unfold Random
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

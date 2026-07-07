@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Join04.Flux.Prelude
 import Surface.Join04.Flux.VC.JoinArr
 open Classical
@@ -68,6 +68,6 @@ open JoinArrQualifs
 set_option maxHeartbeats 5000000
 #time def JoinArr_proof : JoinArr := by
   unfold JoinArr
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

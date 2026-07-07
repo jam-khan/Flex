@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Ex2MinIndexLoop.Flux.Prelude
 import Surface.Ex2MinIndexLoop.Flux.VC.MinIndex
 open Classical
@@ -68,6 +68,6 @@ open MinIndexQualifs
 set_option maxHeartbeats 5000000
 #time def MinIndex_proof : MinIndex := by
   unfold MinIndex
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

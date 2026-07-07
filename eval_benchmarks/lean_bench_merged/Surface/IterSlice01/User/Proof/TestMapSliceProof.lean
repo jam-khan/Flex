@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.IterSlice01.Flux.Prelude
 import Surface.IterSlice01.Flux.VC.TestMapSlice
 open Classical
@@ -68,6 +68,6 @@ open TestMapSliceQualifs
 set_option maxHeartbeats 5000000
 #time def TestMapSlice_proof : TestMapSlice := by
   unfold TestMapSlice
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

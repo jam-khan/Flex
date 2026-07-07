@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.RcSpec.Flux.Prelude
 import Surface.RcSpec.Flux.VC.TestRc
 open Classical
@@ -68,6 +68,6 @@ open TestRcQualifs
 set_option maxHeartbeats 5000000
 #time def TestRc_proof : TestRc := by
   unfold TestRc
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

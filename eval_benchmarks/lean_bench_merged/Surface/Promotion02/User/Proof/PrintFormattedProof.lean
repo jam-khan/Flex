@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Promotion02.Flux.Prelude
 import Surface.Promotion02.Flux.VC.PrintFormatted
 open Classical
@@ -68,6 +68,6 @@ open PrintFormattedQualifs
 set_option maxHeartbeats 5000000
 #time def PrintFormatted_proof : PrintFormatted := by
   unfold PrintFormatted
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

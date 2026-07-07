@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ExternSpecs.FluxCoreSlice00.Flux.Prelude
 import ExternSpecs.FluxCoreSlice00.Flux.VC.TestSplitLastBranch
 open Classical
@@ -68,6 +68,6 @@ open TestSplitLastBranchQualifs
 set_option maxHeartbeats 5000000
 #time def TestSplitLastBranch_proof : TestSplitLastBranch := by
   unfold TestSplitLastBranch
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

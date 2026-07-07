@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.FdmapImpl__0__Create
 open Classical
@@ -68,6 +68,6 @@ open FdmapImpl0CreateQualifs
 set_option maxHeartbeats 5000000
 #time def FdmapImpl__0__Create_proof : FdmapImpl__0__Create := by
   unfold FdmapImpl__0__Create
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

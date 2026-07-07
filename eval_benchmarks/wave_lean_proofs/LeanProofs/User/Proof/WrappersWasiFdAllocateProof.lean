@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.WrappersWasiFdAllocate
 open Classical
@@ -68,6 +68,6 @@ open WrappersWasiFdAllocateQualifs
 set_option maxHeartbeats 5000000
 #time def WrappersWasiFdAllocate_proof : WrappersWasiFdAllocate := by
   unfold WrappersWasiFdAllocate
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

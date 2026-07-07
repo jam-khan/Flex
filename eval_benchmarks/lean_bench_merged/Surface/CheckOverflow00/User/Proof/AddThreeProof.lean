@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.CheckOverflow00.Flux.Prelude
 import Surface.CheckOverflow00.Flux.VC.AddThree
 open Classical
@@ -68,6 +68,6 @@ open AddThreeQualifs
 set_option maxHeartbeats 5000000
 #time def AddThree_proof : AddThree := by
   unfold AddThree
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

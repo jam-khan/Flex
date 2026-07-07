@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.ArgSyntax.Flux.Prelude
 import Surface.ArgSyntax.Flux.VC.Path
 open Classical
@@ -68,6 +68,6 @@ open PathQualifs
 set_option maxHeartbeats 5000000
 #time def Path_proof : Path := by
   unfold Path
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

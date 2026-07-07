@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.AssumeParametric00.Flux.Prelude
 import Surface.AssumeParametric00.Flux.VC.Get
 open Classical
@@ -68,6 +68,6 @@ open GetQualifs
 set_option maxHeartbeats 5000000
 #time def Get_proof : Get := by
   unfold Get
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

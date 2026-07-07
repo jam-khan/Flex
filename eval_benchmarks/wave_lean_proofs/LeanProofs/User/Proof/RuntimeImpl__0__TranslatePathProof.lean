@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.RuntimeImpl__0__TranslatePath
 open Classical
@@ -68,6 +68,6 @@ open RuntimeImpl0TranslatePathQualifs
 set_option maxHeartbeats 5000000
 #time def RuntimeImpl__0__TranslatePath_proof : RuntimeImpl__0__TranslatePath := by
   unfold RuntimeImpl__0__TranslatePath
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

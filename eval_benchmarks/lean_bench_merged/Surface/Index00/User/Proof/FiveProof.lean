@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Index00.Flux.Prelude
 import Surface.Index00.Flux.VC.Five
 open Classical
@@ -68,6 +68,6 @@ open FiveQualifs
 set_option maxHeartbeats 5000000
 #time def Five_proof : Five := by
   unfold Five
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -68,6 +68,6 @@ open AnfImpl0ToImmQualifs
 set_option maxHeartbeats 5000000
 #time def AnfImpl__0__ToImm_proof : AnfImpl__0__ToImm := by
   unfold AnfImpl__0__ToImm
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

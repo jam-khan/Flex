@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Iter02.Flux.Prelude
 import Surface.Iter02.Flux.VC.TestIter1
 open Classical
@@ -68,6 +68,6 @@ open TestIter1Qualifs
 set_option maxHeartbeats 5000000
 #time def TestIter1_proof : TestIter1 := by
   unfold TestIter1
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

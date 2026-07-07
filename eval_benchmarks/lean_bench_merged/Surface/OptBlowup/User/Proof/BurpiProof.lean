@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.OptBlowup.Flux.Prelude
 import Surface.OptBlowup.Flux.VC.Burpi
 open Classical
@@ -68,6 +68,6 @@ open BurpiQualifs
 set_option maxHeartbeats 5000000
 #time def Burpi_proof : Burpi := by
   unfold Burpi
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Detached.DetachEnum00.Flux.Prelude
 import Detached.DetachEnum00.Flux.VC.FromUsize
 open Classical
@@ -68,6 +68,6 @@ open FromUsizeQualifs
 set_option maxHeartbeats 5000000
 #time def FromUsize_proof : FromUsize := by
   unfold FromUsize
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

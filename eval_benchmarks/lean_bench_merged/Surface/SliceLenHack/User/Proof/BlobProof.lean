@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.SliceLenHack.Flux.Prelude
 import Surface.SliceLenHack.Flux.VC.Blob
 open Classical
@@ -68,6 +68,6 @@ open BlobQualifs
 set_option maxHeartbeats 5000000
 #time def Blob_proof : Blob := by
   unfold Blob
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

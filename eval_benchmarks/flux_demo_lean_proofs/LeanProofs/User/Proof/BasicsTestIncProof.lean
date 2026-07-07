@@ -68,6 +68,6 @@ open BasicsTestIncQualifs
 set_option maxHeartbeats 5000000
 #time def BasicsTestInc_proof : BasicsTestInc := by
   unfold BasicsTestInc
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

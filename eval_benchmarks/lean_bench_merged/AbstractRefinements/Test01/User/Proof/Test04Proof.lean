@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import AbstractRefinements.Test01.Flux.Prelude
 import AbstractRefinements.Test01.Flux.VC.Test04
 open Classical
@@ -68,6 +68,6 @@ open Test04Qualifs
 set_option maxHeartbeats 5000000
 #time def Test04_proof : Test04 := by
   unfold Test04
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

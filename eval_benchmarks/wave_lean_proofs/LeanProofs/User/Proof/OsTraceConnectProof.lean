@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.OsTraceConnect
 open Classical
@@ -68,6 +68,6 @@ open OsTraceConnectQualifs
 set_option maxHeartbeats 5000000
 #time def OsTraceConnect_proof : OsTraceConnect := by
   unfold OsTraceConnect
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

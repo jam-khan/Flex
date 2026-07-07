@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Detached.DetachMacro.Flux.Prelude
 import Detached.DetachMacro.Flux.VC.Watermelon
 open Classical
@@ -68,6 +68,6 @@ open WatermelonQualifs
 set_option maxHeartbeats 5000000
 #time def Watermelon_proof : Watermelon := by
   unfold Watermelon
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

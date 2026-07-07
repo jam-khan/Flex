@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Iter00.Flux.Prelude
 import Surface.Iter00.Flux.VC.RangeImpl__3__IntoIter
 open Classical
@@ -68,6 +68,6 @@ open RangeImpl3IntoIterQualifs
 set_option maxHeartbeats 5000000
 #time def RangeImpl__3__IntoIter_proof : RangeImpl__3__IntoIter := by
   unfold RangeImpl__3__IntoIter
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

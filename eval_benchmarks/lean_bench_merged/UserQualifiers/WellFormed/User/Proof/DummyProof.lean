@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import UserQualifiers.WellFormed.Flux.Prelude
 import UserQualifiers.WellFormed.Flux.VC.Dummy
 open Classical
@@ -76,6 +76,6 @@ open DummyQualifs
 set_option maxHeartbeats 5000000
 #time def Dummy_proof : Dummy := by
   unfold Dummy
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

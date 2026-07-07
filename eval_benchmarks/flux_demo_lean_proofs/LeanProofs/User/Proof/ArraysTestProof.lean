@@ -68,6 +68,6 @@ open ArraysTestQualifs
 set_option maxHeartbeats 5000000
 #time def ArraysTest_proof : ArraysTest := by
   unfold ArraysTest
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.TraitSubtyping01.Flux.Prelude
 import Surface.TraitSubtyping01.Flux.VC.Impl__0__Bloop
 open Classical
@@ -68,6 +68,6 @@ open Impl0BloopQualifs
 set_option maxHeartbeats 5000000
 #time def Impl__0__Bloop_proof : Impl__0__Bloop := by
   unfold Impl__0__Bloop
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

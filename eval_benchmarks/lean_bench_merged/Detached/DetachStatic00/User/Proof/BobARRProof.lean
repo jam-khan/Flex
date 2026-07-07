@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Detached.DetachStatic00.Flux.Prelude
 import Detached.DetachStatic00.Flux.VC.BobARR
 open Classical
@@ -68,6 +68,6 @@ open BobARRQualifs
 set_option maxHeartbeats 5000000
 #time def BobARR_proof : BobARR := by
   unfold BobARR
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

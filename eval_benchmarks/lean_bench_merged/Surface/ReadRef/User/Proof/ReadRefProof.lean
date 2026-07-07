@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.ReadRef.Flux.Prelude
 import Surface.ReadRef.Flux.VC.ReadRef
 open Classical
@@ -68,6 +68,6 @@ open ReadRefQualifs
 set_option maxHeartbeats 5000000
 #time def ReadRef_proof : ReadRef := by
   unfold ReadRef
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.BoundedQuant00.Flux.Prelude
 import Surface.BoundedQuant00.Flux.VC.TestExiR
 open Classical
@@ -68,6 +68,6 @@ open TestExiRQualifs
 set_option maxHeartbeats 5000000
 #time def TestExiR_proof : TestExiR := by
   unfold TestExiR
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

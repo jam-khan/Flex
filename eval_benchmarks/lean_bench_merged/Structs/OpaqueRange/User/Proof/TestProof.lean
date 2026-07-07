@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Structs.OpaqueRange.Flux.Prelude
 import Structs.OpaqueRange.Flux.VC.Test
 open Classical
@@ -68,6 +68,6 @@ open TestQualifs
 set_option maxHeartbeats 5000000
 #time def Test_proof : Test := by
   unfold Test
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

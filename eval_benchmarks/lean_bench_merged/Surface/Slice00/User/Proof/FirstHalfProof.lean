@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Slice00.Flux.Prelude
 import Surface.Slice00.Flux.VC.FirstHalf
 open Classical
@@ -68,6 +68,6 @@ open FirstHalfQualifs
 set_option maxHeartbeats 5000000
 #time def FirstHalf_proof : FirstHalf := by
   unfold FirstHalf
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

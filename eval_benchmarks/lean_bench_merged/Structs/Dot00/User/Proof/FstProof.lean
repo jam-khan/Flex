@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Structs.Dot00.Flux.Prelude
 import Structs.Dot00.Flux.VC.Fst
 open Classical
@@ -68,6 +68,6 @@ open FstQualifs
 set_option maxHeartbeats 5000000
 #time def Fst_proof : Fst := by
   unfold Fst
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Detached.DetachImpl06.Flux.Prelude
 import Detached.DetachImpl06.Flux.VC.XYImpl__1__Gromp
 open Classical
@@ -68,6 +68,6 @@ open XYImpl1GrompQualifs
 set_option maxHeartbeats 5000000
 #time def XYImpl__1__Gromp_proof : XYImpl__1__Gromp := by
   unfold XYImpl__1__Gromp
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

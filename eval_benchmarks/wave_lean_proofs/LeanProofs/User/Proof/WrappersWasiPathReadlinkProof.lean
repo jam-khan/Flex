@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.WrappersWasiPathReadlink
 open Classical
@@ -68,6 +68,6 @@ open WrappersWasiPathReadlinkQualifs
 set_option maxHeartbeats 5000000
 #time def WrappersWasiPathReadlink_proof : WrappersWasiPathReadlink := by
   unfold WrappersWasiPathReadlink
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

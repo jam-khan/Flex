@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Date.Flux.Prelude
 import Surface.Date.Flux.VC.IsFebDay
 open Classical
@@ -68,6 +68,6 @@ open IsFebDayQualifs
 set_option maxHeartbeats 5000000
 #time def IsFebDay_proof : IsFebDay := by
   unfold IsFebDay
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

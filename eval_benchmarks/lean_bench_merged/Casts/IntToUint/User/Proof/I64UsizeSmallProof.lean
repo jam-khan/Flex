@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Casts.IntToUint.Flux.Prelude
 import Casts.IntToUint.Flux.VC.I64UsizeSmall
 open Classical
@@ -68,6 +68,6 @@ open I64UsizeSmallQualifs
 set_option maxHeartbeats 5000000
 #time def I64UsizeSmall_proof : I64UsizeSmall := by
   unfold I64UsizeSmall
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

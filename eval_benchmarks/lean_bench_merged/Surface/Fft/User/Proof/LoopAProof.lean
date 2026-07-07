@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Fft.Flux.Prelude
 import Surface.Fft.Flux.VC.LoopA
 open Classical
@@ -68,6 +68,6 @@ open LoopAQualifs
 set_option maxHeartbeats 5000000
 #time def LoopA_proof : LoopA := by
   unfold LoopA
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

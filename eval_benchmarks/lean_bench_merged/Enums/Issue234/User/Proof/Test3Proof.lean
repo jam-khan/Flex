@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Enums.Issue234.Flux.Prelude
 import Enums.Issue234.Flux.VC.Test3
 open Classical
@@ -72,6 +72,6 @@ open Test3Qualifs
 set_option maxHeartbeats 5000000
 #time def Test3_proof : Test3 := by
   unfold Test3
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

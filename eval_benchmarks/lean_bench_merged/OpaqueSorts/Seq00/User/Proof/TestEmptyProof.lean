@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import OpaqueSorts.Seq00.Flux.Prelude
 import OpaqueSorts.Seq00.Flux.VC.TestEmpty
 open Classical
@@ -68,6 +68,6 @@ open TestEmptyQualifs
 set_option maxHeartbeats 5000000
 #time def TestEmpty_proof : TestEmpty := by
   unfold TestEmpty
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

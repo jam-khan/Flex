@@ -68,6 +68,6 @@ open NeuralInitQualifs
 set_option maxHeartbeats 5000000
 #time def NeuralInit_proof : NeuralInit := by
   unfold NeuralInit
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

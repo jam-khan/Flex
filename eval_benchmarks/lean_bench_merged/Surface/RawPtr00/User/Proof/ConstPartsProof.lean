@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.RawPtr00.Flux.Prelude
 import Surface.RawPtr00.Flux.VC.ConstParts
 open Classical
@@ -68,6 +68,6 @@ open ConstPartsQualifs
 set_option maxHeartbeats 5000000
 #time def ConstParts_proof : ConstParts := by
   unfold ConstParts
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

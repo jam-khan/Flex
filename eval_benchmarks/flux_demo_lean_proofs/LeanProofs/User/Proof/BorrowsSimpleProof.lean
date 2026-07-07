@@ -68,6 +68,6 @@ open BorrowsSimpleQualifs
 set_option maxHeartbeats 5000000
 #time def BorrowsSimple_proof : BorrowsSimple := by
   unfold BorrowsSimple
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

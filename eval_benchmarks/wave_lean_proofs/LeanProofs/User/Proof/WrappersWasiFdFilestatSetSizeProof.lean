@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.WrappersWasiFdFilestatSetSize
 open Classical
@@ -68,6 +68,6 @@ open WrappersWasiFdFilestatSetSizeQualifs
 set_option maxHeartbeats 5000000
 #time def WrappersWasiFdFilestatSetSize_proof : WrappersWasiFdFilestatSetSize := by
   unfold WrappersWasiFdFilestatSetSize
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.PathResolutionExpandSymlink
 open Classical
@@ -68,6 +68,6 @@ open PathResolutionExpandSymlinkQualifs
 set_option maxHeartbeats 5000000
 #time def PathResolutionExpandSymlink_proof : PathResolutionExpandSymlink := by
   unfold PathResolutionExpandSymlink
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

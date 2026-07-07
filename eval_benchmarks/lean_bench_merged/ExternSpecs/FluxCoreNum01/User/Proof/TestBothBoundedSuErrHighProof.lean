@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ExternSpecs.FluxCoreNum01.Flux.Prelude
 import ExternSpecs.FluxCoreNum01.Flux.VC.TestBothBoundedSuErrHigh
 open Classical
@@ -68,6 +68,6 @@ open TestBothBoundedSuErrHighQualifs
 set_option maxHeartbeats 5000000
 #time def TestBothBoundedSuErrHigh_proof : TestBothBoundedSuErrHigh := by
   unfold TestBothBoundedSuErrHigh
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

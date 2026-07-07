@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ExternSpecs.FluxCoreMem00.Flux.Prelude
 import ExternSpecs.FluxCoreMem00.Flux.VC.TestSizeOf
 open Classical
@@ -68,6 +68,6 @@ open TestSizeOfQualifs
 set_option maxHeartbeats 5000000
 #time def TestSizeOf_proof : TestSizeOf := by
   unfold TestSizeOf
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

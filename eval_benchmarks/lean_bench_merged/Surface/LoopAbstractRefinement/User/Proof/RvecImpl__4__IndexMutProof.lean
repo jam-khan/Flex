@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.LoopAbstractRefinement.Flux.Prelude
 import Surface.LoopAbstractRefinement.Flux.VC.RvecImpl__4__IndexMut
 open Classical
@@ -72,6 +72,6 @@ open RvecImpl4IndexMutQualifs
 set_option maxHeartbeats 5000000
 #time def RvecImpl__4__IndexMut_proof : RvecImpl__4__IndexMut := by
   unfold RvecImpl__4__IndexMut
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

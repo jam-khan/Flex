@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.CloneSpec.Flux.Prelude
 import Surface.CloneSpec.Flux.VC.TestClone
 open Classical
@@ -68,6 +68,6 @@ open TestCloneQualifs
 set_option maxHeartbeats 5000000
 #time def TestClone_proof : TestClone := by
   unfold TestClone
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

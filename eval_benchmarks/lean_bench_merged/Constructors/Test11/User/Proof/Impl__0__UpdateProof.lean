@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Constructors.Test11.Flux.Prelude
 import Constructors.Test11.Flux.VC.Impl__0__Update
 open Classical
@@ -68,6 +68,6 @@ open Impl0UpdateQualifs
 set_option maxHeartbeats 5000000
 #time def Impl__0__Update_proof : Impl__0__Update := by
   unfold Impl__0__Update
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

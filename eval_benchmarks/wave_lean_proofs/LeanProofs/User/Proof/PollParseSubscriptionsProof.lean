@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.PollParseSubscriptions
 open Classical
@@ -68,6 +68,6 @@ open PollParseSubscriptionsQualifs
 set_option maxHeartbeats 5000000
 #time def PollParseSubscriptions_proof : PollParseSubscriptions := by
   unfold PollParseSubscriptions
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

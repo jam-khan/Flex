@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Issue1449Simp.Flux.Prelude
 import Surface.Issue1449Simp.Flux.VC.TestSelect
 open Classical
@@ -68,6 +68,6 @@ open TestSelectQualifs
 set_option maxHeartbeats 5000000
 #time def TestSelect_proof : TestSelect := by
   unfold TestSelect
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

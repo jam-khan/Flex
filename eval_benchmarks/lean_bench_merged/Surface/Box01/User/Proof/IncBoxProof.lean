@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Box01.Flux.Prelude
 import Surface.Box01.Flux.VC.IncBox
 open Classical
@@ -68,6 +68,6 @@ open IncBoxQualifs
 set_option maxHeartbeats 5000000
 #time def IncBox_proof : IncBox := by
   unfold IncBox
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

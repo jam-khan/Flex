@@ -1,0 +1,73 @@
+import Flex
+import LeanProofs.Flux.Prelude
+import LeanProofs.Flux.VC.DemoImpl__1__Forward
+open Classical
+set_option linter.unusedVariables false
+
+
+namespace F
+
+namespace DemoImpl1ForwardQualifs
+
+@[qualif]
+def EqTrue (i₁ : Prop) : Prop :=
+  i₁
+
+@[qualif]
+def EqFalse (i₁ : Prop) : Prop :=
+  (¬i₁)
+
+@[qualif]
+def EqZero (i₁ : Int) : Prop :=
+  (i₁ = 0)
+
+@[qualif]
+def GtZero (i₁ : Int) : Prop :=
+  (i₁ > 0)
+
+@[qualif]
+def GeZero (i₁ : Int) : Prop :=
+  (i₁ ≥ 0)
+
+@[qualif]
+def LtZero (i₁ : Int) : Prop :=
+  (i₁ < 0)
+
+@[qualif]
+def LeZero (i₁ : Int) : Prop :=
+  (i₁ ≤ 0)
+
+@[qualif]
+def Eq (i₁ : Int) (o₁ : Int) : Prop :=
+  (i₁ = o₁)
+
+@[qualif]
+def Gt (i₁ : Int) (o₁ : Int) : Prop :=
+  (i₁ > o₁)
+
+@[qualif]
+def Ge (i₁ : Int) (o₁ : Int) : Prop :=
+  (i₁ ≥ o₁)
+
+@[qualif]
+def Lt (i₁ : Int) (o₁ : Int) : Prop :=
+  (i₁ < o₁)
+
+@[qualif]
+def Le (i₁ : Int) (o₁ : Int) : Prop :=
+  (i₁ ≤ o₁)
+
+@[qualif]
+def Le1 (i₁ : Int) (o₁ : Int) : Prop :=
+  (i₁ ≤ (o₁ - 1))
+
+end DemoImpl1ForwardQualifs
+
+open DemoImpl1ForwardQualifs
+
+set_option maxHeartbeats 5000000
+#time def DemoImpl__1__Forward_proof : DemoImpl__1__Forward := by
+  unfold DemoImpl__1__Forward
+  (try zap) ; (try simp [*]) ; (try solve)
+
+end F

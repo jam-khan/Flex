@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.KmpOverflow.Flux.Prelude
 import Surface.KmpOverflow.Flux.VC.KmpSearch
 open Classical
@@ -68,6 +68,6 @@ open KmpSearchQualifs
 set_option maxHeartbeats 5000000
 #time def KmpSearch_proof : KmpSearch := by
   unfold KmpSearch
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

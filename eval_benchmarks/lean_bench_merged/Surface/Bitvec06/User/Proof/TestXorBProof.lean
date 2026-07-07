@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Bitvec06.Flux.Prelude
 import Surface.Bitvec06.Flux.VC.TestXorB
 open Classical
@@ -68,6 +68,6 @@ open TestXorBQualifs
 set_option maxHeartbeats 5000000
 #time def TestXorB_proof : TestXorB := by
   unfold TestXorB
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

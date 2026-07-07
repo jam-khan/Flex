@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Async01.Flux.Prelude
 import Surface.Async01.Flux.VC.Jazz
 open Classical
@@ -68,6 +68,6 @@ open JazzQualifs
 set_option maxHeartbeats 5000000
 #time def Jazz_proof : Jazz := by
   unfold Jazz
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

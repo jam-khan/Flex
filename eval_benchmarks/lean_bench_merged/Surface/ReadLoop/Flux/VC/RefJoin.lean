@@ -7,7 +7,7 @@ namespace F
 
 
 
-def RefJoin := ∃ k0 : (a0 : Int) -> (a1 : Prop) -> Prop, ∃ k1 : (a0 : Int) -> (a1 : Prop) -> (a2 : Int) -> Prop, 
+def RefJoin := ∃ k0 : (a0 : Int) -> (a1 : Prop) -> Prop, 
  ∀ (b₀ : Prop),
   (((k0 0 b₀))) ∧
   (∀ (r₀ : Int),
@@ -15,11 +15,7 @@ def RefJoin := ∃ k0 : (a0 : Int) -> (a1 : Prop) -> Prop, ∃ k1 : (a0 : Int) -
     ((¬b₀) ->
      (((r₀ + 1) > 0) = True)) ∧
     (b₀ ->
-     (((k1 1 True r₀))) ∧
-     (∀ (r₁ : Int),
-      ((k1 r₁ True r₀)) ->
-       ((k0 r₁ True)))
-     )
+     ((k0 1 True)))
     )
   
 end F

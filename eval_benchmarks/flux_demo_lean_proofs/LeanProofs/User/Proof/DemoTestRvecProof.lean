@@ -68,6 +68,6 @@ open DemoTestRvecQualifs
 set_option maxHeartbeats 5000000
 #time def DemoTestRvec_proof : DemoTestRvec := by
   unfold DemoTestRvec
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Ptr00.Flux.Prelude
 import Surface.Ptr00.Flux.VC.Test02MutConst
 open Classical
@@ -68,6 +68,6 @@ open Test02MutConstQualifs
 set_option maxHeartbeats 5000000
 #time def Test02MutConst_proof : Test02MutConst := by
   unfold Test02MutConst
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

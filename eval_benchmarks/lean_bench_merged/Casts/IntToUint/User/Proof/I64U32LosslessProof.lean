@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Casts.IntToUint.Flux.Prelude
 import Casts.IntToUint.Flux.VC.I64U32Lossless
 open Classical
@@ -68,6 +68,6 @@ open I64U32LosslessQualifs
 set_option maxHeartbeats 5000000
 #time def I64U32Lossless_proof : I64U32Lossless := by
   unfold I64U32Lossless
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

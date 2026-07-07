@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.MutHack00.Flux.Prelude
 import Surface.MutHack00.Flux.VC.Lib2
 open Classical
@@ -68,6 +68,6 @@ open Lib2Qualifs
 set_option maxHeartbeats 5000000
 #time def Lib2_proof : Lib2 := by
   unfold Lib2
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

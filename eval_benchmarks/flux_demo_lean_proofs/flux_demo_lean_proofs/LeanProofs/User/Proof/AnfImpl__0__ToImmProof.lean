@@ -1,0 +1,73 @@
+import Flex
+import LeanProofs.Flux.Prelude
+import LeanProofs.Flux.VC.AnfImpl__0__ToImm
+open Classical
+set_option linter.unusedVariables false
+
+
+namespace F
+
+namespace AnfImpl0ToImmQualifs
+
+@[qualif]
+def EqTrue (a'₀ : Prop) : Prop :=
+  a'₀
+
+@[qualif]
+def EqFalse (a'₀ : Prop) : Prop :=
+  (¬a'₀)
+
+@[qualif]
+def EqZero (a'₀ : Int) : Prop :=
+  (a'₀ = 0)
+
+@[qualif]
+def GtZero (a'₀ : Int) : Prop :=
+  (a'₀ > 0)
+
+@[qualif]
+def GeZero (a'₀ : Int) : Prop :=
+  (a'₀ ≥ 0)
+
+@[qualif]
+def LtZero (a'₀ : Int) : Prop :=
+  (a'₀ < 0)
+
+@[qualif]
+def LeZero (a'₀ : Int) : Prop :=
+  (a'₀ ≤ 0)
+
+@[qualif]
+def Eq (a'₀ : Int) (count₀ : Int) : Prop :=
+  (a'₀ = count₀)
+
+@[qualif]
+def Gt (a'₀ : Int) (count₀ : Int) : Prop :=
+  (a'₀ > count₀)
+
+@[qualif]
+def Ge (a'₀ : Int) (count₀ : Int) : Prop :=
+  (a'₀ ≥ count₀)
+
+@[qualif]
+def Lt (a'₀ : Int) (count₀ : Int) : Prop :=
+  (a'₀ < count₀)
+
+@[qualif]
+def Le (a'₀ : Int) (count₀ : Int) : Prop :=
+  (a'₀ ≤ count₀)
+
+@[qualif]
+def Le1 (a'₀ : Int) (count₀ : Int) : Prop :=
+  (a'₀ ≤ (count₀ - 1))
+
+end AnfImpl0ToImmQualifs
+
+open AnfImpl0ToImmQualifs
+
+set_option maxHeartbeats 5000000
+#time def AnfImpl__0__ToImm_proof : AnfImpl__0__ToImm := by
+  unfold AnfImpl__0__ToImm
+  (try zap) ; (try simp [*]) ; (try solve)
+
+end F

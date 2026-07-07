@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Char03.Flux.Prelude
 import Surface.Char03.Flux.VC.CastToU8
 open Classical
@@ -68,6 +68,6 @@ open CastToU8Qualifs
 set_option maxHeartbeats 5000000
 #time def CastToU8_proof : CastToU8 := by
   unfold CastToU8
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

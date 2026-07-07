@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ExternSpecs.FluxCoreSlice00.Flux.Prelude
 import ExternSpecs.FluxCoreSlice00.Flux.VC.TestSplitAtCheckedInBounds
 open Classical
@@ -68,6 +68,6 @@ open TestSplitAtCheckedInBoundsQualifs
 set_option maxHeartbeats 5000000
 #time def TestSplitAtCheckedInBounds_proof : TestSplitAtCheckedInBounds := by
   unfold TestSplitAtCheckedInBounds
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.StaticSpec01.Flux.Prelude
 import Surface.StaticSpec01.Flux.VC.GooberIDXS
 open Classical
@@ -68,6 +68,6 @@ open GooberIDXSQualifs
 set_option maxHeartbeats 5000000
 #time def GooberIDXS_proof : GooberIDXS := by
   unfold GooberIDXS
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Test02.Flux.Prelude
 import Surface.Test02.Flux.VC.VecPush
 open Classical
@@ -68,6 +68,6 @@ open VecPushQualifs
 set_option maxHeartbeats 5000000
 #time def VecPush_proof : VecPush := by
   unfold VecPush
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

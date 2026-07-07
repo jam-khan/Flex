@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.RawPtr00.Flux.Prelude
 import Surface.RawPtr00.Flux.VC.MutShortFieldProjections
 open Classical
@@ -68,6 +68,6 @@ open MutShortFieldProjectionsQualifs
 set_option maxHeartbeats 5000000
 #time def MutShortFieldProjections_proof : MutShortFieldProjections := by
   unfold MutShortFieldProjections
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

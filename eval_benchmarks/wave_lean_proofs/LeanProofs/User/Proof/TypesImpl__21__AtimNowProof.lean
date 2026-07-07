@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.TypesImpl__21__AtimNow
 open Classical
@@ -68,6 +68,6 @@ open TypesImpl21AtimNowQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__21__AtimNow_proof : TypesImpl__21__AtimNow := by
   unfold TypesImpl__21__AtimNow
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

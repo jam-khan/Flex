@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Float03.Flux.Prelude
 import Surface.Float03.Flux.VC.DivEuclid
 open Classical
@@ -68,6 +68,6 @@ open DivEuclidQualifs
 set_option maxHeartbeats 5000000
 #time def DivEuclid_proof : DivEuclid := by
   unfold DivEuclid
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

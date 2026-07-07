@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.NumConsts.Flux.Prelude
 import Surface.NumConsts.Flux.VC.TestI64
 open Classical
@@ -68,6 +68,6 @@ open TestI64Qualifs
 set_option maxHeartbeats 5000000
 #time def TestI64_proof : TestI64 := by
   unfold TestI64
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

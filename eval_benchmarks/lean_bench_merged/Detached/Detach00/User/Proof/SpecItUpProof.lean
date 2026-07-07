@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Detached.Detach00.Flux.Prelude
 import Detached.Detach00.Flux.VC.SpecItUp
 open Classical
@@ -68,6 +68,6 @@ open SpecItUpQualifs
 set_option maxHeartbeats 5000000
 #time def SpecItUp_proof : SpecItUp := by
   unfold SpecItUp
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

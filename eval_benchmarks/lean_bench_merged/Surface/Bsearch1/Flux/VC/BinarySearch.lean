@@ -7,7 +7,7 @@ namespace F
 
 
 
-def BinarySearch := ∃ k0 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> Prop, ∃ k1 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> (a4 : Int) -> Prop, ∃ k2 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> (a4 : Int) -> (a5 : Int) -> Prop, ∃ k3 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> (a4 : Int) -> (a5 : Int) -> Prop, ∃ k4 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> (a4 : Int) -> (a5 : Int) -> (a6 : Int) -> Prop, ∃ k5 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> Prop, 
+def BinarySearch := ∃ k0 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> Prop, ∃ k1 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> (a4 : Int) -> Prop, ∃ k2 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> (a4 : Int) -> (a5 : Int) -> Prop, ∃ k3 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> (a4 : Int) -> (a5 : Int) -> Prop, ∃ k4 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> (a4 : Int) -> (a5 : Int) -> (a6 : Int) -> Prop, 
  ∀ (n₀ : Int),
   ∀ (k₀ : Int),
    (n₀ ≥ 0) ->
@@ -54,16 +54,13 @@ def BinarySearch := ∃ k0 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int
               ((k3 (low₀ + ((high₀ - low₀) / 2)) n₀ k₀ low₀ high₀ a'₄))) ∧
              (∀ (a'₇ : Int),
               ((k3 a'₇ n₀ k₀ low₀ high₀ a'₄)) ->
-               ((k5 a'₇ n₀ k₀)))
+               (a'₇ ≤ n₀))
              )
            )
            )
           )
        ) ∧
       ((n₀ ≤ 0) ->
-       ((k5 n₀ n₀ k₀))) ∧
-      (∀ (a'₈ : Int),
-       ((k5 a'₈ n₀ k₀)) ->
-        (a'₈ ≤ n₀))
+       (n₀ ≤ n₀))
       
 end F

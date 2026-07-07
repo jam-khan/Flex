@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Constr00.Flux.Prelude
 import Surface.Constr00.Flux.VC.Sub
 open Classical
@@ -68,6 +68,6 @@ open SubQualifs
 set_option maxHeartbeats 5000000
 #time def Sub_proof : Sub := by
   unfold Sub
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

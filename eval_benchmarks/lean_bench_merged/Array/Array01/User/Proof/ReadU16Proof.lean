@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Array.Array01.Flux.Prelude
 import Array.Array01.Flux.VC.ReadU16
 open Classical
@@ -68,6 +68,6 @@ open ReadU16Qualifs
 set_option maxHeartbeats 5000000
 #time def ReadU16_proof : ReadU16 := by
   unfold ReadU16
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

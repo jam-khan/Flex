@@ -11,7 +11,6 @@ structure RingbufferRingBuffer  where
     len : Int 
     hd : Int 
     tl : Int 
-    num_enqueues : Int 
     init : (SmtMap Int Prop) 
   deriving Inhabited
 attribute [grind .] RingbufferRingBuffer.ext

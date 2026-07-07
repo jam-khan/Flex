@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Date.Flux.Prelude
 import Surface.Date.Flux.VC.IsLeapYear
 open Classical
@@ -68,6 +68,6 @@ open IsLeapYearQualifs
 set_option maxHeartbeats 5000000
 #time def IsLeapYear_proof : IsLeapYear := by
   unfold IsLeapYear
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

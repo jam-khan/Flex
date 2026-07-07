@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Issue658.Flux.Prelude
 import Surface.Issue658.Flux.VC.NextLink
 open Classical
@@ -68,6 +68,6 @@ open NextLinkQualifs
 set_option maxHeartbeats 5000000
 #time def NextLink_proof : NextLink := by
   unfold NextLink
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

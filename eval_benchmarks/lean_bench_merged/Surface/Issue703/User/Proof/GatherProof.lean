@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Issue703.Flux.Prelude
 import Surface.Issue703.Flux.VC.Gather
 open Classical
@@ -68,6 +68,6 @@ open GatherQualifs
 set_option maxHeartbeats 5000000
 #time def Gather_proof : Gather := by
   unfold Gather
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

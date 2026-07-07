@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.WrappersWasiPathRemoveDirectory
 open Classical
@@ -68,6 +68,6 @@ open WrappersWasiPathRemoveDirectoryQualifs
 set_option maxHeartbeats 5000000
 #time def WrappersWasiPathRemoveDirectory_proof : WrappersWasiPathRemoveDirectory := by
   unfold WrappersWasiPathRemoveDirectory
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

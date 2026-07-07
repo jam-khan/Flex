@@ -68,6 +68,6 @@ open NeuralImpl1BackwardQualifs
 set_option maxHeartbeats 5000000
 #time def NeuralImpl__1__Backward_proof : NeuralImpl__1__Backward := by
   unfold NeuralImpl__1__Backward
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

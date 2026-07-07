@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Bitvec05.Flux.Prelude
 import Surface.Bitvec05.Flux.VC.TheoremPow2Octet
 open Classical
@@ -68,6 +68,6 @@ open TheoremPow2OctetQualifs
 set_option maxHeartbeats 5000000
 #time def TheoremPow2Octet_proof : TheoremPow2Octet := by
   unfold TheoremPow2Octet
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

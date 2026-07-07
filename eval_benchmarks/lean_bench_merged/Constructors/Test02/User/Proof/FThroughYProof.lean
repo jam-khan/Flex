@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Constructors.Test02.Flux.Prelude
 import Constructors.Test02.Flux.VC.FThroughY
 open Classical
@@ -68,6 +68,6 @@ open FThroughYQualifs
 set_option maxHeartbeats 5000000
 #time def FThroughY_proof : FThroughY := by
   unfold FThroughY
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

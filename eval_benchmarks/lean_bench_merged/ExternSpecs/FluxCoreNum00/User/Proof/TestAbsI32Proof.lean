@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ExternSpecs.FluxCoreNum00.Flux.Prelude
 import ExternSpecs.FluxCoreNum00.Flux.VC.TestAbsI32
 open Classical
@@ -68,6 +68,6 @@ open TestAbsI32Qualifs
 set_option maxHeartbeats 5000000
 #time def TestAbsI32_proof : TestAbsI32 := by
   unfold TestAbsI32
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

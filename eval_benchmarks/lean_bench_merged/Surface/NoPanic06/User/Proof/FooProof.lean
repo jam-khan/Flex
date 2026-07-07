@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.NoPanic06.Flux.Prelude
 import Surface.NoPanic06.Flux.VC.Foo
 open Classical
@@ -68,6 +68,6 @@ open FooQualifs
 set_option maxHeartbeats 5000000
 #time def Foo_proof : Foo := by
   unfold Foo
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

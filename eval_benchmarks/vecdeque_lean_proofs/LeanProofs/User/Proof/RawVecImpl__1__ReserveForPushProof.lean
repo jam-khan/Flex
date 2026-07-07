@@ -68,6 +68,6 @@ open RawVecImpl1ReserveForPushQualifs
 set_option maxHeartbeats 5000000
 #time def RawVecImpl__1__ReserveForPush_proof : RawVecImpl__1__ReserveForPush := by
   unfold RawVecImpl__1__ReserveForPush
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.RuntimeImpl__0__TranslateIovs
 open Classical
@@ -72,6 +72,6 @@ open RuntimeImpl0TranslateIovsQualifs
 set_option maxHeartbeats 5000000
 #time def RuntimeImpl__0__TranslateIovs_proof : RuntimeImpl__0__TranslateIovs := by
   unfold RuntimeImpl__0__TranslateIovs
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

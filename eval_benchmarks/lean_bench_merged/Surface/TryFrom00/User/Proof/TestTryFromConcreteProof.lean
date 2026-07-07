@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.TryFrom00.Flux.Prelude
 import Surface.TryFrom00.Flux.VC.TestTryFromConcrete
 open Classical
@@ -68,6 +68,6 @@ open TestTryFromConcreteQualifs
 set_option maxHeartbeats 5000000
 #time def TestTryFromConcrete_proof : TestTryFromConcrete := by
   unfold TestTryFromConcrete
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.CheckOverflow05.Flux.Prelude
 import Surface.CheckOverflow05.Flux.VC.AddMore
 open Classical
@@ -68,6 +68,6 @@ open AddMoreQualifs
 set_option maxHeartbeats 5000000
 #time def AddMore_proof : AddMore := by
   unfold AddMore
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

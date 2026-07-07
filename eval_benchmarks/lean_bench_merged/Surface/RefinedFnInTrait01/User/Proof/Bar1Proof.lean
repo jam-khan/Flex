@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.RefinedFnInTrait01.Flux.Prelude
 import Surface.RefinedFnInTrait01.Flux.VC.Bar1
 open Classical
@@ -68,6 +68,6 @@ open Bar1Qualifs
 set_option maxHeartbeats 5000000
 #time def Bar1_proof : Bar1 := by
   unfold Bar1
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

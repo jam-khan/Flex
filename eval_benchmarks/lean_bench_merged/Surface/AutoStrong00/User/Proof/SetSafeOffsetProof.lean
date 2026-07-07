@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.AutoStrong00.Flux.Prelude
 import Surface.AutoStrong00.Flux.VC.SetSafeOffset
 open Classical
@@ -68,6 +68,6 @@ open SetSafeOffsetQualifs
 set_option maxHeartbeats 5000000
 #time def SetSafeOffset_proof : SetSafeOffset := by
   unfold SetSafeOffset
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

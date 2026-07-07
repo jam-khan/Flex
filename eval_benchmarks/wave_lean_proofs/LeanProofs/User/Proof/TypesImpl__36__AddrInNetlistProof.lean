@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.TypesImpl__36__AddrInNetlist
 open Classical
@@ -68,6 +68,6 @@ open TypesImpl36AddrInNetlistQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__36__AddrInNetlist_proof : TypesImpl__36__AddrInNetlist := by
   unfold TypesImpl__36__AddrInNetlist
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

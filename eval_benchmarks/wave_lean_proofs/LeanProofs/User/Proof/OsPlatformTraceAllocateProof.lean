@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.OsPlatformTraceAllocate
 open Classical
@@ -68,6 +68,6 @@ open OsPlatformTraceAllocateQualifs
 set_option maxHeartbeats 5000000
 #time def OsPlatformTraceAllocate_proof : OsPlatformTraceAllocate := by
   unfold OsPlatformTraceAllocate
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

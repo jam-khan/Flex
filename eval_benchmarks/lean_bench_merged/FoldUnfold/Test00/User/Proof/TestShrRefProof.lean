@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import FoldUnfold.Test00.Flux.Prelude
 import FoldUnfold.Test00.Flux.VC.TestShrRef
 open Classical
@@ -68,6 +68,6 @@ open TestShrRefQualifs
 set_option maxHeartbeats 5000000
 #time def TestShrRef_proof : TestShrRef := by
   unfold TestShrRef
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

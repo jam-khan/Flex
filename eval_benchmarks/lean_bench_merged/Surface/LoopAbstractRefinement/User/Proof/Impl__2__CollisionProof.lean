@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.LoopAbstractRefinement.Flux.Prelude
 import Surface.LoopAbstractRefinement.Flux.VC.Impl__2__Collision
 open Classical
@@ -72,6 +72,6 @@ open Impl2CollisionQualifs
 set_option maxHeartbeats 5000000
 #time def Impl__2__Collision_proof : Impl__2__Collision := by
   unfold Impl__2__Collision
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

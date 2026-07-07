@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Bitvec07.Flux.Prelude
 import Surface.Bitvec07.Flux.VC.TestShl8
 open Classical
@@ -68,6 +68,6 @@ open TestShl8Qualifs
 set_option maxHeartbeats 5000000
 #time def TestShl8_proof : TestShl8 := by
   unfold TestShl8
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

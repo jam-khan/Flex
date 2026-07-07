@@ -68,6 +68,6 @@ open ListsTailQualifs
 set_option maxHeartbeats 5000000
 #time def ListsTail_proof : ListsTail := by
   unfold ListsTail
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Date.Flux.Prelude
 import Surface.Date.Flux.VC.IsMonth30
 open Classical
@@ -68,6 +68,6 @@ open IsMonth30Qualifs
 set_option maxHeartbeats 5000000
 #time def IsMonth30_proof : IsMonth30 := by
   unfold IsMonth30
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

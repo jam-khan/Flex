@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Result00.Flux.Prelude
 import Surface.Result00.Flux.VC.Baz
 open Classical
@@ -68,6 +68,6 @@ open BazQualifs
 set_option maxHeartbeats 5000000
 #time def Baz_proof : Baz := by
   unfold Baz
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

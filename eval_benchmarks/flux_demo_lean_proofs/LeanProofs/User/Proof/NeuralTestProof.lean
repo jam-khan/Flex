@@ -68,6 +68,6 @@ open NeuralTestQualifs
 set_option maxHeartbeats 5000000
 #time def NeuralTest_proof : NeuralTest := by
   unfold NeuralTest
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

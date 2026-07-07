@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.RuntimeImpl__0__InLinMem
 open Classical
@@ -68,6 +68,6 @@ open RuntimeImpl0InLinMemQualifs
 set_option maxHeartbeats 5000000
 #time def RuntimeImpl__0__InLinMem_proof : RuntimeImpl__0__InLinMem := by
   unfold RuntimeImpl__0__InLinMem
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

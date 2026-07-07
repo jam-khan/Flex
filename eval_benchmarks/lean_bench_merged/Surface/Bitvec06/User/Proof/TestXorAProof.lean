@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Bitvec06.Flux.Prelude
 import Surface.Bitvec06.Flux.VC.TestXorA
 open Classical
@@ -68,6 +68,6 @@ open TestXorAQualifs
 set_option maxHeartbeats 5000000
 #time def TestXorA_proof : TestXorA := by
   unfold TestXorA
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Literals00.Flux.Prelude
 import Surface.Literals00.Flux.VC.Binary0
 open Classical
@@ -68,6 +68,6 @@ open Binary0Qualifs
 set_option maxHeartbeats 5000000
 #time def Binary0_proof : Binary0 := by
   unfold Binary0
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Constructors.Test12.Flux.Prelude
 import Constructors.Test12.Flux.VC.Foo2
 open Classical
@@ -68,6 +68,6 @@ open Foo2Qualifs
 set_option maxHeartbeats 5000000
 #time def Foo2_proof : Foo2 := by
   unfold Foo2
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

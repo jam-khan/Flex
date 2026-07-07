@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.BinopOverflow.Flux.Prelude
 import Surface.BinopOverflow.Flux.VC.UintSub
 open Classical
@@ -68,6 +68,6 @@ open UintSubQualifs
 set_option maxHeartbeats 5000000
 #time def UintSub_proof : UintSub := by
   unfold UintSub
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

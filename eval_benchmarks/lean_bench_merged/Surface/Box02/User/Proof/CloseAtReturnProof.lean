@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Box02.Flux.Prelude
 import Surface.Box02.Flux.VC.CloseAtReturn
 open Classical
@@ -68,6 +68,6 @@ open CloseAtReturnQualifs
 set_option maxHeartbeats 5000000
 #time def CloseAtReturn_proof : CloseAtReturn := by
   unfold CloseAtReturn
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

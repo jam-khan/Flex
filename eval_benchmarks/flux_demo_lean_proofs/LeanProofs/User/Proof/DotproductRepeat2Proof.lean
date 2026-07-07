@@ -68,6 +68,6 @@ open DotproductRepeat2Qualifs
 set_option maxHeartbeats 5000000
 #time def DotproductRepeat2_proof : DotproductRepeat2 := by
   unfold DotproductRepeat2
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

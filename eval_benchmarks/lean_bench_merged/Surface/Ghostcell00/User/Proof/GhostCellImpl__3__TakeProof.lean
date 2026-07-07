@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Ghostcell00.Flux.Prelude
 import Surface.Ghostcell00.Flux.VC.GhostCellImpl__3__Take
 open Classical
@@ -68,6 +68,6 @@ open GhostCellImpl3TakeQualifs
 set_option maxHeartbeats 5000000
 #time def GhostCellImpl__3__Take_proof : GhostCellImpl__3__Take := by
   unfold GhostCellImpl__3__Take
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

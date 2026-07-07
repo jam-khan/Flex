@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ExternSpecs.FluxCoreSlice03.Flux.Prelude
 import ExternSpecs.FluxCoreSlice03.Flux.VC.Test4Mut
 open Classical
@@ -68,6 +68,6 @@ open Test4MutQualifs
 set_option maxHeartbeats 5000000
 #time def Test4Mut_proof : Test4Mut := by
   unfold Test4Mut
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

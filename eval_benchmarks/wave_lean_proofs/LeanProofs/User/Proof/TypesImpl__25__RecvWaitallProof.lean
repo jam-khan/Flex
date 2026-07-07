@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.TypesImpl__25__RecvWaitall
 open Classical
@@ -68,6 +68,6 @@ open TypesImpl25RecvWaitallQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__25__RecvWaitall_proof : TypesImpl__25__RecvWaitall := by
   unfold TypesImpl__25__RecvWaitall
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

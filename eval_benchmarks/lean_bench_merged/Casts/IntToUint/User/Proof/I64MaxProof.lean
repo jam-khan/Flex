@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Casts.IntToUint.Flux.Prelude
 import Casts.IntToUint.Flux.VC.I64Max
 open Classical
@@ -68,6 +68,6 @@ open I64MaxQualifs
 set_option maxHeartbeats 5000000
 #time def I64Max_proof : I64Max := by
   unfold I64Max
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

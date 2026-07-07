@@ -68,6 +68,6 @@ open KmeansCentroidQualifs
 set_option maxHeartbeats 5000000
 #time def KmeansCentroid_proof : KmeansCentroid := by
   unfold KmeansCentroid
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

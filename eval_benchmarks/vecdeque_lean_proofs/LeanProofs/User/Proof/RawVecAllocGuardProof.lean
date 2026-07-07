@@ -68,6 +68,6 @@ open RawVecAllocGuardQualifs
 set_option maxHeartbeats 5000000
 #time def RawVecAllocGuard_proof : RawVecAllocGuard := by
   unfold RawVecAllocGuard
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

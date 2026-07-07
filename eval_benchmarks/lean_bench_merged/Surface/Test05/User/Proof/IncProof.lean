@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Test05.Flux.Prelude
 import Surface.Test05.Flux.VC.Inc
 open Classical
@@ -68,6 +68,6 @@ open IncQualifs
 set_option maxHeartbeats 5000000
 #time def Inc_proof : Inc := by
   unfold Inc
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

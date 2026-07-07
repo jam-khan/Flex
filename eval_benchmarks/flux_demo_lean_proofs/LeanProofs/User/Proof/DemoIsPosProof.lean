@@ -68,6 +68,6 @@ open DemoIsPosQualifs
 set_option maxHeartbeats 5000000
 #time def DemoIsPos_proof : DemoIsPos := by
   unfold DemoIsPos
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

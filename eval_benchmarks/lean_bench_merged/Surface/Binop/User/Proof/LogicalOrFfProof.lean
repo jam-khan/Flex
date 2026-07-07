@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Binop.Flux.Prelude
 import Surface.Binop.Flux.VC.LogicalOrFf
 open Classical
@@ -68,6 +68,6 @@ open LogicalOrFfQualifs
 set_option maxHeartbeats 5000000
 #time def LogicalOrFf_proof : LogicalOrFf := by
   unfold LogicalOrFf
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

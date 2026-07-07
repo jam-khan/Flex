@@ -68,6 +68,6 @@ open KmeansFdivQualifs
 set_option maxHeartbeats 5000000
 #time def KmeansFdiv_proof : KmeansFdiv := by
   unfold KmeansFdiv
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

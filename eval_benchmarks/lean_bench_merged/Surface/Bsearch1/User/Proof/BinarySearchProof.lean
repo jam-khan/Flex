@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Bsearch1.Flux.Prelude
 import Surface.Bsearch1.Flux.VC.BinarySearch
 open Classical
@@ -68,6 +68,6 @@ open BinarySearchQualifs
 set_option maxHeartbeats 5000000
 #time def BinarySearch_proof : BinarySearch := by
   unfold BinarySearch
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Async00.Flux.Prelude
 import Surface.Async00.Flux.VC.MakeNat
 open Classical
@@ -68,6 +68,6 @@ open MakeNatQualifs
 set_option maxHeartbeats 5000000
 #time def MakeNat_proof : MakeNat := by
   unfold MakeNat
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

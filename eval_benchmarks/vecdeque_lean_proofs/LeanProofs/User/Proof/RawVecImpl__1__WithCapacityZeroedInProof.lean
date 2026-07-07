@@ -68,6 +68,6 @@ open RawVecImpl1WithCapacityZeroedInQualifs
 set_option maxHeartbeats 5000000
 #time def RawVecImpl__1__WithCapacityZeroedIn_proof : RawVecImpl__1__WithCapacityZeroedIn := by
   unfold RawVecImpl__1__WithCapacityZeroedIn
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

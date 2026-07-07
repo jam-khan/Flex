@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.RuntimeImpl__0__WriteU8
 open Classical
@@ -68,6 +68,6 @@ open RuntimeImpl0WriteU8Qualifs
 set_option maxHeartbeats 5000000
 #time def RuntimeImpl__0__WriteU8_proof : RuntimeImpl__0__WriteU8 := by
   unfold RuntimeImpl__0__WriteU8
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

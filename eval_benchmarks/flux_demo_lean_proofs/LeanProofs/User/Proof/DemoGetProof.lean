@@ -68,6 +68,6 @@ open DemoGetQualifs
 set_option maxHeartbeats 5000000
 #time def DemoGet_proof : DemoGet := by
   unfold DemoGet
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

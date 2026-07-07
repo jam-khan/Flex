@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Bitvec06.Flux.Prelude
 import Surface.Bitvec06.Flux.VC.TestToBv8
 open Classical
@@ -68,6 +68,6 @@ open TestToBv8Qualifs
 set_option maxHeartbeats 5000000
 #time def TestToBv8_proof : TestToBv8 := by
   unfold TestToBv8
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

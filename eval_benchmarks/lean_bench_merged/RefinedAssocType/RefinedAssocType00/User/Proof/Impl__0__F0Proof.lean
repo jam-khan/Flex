@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import RefinedAssocType.RefinedAssocType00.Flux.Prelude
 import RefinedAssocType.RefinedAssocType00.Flux.VC.Impl__0__F0
 open Classical
@@ -68,6 +68,6 @@ open Impl0F0Qualifs
 set_option maxHeartbeats 5000000
 #time def Impl__0__F0_proof : Impl__0__F0 := by
   unfold Impl__0__F0
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

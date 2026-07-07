@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Heapsort.Flux.Prelude
 import Surface.Heapsort.Flux.VC.ShiftDown
 open Classical
@@ -68,6 +68,6 @@ open ShiftDownQualifs
 set_option maxHeartbeats 5000000
 #time def ShiftDown_proof : ShiftDown := by
   unfold ShiftDown
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

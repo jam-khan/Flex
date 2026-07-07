@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ExternSpecs.FluxCoreSlice00.Flux.Prelude
 import ExternSpecs.FluxCoreSlice00.Flux.VC.TestLastConcrete
 open Classical
@@ -68,6 +68,6 @@ open TestLastConcreteQualifs
 set_option maxHeartbeats 5000000
 #time def TestLastConcrete_proof : TestLastConcrete := by
   unfold TestLastConcrete
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

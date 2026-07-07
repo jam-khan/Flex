@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.OsTraceSymlinkat
 open Classical
@@ -68,6 +68,6 @@ open OsTraceSymlinkatQualifs
 set_option maxHeartbeats 5000000
 #time def OsTraceSymlinkat_proof : OsTraceSymlinkat := by
   unfold OsTraceSymlinkat
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

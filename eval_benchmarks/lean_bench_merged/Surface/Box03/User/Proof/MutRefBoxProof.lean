@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Box03.Flux.Prelude
 import Surface.Box03.Flux.VC.MutRefBox
 open Classical
@@ -68,6 +68,6 @@ open MutRefBoxQualifs
 set_option maxHeartbeats 5000000
 #time def MutRefBox_proof : MutRefBox := by
   unfold MutRefBox
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

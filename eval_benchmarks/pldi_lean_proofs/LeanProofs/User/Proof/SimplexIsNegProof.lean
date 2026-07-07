@@ -68,6 +68,6 @@ open SimplexIsNegQualifs
 set_option maxHeartbeats 5000000
 #time def SimplexIsNeg_proof : SimplexIsNeg := by
   unfold SimplexIsNeg
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

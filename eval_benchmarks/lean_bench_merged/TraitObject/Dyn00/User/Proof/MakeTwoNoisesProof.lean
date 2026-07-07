@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import TraitObject.Dyn00.Flux.Prelude
 import TraitObject.Dyn00.Flux.VC.MakeTwoNoises
 open Classical
@@ -68,6 +68,6 @@ open MakeTwoNoisesQualifs
 set_option maxHeartbeats 5000000
 #time def MakeTwoNoises_proof : MakeTwoNoises := by
   unfold MakeTwoNoises
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

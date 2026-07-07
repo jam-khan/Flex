@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Box01.Flux.Prelude
 import Surface.Box01.Flux.VC.Mv
 open Classical
@@ -68,6 +68,6 @@ open MvQualifs
 set_option maxHeartbeats 5000000
 #time def Mv_proof : Mv := by
   unfold Mv
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

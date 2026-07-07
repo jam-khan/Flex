@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.PollWritebackFds
 open Classical
@@ -68,6 +68,6 @@ open PollWritebackFdsQualifs
 set_option maxHeartbeats 5000000
 #time def PollWritebackFds_proof : PollWritebackFds := by
   unfold PollWritebackFds
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

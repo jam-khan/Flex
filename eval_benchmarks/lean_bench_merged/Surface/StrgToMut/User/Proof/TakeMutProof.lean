@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.StrgToMut.Flux.Prelude
 import Surface.StrgToMut.Flux.VC.TakeMut
 open Classical
@@ -68,6 +68,6 @@ open TakeMutQualifs
 set_option maxHeartbeats 5000000
 #time def TakeMut_proof : TakeMut := by
   unfold TakeMut
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

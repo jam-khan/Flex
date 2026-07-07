@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Simplex.Flux.Prelude
 import Surface.Simplex.Flux.VC.InitRatioC
 open Classical
@@ -68,6 +68,6 @@ open InitRatioCQualifs
 set_option maxHeartbeats 5000000
 #time def InitRatioC_proof : InitRatioC := by
   unfold InitRatioC
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

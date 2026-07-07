@@ -68,6 +68,6 @@ open ArraysAddNKQualifs
 set_option maxHeartbeats 5000000
 #time def ArraysAddNK_proof : ArraysAddNK := by
   unfold ArraysAddNK
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

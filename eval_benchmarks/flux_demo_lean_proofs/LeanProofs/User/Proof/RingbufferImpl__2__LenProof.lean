@@ -68,6 +68,6 @@ open RingbufferImpl2LenQualifs
 set_option maxHeartbeats 5000000
 #time def RingbufferImpl__2__Len_proof : RingbufferImpl__2__Len := by
   unfold RingbufferImpl__2__Len
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

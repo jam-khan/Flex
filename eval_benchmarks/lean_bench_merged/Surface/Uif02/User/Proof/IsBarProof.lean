@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Uif02.Flux.Prelude
 import Surface.Uif02.Flux.VC.IsBar
 open Classical
@@ -68,6 +68,6 @@ open IsBarQualifs
 set_option maxHeartbeats 5000000
 #time def IsBar_proof : IsBar := by
   unfold IsBar
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

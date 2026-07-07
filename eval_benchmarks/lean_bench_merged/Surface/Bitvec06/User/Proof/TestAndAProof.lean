@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Bitvec06.Flux.Prelude
 import Surface.Bitvec06.Flux.VC.TestAndA
 open Classical
@@ -68,6 +68,6 @@ open TestAndAQualifs
 set_option maxHeartbeats 5000000
 #time def TestAndA_proof : TestAndA := by
   unfold TestAndA
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Vec.Vec00.Flux.Prelude
 import Vec.Vec00.Flux.VC.TestPushMacro
 open Classical
@@ -68,6 +68,6 @@ open TestPushMacroQualifs
 set_option maxHeartbeats 5000000
 #time def TestPushMacro_proof : TestPushMacro := by
   unfold TestPushMacro
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

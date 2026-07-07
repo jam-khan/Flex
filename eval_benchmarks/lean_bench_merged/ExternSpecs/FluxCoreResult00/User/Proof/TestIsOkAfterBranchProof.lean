@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ExternSpecs.FluxCoreResult00.Flux.Prelude
 import ExternSpecs.FluxCoreResult00.Flux.VC.TestIsOkAfterBranch
 open Classical
@@ -68,6 +68,6 @@ open TestIsOkAfterBranchQualifs
 set_option maxHeartbeats 5000000
 #time def TestIsOkAfterBranch_proof : TestIsOkAfterBranch := by
   unfold TestIsOkAfterBranch
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

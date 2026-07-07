@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ExternSpecs.FluxCoreNum00.Flux.Prelude
 import ExternSpecs.FluxCoreNum00.Flux.VC.TestCheckedMulI32
 open Classical
@@ -68,6 +68,6 @@ open TestCheckedMulI32Qualifs
 set_option maxHeartbeats 5000000
 #time def TestCheckedMulI32_proof : TestCheckedMulI32 := by
   unfold TestCheckedMulI32
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Structs.OpaqueStruct01.Flux.Prelude
 import Structs.OpaqueStruct01.Flux.VC.OpaqueStruct01
 open Classical
@@ -68,6 +68,6 @@ open OpaqueStruct01Qualifs
 set_option maxHeartbeats 5000000
 #time def OpaqueStruct01_proof : OpaqueStruct01 := by
   unfold OpaqueStruct01
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.WritebackWasm2cMarshalAndWritebackU64
 open Classical
@@ -68,6 +68,6 @@ open WritebackWasm2cMarshalAndWritebackU64Qualifs
 set_option maxHeartbeats 5000000
 #time def WritebackWasm2cMarshalAndWritebackU64_proof : WritebackWasm2cMarshalAndWritebackU64 := by
   unfold WritebackWasm2cMarshalAndWritebackU64
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

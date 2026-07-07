@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Enums.Issue234.Flux.Prelude
 import Enums.Issue234.Flux.VC.Impl__0__LenConstMemory
 open Classical
@@ -72,6 +72,6 @@ open Impl0LenConstMemoryQualifs
 set_option maxHeartbeats 5000000
 #time def Impl__0__LenConstMemory_proof : Impl__0__LenConstMemory := by
   unfold Impl__0__LenConstMemory
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

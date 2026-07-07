@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.GeneralizedJoin.Flux.Prelude
 import Surface.GeneralizedJoin.Flux.VC.GeneralizedJoin
 open Classical
@@ -68,6 +68,6 @@ open GeneralizedJoinQualifs
 set_option maxHeartbeats 5000000
 #time def GeneralizedJoin_proof : GeneralizedJoin := by
   unfold GeneralizedJoin
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

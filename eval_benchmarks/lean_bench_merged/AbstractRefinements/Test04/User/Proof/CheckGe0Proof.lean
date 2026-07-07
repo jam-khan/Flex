@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import AbstractRefinements.Test04.Flux.Prelude
 import AbstractRefinements.Test04.Flux.VC.CheckGe0
 open Classical
@@ -68,6 +68,6 @@ open CheckGe0Qualifs
 set_option maxHeartbeats 5000000
 #time def CheckGe0_proof : CheckGe0 := by
   unfold CheckGe0
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

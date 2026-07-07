@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ExternSpecs.FluxCoreAlloc00.Flux.Prelude
 import ExternSpecs.FluxCoreAlloc00.Flux.VC.TestFromValid
 open Classical
@@ -68,6 +68,6 @@ open TestFromValidQualifs
 set_option maxHeartbeats 5000000
 #time def TestFromValid_proof : TestFromValid := by
   unfold TestFromValid
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

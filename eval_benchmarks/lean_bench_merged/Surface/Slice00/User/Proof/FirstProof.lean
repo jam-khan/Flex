@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Slice00.Flux.Prelude
 import Surface.Slice00.Flux.VC.First
 open Classical
@@ -68,6 +68,6 @@ open FirstQualifs
 set_option maxHeartbeats 5000000
 #time def First_proof : First := by
   unfold First
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

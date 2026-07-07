@@ -68,6 +68,6 @@ open RvecImpl0IndexQualifs
 set_option maxHeartbeats 5000000
 #time def RvecImpl__0__Index_proof : RvecImpl__0__Index := by
   unfold RvecImpl__0__Index
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

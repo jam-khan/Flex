@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Closure12.Flux.Prelude
 import Surface.Closure12.Flux.VC.FillVecIndexLoop
 open Classical
@@ -68,6 +68,6 @@ open FillVecIndexLoopQualifs
 set_option maxHeartbeats 5000000
 #time def FillVecIndexLoop_proof : FillVecIndexLoop := by
   unfold FillVecIndexLoop
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

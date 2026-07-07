@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ExternSpecs.FluxCoreResult00.Flux.Prelude
 import ExternSpecs.FluxCoreResult00.Flux.VC.TestOkErrBranch
 open Classical
@@ -68,6 +68,6 @@ open TestOkErrBranchQualifs
 set_option maxHeartbeats 5000000
 #time def TestOkErrBranch_proof : TestOkErrBranch := by
   unfold TestOkErrBranch
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

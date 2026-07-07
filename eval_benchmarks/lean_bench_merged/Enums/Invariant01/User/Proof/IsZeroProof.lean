@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Enums.Invariant01.Flux.Prelude
 import Enums.Invariant01.Flux.VC.IsZero
 open Classical
@@ -68,6 +68,6 @@ open IsZeroQualifs
 set_option maxHeartbeats 5000000
 #time def IsZero_proof : IsZero := by
   unfold IsZero
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

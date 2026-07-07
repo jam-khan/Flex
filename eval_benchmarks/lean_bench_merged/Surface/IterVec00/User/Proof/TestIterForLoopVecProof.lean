@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.IterVec00.Flux.Prelude
 import Surface.IterVec00.Flux.VC.TestIterForLoopVec
 open Classical
@@ -68,6 +68,6 @@ open TestIterForLoopVecQualifs
 set_option maxHeartbeats 5000000
 #time def TestIterForLoopVec_proof : TestIterForLoopVec := by
   unfold TestIterForLoopVec
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

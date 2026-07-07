@@ -68,6 +68,6 @@ open SparseImpl0MultiplyQualifs
 set_option maxHeartbeats 5000000
 #time def SparseImpl__0__Multiply_proof : SparseImpl__0__Multiply := by
   unfold SparseImpl__0__Multiply
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

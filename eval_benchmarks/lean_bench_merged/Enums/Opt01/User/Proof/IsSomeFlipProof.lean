@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Enums.Opt01.Flux.Prelude
 import Enums.Opt01.Flux.VC.IsSomeFlip
 open Classical
@@ -68,6 +68,6 @@ open IsSomeFlipQualifs
 set_option maxHeartbeats 5000000
 #time def IsSomeFlip_proof : IsSomeFlip := by
   unfold IsSomeFlip
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

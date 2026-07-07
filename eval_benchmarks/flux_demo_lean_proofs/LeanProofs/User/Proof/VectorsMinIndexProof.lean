@@ -68,6 +68,6 @@ open VectorsMinIndexQualifs
 set_option maxHeartbeats 5000000
 #time def VectorsMinIndex_proof : VectorsMinIndex := by
   unfold VectorsMinIndex
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

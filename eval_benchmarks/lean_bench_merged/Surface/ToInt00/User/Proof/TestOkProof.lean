@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.ToInt00.Flux.Prelude
 import Surface.ToInt00.Flux.VC.TestOk
 open Classical
@@ -68,6 +68,6 @@ open TestOkQualifs
 set_option maxHeartbeats 5000000
 #time def TestOk_proof : TestOk := by
   unfold TestOk
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

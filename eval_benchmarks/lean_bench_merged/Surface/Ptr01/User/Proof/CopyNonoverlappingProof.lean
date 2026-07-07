@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Ptr01.Flux.Prelude
 import Surface.Ptr01.Flux.VC.CopyNonoverlapping
 open Classical
@@ -68,6 +68,6 @@ open CopyNonoverlappingQualifs
 set_option maxHeartbeats 5000000
 #time def CopyNonoverlapping_proof : CopyNonoverlapping := by
   unfold CopyNonoverlapping
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.ToInt01.Flux.Prelude
 import Surface.ToInt01.Flux.VC.TestCharToIntMax
 open Classical
@@ -68,6 +68,6 @@ open TestCharToIntMaxQualifs
 set_option maxHeartbeats 5000000
 #time def TestCharToIntMax_proof : TestCharToIntMax := by
   unfold TestCharToIntMax
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

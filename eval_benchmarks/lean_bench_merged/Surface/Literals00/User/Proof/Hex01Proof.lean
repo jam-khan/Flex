@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Literals00.Flux.Prelude
 import Surface.Literals00.Flux.VC.Hex01
 open Classical
@@ -68,6 +68,6 @@ open Hex01Qualifs
 set_option maxHeartbeats 5000000
 #time def Hex01_proof : Hex01 := by
   unfold Hex01
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Casts.Unsize.Flux.Prelude
 import Casts.Unsize.Flux.VC.Test01
 open Classical
@@ -68,6 +68,6 @@ open Test01Qualifs
 set_option maxHeartbeats 5000000
 #time def Test01_proof : Test01 := by
   unfold Test01
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

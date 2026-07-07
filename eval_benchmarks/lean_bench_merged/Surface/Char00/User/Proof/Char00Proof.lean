@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Char00.Flux.Prelude
 import Surface.Char00.Flux.VC.Char00
 open Classical
@@ -68,6 +68,6 @@ open Char00Qualifs
 set_option maxHeartbeats 5000000
 #time def Char00_proof : Char00 := by
   unfold Char00
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

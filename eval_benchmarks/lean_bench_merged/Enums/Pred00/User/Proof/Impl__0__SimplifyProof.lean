@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Enums.Pred00.Flux.Prelude
 import Enums.Pred00.Flux.VC.Impl__0__Simplify
 open Classical
@@ -68,6 +68,6 @@ open Impl0SimplifyQualifs
 set_option maxHeartbeats 5000000
 #time def Impl__0__Simplify_proof : Impl__0__Simplify := by
   unfold Impl__0__Simplify
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

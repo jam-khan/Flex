@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Fndef01.Flux.Prelude
 import Surface.Fndef01.Flux.VC.Id
 open Classical
@@ -68,6 +68,6 @@ open IdQualifs
 set_option maxHeartbeats 5000000
 #time def Id_proof : Id := by
   unfold Id
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Resolver02.Flux.Prelude
 import Surface.Resolver02.Flux.VC.MyModuleTest00
 open Classical
@@ -68,6 +68,6 @@ open MyModuleTest00Qualifs
 set_option maxHeartbeats 5000000
 #time def MyModuleTest00_proof : MyModuleTest00 := by
   unfold MyModuleTest00
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

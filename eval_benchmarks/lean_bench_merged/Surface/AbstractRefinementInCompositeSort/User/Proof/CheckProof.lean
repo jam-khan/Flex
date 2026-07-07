@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.AbstractRefinementInCompositeSort.Flux.Prelude
 import Surface.AbstractRefinementInCompositeSort.Flux.VC.Check
 open Classical
@@ -68,6 +68,6 @@ open CheckQualifs
 set_option maxHeartbeats 5000000
 #time def Check_proof : Check := by
   unfold Check
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

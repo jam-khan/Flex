@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.TypesPlatformImpl__3__Parse
 open Classical
@@ -68,6 +68,6 @@ open TypesPlatformImpl3ParseQualifs
 set_option maxHeartbeats 5000000
 #time def TypesPlatformImpl__3__Parse_proof : TypesPlatformImpl__3__Parse := by
   unfold TypesPlatformImpl__3__Parse
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

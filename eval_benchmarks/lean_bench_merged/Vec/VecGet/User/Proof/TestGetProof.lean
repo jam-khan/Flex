@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Vec.VecGet.Flux.Prelude
 import Vec.VecGet.Flux.VC.TestGet
 open Classical
@@ -68,6 +68,6 @@ open TestGetQualifs
 set_option maxHeartbeats 5000000
 #time def TestGet_proof : TestGet := by
   unfold TestGet
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

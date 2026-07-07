@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Issue1449.Flux.Prelude
 import Surface.Issue1449.Flux.VC.Impl__7__Route
 open Classical
@@ -68,6 +68,6 @@ open Impl7RouteQualifs
 set_option maxHeartbeats 5000000
 #time def Impl__7__Route_proof : Impl__7__Route := by
   unfold Impl__7__Route
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

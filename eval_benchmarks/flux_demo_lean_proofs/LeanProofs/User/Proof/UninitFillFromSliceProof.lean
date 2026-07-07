@@ -68,6 +68,6 @@ open UninitFillFromSliceQualifs
 set_option maxHeartbeats 5000000
 #time def UninitFillFromSlice_proof : UninitFillFromSlice := by
   unfold UninitFillFromSlice
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

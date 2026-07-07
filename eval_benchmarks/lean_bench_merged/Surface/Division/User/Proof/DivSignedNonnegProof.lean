@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Division.Flux.Prelude
 import Surface.Division.Flux.VC.DivSignedNonneg
 open Classical
@@ -68,6 +68,6 @@ open DivSignedNonnegQualifs
 set_option maxHeartbeats 5000000
 #time def DivSignedNonneg_proof : DivSignedNonneg := by
   unfold DivSignedNonneg
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ExternSpecs.FluxCoreSlice00.Flux.Prelude
 import ExternSpecs.FluxCoreSlice00.Flux.VC.TestLastBranch
 open Classical
@@ -68,6 +68,6 @@ open TestLastBranchQualifs
 set_option maxHeartbeats 5000000
 #time def TestLastBranch_proof : TestLastBranch := by
   unfold TestLastBranch
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.VerifierInterfaceStopTimer
 open Classical
@@ -68,6 +68,6 @@ open VerifierInterfaceStopTimerQualifs
 set_option maxHeartbeats 5000000
 #time def VerifierInterfaceStopTimer_proof : VerifierInterfaceStopTimer := by
   unfold VerifierInterfaceStopTimer
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

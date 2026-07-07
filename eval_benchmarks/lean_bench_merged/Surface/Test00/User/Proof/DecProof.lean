@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Test00.Flux.Prelude
 import Surface.Test00.Flux.VC.Dec
 open Classical
@@ -68,6 +68,6 @@ open DecQualifs
 set_option maxHeartbeats 5000000
 #time def Dec_proof : Dec := by
   unfold Dec
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

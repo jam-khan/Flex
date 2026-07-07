@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.AssocReft05.Flux.Prelude
 import Surface.AssocReft05.Flux.VC.MyTraitFoo
 open Classical
@@ -68,6 +68,6 @@ open MyTraitFooQualifs
 set_option maxHeartbeats 5000000
 #time def MyTraitFoo_proof : MyTraitFoo := by
   unfold MyTraitFoo
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

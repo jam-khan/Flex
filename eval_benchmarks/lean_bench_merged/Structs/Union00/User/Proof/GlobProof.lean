@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Structs.Union00.Flux.Prelude
 import Structs.Union00.Flux.VC.Glob
 open Classical
@@ -68,6 +68,6 @@ open GlobQualifs
 set_option maxHeartbeats 5000000
 #time def Glob_proof : Glob := by
   unfold Glob
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

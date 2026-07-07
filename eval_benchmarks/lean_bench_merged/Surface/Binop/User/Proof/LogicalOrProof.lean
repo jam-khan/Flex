@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Binop.Flux.Prelude
 import Surface.Binop.Flux.VC.LogicalOr
 open Classical
@@ -68,6 +68,6 @@ open LogicalOrQualifs
 set_option maxHeartbeats 5000000
 #time def LogicalOr_proof : LogicalOr := by
   unfold LogicalOr
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

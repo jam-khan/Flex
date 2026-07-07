@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Async00.Flux.Prelude
 import Surface.Async00.Flux.VC.MakeNatRes
 open Classical
@@ -68,6 +68,6 @@ open MakeNatResQualifs
 set_option maxHeartbeats 5000000
 #time def MakeNatRes_proof : MakeNatRes := by
   unfold MakeNatRes
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

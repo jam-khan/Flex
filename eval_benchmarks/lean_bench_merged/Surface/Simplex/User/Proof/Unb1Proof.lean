@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Simplex.Flux.Prelude
 import Surface.Simplex.Flux.VC.Unb1
 open Classical
@@ -68,6 +68,6 @@ open Unb1Qualifs
 set_option maxHeartbeats 5000000
 #time def Unb1_proof : Unb1 := by
   unfold Unb1
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

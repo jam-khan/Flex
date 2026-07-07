@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.NumConsts.Flux.Prelude
 import Surface.NumConsts.Flux.VC.TestUsize
 open Classical
@@ -68,6 +68,6 @@ open TestUsizeQualifs
 set_option maxHeartbeats 5000000
 #time def TestUsize_proof : TestUsize := by
   unfold TestUsize
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

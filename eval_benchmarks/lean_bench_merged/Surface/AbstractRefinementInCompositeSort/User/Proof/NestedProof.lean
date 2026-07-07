@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.AbstractRefinementInCompositeSort.Flux.Prelude
 import Surface.AbstractRefinementInCompositeSort.Flux.VC.Nested
 open Classical
@@ -68,6 +68,6 @@ open NestedQualifs
 set_option maxHeartbeats 5000000
 #time def Nested_proof : Nested := by
   unfold Nested
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Issue141.Flux.Prelude
 import Surface.Issue141.Flux.VC.Push
 open Classical
@@ -68,6 +68,6 @@ open PushQualifs
 set_option maxHeartbeats 5000000
 #time def Push_proof : Push := by
   unfold Push
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

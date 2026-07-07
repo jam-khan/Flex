@@ -68,6 +68,6 @@ open BorrowsTestAssertQualifs
 set_option maxHeartbeats 5000000
 #time def BorrowsTestAssert_proof : BorrowsTestAssert := by
   unfold BorrowsTestAssert
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

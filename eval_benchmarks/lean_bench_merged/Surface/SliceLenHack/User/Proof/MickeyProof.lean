@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.SliceLenHack.Flux.Prelude
 import Surface.SliceLenHack.Flux.VC.Mickey
 open Classical
@@ -68,6 +68,6 @@ open MickeyQualifs
 set_option maxHeartbeats 5000000
 #time def Mickey_proof : Mickey := by
   unfold Mickey
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

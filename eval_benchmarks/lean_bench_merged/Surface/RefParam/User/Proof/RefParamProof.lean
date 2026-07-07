@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.RefParam.Flux.Prelude
 import Surface.RefParam.Flux.VC.RefParam
 open Classical
@@ -68,6 +68,6 @@ open RefParamQualifs
 set_option maxHeartbeats 5000000
 #time def RefParam_proof : RefParam := by
   unfold RefParam
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

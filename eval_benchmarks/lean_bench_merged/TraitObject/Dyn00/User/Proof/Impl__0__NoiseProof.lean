@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import TraitObject.Dyn00.Flux.Prelude
 import TraitObject.Dyn00.Flux.VC.Impl__0__Noise
 open Classical
@@ -68,6 +68,6 @@ open Impl0NoiseQualifs
 set_option maxHeartbeats 5000000
 #time def Impl__0__Noise_proof : Impl__0__Noise := by
   unfold Impl__0__Noise
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Issue1148.Flux.Prelude
 import Surface.Issue1148.Flux.VC.Fill
 open Classical
@@ -68,6 +68,6 @@ open FillQualifs
 set_option maxHeartbeats 5000000
 #time def Fill_proof : Fill := by
   unfold Fill
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

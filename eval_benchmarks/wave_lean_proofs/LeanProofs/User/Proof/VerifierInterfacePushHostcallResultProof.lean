@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.VerifierInterfacePushHostcallResult
 open Classical
@@ -68,6 +68,6 @@ open VerifierInterfacePushHostcallResultQualifs
 set_option maxHeartbeats 5000000
 #time def VerifierInterfacePushHostcallResult_proof : VerifierInterfacePushHostcallResult := by
   unfold VerifierInterfacePushHostcallResult
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

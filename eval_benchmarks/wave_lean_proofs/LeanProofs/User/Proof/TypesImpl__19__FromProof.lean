@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.TypesImpl__19__From
 open Classical
@@ -68,6 +68,6 @@ open TypesImpl19FromQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__19__From_proof : TypesImpl__19__From := by
   unfold TypesImpl__19__From
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

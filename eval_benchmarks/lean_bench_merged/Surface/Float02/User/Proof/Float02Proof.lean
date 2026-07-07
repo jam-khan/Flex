@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Float02.Flux.Prelude
 import Surface.Float02.Flux.VC.Float02
 open Classical
@@ -68,6 +68,6 @@ open Float02Qualifs
 set_option maxHeartbeats 5000000
 #time def Float02_proof : Float02 := by
   unfold Float02
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

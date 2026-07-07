@@ -68,6 +68,6 @@ open RingbufferImpl2NewQualifs
 set_option maxHeartbeats 5000000
 #time def RingbufferImpl__2__New_proof : RingbufferImpl__2__New := by
   unfold RingbufferImpl__2__New
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

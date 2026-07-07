@@ -68,6 +68,6 @@ open MainQualifs
 set_option maxHeartbeats 5000000
 #time def Main_proof : Main := by
   unfold Main
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

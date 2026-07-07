@@ -68,6 +68,6 @@ open VectorsRangeRQualifs
 set_option maxHeartbeats 5000000
 #time def VectorsRangeR_proof : VectorsRangeR := by
   unfold VectorsRangeR
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

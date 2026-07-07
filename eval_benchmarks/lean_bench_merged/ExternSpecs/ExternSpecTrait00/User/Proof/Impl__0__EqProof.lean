@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ExternSpecs.ExternSpecTrait00.Flux.Prelude
 import ExternSpecs.ExternSpecTrait00.Flux.VC.Impl__0__Eq
 open Classical
@@ -68,6 +68,6 @@ open Impl0EqQualifs
 set_option maxHeartbeats 5000000
 #time def Impl__0__Eq_proof : Impl__0__Eq := by
   unfold Impl__0__Eq
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

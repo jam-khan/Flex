@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import OpaqueSorts.Seq00.Flux.Prelude
 import OpaqueSorts.Seq00.Flux.VC.TestCons
 open Classical
@@ -68,6 +68,6 @@ open TestConsQualifs
 set_option maxHeartbeats 5000000
 #time def TestCons_proof : TestCons := by
   unfold TestCons
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

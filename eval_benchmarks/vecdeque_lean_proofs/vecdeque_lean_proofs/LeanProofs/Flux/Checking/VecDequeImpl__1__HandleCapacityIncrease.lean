@@ -1,0 +1,4 @@
+import LeanProofs.Flux.VC.VecDequeImpl__1__HandleCapacityIncrease
+import LeanProofs.User.Proof.VecDequeImpl__1__HandleCapacityIncreaseProof
+
+#check (F.VecDequeImpl__1__HandleCapacityIncrease_proof : F.VecDequeImpl__1__HandleCapacityIncrease)

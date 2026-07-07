@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Detached.DetachStruct00.Flux.Prelude
 import Detached.DetachStruct00.Flux.VC.MkStruct
 open Classical
@@ -68,6 +68,6 @@ open MkStructQualifs
 set_option maxHeartbeats 5000000
 #time def MkStruct_proof : MkStruct := by
   unfold MkStruct
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

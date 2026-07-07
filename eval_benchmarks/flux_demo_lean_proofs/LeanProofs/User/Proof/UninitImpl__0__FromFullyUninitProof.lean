@@ -68,6 +68,6 @@ open UninitImpl0FromFullyUninitQualifs
 set_option maxHeartbeats 5000000
 #time def UninitImpl__0__FromFullyUninit_proof : UninitImpl__0__FromFullyUninit := by
   unfold UninitImpl__0__FromFullyUninit
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Fft.Flux.Prelude
 import Surface.Fft.Flux.VC.LoopC
 open Classical
@@ -68,6 +68,6 @@ open LoopCQualifs
 set_option maxHeartbeats 5000000
 #time def LoopC_proof : LoopC := by
   unfold LoopC
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

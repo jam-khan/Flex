@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.KnuthShuffle.Flux.Prelude
 import Surface.KnuthShuffle.Flux.VC.KnuthShuffle
 open Classical
@@ -68,6 +68,6 @@ open KnuthShuffleQualifs
 set_option maxHeartbeats 5000000
 #time def KnuthShuffle_proof : KnuthShuffle := by
   unfold KnuthShuffle
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

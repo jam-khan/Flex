@@ -1,0 +1,73 @@
+import Flex
+import LeanProofs.Flux.Prelude
+import LeanProofs.Flux.VC.RingbufferImpl__2__HasElements
+open Classical
+set_option linter.unusedVariables false
+
+
+namespace F
+
+namespace RingbufferImpl2HasElementsQualifs
+
+@[qualif]
+def EqTrue (a'₀ : Prop) : Prop :=
+  a'₀
+
+@[qualif]
+def EqFalse (a'₀ : Prop) : Prop :=
+  (¬a'₀)
+
+@[qualif]
+def EqZero (a'₀ : Int) : Prop :=
+  (a'₀ = 0)
+
+@[qualif]
+def GtZero (a'₀ : Int) : Prop :=
+  (a'₀ > 0)
+
+@[qualif]
+def GeZero (a'₀ : Int) : Prop :=
+  (a'₀ ≥ 0)
+
+@[qualif]
+def LtZero (a'₀ : Int) : Prop :=
+  (a'₀ < 0)
+
+@[qualif]
+def LeZero (a'₀ : Int) : Prop :=
+  (a'₀ ≤ 0)
+
+@[qualif]
+def Eq (a'₀ : Int) (a'₁ : Int) : Prop :=
+  (a'₀ = a'₁)
+
+@[qualif]
+def Gt (a'₀ : Int) (a'₁ : Int) : Prop :=
+  (a'₀ > a'₁)
+
+@[qualif]
+def Ge (a'₀ : Int) (a'₁ : Int) : Prop :=
+  (a'₀ ≥ a'₁)
+
+@[qualif]
+def Lt (a'₀ : Int) (a'₁ : Int) : Prop :=
+  (a'₀ < a'₁)
+
+@[qualif]
+def Le (a'₀ : Int) (a'₁ : Int) : Prop :=
+  (a'₀ ≤ a'₁)
+
+@[qualif]
+def Le1 (a'₀ : Int) (a'₁ : Int) : Prop :=
+  (a'₀ ≤ (a'₁ - 1))
+
+end RingbufferImpl2HasElementsQualifs
+
+open RingbufferImpl2HasElementsQualifs
+
+set_option maxHeartbeats 5000000
+#time def RingbufferImpl__2__HasElements_proof : RingbufferImpl__2__HasElements := by
+  unfold RingbufferImpl__2__HasElements
+  (try zap) ; (try simp [*]) ; (try solve)
+
+end F

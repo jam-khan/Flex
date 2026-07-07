@@ -68,6 +68,6 @@ open DemoDecrMutQualifs
 set_option maxHeartbeats 5000000
 #time def DemoDecrMut_proof : DemoDecrMut := by
   unfold DemoDecrMut
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

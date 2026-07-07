@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Hide00.Flux.Prelude
 import Surface.Hide00.Flux.VC.UseFoo
 open Classical
@@ -68,6 +68,6 @@ open UseFooQualifs
 set_option maxHeartbeats 5000000
 #time def UseFoo_proof : UseFoo := by
   unfold UseFoo
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

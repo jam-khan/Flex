@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Detached.DetachImpl02.Flux.Prelude
 import Detached.DetachImpl02.Flux.VC.Impl__1__From
 open Classical
@@ -68,6 +68,6 @@ open Impl1FromQualifs
 set_option maxHeartbeats 5000000
 #time def Impl__1__From_proof : Impl__1__From := by
   unfold Impl__1__From
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

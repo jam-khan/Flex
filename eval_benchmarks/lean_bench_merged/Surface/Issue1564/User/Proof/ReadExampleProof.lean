@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Issue1564.Flux.Prelude
 import Surface.Issue1564.Flux.VC.ReadExample
 open Classical
@@ -68,6 +68,6 @@ open ReadExampleQualifs
 set_option maxHeartbeats 5000000
 #time def ReadExample_proof : ReadExample := by
   unfold ReadExample
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

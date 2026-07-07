@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.ArgSyntax.Flux.Prelude
 import Surface.ArgSyntax.Flux.VC.ShrRef
 open Classical
@@ -68,6 +68,6 @@ open ShrRefQualifs
 set_option maxHeartbeats 5000000
 #time def ShrRef_proof : ShrRef := by
   unfold ShrRef
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

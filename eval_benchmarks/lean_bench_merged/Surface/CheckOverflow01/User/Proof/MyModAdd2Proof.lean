@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.CheckOverflow01.Flux.Prelude
 import Surface.CheckOverflow01.Flux.VC.MyModAdd2
 open Classical
@@ -68,6 +68,6 @@ open MyModAdd2Qualifs
 set_option maxHeartbeats 5000000
 #time def MyModAdd2_proof : MyModAdd2 := by
   unfold MyModAdd2
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

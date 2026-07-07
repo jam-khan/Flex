@@ -68,6 +68,6 @@ open HeapsortShiftDownQualifs
 set_option maxHeartbeats 5000000
 #time def HeapsortShiftDown_proof : HeapsortShiftDown := by
   unfold HeapsortShiftDown
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

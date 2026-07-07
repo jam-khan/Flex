@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Issue706.Flux.Prelude
 import Surface.Issue706.Flux.VC.AssignWord
 open Classical
@@ -68,6 +68,6 @@ open AssignWordQualifs
 set_option maxHeartbeats 5000000
 #time def AssignWord_proof : AssignWord := by
   unfold AssignWord
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

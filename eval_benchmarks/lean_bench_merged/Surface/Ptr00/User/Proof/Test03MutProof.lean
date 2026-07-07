@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Ptr00.Flux.Prelude
 import Surface.Ptr00.Flux.VC.Test03Mut
 open Classical
@@ -68,6 +68,6 @@ open Test03MutQualifs
 set_option maxHeartbeats 5000000
 #time def Test03Mut_proof : Test03Mut := by
   unfold Test03Mut
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

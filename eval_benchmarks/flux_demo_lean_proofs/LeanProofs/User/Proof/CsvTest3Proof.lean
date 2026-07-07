@@ -68,6 +68,6 @@ open CsvTest3Qualifs
 set_option maxHeartbeats 5000000
 #time def CsvTest3_proof : CsvTest3 := by
   unfold CsvTest3
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

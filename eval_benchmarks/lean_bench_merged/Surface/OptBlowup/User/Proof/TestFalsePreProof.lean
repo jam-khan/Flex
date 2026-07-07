@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.OptBlowup.Flux.Prelude
 import Surface.OptBlowup.Flux.VC.TestFalsePre
 open Classical
@@ -68,6 +68,6 @@ open TestFalsePreQualifs
 set_option maxHeartbeats 5000000
 #time def TestFalsePre_proof : TestFalsePre := by
   unfold TestFalsePre
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

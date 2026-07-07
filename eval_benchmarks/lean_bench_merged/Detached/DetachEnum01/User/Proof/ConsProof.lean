@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Detached.DetachEnum01.Flux.Prelude
 import Detached.DetachEnum01.Flux.VC.Cons
 open Classical
@@ -68,6 +68,6 @@ open ConsQualifs
 set_option maxHeartbeats 5000000
 #time def Cons_proof : Cons := by
   unfold Cons
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

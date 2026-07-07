@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Test01.Flux.Prelude
 import Surface.Test01.Flux.VC.Test1
 open Classical
@@ -68,6 +68,6 @@ open Test1Qualifs
 set_option maxHeartbeats 5000000
 #time def Test1_proof : Test1 := by
   unfold Test1
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

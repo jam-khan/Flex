@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Detached.DetachStatic00.Flux.Prelude
 import Detached.DetachStatic00.Flux.VC.BobTest2
 open Classical
@@ -68,6 +68,6 @@ open BobTest2Qualifs
 set_option maxHeartbeats 5000000
 #time def BobTest2_proof : BobTest2 := by
   unfold BobTest2
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

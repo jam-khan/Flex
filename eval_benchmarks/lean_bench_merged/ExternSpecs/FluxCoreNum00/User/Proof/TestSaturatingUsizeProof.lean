@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ExternSpecs.FluxCoreNum00.Flux.Prelude
 import ExternSpecs.FluxCoreNum00.Flux.VC.TestSaturatingUsize
 open Classical
@@ -68,6 +68,6 @@ open TestSaturatingUsizeQualifs
 set_option maxHeartbeats 5000000
 #time def TestSaturatingUsize_proof : TestSaturatingUsize := by
   unfold TestSaturatingUsize
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

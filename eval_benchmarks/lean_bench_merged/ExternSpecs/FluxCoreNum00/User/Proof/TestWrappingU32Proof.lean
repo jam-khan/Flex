@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ExternSpecs.FluxCoreNum00.Flux.Prelude
 import ExternSpecs.FluxCoreNum00.Flux.VC.TestWrappingU32
 open Classical
@@ -68,6 +68,6 @@ open TestWrappingU32Qualifs
 set_option maxHeartbeats 5000000
 #time def TestWrappingU32_proof : TestWrappingU32 := by
   unfold TestWrappingU32
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

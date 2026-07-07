@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.ForRange00.Flux.Prelude
 import Surface.ForRange00.Flux.VC.Goofy
 open Classical
@@ -68,6 +68,6 @@ open GoofyQualifs
 set_option maxHeartbeats 5000000
 #time def Goofy_proof : Goofy := by
   unfold Goofy
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

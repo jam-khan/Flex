@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Closure11.Flux.Prelude
 import Surface.Closure11.Flux.VC.Impl__0__Foreach
 open Classical
@@ -68,6 +68,6 @@ open Impl0ForeachQualifs
 set_option maxHeartbeats 5000000
 #time def Impl__0__Foreach_proof : Impl__0__Foreach := by
   unfold Impl__0__Foreach
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.BvOrd.Flux.Prelude
 import Surface.BvOrd.Flux.VC.LtImp
 open Classical
@@ -68,6 +68,6 @@ open LtImpQualifs
 set_option maxHeartbeats 5000000
 #time def LtImp_proof : LtImp := by
   unfold LtImp
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.OsPlatformTraceClockGetRes
 open Classical
@@ -68,6 +68,6 @@ open OsPlatformTraceClockGetResQualifs
 set_option maxHeartbeats 5000000
 #time def OsPlatformTraceClockGetRes_proof : OsPlatformTraceClockGetRes := by
   unfold OsPlatformTraceClockGetRes
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

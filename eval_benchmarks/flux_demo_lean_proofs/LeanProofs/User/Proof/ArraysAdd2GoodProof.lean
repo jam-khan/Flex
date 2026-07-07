@@ -68,6 +68,6 @@ open ArraysAdd2GoodQualifs
 set_option maxHeartbeats 5000000
 #time def ArraysAdd2Good_proof : ArraysAdd2Good := by
   unfold ArraysAdd2Good
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

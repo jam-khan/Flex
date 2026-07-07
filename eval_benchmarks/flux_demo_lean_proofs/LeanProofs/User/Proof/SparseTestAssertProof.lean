@@ -68,6 +68,6 @@ open SparseTestAssertQualifs
 set_option maxHeartbeats 5000000
 #time def SparseTestAssert_proof : SparseTestAssert := by
   unfold SparseTestAssert
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

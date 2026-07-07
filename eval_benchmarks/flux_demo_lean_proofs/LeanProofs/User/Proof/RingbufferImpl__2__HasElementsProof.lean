@@ -68,6 +68,6 @@ open RingbufferImpl2HasElementsQualifs
 set_option maxHeartbeats 5000000
 #time def RingbufferImpl__2__HasElements_proof : RingbufferImpl__2__HasElements := by
   unfold RingbufferImpl__2__HasElements
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

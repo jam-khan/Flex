@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ExternSpecs.FluxCoreOption00.Flux.Prelude
 import ExternSpecs.FluxCoreOption00.Flux.VC.TestReplaceReturnsOldSome
 open Classical
@@ -68,6 +68,6 @@ open TestReplaceReturnsOldSomeQualifs
 set_option maxHeartbeats 5000000
 #time def TestReplaceReturnsOldSome_proof : TestReplaceReturnsOldSome := by
   unfold TestReplaceReturnsOldSome
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

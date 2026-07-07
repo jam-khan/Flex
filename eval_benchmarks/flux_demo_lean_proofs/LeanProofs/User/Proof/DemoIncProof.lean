@@ -68,6 +68,6 @@ open DemoIncQualifs
 set_option maxHeartbeats 5000000
 #time def DemoInc_proof : DemoInc := by
   unfold DemoInc
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

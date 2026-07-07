@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Binop.Flux.Prelude
 import Surface.Binop.Flux.VC.MultiplyF32
 open Classical
@@ -68,6 +68,6 @@ open MultiplyF32Qualifs
 set_option maxHeartbeats 5000000
 #time def MultiplyF32_proof : MultiplyF32 := by
   unfold MultiplyF32
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

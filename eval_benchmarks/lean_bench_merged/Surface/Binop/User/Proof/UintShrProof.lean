@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Binop.Flux.Prelude
 import Surface.Binop.Flux.VC.UintShr
 open Classical
@@ -68,6 +68,6 @@ open UintShrQualifs
 set_option maxHeartbeats 5000000
 #time def UintShr_proof : UintShr := by
   unfold UintShr
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

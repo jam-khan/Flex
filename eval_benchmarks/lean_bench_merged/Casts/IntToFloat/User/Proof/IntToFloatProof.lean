@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Casts.IntToFloat.Flux.Prelude
 import Casts.IntToFloat.Flux.VC.IntToFloat
 open Classical
@@ -68,6 +68,6 @@ open IntToFloatQualifs
 set_option maxHeartbeats 5000000
 #time def IntToFloat_proof : IntToFloat := by
   unfold IntToFloat
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

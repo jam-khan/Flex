@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Enums.List00.Flux.Prelude
 import Enums.List00.Flux.VC.Len
 open Classical
@@ -68,6 +68,6 @@ open LenQualifs
 set_option maxHeartbeats 5000000
 #time def Len_proof : Len := by
   unfold Len
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Enums.List00.Flux.Prelude
 import Enums.List00.Flux.VC.Empty
 open Classical
@@ -68,6 +68,6 @@ open EmptyQualifs
 set_option maxHeartbeats 5000000
 #time def Empty_proof : Empty := by
   unfold Empty
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

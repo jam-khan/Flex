@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Test06.Flux.Prelude
 import Surface.Test06.Flux.VC.Double
 open Classical
@@ -68,6 +68,6 @@ open DoubleQualifs
 set_option maxHeartbeats 5000000
 #time def Double_proof : Double := by
   unfold Double
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

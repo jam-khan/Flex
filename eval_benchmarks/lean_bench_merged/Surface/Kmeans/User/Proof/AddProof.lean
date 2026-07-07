@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Kmeans.Flux.Prelude
 import Surface.Kmeans.Flux.VC.Add
 open Classical
@@ -68,6 +68,6 @@ open AddQualifs
 set_option maxHeartbeats 5000000
 #time def Add_proof : Add := by
   unfold Add
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

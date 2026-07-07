@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Binop.Flux.Prelude
 import Surface.Binop.Flux.VC.DivideF32
 open Classical
@@ -68,6 +68,6 @@ open DivideF32Qualifs
 set_option maxHeartbeats 5000000
 #time def DivideF32_proof : DivideF32 := by
   unfold DivideF32
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -68,6 +68,6 @@ open RangeImpl4NextQualifs
 set_option maxHeartbeats 5000000
 #time def RangeImpl__4__Next_proof : RangeImpl__4__Next := by
   unfold RangeImpl__4__Next
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

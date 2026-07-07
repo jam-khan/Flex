@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.OsTraceGetdents64
 open Classical
@@ -68,6 +68,6 @@ open OsTraceGetdents64Qualifs
 set_option maxHeartbeats 5000000
 #time def OsTraceGetdents64_proof : OsTraceGetdents64 := by
   unfold OsTraceGetdents64
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

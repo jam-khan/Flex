@@ -1,0 +1,73 @@
+import Flex
+import Surface.NoPanic07.Flux.Prelude
+import Surface.NoPanic07.Flux.VC.Caller
+open Classical
+set_option linter.unusedVariables false
+
+
+namespace F
+
+namespace CallerQualifs
+
+@[qualif]
+def EqTrue (a'₀ : Prop) : Prop :=
+  a'₀
+
+@[qualif]
+def EqFalse (a'₀ : Prop) : Prop :=
+  (¬a'₀)
+
+@[qualif]
+def EqZero (a'₀ : Int) : Prop :=
+  (a'₀ = 0)
+
+@[qualif]
+def GtZero (a'₀ : Int) : Prop :=
+  (a'₀ > 0)
+
+@[qualif]
+def GeZero (a'₀ : Int) : Prop :=
+  (a'₀ ≥ 0)
+
+@[qualif]
+def LtZero (a'₀ : Int) : Prop :=
+  (a'₀ < 0)
+
+@[qualif]
+def LeZero (a'₀ : Int) : Prop :=
+  (a'₀ ≤ 0)
+
+@[qualif]
+def Eq (a'₀ : Int) (a'₁ : Int) : Prop :=
+  (a'₀ = a'₁)
+
+@[qualif]
+def Gt (a'₀ : Int) (a'₁ : Int) : Prop :=
+  (a'₀ > a'₁)
+
+@[qualif]
+def Ge (a'₀ : Int) (a'₁ : Int) : Prop :=
+  (a'₀ ≥ a'₁)
+
+@[qualif]
+def Lt (a'₀ : Int) (a'₁ : Int) : Prop :=
+  (a'₀ < a'₁)
+
+@[qualif]
+def Le (a'₀ : Int) (a'₁ : Int) : Prop :=
+  (a'₀ ≤ a'₁)
+
+@[qualif]
+def Le1 (a'₀ : Int) (a'₁ : Int) : Prop :=
+  (a'₀ ≤ (a'₁ - 1))
+
+end CallerQualifs
+
+open CallerQualifs
+
+set_option maxHeartbeats 5000000
+#time def Caller_proof : Caller := by
+  unfold Caller
+  (try zap) ; (try simp [*]) ; (try solve)
+
+end F

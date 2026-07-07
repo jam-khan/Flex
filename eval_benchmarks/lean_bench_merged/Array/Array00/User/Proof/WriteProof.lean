@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Array.Array00.Flux.Prelude
 import Array.Array00.Flux.VC.Write
 open Classical
@@ -68,6 +68,6 @@ open WriteQualifs
 set_option maxHeartbeats 5000000
 #time def Write_proof : Write := by
   unfold Write
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

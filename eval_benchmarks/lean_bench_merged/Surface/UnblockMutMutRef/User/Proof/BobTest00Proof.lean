@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.UnblockMutMutRef.Flux.Prelude
 import Surface.UnblockMutMutRef.Flux.VC.BobTest00
 open Classical
@@ -68,6 +68,6 @@ open BobTest00Qualifs
 set_option maxHeartbeats 5000000
 #time def BobTest00_proof : BobTest00 := by
   unfold BobTest00
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

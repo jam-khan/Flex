@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Lifetimes.StructGenericLifetimeShr.Flux.Prelude
 import Lifetimes.StructGenericLifetimeShr.Flux.VC.Construct
 open Classical
@@ -68,6 +68,6 @@ open ConstructQualifs
 set_option maxHeartbeats 5000000
 #time def Construct_proof : Construct := by
   unfold Construct
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

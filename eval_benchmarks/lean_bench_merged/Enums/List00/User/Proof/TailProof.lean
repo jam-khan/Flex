@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Enums.List00.Flux.Prelude
 import Enums.List00.Flux.VC.Tail
 open Classical
@@ -68,6 +68,6 @@ open TailQualifs
 set_option maxHeartbeats 5000000
 #time def Tail_proof : Tail := by
   unfold Tail
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

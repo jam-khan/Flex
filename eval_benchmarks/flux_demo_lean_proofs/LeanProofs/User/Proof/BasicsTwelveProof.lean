@@ -68,6 +68,6 @@ open BasicsTwelveQualifs
 set_option maxHeartbeats 5000000
 #time def BasicsTwelve_proof : BasicsTwelve := by
   unfold BasicsTwelve
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

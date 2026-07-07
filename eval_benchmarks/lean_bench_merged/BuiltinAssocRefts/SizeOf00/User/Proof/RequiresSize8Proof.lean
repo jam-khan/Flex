@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import BuiltinAssocRefts.SizeOf00.Flux.Prelude
 import BuiltinAssocRefts.SizeOf00.Flux.VC.RequiresSize8
 open Classical
@@ -68,6 +68,6 @@ open RequiresSize8Qualifs
 set_option maxHeartbeats 5000000
 #time def RequiresSize8_proof : RequiresSize8 := by
   unfold RequiresSize8
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.WrappersWasiClockTimeGet
 open Classical
@@ -68,6 +68,6 @@ open WrappersWasiClockTimeGetQualifs
 set_option maxHeartbeats 5000000
 #time def WrappersWasiClockTimeGet_proof : WrappersWasiClockTimeGet := by
   unfold WrappersWasiClockTimeGet
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Remainder.Flux.Prelude
 import Surface.Remainder.Flux.VC.ModSignedPos
 open Classical
@@ -68,6 +68,6 @@ open ModSignedPosQualifs
 set_option maxHeartbeats 5000000
 #time def ModSignedPos_proof : ModSignedPos := by
   unfold ModSignedPos
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

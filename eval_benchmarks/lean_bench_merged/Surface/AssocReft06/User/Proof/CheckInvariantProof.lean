@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.AssocReft06.Flux.Prelude
 import Surface.AssocReft06.Flux.VC.CheckInvariant
 open Classical
@@ -68,6 +68,6 @@ open CheckInvariantQualifs
 set_option maxHeartbeats 5000000
 #time def CheckInvariant_proof : CheckInvariant := by
   unfold CheckInvariant
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

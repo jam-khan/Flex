@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Date.Flux.Prelude
 import Surface.Date.Flux.VC.MkDate
 open Classical
@@ -68,6 +68,6 @@ open MkDateQualifs
 set_option maxHeartbeats 5000000
 #time def MkDate_proof : MkDate := by
   unfold MkDate
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

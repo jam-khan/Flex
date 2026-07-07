@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.RefinedTypeVar00.Flux.Prelude
 import Surface.RefinedTypeVar00.Flux.VC.Choose
 open Classical
@@ -68,6 +68,6 @@ open ChooseQualifs
 set_option maxHeartbeats 5000000
 #time def Choose_proof : Choose := by
   unfold Choose
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

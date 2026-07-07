@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.TooManyLinkedLists.Flux.Prelude
 import Surface.TooManyLinkedLists.Flux.VC.Impl__1__Push
 open Classical
@@ -68,6 +68,6 @@ open Impl1PushQualifs
 set_option maxHeartbeats 5000000
 #time def Impl__1__Push_proof : Impl__1__Push := by
   unfold Impl__1__Push
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Detached.DetachImpl02.Flux.Prelude
 import Detached.DetachImpl02.Flux.VC.TestA
 open Classical
@@ -68,6 +68,6 @@ open TestAQualifs
 set_option maxHeartbeats 5000000
 #time def TestA_proof : TestA := by
   unfold TestA
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

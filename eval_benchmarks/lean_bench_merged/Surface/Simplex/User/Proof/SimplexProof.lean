@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Simplex.Flux.Prelude
 import Surface.Simplex.Flux.VC.Simplex
 open Classical
@@ -68,6 +68,6 @@ open SimplexQualifs
 set_option maxHeartbeats 5000000
 #time def Simplex_proof : Simplex := by
   unfold Simplex
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

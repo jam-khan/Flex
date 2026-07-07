@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Structs.Dot02.Flux.Prelude
 import Structs.Dot02.Flux.VC.RvecImpl__3__Index
 open Classical
@@ -72,6 +72,6 @@ open RvecImpl3IndexQualifs
 set_option maxHeartbeats 5000000
 #time def RvecImpl__3__Index_proof : RvecImpl__3__Index := by
   unfold RvecImpl__3__Index
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.BitvecConst02.Flux.Prelude
 import Surface.BitvecConst02.Flux.VC.Test05
 open Classical
@@ -68,6 +68,6 @@ open Test05Qualifs
 set_option maxHeartbeats 5000000
 #time def Test05_proof : Test05 := by
   unfold Test05
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

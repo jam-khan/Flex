@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.AutoStrong01.Flux.Prelude
 import Surface.AutoStrong01.Flux.VC.Set
 open Classical
@@ -68,6 +68,6 @@ open SetQualifs
 set_option maxHeartbeats 5000000
 #time def Set_proof : Set := by
   unfold Set
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

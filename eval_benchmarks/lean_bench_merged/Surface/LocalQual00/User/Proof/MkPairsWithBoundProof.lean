@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.LocalQual00.Flux.Prelude
 import Surface.LocalQual00.Flux.VC.MkPairsWithBound
 open Classical
@@ -72,6 +72,6 @@ open MkPairsWithBoundQualifs
 set_option maxHeartbeats 5000000
 #time def MkPairsWithBound_proof : MkPairsWithBound := by
   unfold MkPairsWithBound
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

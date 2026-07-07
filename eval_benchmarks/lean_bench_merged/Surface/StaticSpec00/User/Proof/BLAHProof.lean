@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.StaticSpec00.Flux.Prelude
 import Surface.StaticSpec00.Flux.VC.BLAH
 open Classical
@@ -68,6 +68,6 @@ open BLAHQualifs
 set_option maxHeartbeats 5000000
 #time def BLAH_proof : BLAH := by
   unfold BLAH
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

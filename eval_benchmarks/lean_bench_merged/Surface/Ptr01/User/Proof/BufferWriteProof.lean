@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Ptr01.Flux.Prelude
 import Surface.Ptr01.Flux.VC.BufferWrite
 open Classical
@@ -68,6 +68,6 @@ open BufferWriteQualifs
 set_option maxHeartbeats 5000000
 #time def BufferWrite_proof : BufferWrite := by
   unfold BufferWrite
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

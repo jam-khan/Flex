@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ExternSpecs.FluxCoreNum01.Flux.Prelude
 import ExternSpecs.FluxCoreNum01.Flux.VC.TestBothBoundedSuErrNeg
 open Classical
@@ -68,6 +68,6 @@ open TestBothBoundedSuErrNegQualifs
 set_option maxHeartbeats 5000000
 #time def TestBothBoundedSuErrNeg_proof : TestBothBoundedSuErrNeg := by
   unfold TestBothBoundedSuErrNeg
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

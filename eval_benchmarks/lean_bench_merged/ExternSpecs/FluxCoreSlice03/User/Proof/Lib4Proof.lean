@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ExternSpecs.FluxCoreSlice03.Flux.Prelude
 import ExternSpecs.FluxCoreSlice03.Flux.VC.Lib4
 open Classical
@@ -68,6 +68,6 @@ open Lib4Qualifs
 set_option maxHeartbeats 5000000
 #time def Lib4_proof : Lib4 := by
   unfold Lib4
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

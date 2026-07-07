@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.AssocReft06.Flux.Prelude
 import Surface.AssocReft06.Flux.VC.AssumeInvariant
 open Classical
@@ -68,6 +68,6 @@ open AssumeInvariantQualifs
 set_option maxHeartbeats 5000000
 #time def AssumeInvariant_proof : AssumeInvariant := by
   unfold AssumeInvariant
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

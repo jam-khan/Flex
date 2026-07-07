@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Primops00.Flux.Prelude
 import Surface.Primops00.Flux.VC.Test7
 open Classical
@@ -68,6 +68,6 @@ open Test7Qualifs
 set_option maxHeartbeats 5000000
 #time def Test7_proof : Test7 := by
   unfold Test7
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

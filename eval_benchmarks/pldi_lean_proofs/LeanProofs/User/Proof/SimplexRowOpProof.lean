@@ -68,6 +68,6 @@ open SimplexRowOpQualifs
 set_option maxHeartbeats 5000000
 #time def SimplexRowOp_proof : SimplexRowOp := by
   unfold SimplexRowOp
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Resolver04.Flux.Prelude
 import Surface.Resolver04.Flux.VC.BFoo
 open Classical
@@ -68,6 +68,6 @@ open BFooQualifs
 set_option maxHeartbeats 5000000
 #time def BFoo_proof : BFoo := by
   unfold BFoo
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

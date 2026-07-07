@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.RuntimeImpl__0__CopyBufFromSandbox
 open Classical
@@ -68,6 +68,6 @@ open RuntimeImpl0CopyBufFromSandboxQualifs
 set_option maxHeartbeats 5000000
 #time def RuntimeImpl__0__CopyBufFromSandbox_proof : RuntimeImpl__0__CopyBufFromSandbox := by
   unfold RuntimeImpl__0__CopyBufFromSandbox
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

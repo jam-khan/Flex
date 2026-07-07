@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Promotion00.Flux.Prelude
 import Surface.Promotion00.Flux.VC.Bad
 open Classical
@@ -68,6 +68,6 @@ open BadQualifs
 set_option maxHeartbeats 5000000
 #time def Bad_proof : Bad := by
   unfold Bad
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -68,6 +68,6 @@ open ArraysDotKQualifs
 set_option maxHeartbeats 5000000
 #time def ArraysDotK_proof : ArraysDotK := by
   unfold ArraysDotK
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

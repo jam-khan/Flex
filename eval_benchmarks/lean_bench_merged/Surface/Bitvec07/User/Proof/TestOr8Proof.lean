@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Bitvec07.Flux.Prelude
 import Surface.Bitvec07.Flux.VC.TestOr8
 open Classical
@@ -68,6 +68,6 @@ open TestOr8Qualifs
 set_option maxHeartbeats 5000000
 #time def TestOr8_proof : TestOr8 := by
   unfold TestOr8
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

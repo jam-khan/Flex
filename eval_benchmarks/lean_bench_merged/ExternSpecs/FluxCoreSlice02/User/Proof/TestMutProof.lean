@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ExternSpecs.FluxCoreSlice02.Flux.Prelude
 import ExternSpecs.FluxCoreSlice02.Flux.VC.TestMut
 open Classical
@@ -68,6 +68,6 @@ open TestMutQualifs
 set_option maxHeartbeats 5000000
 #time def TestMut_proof : TestMut := by
   unfold TestMut
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

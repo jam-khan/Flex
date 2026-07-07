@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Kmeans.Flux.Prelude
 import Surface.Kmeans.Flux.VC.NormalizeCenters
 open Classical
@@ -68,6 +68,6 @@ open NormalizeCentersQualifs
 set_option maxHeartbeats 5000000
 #time def NormalizeCenters_proof : NormalizeCenters := by
   unfold NormalizeCenters
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

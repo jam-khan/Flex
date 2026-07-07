@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ExternSpecs.FluxCoreOption00.Flux.Prelude
 import ExternSpecs.FluxCoreOption00.Flux.VC.TestMapPreservesNone
 open Classical
@@ -68,6 +68,6 @@ open TestMapPreservesNoneQualifs
 set_option maxHeartbeats 5000000
 #time def TestMapPreservesNone_proof : TestMapPreservesNone := by
   unfold TestMapPreservesNone
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

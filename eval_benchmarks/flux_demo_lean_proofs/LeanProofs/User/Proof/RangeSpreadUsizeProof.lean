@@ -68,6 +68,6 @@ open RangeSpreadUsizeQualifs
 set_option maxHeartbeats 5000000
 #time def RangeSpreadUsize_proof : RangeSpreadUsize := by
   unfold RangeSpreadUsize
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

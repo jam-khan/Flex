@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import BuiltinAssocRefts.AlignOf00.Flux.Prelude
 import BuiltinAssocRefts.AlignOf00.Flux.VC.RequiresAlign2
 open Classical
@@ -68,6 +68,6 @@ open RequiresAlign2Qualifs
 set_option maxHeartbeats 5000000
 #time def RequiresAlign2_proof : RequiresAlign2 := by
   unfold RequiresAlign2
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

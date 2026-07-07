@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Simplex.Flux.Prelude
 import Surface.Simplex.Flux.VC.DepartVar
 open Classical
@@ -68,6 +68,6 @@ open DepartVarQualifs
 set_option maxHeartbeats 5000000
 #time def DepartVar_proof : DepartVar := by
   unfold DepartVar
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

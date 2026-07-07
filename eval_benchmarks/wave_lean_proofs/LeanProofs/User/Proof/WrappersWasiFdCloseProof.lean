@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.WrappersWasiFdClose
 open Classical
@@ -68,6 +68,6 @@ open WrappersWasiFdCloseQualifs
 set_option maxHeartbeats 5000000
 #time def WrappersWasiFdClose_proof : WrappersWasiFdClose := by
   unfold WrappersWasiFdClose
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

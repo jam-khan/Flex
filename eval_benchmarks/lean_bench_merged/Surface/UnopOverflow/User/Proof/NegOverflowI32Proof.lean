@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.UnopOverflow.Flux.Prelude
 import Surface.UnopOverflow.Flux.VC.NegOverflowI32
 open Classical
@@ -68,6 +68,6 @@ open NegOverflowI32Qualifs
 set_option maxHeartbeats 5000000
 #time def NegOverflowI32_proof : NegOverflowI32 := by
   unfold NegOverflowI32
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -68,6 +68,6 @@ open BasicsImpl0FooQualifs
 set_option maxHeartbeats 5000000
 #time def BasicsImpl__0__Foo_proof : BasicsImpl__0__Foo := by
   unfold BasicsImpl__0__Foo
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

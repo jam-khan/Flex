@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.Wasm2cFrontendAdjustOflags
 open Classical
@@ -68,6 +68,6 @@ open Wasm2cFrontendAdjustOflagsQualifs
 set_option maxHeartbeats 5000000
 #time def Wasm2cFrontendAdjustOflags_proof : Wasm2cFrontendAdjustOflags := by
   unfold Wasm2cFrontendAdjustOflags
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

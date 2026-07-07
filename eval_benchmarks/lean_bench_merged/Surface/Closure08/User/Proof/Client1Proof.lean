@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Closure08.Flux.Prelude
 import Surface.Closure08.Flux.VC.Client1
 open Classical
@@ -68,6 +68,6 @@ open Client1Qualifs
 set_option maxHeartbeats 5000000
 #time def Client1_proof : Client1 := by
   unfold Client1
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

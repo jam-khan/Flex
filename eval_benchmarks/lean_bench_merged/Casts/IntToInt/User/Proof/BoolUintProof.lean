@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Casts.IntToInt.Flux.Prelude
 import Casts.IntToInt.Flux.VC.BoolUint
 open Classical
@@ -68,6 +68,6 @@ open BoolUintQualifs
 set_option maxHeartbeats 5000000
 #time def BoolUint_proof : BoolUint := by
   unfold BoolUint
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

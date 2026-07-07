@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import AbstractRefinements.Test02.Flux.Prelude
 import AbstractRefinements.Test02.Flux.VC.Ipa
 open Classical
@@ -68,6 +68,6 @@ open IpaQualifs
 set_option maxHeartbeats 5000000
 #time def Ipa_proof : Ipa := by
   unfold Ipa
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

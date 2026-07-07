@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ExternSpecs.ExternSpecStruct00.Flux.Prelude
 import ExternSpecs.ExternSpecStruct00.Flux.VC.TestStringLen3
 open Classical
@@ -68,6 +68,6 @@ open TestStringLen3Qualifs
 set_option maxHeartbeats 5000000
 #time def TestStringLen3_proof : TestStringLen3 := by
   unfold TestStringLen3
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

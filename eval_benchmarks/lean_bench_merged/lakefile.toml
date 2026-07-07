@@ -31,4 +31,4 @@ globs = [
 
 [[require]]
 name = "LeanFixpoint"
-path = "../../"
+path = "/Users/petros/Documents/UCSD/Work/lean-fixpoint"

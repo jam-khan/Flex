@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.TcbMiscEmptyNetlist
 open Classical
@@ -68,6 +68,6 @@ open TcbMiscEmptyNetlistQualifs
 set_option maxHeartbeats 5000000
 #time def TcbMiscEmptyNetlist_proof : TcbMiscEmptyNetlist := by
   unfold TcbMiscEmptyNetlist
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

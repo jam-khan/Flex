@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.TraitSubtyping03.Flux.Prelude
 import Surface.TraitSubtyping03.Flux.VC.Ok
 open Classical
@@ -68,6 +68,6 @@ open OkQualifs
 set_option maxHeartbeats 5000000
 #time def Ok_proof : Ok := by
   unfold Ok
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

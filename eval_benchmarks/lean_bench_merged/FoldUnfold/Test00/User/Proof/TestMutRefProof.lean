@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import FoldUnfold.Test00.Flux.Prelude
 import FoldUnfold.Test00.Flux.VC.TestMutRef
 open Classical
@@ -68,6 +68,6 @@ open TestMutRefQualifs
 set_option maxHeartbeats 5000000
 #time def TestMutRef_proof : TestMutRef := by
   unfold TestMutRef
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

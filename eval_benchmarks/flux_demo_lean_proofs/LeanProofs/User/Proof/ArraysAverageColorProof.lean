@@ -68,6 +68,6 @@ open ArraysAverageColorQualifs
 set_option maxHeartbeats 5000000
 #time def ArraysAverageColor_proof : ArraysAverageColor := by
   unfold ArraysAverageColor
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

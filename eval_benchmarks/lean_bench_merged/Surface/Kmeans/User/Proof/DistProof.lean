@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Kmeans.Flux.Prelude
 import Surface.Kmeans.Flux.VC.Dist
 open Classical
@@ -68,6 +68,6 @@ open DistQualifs
 set_option maxHeartbeats 5000000
 #time def Dist_proof : Dist := by
   unfold Dist
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

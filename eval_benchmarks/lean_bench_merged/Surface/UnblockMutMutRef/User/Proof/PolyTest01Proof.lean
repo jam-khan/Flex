@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.UnblockMutMutRef.Flux.Prelude
 import Surface.UnblockMutMutRef.Flux.VC.PolyTest01
 open Classical
@@ -68,6 +68,6 @@ open PolyTest01Qualifs
 set_option maxHeartbeats 5000000
 #time def PolyTest01_proof : PolyTest01 := by
   unfold PolyTest01
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

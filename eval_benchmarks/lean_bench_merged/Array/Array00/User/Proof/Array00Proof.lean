@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Array.Array00.Flux.Prelude
 import Array.Array00.Flux.VC.Array00
 open Classical
@@ -68,6 +68,6 @@ open Array00Qualifs
 set_option maxHeartbeats 5000000
 #time def Array00_proof : Array00 := by
   unfold Array00
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

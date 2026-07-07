@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Detached.Detach01.Flux.Prelude
 import Detached.Detach01.Flux.VC.BobId
 open Classical
@@ -68,6 +68,6 @@ open BobIdQualifs
 set_option maxHeartbeats 5000000
 #time def BobId_proof : BobId := by
   unfold BobId
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

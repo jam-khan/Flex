@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Kmeans.Flux.Prelude
 import Surface.Kmeans.Flux.VC.InitCenters
 open Classical
@@ -68,6 +68,6 @@ open InitCentersQualifs
 set_option maxHeartbeats 5000000
 #time def InitCenters_proof : InitCenters := by
   unfold InitCenters
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Issue1449.Flux.Prelude
 import Surface.Issue1449.Flux.VC.Impl__5__Upcast
 open Classical
@@ -68,6 +68,6 @@ open Impl5UpcastQualifs
 set_option maxHeartbeats 5000000
 #time def Impl__5__Upcast_proof : Impl__5__Upcast := by
   unfold Impl__5__Upcast
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Detached.DetachEnum00.Flux.Prelude
 import Detached.DetachEnum00.Flux.VC.Succ
 open Classical
@@ -68,6 +68,6 @@ open SuccQualifs
 set_option maxHeartbeats 5000000
 #time def Succ_proof : Succ := by
   unfold Succ
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

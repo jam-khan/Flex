@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ExternSpecs.FluxCoreNum01.Flux.Prelude
 import ExternSpecs.FluxCoreNum01.Flux.VC.TestBothBoundedSuOk
 open Classical
@@ -68,6 +68,6 @@ open TestBothBoundedSuOkQualifs
 set_option maxHeartbeats 5000000
 #time def TestBothBoundedSuOk_proof : TestBothBoundedSuOk := by
   unfold TestBothBoundedSuOk
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Enums.Opt00.Flux.Prelude
 import Enums.Opt00.Flux.VC.Unwrap
 open Classical
@@ -68,6 +68,6 @@ open UnwrapQualifs
 set_option maxHeartbeats 5000000
 #time def Unwrap_proof : Unwrap := by
   unfold Unwrap
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

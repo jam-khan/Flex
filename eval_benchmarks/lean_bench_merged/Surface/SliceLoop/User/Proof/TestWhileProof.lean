@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.SliceLoop.Flux.Prelude
 import Surface.SliceLoop.Flux.VC.TestWhile
 open Classical
@@ -68,6 +68,6 @@ open TestWhileQualifs
 set_option maxHeartbeats 5000000
 #time def TestWhile_proof : TestWhile := by
   unfold TestWhile
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

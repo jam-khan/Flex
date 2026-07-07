@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ExternSpecs.FluxCoreOption00.Flux.Prelude
 import ExternSpecs.FluxCoreOption00.Flux.VC.TestAndNoneLeft
 open Classical
@@ -68,6 +68,6 @@ open TestAndNoneLeftQualifs
 set_option maxHeartbeats 5000000
 #time def TestAndNoneLeft_proof : TestAndNoneLeft := by
   unfold TestAndNoneLeft
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

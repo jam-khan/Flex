@@ -7,7 +7,7 @@ namespace F
 
 
 
-def KmpTable := ∃ k0 : (a0 : Int) -> (a1 : Int) -> Prop, ∃ k1 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> Prop, ∃ k2 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> Prop, ∃ k3 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> Prop, ∃ k4 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> (a4 : Int) -> Prop, ∃ k5 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> (a4 : Int) -> (a5 : Int) -> Prop, ∃ k6 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> (a4 : Int) -> (a5 : Int) -> (a6 : Int) -> Prop, ∃ k7 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> (a4 : Int) -> (a5 : Int) -> (a6 : Int) -> (a7 : Int) -> Prop, ∃ k8 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> (a4 : Int) -> (a5 : Int) -> Prop, ∃ k9 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> (a4 : Int) -> (a5 : Int) -> (a6 : Int) -> Prop, ∃ k10 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> (a4 : Int) -> (a5 : Int) -> (a6 : Int) -> (a7 : Int) -> Prop, ∃ k11 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> (a4 : Int) -> (a5 : Int) -> Prop, 
+def KmpTable := ∃ k0 : (a0 : Int) -> (a1 : Int) -> Prop, ∃ k1 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> Prop, ∃ k2 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> Prop, ∃ k3 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> Prop, ∃ k4 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> (a4 : Int) -> Prop, ∃ k5 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> (a4 : Int) -> (a5 : Int) -> Prop, ∃ k6 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> (a4 : Int) -> (a5 : Int) -> (a6 : Int) -> Prop, ∃ k7 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> (a4 : Int) -> (a5 : Int) -> (a6 : Int) -> (a7 : Int) -> Prop, ∃ k8 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> (a4 : Int) -> (a5 : Int) -> Prop, ∃ k9 : (a0 : Int) -> (a1 : Int) -> (a2 : Int) -> (a3 : Int) -> (a4 : Int) -> (a5 : Int) -> Prop, 
  ∀ (len₀ : Int),
   (len₀ > 0) ->
    (0 ≤ len₀) ->
@@ -61,33 +61,25 @@ def KmpTable := ∃ k0 : (a0 : Int) -> (a1 : Int) -> Prop, ∃ k1 : (a0 : Int) -
                  (∀ (a'₁₂ : Int),
                   ((k8 a'₁₂ len₀ i₀ j₀ a'₅ a'₇)) ->
                    ((k7 a'₁₂ (i₀ + 1) j₀ len₀ i₀ j₀ a'₅ a'₇)))
-                 ) ∧
-                (∀ (i₁ : Int),
-                 ∀ (j₁ : Int),
-                  ((k6 i₁ j₁ len₀ i₀ j₀ a'₅ a'₇)) ->
-                   (((k9 i₁ j₁ len₀ i₀ j₀ a'₅ a'₇))) ∧
-                   (∀ (a'₁₅ : Int),
-                    ((k7 a'₁₅ i₁ j₁ len₀ i₀ j₀ a'₅ a'₇)) ->
-                     ((k10 a'₁₅ i₁ j₁ len₀ i₀ j₀ a'₅ a'₇)))
-                   )
+                 )
                 ) ∧
                ((¬(a'₅ ≠ a'₇)) ->
-                (∀ (a'₁₆ : Int),
-                 ((k2 a'₁₆ i₀ j₀ len₀)) ->
-                  ((k11 a'₁₆ len₀ i₀ j₀ a'₅ a'₇))) ∧
-                (((k11 (j₀ + 1) len₀ i₀ j₀ a'₅ a'₇))) ∧
-                (((k9 (i₀ + 1) (j₀ + 1) len₀ i₀ j₀ a'₅ a'₇))) ∧
-                (∀ (a'₁₇ : Int),
-                 ((k11 a'₁₇ len₀ i₀ j₀ a'₅ a'₇)) ->
-                  ((k10 a'₁₇ (i₀ + 1) (j₀ + 1) len₀ i₀ j₀ a'₅ a'₇)))
+                (∀ (a'₁₃ : Int),
+                 ((k2 a'₁₃ i₀ j₀ len₀)) ->
+                  ((k9 a'₁₃ len₀ i₀ j₀ a'₅ a'₇))) ∧
+                (((k9 (j₀ + 1) len₀ i₀ j₀ a'₅ a'₇))) ∧
+                (((k6 (i₀ + 1) (j₀ + 1) len₀ i₀ j₀ a'₅ a'₇))) ∧
+                (∀ (a'₁₄ : Int),
+                 ((k9 a'₁₄ len₀ i₀ j₀ a'₅ a'₇)) ->
+                  ((k7 a'₁₄ (i₀ + 1) (j₀ + 1) len₀ i₀ j₀ a'₅ a'₇)))
                 ) ∧
-               (∀ (i₂ : Int),
-                ∀ (j₂ : Int),
-                 ((k9 i₂ j₂ len₀ i₀ j₀ a'₅ a'₇)) ->
-                  (((k1 i₂ j₂ len₀))) ∧
-                  (∀ (a'₂₀ : Int),
-                   ((k10 a'₂₀ i₂ j₂ len₀ i₀ j₀ a'₅ a'₇)) ->
-                    ((k2 a'₂₀ i₂ j₂ len₀)))
+               (∀ (i₁ : Int),
+                ∀ (j₁ : Int),
+                 ((k6 i₁ j₁ len₀ i₀ j₀ a'₅ a'₇)) ->
+                  (((k1 i₁ j₁ len₀))) ∧
+                  (∀ (a'₁₇ : Int),
+                   ((k7 a'₁₇ i₁ j₁ len₀ i₀ j₀ a'₅ a'₇)) ->
+                    ((k2 a'₁₇ i₁ j₁ len₀)))
                   )
                )
             )

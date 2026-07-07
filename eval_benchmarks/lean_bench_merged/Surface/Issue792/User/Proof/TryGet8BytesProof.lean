@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Issue792.Flux.Prelude
 import Surface.Issue792.Flux.VC.TryGet8Bytes
 open Classical
@@ -68,6 +68,6 @@ open TryGet8BytesQualifs
 set_option maxHeartbeats 5000000
 #time def TryGet8Bytes_proof : TryGet8Bytes := by
   unfold TryGet8Bytes
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

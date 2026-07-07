@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ImplTrait.ParentGenerics.Flux.Prelude
 import ImplTrait.ParentGenerics.Flux.VC.Impl__0__Method00
 open Classical
@@ -68,6 +68,6 @@ open Impl0Method00Qualifs
 set_option maxHeartbeats 5000000
 #time def Impl__0__Method00_proof : Impl__0__Method00 := by
   unfold Impl__0__Method00
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

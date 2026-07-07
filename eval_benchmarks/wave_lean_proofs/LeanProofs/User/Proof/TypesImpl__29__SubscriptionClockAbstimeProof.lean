@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.TypesImpl__29__SubscriptionClockAbstime
 open Classical
@@ -68,6 +68,6 @@ open TypesImpl29SubscriptionClockAbstimeQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__29__SubscriptionClockAbstime_proof : TypesImpl__29__SubscriptionClockAbstime := by
   unfold TypesImpl__29__SubscriptionClockAbstime
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

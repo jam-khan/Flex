@@ -68,6 +68,6 @@ open VecDequeImpl3ReserveQualifs
 set_option maxHeartbeats 5000000
 #time def VecDequeImpl__3__Reserve_proof : VecDequeImpl__3__Reserve := by
   unfold VecDequeImpl__3__Reserve
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

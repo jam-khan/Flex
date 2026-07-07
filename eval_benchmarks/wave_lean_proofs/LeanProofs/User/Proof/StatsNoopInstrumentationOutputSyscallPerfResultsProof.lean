@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.StatsNoopInstrumentationOutputSyscallPerfResults
 open Classical
@@ -68,6 +68,6 @@ open StatsNoopInstrumentationOutputSyscallPerfResultsQualifs
 set_option maxHeartbeats 5000000
 #time def StatsNoopInstrumentationOutputSyscallPerfResults_proof : StatsNoopInstrumentationOutputSyscallPerfResults := by
   unfold StatsNoopInstrumentationOutputSyscallPerfResults
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Ptr00.Flux.Prelude
 import Surface.Ptr00.Flux.VC.Test02ConstConst
 open Classical
@@ -68,6 +68,6 @@ open Test02ConstConstQualifs
 set_option maxHeartbeats 5000000
 #time def Test02ConstConst_proof : Test02ConstConst := by
   unfold Test02ConstConst
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

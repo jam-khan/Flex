@@ -68,6 +68,6 @@ open DemoAssertQualifs
 set_option maxHeartbeats 5000000
 #time def DemoAssert_proof : DemoAssert := by
   unfold DemoAssert
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

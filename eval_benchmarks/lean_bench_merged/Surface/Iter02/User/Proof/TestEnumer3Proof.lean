@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Iter02.Flux.Prelude
 import Surface.Iter02.Flux.VC.TestEnumer3
 open Classical
@@ -68,6 +68,6 @@ open TestEnumer3Qualifs
 set_option maxHeartbeats 5000000
 #time def TestEnumer3_proof : TestEnumer3 := by
   unfold TestEnumer3
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.AssertTerminator.Flux.Prelude
 import Surface.AssertTerminator.Flux.VC.AssertTerminatorTest
 open Classical
@@ -68,6 +68,6 @@ open AssertTerminatorTestQualifs
 set_option maxHeartbeats 5000000
 #time def AssertTerminatorTest_proof : AssertTerminatorTest := by
   unfold AssertTerminatorTest
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

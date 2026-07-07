@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Promotion01.Flux.Prelude
 import Surface.Promotion01.Flux.VC.TestFooEq
 open Classical
@@ -68,6 +68,6 @@ open TestFooEqQualifs
 set_option maxHeartbeats 5000000
 #time def TestFooEq_proof : TestFooEq := by
   unfold TestFooEq
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

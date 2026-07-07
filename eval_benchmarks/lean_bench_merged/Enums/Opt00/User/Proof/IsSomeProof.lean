@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Enums.Opt00.Flux.Prelude
 import Enums.Opt00.Flux.VC.IsSome
 open Classical
@@ -68,6 +68,6 @@ open IsSomeQualifs
 set_option maxHeartbeats 5000000
 #time def IsSome_proof : IsSome := by
   unfold IsSome
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

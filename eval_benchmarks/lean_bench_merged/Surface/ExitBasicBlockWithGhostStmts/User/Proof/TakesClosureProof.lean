@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.ExitBasicBlockWithGhostStmts.Flux.Prelude
 import Surface.ExitBasicBlockWithGhostStmts.Flux.VC.TakesClosure
 open Classical
@@ -68,6 +68,6 @@ open TakesClosureQualifs
 set_option maxHeartbeats 5000000
 #time def TakesClosure_proof : TakesClosure := by
   unfold TakesClosure
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

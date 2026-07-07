@@ -68,6 +68,6 @@ open VectorsTestPushLenQualifs
 set_option maxHeartbeats 5000000
 #time def VectorsTestPushLen_proof : VectorsTestPushLen := by
   unfold VectorsTestPushLen
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

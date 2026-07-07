@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Vec.Vec00.Flux.Prelude
 import Vec.Vec00.Flux.VC.TestLen
 open Classical
@@ -68,6 +68,6 @@ open TestLenQualifs
 set_option maxHeartbeats 5000000
 #time def TestLen_proof : TestLen := by
   unfold TestLen
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

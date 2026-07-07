@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import AbstractRefinements.Test03.Flux.Prelude
 import AbstractRefinements.Test03.Flux.VC.Gt
 open Classical
@@ -68,6 +68,6 @@ open GtQualifs
 set_option maxHeartbeats 5000000
 #time def Gt_proof : Gt := by
   unfold Gt
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

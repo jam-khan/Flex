@@ -68,6 +68,6 @@ open RawVecImpl1NewInQualifs
 set_option maxHeartbeats 5000000
 #time def RawVecImpl__1__NewIn_proof : RawVecImpl__1__NewIn := by
   unfold RawVecImpl__1__NewIn
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

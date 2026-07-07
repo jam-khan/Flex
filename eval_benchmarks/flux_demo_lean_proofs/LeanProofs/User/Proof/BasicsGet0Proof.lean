@@ -68,6 +68,6 @@ open BasicsGet0Qualifs
 set_option maxHeartbeats 5000000
 #time def BasicsGet0_proof : BasicsGet0 := by
   unfold BasicsGet0
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

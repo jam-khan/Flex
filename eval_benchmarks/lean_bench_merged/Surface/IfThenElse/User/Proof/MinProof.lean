@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.IfThenElse.Flux.Prelude
 import Surface.IfThenElse.Flux.VC.Min
 open Classical
@@ -68,6 +68,6 @@ open MinQualifs
 set_option maxHeartbeats 5000000
 #time def Min_proof : Min := by
   unfold Min
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

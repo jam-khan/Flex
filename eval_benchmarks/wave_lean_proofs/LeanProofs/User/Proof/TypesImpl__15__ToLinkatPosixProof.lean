@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.TypesImpl__15__ToLinkatPosix
 open Classical
@@ -68,6 +68,6 @@ open TypesImpl15ToLinkatPosixQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__15__ToLinkatPosix_proof : TypesImpl__15__ToLinkatPosix := by
   unfold TypesImpl__15__ToLinkatPosix
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

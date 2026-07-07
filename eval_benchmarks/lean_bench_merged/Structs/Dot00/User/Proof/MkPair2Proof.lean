@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Structs.Dot00.Flux.Prelude
 import Structs.Dot00.Flux.VC.MkPair2
 open Classical
@@ -68,6 +68,6 @@ open MkPair2Qualifs
 set_option maxHeartbeats 5000000
 #time def MkPair2_proof : MkPair2 := by
   unfold MkPair2
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -68,6 +68,6 @@ open AnfBinQualifs
 set_option maxHeartbeats 5000000
 #time def AnfBin_proof : AnfBin := by
   unfold AnfBin
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

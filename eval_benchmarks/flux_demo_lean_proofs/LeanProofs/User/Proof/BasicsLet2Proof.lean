@@ -68,6 +68,6 @@ open BasicsLet2Qualifs
 set_option maxHeartbeats 5000000
 #time def BasicsLet2_proof : BasicsLet2 := by
   unfold BasicsLet2
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

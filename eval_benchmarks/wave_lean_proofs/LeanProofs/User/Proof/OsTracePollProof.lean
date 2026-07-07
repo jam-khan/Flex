@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.OsTracePoll
 open Classical
@@ -68,6 +68,6 @@ open OsTracePollQualifs
 set_option maxHeartbeats 5000000
 #time def OsTracePoll_proof : OsTracePoll := by
   unfold OsTracePoll
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Fft.Flux.Prelude
 import Surface.Fft.Flux.VC.FftTest
 open Classical
@@ -68,6 +68,6 @@ open FftTestQualifs
 set_option maxHeartbeats 5000000
 #time def FftTest_proof : FftTest := by
   unfold FftTest
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -68,6 +68,6 @@ open DemoNeverQualifs
 set_option maxHeartbeats 5000000
 #time def DemoNever_proof : DemoNever := by
   unfold DemoNever
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

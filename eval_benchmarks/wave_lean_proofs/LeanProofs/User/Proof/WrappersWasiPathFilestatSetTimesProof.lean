@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.WrappersWasiPathFilestatSetTimes
 open Classical
@@ -68,6 +68,6 @@ open WrappersWasiPathFilestatSetTimesQualifs
 set_option maxHeartbeats 5000000
 #time def WrappersWasiPathFilestatSetTimes_proof : WrappersWasiPathFilestatSetTimes := by
   unfold WrappersWasiPathFilestatSetTimes
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

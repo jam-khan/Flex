@@ -68,6 +68,6 @@ open SimplexSimplexQualifs
 set_option maxHeartbeats 5000000
 #time def SimplexSimplex_proof : SimplexSimplex := by
   unfold SimplexSimplex
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

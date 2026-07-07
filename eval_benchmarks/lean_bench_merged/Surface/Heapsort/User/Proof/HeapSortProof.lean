@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Heapsort.Flux.Prelude
 import Surface.Heapsort.Flux.VC.HeapSort
 open Classical
@@ -68,6 +68,6 @@ open HeapSortQualifs
 set_option maxHeartbeats 5000000
 #time def HeapSort_proof : HeapSort := by
   unfold HeapSort
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

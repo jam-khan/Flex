@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.AbstractRefinementInCompositeSort.Flux.Prelude
 import Surface.AbstractRefinementInCompositeSort.Flux.VC.Direct
 open Classical
@@ -68,6 +68,6 @@ open DirectQualifs
 set_option maxHeartbeats 5000000
 #time def Direct_proof : Direct := by
   unfold Direct
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

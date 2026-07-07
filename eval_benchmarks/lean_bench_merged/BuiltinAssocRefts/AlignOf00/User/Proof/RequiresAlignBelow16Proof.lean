@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import BuiltinAssocRefts.AlignOf00.Flux.Prelude
 import BuiltinAssocRefts.AlignOf00.Flux.VC.RequiresAlignBelow16
 open Classical
@@ -68,6 +68,6 @@ open RequiresAlignBelow16Qualifs
 set_option maxHeartbeats 5000000
 #time def RequiresAlignBelow16_proof : RequiresAlignBelow16 := by
   unfold RequiresAlignBelow16
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

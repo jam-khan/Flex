@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Binop.Flux.Prelude
 import Surface.Binop.Flux.VC.BitwiseShrI32I32
 open Classical
@@ -68,6 +68,6 @@ open BitwiseShrI32I32Qualifs
 set_option maxHeartbeats 5000000
 #time def BitwiseShrI32I32_proof : BitwiseShrI32I32 := by
   unfold BitwiseShrI32I32
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

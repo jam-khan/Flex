@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.StaticSpec00.Flux.Prelude
 import Surface.StaticSpec00.Flux.VC.TestFrog
 open Classical
@@ -68,6 +68,6 @@ open TestFrogQualifs
 set_option maxHeartbeats 5000000
 #time def TestFrog_proof : TestFrog := by
   unfold TestFrog
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

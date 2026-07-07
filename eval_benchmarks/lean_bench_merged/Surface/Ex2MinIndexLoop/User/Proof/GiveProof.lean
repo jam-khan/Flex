@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Ex2MinIndexLoop.Flux.Prelude
 import Surface.Ex2MinIndexLoop.Flux.VC.Give
 open Classical
@@ -68,6 +68,6 @@ open GiveQualifs
 set_option maxHeartbeats 5000000
 #time def Give_proof : Give := by
   unfold Give
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

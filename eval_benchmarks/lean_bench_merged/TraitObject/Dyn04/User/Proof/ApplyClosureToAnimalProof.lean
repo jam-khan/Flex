@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import TraitObject.Dyn04.Flux.Prelude
 import TraitObject.Dyn04.Flux.VC.ApplyClosureToAnimal
 open Classical
@@ -68,6 +68,6 @@ open ApplyClosureToAnimalQualifs
 set_option maxHeartbeats 5000000
 #time def ApplyClosureToAnimal_proof : ApplyClosureToAnimal := by
   unfold ApplyClosureToAnimal
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

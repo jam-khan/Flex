@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ConstGenerics.Array02.Flux.Prelude
 import ConstGenerics.Array02.Flux.VC.Impl__0__IndexCrash
 open Classical
@@ -68,6 +68,6 @@ open Impl0IndexCrashQualifs
 set_option maxHeartbeats 5000000
 #time def Impl__0__IndexCrash_proof : Impl__0__IndexCrash := by
   unfold Impl__0__IndexCrash
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

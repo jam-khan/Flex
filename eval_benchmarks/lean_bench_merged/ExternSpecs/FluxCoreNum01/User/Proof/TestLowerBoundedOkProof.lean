@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ExternSpecs.FluxCoreNum01.Flux.Prelude
 import ExternSpecs.FluxCoreNum01.Flux.VC.TestLowerBoundedOk
 open Classical
@@ -68,6 +68,6 @@ open TestLowerBoundedOkQualifs
 set_option maxHeartbeats 5000000
 #time def TestLowerBoundedOk_proof : TestLowerBoundedOk := by
   unfold TestLowerBoundedOk
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

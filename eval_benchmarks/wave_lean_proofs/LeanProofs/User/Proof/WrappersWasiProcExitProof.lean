@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.WrappersWasiProcExit
 open Classical
@@ -68,6 +68,6 @@ open WrappersWasiProcExitQualifs
 set_option maxHeartbeats 5000000
 #time def WrappersWasiProcExit_proof : WrappersWasiProcExit := by
   unfold WrappersWasiProcExit
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

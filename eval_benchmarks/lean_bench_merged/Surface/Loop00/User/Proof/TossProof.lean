@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Loop00.Flux.Prelude
 import Surface.Loop00.Flux.VC.Toss
 open Classical
@@ -68,6 +68,6 @@ open TossQualifs
 set_option maxHeartbeats 5000000
 #time def Toss_proof : Toss := by
   unfold Toss
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

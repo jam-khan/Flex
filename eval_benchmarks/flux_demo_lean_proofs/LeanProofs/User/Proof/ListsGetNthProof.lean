@@ -68,6 +68,6 @@ open ListsGetNthQualifs
 set_option maxHeartbeats 5000000
 #time def ListsGetNth_proof : ListsGetNth := by
   unfold ListsGetNth
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

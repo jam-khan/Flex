@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Simplex.Flux.Prelude
 import Surface.Simplex.Flux.VC.IsNeg
 open Classical
@@ -68,6 +68,6 @@ open IsNegQualifs
 set_option maxHeartbeats 5000000
 #time def IsNeg_proof : IsNeg := by
   unfold IsNeg
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

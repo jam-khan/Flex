@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.OptBlowup.Flux.Prelude
 import Surface.OptBlowup.Flux.VC.Let3
 open Classical
@@ -68,6 +68,6 @@ open Let3Qualifs
 set_option maxHeartbeats 5000000
 #time def Let3_proof : Let3 := by
   unfold Let3
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

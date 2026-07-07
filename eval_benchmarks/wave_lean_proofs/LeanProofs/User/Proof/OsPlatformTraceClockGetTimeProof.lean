@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.OsPlatformTraceClockGetTime
 open Classical
@@ -68,6 +68,6 @@ open OsPlatformTraceClockGetTimeQualifs
 set_option maxHeartbeats 5000000
 #time def OsPlatformTraceClockGetTime_proof : OsPlatformTraceClockGetTime := by
   unfold OsPlatformTraceClockGetTime
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

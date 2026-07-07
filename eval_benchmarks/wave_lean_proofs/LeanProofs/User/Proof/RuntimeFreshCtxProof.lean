@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.RuntimeFreshCtx
 open Classical
@@ -68,6 +68,6 @@ open RuntimeFreshCtxQualifs
 set_option maxHeartbeats 5000000
 #time def RuntimeFreshCtx_proof : RuntimeFreshCtx := by
   unfold RuntimeFreshCtx
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

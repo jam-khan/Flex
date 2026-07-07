@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Default00.Flux.Prelude
 import Surface.Default00.Flux.VC.Silly
 open Classical
@@ -68,6 +68,6 @@ open SillyQualifs
 set_option maxHeartbeats 5000000
 #time def Silly_proof : Silly := by
   unfold Silly
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

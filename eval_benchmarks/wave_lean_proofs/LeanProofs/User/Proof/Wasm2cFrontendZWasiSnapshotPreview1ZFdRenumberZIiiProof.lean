@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.Wasm2cFrontendZWasiSnapshotPreview1ZFdRenumberZIii
 open Classical
@@ -68,6 +68,6 @@ open Wasm2cFrontendZWasiSnapshotPreview1ZFdRenumberZIiiQualifs
 set_option maxHeartbeats 5000000
 #time def Wasm2cFrontendZWasiSnapshotPreview1ZFdRenumberZIii_proof : Wasm2cFrontendZWasiSnapshotPreview1ZFdRenumberZIii := by
   unfold Wasm2cFrontendZWasiSnapshotPreview1ZFdRenumberZIii
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

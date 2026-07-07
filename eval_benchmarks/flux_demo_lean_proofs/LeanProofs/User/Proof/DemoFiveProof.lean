@@ -68,6 +68,6 @@ open DemoFiveQualifs
 set_option maxHeartbeats 5000000
 #time def DemoFive_proof : DemoFive := by
   unfold DemoFive
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

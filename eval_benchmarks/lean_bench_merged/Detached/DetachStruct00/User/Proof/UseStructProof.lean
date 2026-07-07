@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Detached.DetachStruct00.Flux.Prelude
 import Detached.DetachStruct00.Flux.VC.UseStruct
 open Classical
@@ -68,6 +68,6 @@ open UseStructQualifs
 set_option maxHeartbeats 5000000
 #time def UseStruct_proof : UseStruct := by
   unfold UseStruct
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

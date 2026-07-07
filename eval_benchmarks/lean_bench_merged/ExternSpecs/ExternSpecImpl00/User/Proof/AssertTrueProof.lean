@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import ExternSpecs.ExternSpecImpl00.Flux.Prelude
 import ExternSpecs.ExternSpecImpl00.Flux.VC.AssertTrue
 open Classical
@@ -68,6 +68,6 @@ open AssertTrueQualifs
 set_option maxHeartbeats 5000000
 #time def AssertTrue_proof : AssertTrue := by
   unfold AssertTrue
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

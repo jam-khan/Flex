@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Bcopy.Flux.Prelude
 import Surface.Bcopy.Flux.VC.BcopyAux
 open Classical
@@ -68,6 +68,6 @@ open BcopyAuxQualifs
 set_option maxHeartbeats 5000000
 #time def BcopyAux_proof : BcopyAux := by
   unfold BcopyAux
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

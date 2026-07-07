@@ -68,6 +68,6 @@ open MapreduceMapQualifs
 set_option maxHeartbeats 5000000
 #time def MapreduceMap_proof : MapreduceMap := by
   unfold MapreduceMap
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

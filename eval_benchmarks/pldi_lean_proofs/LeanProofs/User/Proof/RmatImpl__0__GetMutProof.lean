@@ -68,6 +68,6 @@ open RmatImpl0GetMutQualifs
 set_option maxHeartbeats 5000000
 #time def RmatImpl__0__GetMut_proof : RmatImpl__0__GetMut := by
   unfold RmatImpl__0__GetMut
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

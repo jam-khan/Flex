@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Casts.FloatToInt.Flux.Prelude
 import Casts.FloatToInt.Flux.VC.FloatToUint
 open Classical
@@ -68,6 +68,6 @@ open FloatToUintQualifs
 set_option maxHeartbeats 5000000
 #time def FloatToUint_proof : FloatToUint := by
   unfold FloatToUint
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

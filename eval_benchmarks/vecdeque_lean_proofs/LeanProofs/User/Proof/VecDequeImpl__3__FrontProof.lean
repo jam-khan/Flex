@@ -68,6 +68,6 @@ open VecDequeImpl3FrontQualifs
 set_option maxHeartbeats 5000000
 #time def VecDequeImpl__3__Front_proof : VecDequeImpl__3__Front := by
   unfold VecDequeImpl__3__Front
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

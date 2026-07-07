@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.Wasm2cFrontendWaveInit
 open Classical
@@ -68,6 +68,6 @@ open Wasm2cFrontendWaveInitQualifs
 set_option maxHeartbeats 5000000
 #time def Wasm2cFrontendWaveInit_proof : Wasm2cFrontendWaveInit := by
   unfold Wasm2cFrontendWaveInit
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

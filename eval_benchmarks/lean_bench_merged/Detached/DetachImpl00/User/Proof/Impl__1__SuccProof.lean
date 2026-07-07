@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Detached.DetachImpl00.Flux.Prelude
 import Detached.DetachImpl00.Flux.VC.Impl__1__Succ
 open Classical
@@ -68,6 +68,6 @@ open Impl1SuccQualifs
 set_option maxHeartbeats 5000000
 #time def Impl__1__Succ_proof : Impl__1__Succ := by
   unfold Impl__1__Succ
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

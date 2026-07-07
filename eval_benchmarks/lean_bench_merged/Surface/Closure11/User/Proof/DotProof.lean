@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Closure11.Flux.Prelude
 import Surface.Closure11.Flux.VC.Dot
 open Classical
@@ -68,6 +68,6 @@ open DotQualifs
 set_option maxHeartbeats 5000000
 #time def Dot_proof : Dot := by
   unfold Dot
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Structs.Union00.Flux.Prelude
 import Structs.Union00.Flux.VC.NewThis
 open Classical
@@ -68,6 +68,6 @@ open NewThisQualifs
 set_option maxHeartbeats 5000000
 #time def NewThis_proof : NewThis := by
   unfold NewThis
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

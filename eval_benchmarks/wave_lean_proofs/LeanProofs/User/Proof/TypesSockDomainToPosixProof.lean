@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.TypesSockDomainToPosix
 open Classical
@@ -68,6 +68,6 @@ open TypesSockDomainToPosixQualifs
 set_option maxHeartbeats 5000000
 #time def TypesSockDomainToPosix_proof : TypesSockDomainToPosix := by
   unfold TypesSockDomainToPosix
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

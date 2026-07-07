@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.TypesImpl__0__AlignDownMask
 open Classical
@@ -68,6 +68,6 @@ open TypesImpl0AlignDownMaskQualifs
 set_option maxHeartbeats 5000000
 #time def TypesImpl__0__AlignDownMask_proof : TypesImpl__0__AlignDownMask := by
   unfold TypesImpl__0__AlignDownMask
-  (try fusion) ; (try simp [*]) ; try solve_fixpoint
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

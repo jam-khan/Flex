@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Array.Array04.Flux.Prelude
 import Array.Array04.Flux.VC.TestRepeatReturnPos
 open Classical
@@ -68,6 +68,6 @@ open TestRepeatReturnPosQualifs
 set_option maxHeartbeats 5000000
 #time def TestRepeatReturnPos_proof : TestRepeatReturnPos := by
   unfold TestRepeatReturnPos
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

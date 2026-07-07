@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Structs.Dot00.Flux.Prelude
 import Structs.Dot00.Flux.VC.MkPairWithFirst
 open Classical
@@ -68,6 +68,6 @@ open MkPairWithFirstQualifs
 set_option maxHeartbeats 5000000
 #time def MkPairWithFirst_proof : MkPairWithFirst := by
   unfold MkPairWithFirst
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Surface.Impl01.Flux.Prelude
 import Surface.Impl01.Flux.VC.Impl__1__Foo
 open Classical
@@ -68,6 +68,6 @@ open Impl1FooQualifs
 set_option maxHeartbeats 5000000
 #time def Impl__1__Foo_proof : Impl__1__Foo := by
   unfold Impl__1__Foo
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import Enums.List00.Flux.Prelude
 import Enums.List00.Flux.VC.Clone
 open Classical
@@ -68,6 +68,6 @@ open CloneQualifs
 set_option maxHeartbeats 5000000
 #time def Clone_proof : Clone := by
   unfold Clone
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

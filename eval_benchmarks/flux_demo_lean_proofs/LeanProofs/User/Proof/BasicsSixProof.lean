@@ -68,6 +68,6 @@ open BasicsSixQualifs
 set_option maxHeartbeats 5000000
 #time def BasicsSix_proof : BasicsSix := by
   unfold BasicsSix
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  solve_fixpoint_combo
 
 end F

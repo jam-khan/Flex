@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import AbstractRefinements.Test02.Flux.Prelude
 import AbstractRefinements.Test02.Flux.VC.Ris
 open Classical
@@ -68,6 +68,6 @@ open RisQualifs
 set_option maxHeartbeats 5000000
 #time def Ris_proof : Ris := by
   unfold Ris
-  (try fusion) ; (try simp [*]) ; (try solve_fixpoint)
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F
