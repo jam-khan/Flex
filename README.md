@@ -1,6 +1,6 @@
 # Flex
 
-A Lean 4 library implementing a fixpoint-based constraint solving framework with predicate abstraction, fusion algorithms, and meta-programming support for refinement types.
+A Lean 4 library for a constraint-solving framework for Constrained Horn Clauses (CHCs).
 
 > ⚠️ This is a private repository. You must be a collaborator to use it as a dependency.
 
@@ -18,7 +18,7 @@ A Lean 4 library implementing a fixpoint-based constraint solving framework with
 ```toml
 [[require]]
 name = "Flex"
-git = "https://github.com/jam-khan/lean-fixpoint"
+git = "https://github.com/jam-khan/Flex"
 rev = "main"
 ```
 
