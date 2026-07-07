@@ -18,8 +18,8 @@ LF_ROOT="$(cd "$EVAL_DIR/.." && pwd)"
 
 # ── build LeanFixpoint.Eval.FusionSearch ─────────────────────────────────────
 
-echo "==> Building LeanFixpoint.Eval.FusionSearch"
-(cd "$LF_ROOT" && lake build LeanFixpoint.Eval.FusionSearch)
+echo "==> Building Flex.Eval.FusionSearch"
+(cd "$LF_ROOT" && lake build Flex.Eval.FusionSearch)
 
 # ── build hashtable and sorting suites ───────────────────────────────────────
 

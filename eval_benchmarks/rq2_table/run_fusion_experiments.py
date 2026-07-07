@@ -106,8 +106,8 @@ def parse_proof_file(path: Path) -> tuple[str, str, str] | None:
 
 def build_temp_src(head: str, proof_name: str, vc_type: str, config: str, tactic: str) -> str:
     imports_patched = head.replace(
-        "import LeanFixpoint\n",
-        "import LeanFixpoint\nimport LeanFixpoint.Eval.FusionSearch\n",
+        "import Flex\n",
+        "import Flex\nimport Flex.Eval.FusionSearch\n",
         1,
     )
     bench_name = f"{proof_name}_{config}"
