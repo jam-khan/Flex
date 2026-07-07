@@ -1,25 +1,19 @@
-import Mathlib.Data.Finset.Basic
-import LeanFixpoint
+import Flex
 
 /-
   Liquid-fixpoint test — ground set property:
-    ∀ xs : Finset ℤ,
-      (xs = ∅ → xs = ∅)                             -- trivial
-    ∧ (∀ a0 a1, xs = {a0} ∪ a1 → xs ≠ ∅)            -- nonempty if it has an element
+    ∀ xs : List ℤ,
+      (xs = [] → xs = [])                 -- trivial
+    ∧ (∀ a0 a1, xs = a0 :: a1 → xs ≠ [])  -- nonempty if it has an element
 
-  `∅` is disambiguated as `Finset Int` (the ambient `State` from LeanFixpoint
-  has its own `∅` that conflicts otherwise).
+  Sets are modeled mathlib-free as core `List`: ∅ ↦ [] , {a0} ∪ a1 ↦ a0 :: a1.
 -/
 
 def lhSetProp : Prop :=
-  ∀ xs : Finset Int, True →
-    (∀ _x : Int, xs = (∅ : Finset Int) → xs = (∅ : Finset Int))
-    ∧ (∀ a0 : Int, True → ∀ a1 : Finset Int, True →
-        ∀ _x : Int, xs = {a0} ∪ a1 → xs ≠ (∅ : Finset Int))
+  ∀ xs : List Int, True →
+    (∀ _x : Int, xs = [] → xs = [])
+    ∧ (∀ a0 : Int, True → ∀ a1 : List Int, True →
+        ∀ _x : Int, xs = a0 :: a1 → xs ≠ [])
 
 theorem lhSetProof : lhSetProp := by
-  intro xs _
-  refine ⟨fun _ h => h, ?_⟩
-  intro a0 _ a1 _ _x hxs
-  rw [hxs, ← Finset.nonempty_iff_ne_empty]
-  exact ⟨a0, by simp⟩
+  solve_fixpoint

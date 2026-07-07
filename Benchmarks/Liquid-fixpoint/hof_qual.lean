@@ -17,7 +17,7 @@
         (forall ((z Int) ($k0 z p0))
           ((p0 z)))))))
 -/
-import LeanFixpoint
+import Flex
 
 -- The HO qualifier corresponding to `--allowhoqs --scrape=head`:
 -- "the predicate holds at the int slot"

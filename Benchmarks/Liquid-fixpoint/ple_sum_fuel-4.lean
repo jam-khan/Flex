@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 @[grind]
 def mySum (n : Int) : Int :=

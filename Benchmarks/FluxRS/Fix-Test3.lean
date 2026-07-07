@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 /-!
   Reproducer: PA produces an UNSOUND-shaped solution containing

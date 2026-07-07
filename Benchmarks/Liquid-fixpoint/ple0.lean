@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 def adder (x y : Int) : Int := x + y
 

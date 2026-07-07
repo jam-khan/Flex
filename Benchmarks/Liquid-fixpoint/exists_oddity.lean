@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 def existsOddityProp : Prop :=
   ∃ κ0 : Int → Prop,

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 def mod00Prop : Prop :=
   ∃ κ0 : Int → Prop,

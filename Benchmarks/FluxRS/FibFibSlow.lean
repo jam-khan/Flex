@@ -1,5 +1,5 @@
 import Lean
-import LeanFixpoint
+import Flex
 
 open Lean Meta
 

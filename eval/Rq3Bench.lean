@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 /-
   RQ3 benchmark prelude. The driver (`scripts/run_rq3.py`) injects everything
   below the `import` line after a benchmark's own imports, then appends two
@@ -15,13 +15,13 @@ import LeanFixpoint
     • kerus  — µs the kernel takes to RE-check the term in isolation (foundational)
 
   Per-phase heartbeats (`[phase] <tac>:<phase>=<hb>`) come from the gated
-  `leanfixpoint.benchPhases` instrumentation, enabled below.
+  `flex.benchPhases` instrumentation, enabled below.
 -/
 open Lean Elab Command Meta
 
 set_option Elab.async false
 set_option maxHeartbeats 4000000
-set_option leanfixpoint.benchPhases true
+set_option flex.benchPhases true
 
 /-- Proof-term shape proxies: (approxDepth, # distinct constants). -/
 private def rq3TermMetrics (val : Expr) : Nat × Nat :=

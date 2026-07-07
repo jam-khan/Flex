@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 inductive MyList (α : Type) where
   | nil  : MyList α

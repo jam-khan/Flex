@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 @[qualif] def q_eq_zero (v : Int)   : Prop := v = 0
 @[qualif] def q_gt_zero (v : Int)   : Prop := 0 < v

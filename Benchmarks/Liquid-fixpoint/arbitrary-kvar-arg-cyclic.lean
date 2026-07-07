@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 /-
   Liquid-fixpoint test — non-ANF form (field projections inlined)
   https://github.com/ucsd-progsys/liquid-fixpoint/blob/develop/tests/horn/pos/arbitrary-kvar-arg-cyclic.smt2

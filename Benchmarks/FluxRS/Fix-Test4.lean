@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 /-!
   Reproducer: Flux test03 — `solve_fixpoint` gets stuck trying to solve the

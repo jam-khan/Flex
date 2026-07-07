@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 /-
   Liquid-fixpoint test — ground constraint over an Int→Int map:
     define_fun foo m := (m 0 = 99)
@@ -15,5 +15,4 @@ def lhMapProp : Prop :=
     ∧ foo moo
 
 theorem lhMapProof : lhMapProp := by
-  intro moo hfoo
-  exact ⟨rfl, hfoo⟩
+  solve_fixpoint

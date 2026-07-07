@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 def icfp17Ex3Prop : Prop :=
   ∃ κa : Int → Prop, ∃ κb : Int → Prop, ∃ κc : Int → Prop,

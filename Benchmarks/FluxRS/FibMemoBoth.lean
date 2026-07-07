@@ -1,5 +1,5 @@
 import Lean
-import LeanFixpoint
+import Flex
 
 /-!
 # Memoized Fibonacci — one cyclic and one acyclic κ

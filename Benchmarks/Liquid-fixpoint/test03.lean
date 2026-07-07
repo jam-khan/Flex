@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 /-
 GOOD EXAMPLE FOR PREDICATE ABSTRACTION
 

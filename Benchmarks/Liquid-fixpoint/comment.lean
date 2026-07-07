@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 /-
   Demo: prove comment_vc by hoisting cut kvars to the front, then refining
   with metavariables for them. Cut kvars become outer mvars; the inner ∃'s
@@ -50,11 +50,6 @@ def comment_vc : Prop :=
                   ∀ a13 : Int, k3 a13 a0 a1 →
                     0 ≤ a11 - a0))
 
-
-theorem test : comment_vc := by
-  solve_fixpoint
-
 theorem test' : comment_vc := by
   fusion
-  fixpoint
-  all_goals grind
+  solve_fixpoint

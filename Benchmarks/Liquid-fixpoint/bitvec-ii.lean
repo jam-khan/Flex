@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 def bitvec_ii_vc : Prop :=
     -- rotate_right 8 (#b1000) by 7 = #b0001
