@@ -10,6 +10,10 @@ three tactics (leaving residuals as `all_goals sorry`):
 
 Suites (fixed):
   flux-medium      — flux-demo + kani-vecdeque + pldi23 (logs from rq3_table/)
+  wave             — wave_lean_proofs/ (log from rq3_table/)
+  lean-bench       — lean_bench_merged/ (log: rq3_table/lean_bench_log.txt);
+                      VC basenames collide across test dirs in this suite, so
+                      tasks are keyed by <Cat>/<Test>/<VCName>, not bare name
   liquid-fixpoint  — handled separately by make_rq2_table.py via --lf-results
   hashtable        — hashtable_lean_proofs/lean_proofs.log
   sorting          — flux_lean_demo_lean_proofs/lean_proofs.log
@@ -35,7 +39,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from kappa_classify import parse_log_kappa  # noqa: E402
+from kappa_classify import parse_log_kappa, parse_log_kappa_pathed  # noqa: E402
 
 # ── paths ─────────────────────────────────────────────────────────────────────
 
@@ -45,12 +49,17 @@ LF_ROOT    = EVAL_DIR.parent
 RQ3_TABLE  = EVAL_DIR / "rq3_table"
 PRELUDE    = LF_ROOT / "eval" / "Rq3Bench.lean"
 
+LEAN_BENCH_MERGED = EVAL_DIR / "lean_bench_merged"
+LEAN_BENCH_LOG    = RQ3_TABLE / "lean_bench_log.txt"
+
 # (suite_name, lean_proofs_dir, log_path)
 SUITES: list[tuple[str, Path, Path]] = [
     # flux-medium: three sub-suites reported under one name
     ("flux-medium", EVAL_DIR / "flux_demo_lean_proofs",    RQ3_TABLE / "flux_demo_lean_proofs.log"),
     ("flux-medium", EVAL_DIR / "vecdeque_lean_proofs",     RQ3_TABLE / "vecdeque_lean_proofs.log"),
     ("flux-medium", EVAL_DIR / "pldi_lean_proofs",         RQ3_TABLE / "pldi_lean_proofs.log"),
+    # wave
+    ("wave",      EVAL_DIR / "wave_lean_proofs",           RQ3_TABLE / "wave_lean_proofs.log"),
     # hashtable
     ("hashtable", EVAL_DIR / "hashtable_lean_proofs",      EVAL_DIR / "hashtable_lean_proofs" / "lean_proofs.log"),
     # sorting (flux-to-lean-demo)
@@ -237,6 +246,40 @@ def collect_tasks(
     return tasks
 
 
+def collect_lean_bench_tasks(log_text: str, vc_filter: str | None) -> list[tuple]:
+    """Collect tasks from lean_bench_merged, whose proof files live at
+    LEAN_BENCH_MERGED/<Cat>/<Test>/User/Proof/<Name>Proof.lean.
+
+    VC basenames collide heavily across test directories in this suite (e.g.
+    `Test00Proof.lean` appears under dozens of tests), so both the acyclic
+    classification and the vc_id must be keyed by the full `<Cat>/<Test>/
+    <VCName>` path, not the bare basename (see kappa_classify.parse_log_kappa_pathed).
+    """
+    if not LEAN_BENCH_MERGED.is_dir():
+        print(f"  [warn] missing dir: {LEAN_BENCH_MERGED}", file=sys.stderr)
+        return []
+    kappa = parse_log_kappa_pathed(log_text)
+    acyclic_keys = {k for k, kind in kappa.items() if kind in ("acyclic_only", "both")}
+    tasks = []
+    for key in sorted(acyclic_keys):
+        test_path, vc_name = key.rsplit("/", 1)
+        if vc_filter and vc_filter not in vc_name:
+            continue
+        proof_path = LEAN_BENCH_MERGED / test_path / "User" / "Proof" / f"{vc_name}Proof.lean"
+        if not proof_path.exists():
+            print(f"  [warn] missing proof file: {proof_path}", file=sys.stderr)
+            continue
+        parsed = parse_proof_file(proof_path)
+        if parsed is None:
+            print(f"  [warn] parse failed: {proof_path.name}", file=sys.stderr)
+            continue
+        _, proof_name, vc_type = parsed
+        for config, tactic in CONFIGS:
+            tasks.append(("lean-bench", LEAN_BENCH_MERGED, proof_path,
+                          proof_name, vc_type, config, tactic, key))
+    return tasks
+
+
 # ── main ──────────────────────────────────────────────────────────────────────
 
 def main() -> int:
@@ -266,6 +309,12 @@ def main() -> int:
             continue
         log_text = log_path.read_text(encoding="utf-8", errors="replace")
         all_tasks += collect_tasks(suite_name, lean_proofs_dir, log_text, args.filter)
+
+    if LEAN_BENCH_LOG.exists():
+        log_text = LEAN_BENCH_LOG.read_text(encoding="utf-8", errors="replace")
+        all_tasks += collect_lean_bench_tasks(log_text, args.filter)
+    else:
+        print(f"  [warn] missing log: {LEAN_BENCH_LOG}", file=sys.stderr)
 
     n_vcs = len({t[7] for t in all_tasks})
     print(
