@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 /-!
   Reproducer: VC with κ-vars taking `Prop`-typed arguments alongside `Int`s.

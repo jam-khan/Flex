@@ -10,7 +10,7 @@ For each benchmark with ≥1 acyclic κ, run THREE configs on the SAME VC. Each 
   aesop = `unfold VC; fusion_aesop; all_goals sorry`   (κ-head clauses via aesop)
 
 `fusion_grind`/`fusion_aesop` are the isolated, eval-only tactics in
-`LeanFixpoint/Eval/FusionSearch.lean` (a copy of the `fusion` pipeline whose
+`Flex/Eval/FusionSearch.lean` (a copy of the `fusion` pipeline whose
 κ-head leaves are discharged by search instead of `emitKLeaf`). If a search
 variant cannot discharge a κ-head clause it ERRORS — that failure (status=FAIL)
 is itself a data point.
@@ -126,7 +126,7 @@ def build_file(group: str, bench: str, config: str, tac: str) -> tuple[str, str]
     thm = f"{sanitize(bench)}_{config}"
     proof = f"by unfold {vc}; {tac}; all_goals sorry"
     src = (
-        f"import LeanFixpoint.Eval.FusionSearch\n"   # isolated eval-only tactics
+        f"import Flex.Eval.FusionSearch\n"   # isolated eval-only tactics
         f"{head}\n{prelude_body()}\n\n"
         f'benchx "{thm}" in\n'
         f"theorem {thm} : {vc} := {proof}\n"

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 @[qualif]
 def q1 (a : Int) : Prop := a ≥ 0

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 def lhDefineFun01Prop
     (magic0 magic1 magic2 magic3 : Int → Prop) : Prop :=

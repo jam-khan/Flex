@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 @[grind]
 def fib_spec_sum (n : Int) : Int :=

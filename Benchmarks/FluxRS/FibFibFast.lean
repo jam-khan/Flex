@@ -1,5 +1,5 @@
 import Lean
-import LeanFixpoint
+import Flex
 
 @[grind]
 def fib_spec_fib (n : Int) : Int :=

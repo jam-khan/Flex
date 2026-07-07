@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 -- (datatype (Adt0 0) ((mkadt0$0 ()) (mkadt0$1 ())))
 @[grind]

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 /-
 (fixpoint "--eliminate=horn")
 

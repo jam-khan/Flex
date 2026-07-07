@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 def lhHornProp : Prop :=
   ∃ κ : Int → Int → Prop,

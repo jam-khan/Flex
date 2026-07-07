@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 @[simp]
 def fib_spec_twelve : Int := 12

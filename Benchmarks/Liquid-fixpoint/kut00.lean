@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 
 def kut00Prop : Prop :=

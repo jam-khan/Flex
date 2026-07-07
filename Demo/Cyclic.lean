@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 /-
   Predicate Abstraction Demo — updated for `@[qualif]`-lambda syntax.

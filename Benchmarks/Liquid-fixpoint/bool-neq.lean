@@ -1,5 +1,5 @@
 
-import LeanFixpoint
+import Flex
 
 def boolNeqProp : Prop :=
   (∀ x : Int, x > 0 → ∀ y : Int, y > x →

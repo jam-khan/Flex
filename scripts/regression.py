@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regression anchor for LeanFixpoint.
+"""Regression anchor for Flex.
 
 Compiles every benchmark / demo file individually with `lake env lean` and
 reports a green ✓ (pass) or red ✗ (fail) per file. A file passes iff Lean
@@ -70,39 +70,6 @@ class Result:
         self.elapsed = elapsed
 
 
-def make_runner(bench: bool):
-    """Return (cmd_fn, env) for compiling a file.
-
-    Default: `lake env lean <file>` (core, no mathlib).
-
-    `--bench`: mathlib (and its deps) are gated out of the lake-manifest, and
-    the lakefile's `meta if get_config? bench` does not reliably re-add them on
-    this toolchain. So instead of relying on `lake -Kbench`, we run the
-    toolchain `lean` directly with the already-built package oleans prepended to
-    `LEAN_PATH` — this is what lets the 6 Set/Finset benchmarks resolve `Mathlib`.
-    """
-    if not bench:
-        return (lambda path: ["lake", "env", "lean", str(path)]), None
-
-    def _capture(args: list[str]) -> str:
-        return subprocess.run(args, cwd=REPO_ROOT,
-                              capture_output=True, text=True).stdout.strip()
-
-    base_path = _capture(["lake", "env", "printenv", "LEAN_PATH"])
-    lean_bin = _capture(["lake", "env", "which", "lean"])
-    pkg_libs = sorted(
-        str(p) for p in (REPO_ROOT / ".lake" / "packages").glob(
-            "*/.lake/build/lib/lean")
-    )
-    if not pkg_libs:
-        print(YELLOW("! --bench: no built packages under .lake/packages — "
-                     "fetch+build mathlib first (see lakefile)."))
-    lean_path = ":".join([p for p in [base_path, *pkg_libs] if p])
-    env = os.environ.copy()
-    env["LEAN_PATH"] = lean_path
-    return (lambda path: [lean_bin, str(path)]), env
-
-
 def check_file(path: Path, strict_sorry: bool, runner=None,
                bench_env=None) -> Result:
     if runner is None:
@@ -137,22 +104,20 @@ def check_file(path: Path, strict_sorry: bool, runner=None,
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="LeanFixpoint regression anchor")
+    ap = argparse.ArgumentParser(description="Flex regression anchor")
     ap.add_argument("--jobs", type=int, default=max(1, (os.cpu_count() or 2) // 2),
                     help="parallel lean processes (default: cpu/2)")
     ap.add_argument("--filter", default=None,
                     help="only check files whose path contains this substring")
     ap.add_argument("--strict-sorry", action="store_true",
                     help="treat `sorry` usage as a failure")
-    ap.add_argument("--bench", action="store_true",
-                    help="put built mathlib on LEAN_PATH so the Set/Finset "
-                         "benchmarks resolve `Mathlib` (replaces broken "
-                         "`lake -Kbench`)")
     ap.add_argument("--verbose", action="store_true",
                     help="print the first error line for each failing file")
     args = ap.parse_args()
 
-    runner, bench_env = make_runner(args.bench)
+    # Flex is mathlib-free: every file compiles with plain `lake env lean`.
+    runner = lambda path: ["lake", "env", "lean", str(path)]
+    bench_env = None
 
     # Collect files per group, sorted for stable output.
     jobs: list[tuple[str, Path]] = []

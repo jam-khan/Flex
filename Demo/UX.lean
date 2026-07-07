@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 /-!
   # UX walkthrough — one constraint, every tactic

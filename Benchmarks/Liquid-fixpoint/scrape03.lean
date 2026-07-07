@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 -- Adt0 maps to Bool: mkadt0$0 = false, mkadt0$1 = true
 -- κ0 : Bool → Prop

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 
 @[ext]
 structure FibBozo  where

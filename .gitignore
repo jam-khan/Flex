@@ -18,7 +18,7 @@ Thumbs.db
 __pycache__
 *.pyc
 
-LeanFixpoint/Experiments
+Flex/Experiments
 
 TODO.md
 
@@ -28,3 +28,4 @@ liquid-fixpoint-develop
 .claude
 
 icfp17.txt
+draft.txt

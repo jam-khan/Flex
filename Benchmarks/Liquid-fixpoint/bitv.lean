@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 /-
 (constraint
   (and
@@ -38,5 +38,4 @@ def bitv_vc : Prop :=
     res < size
 
 theorem bitv_proof : bitv_vc := by
-  unfold bitv_vc
   solve_fixpoint

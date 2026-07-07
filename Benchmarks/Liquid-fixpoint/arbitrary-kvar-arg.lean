@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 /-
   Liquid-fixpoint test — acyclic κ-vars with Bool last arg
   https://github.com/ucsd-progsys/liquid-fixpoint/blob/develop/tests/horn/pos/arbitrary-kvar-arg.smt2
