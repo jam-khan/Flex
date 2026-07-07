@@ -36,7 +36,7 @@ This clones the repo into `.lake/packages/Flex/` using your local Git credential
 lake build
 ```
 
-> **Note:** The first build pulls in `mathlib` transitively, which can take a while. Run `lake exe cache get` beforehand to download prebuilt mathlib `.olean` files and skip most of the wait.
+> **Note:** Flex is mathlib-free — the only dependency is `aesop` (built from source on the first build).
 
 ---
 

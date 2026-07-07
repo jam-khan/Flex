@@ -9,7 +9,7 @@ def ex1 : Prop :=
 theorem ex1Proof' : ex1 := by
   unfold ex1
   fusion
-  sorry
+  grind
 
 theorem ex1Proof : ex1 := by
   solve_fixpoint
@@ -31,8 +31,7 @@ def ex2 : Prop :=
 
 theorem ex2Proof' : ex2 := by
   fusion
-  sorry
---  solve_fixpoint
+  grind
 
 theorem ex2Proof : ex2 := by
   solve_fixpoint
@@ -47,8 +46,7 @@ def ex3 : Prop :=
 
 theorem ex3Proof' : ex3 := by
   fusion
-  sorry
-  -- solve_fixpoint
+  grind
 
 theorem ex3Proof : ex3 := by
   solve_fixpoint
@@ -183,9 +181,7 @@ def ex8 : Prop :=
           ∀ ν : Int, ν = a + 1 + y → 0 ≤ ν)
 
 theorem ex8Proof : ex8 := by
-  try solve_fixpoint
-  -- try solve_fusion
-  --sorry
+  solve_fixpoint
 
 theorem ex8Proof' : ex8 := by
   unfold ex8
@@ -230,8 +226,7 @@ def ex10 : Prop :=
         ∀ ν : Int, ν = y + 2 → 0 ≤ ν)
 
 theorem ex10Proof : ex10 := by
-  try solve_fixpoint -- try solve_fusion
-  --sorry
+  solve_fixpoint
 
 theorem ex10Proof' : ex10 := by
   unfold ex10

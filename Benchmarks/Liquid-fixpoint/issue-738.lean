@@ -1,12 +1,11 @@
 import Flex
-import Mathlib.Data.Set.Basic
 
+-- Sets are modeled mathlib-free as `List` (membership `∈` is core Lean).
 structure MyData (α : Type) where
   mkdata :: field1 : α
 
 def issue701 : Prop :=
-  ∀ x : MyData (Set Int), 0 ∈ x.field1 → 0 ∈ x.field1
+  ∀ x : MyData (List Int), 0 ∈ x.field1 → 0 ∈ x.field1
 
 theorem issue701_proof : issue701 := by
   solve_fixpoint
-  

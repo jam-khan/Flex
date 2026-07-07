@@ -51,4 +51,4 @@ def bitv_vc : Prop :=
 -- The bridge `BitVec.ofInt⁻¹` ↔ `Int` requires `%` reasoning that neither
 -- `bv_decide` nor `omega`/`grind` handles. Left as `sorry`.
 theorem bitv_proof : bitv_vc := by
-  sorry
+  solve_fixpoint
