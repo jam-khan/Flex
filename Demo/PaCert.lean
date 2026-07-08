@@ -60,6 +60,3 @@ def fibFastVC : Prop :=
 theorem fibFastVC_pa_cert : fibFastVC := by
   pa_cert
   all_goals grind
-
-#print axioms cyc0_pa_cert
-#print axioms fibFastVC_pa_cert
