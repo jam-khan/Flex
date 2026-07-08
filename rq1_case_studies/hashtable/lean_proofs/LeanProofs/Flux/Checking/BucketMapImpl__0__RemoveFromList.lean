@@ -1,0 +1,4 @@
+import LeanProofs.Flux.VC.BucketMapImpl__0__RemoveFromList
+import LeanProofs.User.Proof.BucketMapImpl__0__RemoveFromListProof
+
+#check (F.BucketMapImpl__0__RemoveFromList_proof : F.BucketMapImpl__0__RemoveFromList)

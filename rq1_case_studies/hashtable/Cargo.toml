@@ -1,0 +1,13 @@
+[package]
+name = "aeneas-hash-table"
+version = "0.1.0"
+edition = "2024"
+
+[package.metadata.flux]
+enabled = true
+cache = true
+scrape_quals = true
+
+[dependencies]
+flux-rs = { git = "https://github.com/flux-rs/flux" }
+flux-core = { git = "https://github.com/flux-rs/flux" }
