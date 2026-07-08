@@ -16,15 +16,6 @@ import Flex
                       ((< res size)))))))))))))
 -/
 
--- No κ-variables — pure VC about bit masking
--- This is a complex bitvector constraint: index & (size - 1) < size
--- when size is a power of 2 (size & (size - 1) == 0)
--- Expr passthrough: BitVec 32 is a native Lean type
-
--- NOTE: This VC is hard — it requires reasoning about bitvector
--- masking properties. The old system couldn't even EXPRESS this.
--- With Expr passthrough, at least we can state it.
-
 def bitv_vc : Prop :=
   ∀ one_ : BitVec 32, one_ = BitVec.ofInt 32 1 →
   ∀ zero_ : BitVec 32, zero_ = BitVec.ofInt 32 0 →
@@ -37,18 +28,5 @@ def bitv_vc : Prop :=
   ∀ res : Int, res = res_.toInt →
     res < size
 
--- Ground VC (no κ-vars): requires bitvector reasoning about power-of-2 masks
--- mixed with `Int`. `size : Int` is unbounded while `size_ : BitVec 32` is
--- 32-bit; strictly this statement would need `size < 2^32` or similar to
--- hold. Left as `sorry` — outside the fusion/fixpoint solver's scope.
--- Tried `bv_decide`: rejected — hypotheses mix `Int` and `BitVec 32` via
--- `BitVec.ofInt` / `.toInt`, outside `bv_decide`'s supported fragment. A
--- pure-bitvector reformulation (or a `size < 2^32` bound) would be needed.
--- Manual proof sketch (why this is non-trivial):
---   split on size_ = 0 vs size_ = 2^k (power-of-2)
---   case size_ = 0 : size ≥ 2^32, and res_.toInt < 2^31 ≤ size
---   case size_ = 2^k: mask = 2^k - 1, res_.toNat < 2^k = size_.toNat ≤ size
--- The bridge `BitVec.ofInt⁻¹` ↔ `Int` requires `%` reasoning that neither
--- `bv_decide` nor `omega`/`grind` handles. Left as `sorry`.
 theorem bitv_proof : bitv_vc := by
   solve_fixpoint

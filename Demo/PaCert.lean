@@ -61,7 +61,5 @@ theorem fibFastVC_pa_cert : fibFastVC := by
   pa_cert
   all_goals grind
 
--- The certifying bridge is kernel-re-checked: no `sorryAx`, only the standard
--- axioms (`propext`/`Classical.choice`/`Quot.sound`) that `grind`/`Int` pull in.
 #print axioms cyc0_pa_cert
 #print axioms fibFastVC_pa_cert

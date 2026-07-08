@@ -66,8 +66,6 @@ inductive Hastype : KEnv → TEnv → Exp → Ty → Prop where
 /-- For fvar typing, the variable must appear in the context. -/
 theorem Hastype.fvar_lookup {κ Γ x t} (h : Hastype κ Γ (.fvar x) t) :
     ∃ s, Γ.lookup x = some s := by
-  -- Only var and sub (transitively) can type a free variable; proved below
-  -- by structural descent but requires sorry due to LN index elaboration issue.
   generalize he : (Exp.fvar x) = e ; rw [he] at h
   induction h <;> grind
 

@@ -19,6 +19,3 @@ def str01Prop : Prop :=
 
 theorem str01Proof : str01Prop := by
   solve_fixpoint
-
-  -- sorry
-  -- solve_fusion

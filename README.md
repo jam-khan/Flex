@@ -7,12 +7,10 @@ Artifact for **"Foundational Constraint Solving for Expressive Refinement Typing
 Requires [`elan`](https://github.com/leanprover/elan); the pinned toolchain (`leanprover/lean4:v4.29.0-rc8`, [lean-toolchain](lean-toolchain)) installs automatically.
 
 ```bash
-lake update                 # fetch aesop — the only dependency; mathlib-free
-lake build                  # solver + verifiers (default target)
-lake build Demo Benchmarks  # worked examples + benchmark suites
+lake update
+lake build
+lake build Demo Tests
 ```
-
-Every claim below is a Lean `theorem`/`example`, so a successful build means the kernel accepted all proofs. No `sorry`, no axiom declarations. CI: [.github/workflows/lean_action_ci.yml](.github/workflows/lean_action_ci.yml).
 
 ## 2. Solver tactics (paper §4)
 

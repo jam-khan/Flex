@@ -32,8 +32,8 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 GROUPS = {
-    "Liquid-fixpoint": REPO_ROOT / "Benchmarks" / "Liquid-fixpoint",
-    "FluxRS": REPO_ROOT / "Benchmarks" / "FluxRS",
+    "Liquid-fixpoint": REPO_ROOT / "Tests" / "Liquid-fixpoint",
+    "FluxRS": REPO_ROOT / "Tests" / "FluxRS",
     "Demo": REPO_ROOT / "Demo",
 }
 
