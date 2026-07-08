@@ -6,6 +6,17 @@ Artifact for **"Foundational Constraint Solving for Expressive Refinement Typing
 
 Requires [`elan`](https://github.com/leanprover/elan); the pinned toolchain (`leanprover/lean4:v4.29.0-rc8`, [lean-toolchain](lean-toolchain)) installs automatically.
 
+The [Makefile](Makefile) builds everything:
+
+```bash
+make        # build Flex, then every rq1_case_studies/**/lean_proofs project
+make clean  # lake clean in Flex and all case-study projects
+```
+
+`make` first builds the Flex solver (root Lake project), then runs `lake build` inside each case-study proof project under [rq1_case_studies/](rq1_case_studies/) (each requires Flex via a path dependency, so order matters). Individual pieces: `make flex` (solver only), `make case-studies` (proofs only).
+
+To build manually instead:
+
 ```bash
 lake update
 lake build
