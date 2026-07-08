@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.SortTest2
 open Classical
@@ -68,6 +68,6 @@ open SortTest2Qualifs
 set_option maxHeartbeats 5000000
 #time def SortTest2_proof : SortTest2 := by
   unfold SortTest2
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

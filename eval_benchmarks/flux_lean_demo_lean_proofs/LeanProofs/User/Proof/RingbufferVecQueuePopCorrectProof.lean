@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.RingbufferVecQueuePopCorrect
 open Classical
@@ -68,6 +68,6 @@ open RingbufferVecQueuePopCorrectQualifs
 set_option maxHeartbeats 5000000
 #time def RingbufferVecQueuePopCorrect_proof : RingbufferVecQueuePopCorrect := by
   unfold RingbufferVecQueuePopCorrect
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

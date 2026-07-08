@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.SortInitUp
 open Classical
@@ -68,6 +68,6 @@ open SortInitUpQualifs
 set_option maxHeartbeats 5000000
 #time def SortInitUp_proof : SortInitUp := by
   unfold SortInitUp
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

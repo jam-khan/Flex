@@ -318,9 +318,9 @@ def render_table1_latex(suites: list[SuiteStats]) -> str:
     lines = [
         r"\begin{table}[t]",
         r"\centering\small",
-        r"\begin{tabular}{lrrrrr}",
+        r"\begin{tabular}{lrrrrrr}",
         r"\toprule",
-        r"Benchmark & \#CHCs & Success & Success (cyclic) & LF time & \sys Time \\",
+        r"Benchmark & \#CHCs & Success & \#Cyclic & Success (cyclic) & LF time & \sys Time \\",
         r"\midrule",
     ]
     tot_nt = tot_cyclic = tot_cyclic_proven = 0
@@ -333,10 +333,10 @@ def render_table1_latex(suites: list[SuiteStats]) -> str:
         n_cyclic = t["cyclic_only"] + t["both"]
         pct  = f"{100*(nt-fail)/nt:.1f}" if nt else "--"
         cpct = f"{100*s.n_cyclic_proven()/n_cyclic:.1f}" if n_cyclic else "--"
-        cstr = f"{n_cyclic} ({cpct}\\%)" if n_cyclic else "—"
+        cstr = f"{s.n_cyclic_proven()} ({cpct}\\%)" if n_cyclic else "—"
         name = SUITE_MACROS.get(s.name, s.name.replace("_", r"\_"))
         lines.append(
-            rf"{name} & {nt} & {pct}\% & {cstr} & {_fmt_time(s.flux_time_ms)} & {_fmt_time(s.time_ms)} \\"
+            rf"{name} & {nt} & {pct}\% & {n_cyclic} & {cstr} & {_fmt_time(s.flux_time_ms)} & {_fmt_time(s.time_ms)} \\"
         )
         tot_nt += nt
         tot_cyclic += n_cyclic; tot_cyclic_proven += s.n_cyclic_proven()
@@ -345,10 +345,10 @@ def render_table1_latex(suites: list[SuiteStats]) -> str:
     tot_fail_total = sum(s.n_failed() for s in suites)
     tot_pct  = f"{100*(tot_nt-tot_fail_total)/tot_nt:.1f}" if tot_nt else "--"
     tot_cpct = f"{100*tot_cyclic_proven/tot_cyclic:.1f}" if tot_cyclic else "--"
-    tot_cstr = f"{tot_cyclic} ({tot_cpct}\\%)" if tot_cyclic else "—"
+    tot_cstr = f"{tot_cyclic_proven} ({tot_cpct}\\%)" if tot_cyclic else "—"
     lines += [
         r"\midrule",
-        rf"\textbf{{Total}} & {tot_nt} & {tot_pct}\% & {tot_cstr} & {_fmt_time(tot_flux_ms)} & {_fmt_time(tot_ms)} \\",
+        rf"\textbf{{Total}} & {tot_nt} & {tot_pct}\% & {tot_cyclic} & {tot_cstr} & {_fmt_time(tot_flux_ms)} & {_fmt_time(tot_ms)} \\",
         r"\bottomrule",
         r"\end{tabular}",
         r"\caption{Automation coverage of the full solver pipeline (\zap{} followed by",

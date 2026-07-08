@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.BucketMapThmRemove
 open Classical
@@ -68,6 +68,6 @@ open BucketMapThmRemoveQualifs
 set_option maxHeartbeats 5000000
 #time def BucketMapThmRemove_proof : BucketMapThmRemove := by
   unfold BucketMapThmRemove
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

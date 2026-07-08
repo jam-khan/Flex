@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.SortPartition
 open Classical
@@ -68,6 +68,6 @@ open SortPartitionQualifs
 set_option maxHeartbeats 5000000
 #time def SortPartition_proof : SortPartition := by
   unfold SortPartition
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

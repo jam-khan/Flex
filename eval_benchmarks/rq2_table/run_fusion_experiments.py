@@ -275,7 +275,7 @@ def collect_lean_bench_tasks(log_text: str, vc_filter: str | None) -> list[tuple
             continue
         _, proof_name, vc_type = parsed
         for config, tactic in CONFIGS:
-            tasks.append(("lean-bench", LEAN_BENCH_MERGED, proof_path,
+            tasks.append(("Flux lean-bench", LEAN_BENCH_MERGED, proof_path,
                           proof_name, vc_type, config, tactic, key))
     return tasks
 

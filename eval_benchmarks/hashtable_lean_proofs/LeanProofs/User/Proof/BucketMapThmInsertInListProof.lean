@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.BucketMapThmInsertInList
 open Classical
@@ -68,6 +68,6 @@ open BucketMapThmInsertInListQualifs
 set_option maxHeartbeats 5000000
 #time def BucketMapThmInsertInList_proof : BucketMapThmInsertInList := by
   unfold BucketMapThmInsertInList
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

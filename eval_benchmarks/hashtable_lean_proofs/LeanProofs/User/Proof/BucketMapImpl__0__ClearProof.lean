@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.BucketMapImpl__0__Clear
 open Classical
@@ -68,6 +68,6 @@ open BucketMapImpl0ClearQualifs
 set_option maxHeartbeats 5000000
 #time def BucketMapImpl__0__Clear_proof : BucketMapImpl__0__Clear := by
   unfold BucketMapImpl__0__Clear
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

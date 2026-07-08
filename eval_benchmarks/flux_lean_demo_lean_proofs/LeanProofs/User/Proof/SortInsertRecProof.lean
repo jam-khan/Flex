@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.SortInsertRec
 open Classical
@@ -68,6 +68,6 @@ open SortInsertRecQualifs
 set_option maxHeartbeats 5000000
 #time def SortInsertRec_proof : SortInsertRec := by
   unfold SortInsertRec
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

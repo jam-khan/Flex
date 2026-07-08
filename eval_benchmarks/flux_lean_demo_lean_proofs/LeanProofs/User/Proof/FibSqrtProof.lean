@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.FibSqrt
 open Classical
@@ -68,6 +68,6 @@ open FibSqrtQualifs
 set_option maxHeartbeats 5000000
 #time def FibSqrt_proof : FibSqrt := by
   unfold FibSqrt
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

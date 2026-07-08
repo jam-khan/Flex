@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.FibSumLoop
 open Classical
@@ -68,6 +68,6 @@ open FibSumLoopQualifs
 set_option maxHeartbeats 5000000
 #time def FibSumLoop_proof : FibSumLoop := by
   unfold FibSumLoop
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

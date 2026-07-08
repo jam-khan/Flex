@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.BucketMapImpl__0__InsertNoResize
 open Classical
@@ -68,6 +68,6 @@ open BucketMapImpl0InsertNoResizeQualifs
 set_option maxHeartbeats 5000000
 #time def BucketMapImpl__0__InsertNoResize_proof : BucketMapImpl__0__InsertNoResize := by
   unfold BucketMapImpl__0__InsertNoResize
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.AlistImpl__0__ReplaceIfPresent
 open Classical
@@ -68,6 +68,6 @@ open AlistImpl0ReplaceIfPresentQualifs
 set_option maxHeartbeats 5000000
 #time def AlistImpl__0__ReplaceIfPresent_proof : AlistImpl__0__ReplaceIfPresent := by
   unfold AlistImpl__0__ReplaceIfPresent
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.SortMerge
 open Classical
@@ -68,6 +68,6 @@ open SortMergeQualifs
 set_option maxHeartbeats 5000000
 #time def SortMerge_proof : SortMerge := by
   unfold SortMerge
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

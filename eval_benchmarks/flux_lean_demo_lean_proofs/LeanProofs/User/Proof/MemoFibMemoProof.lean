@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.MemoFibMemo
 open Classical
@@ -68,6 +68,6 @@ open MemoFibMemoQualifs
 set_option maxHeartbeats 5000000
 #time def MemoFibMemo_proof : MemoFibMemo := by
   unfold MemoFibMemo
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

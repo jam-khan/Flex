@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.VectorsCanary
 open Classical
@@ -68,6 +68,6 @@ open VectorsCanaryQualifs
 set_option maxHeartbeats 5000000
 #time def VectorsCanary_proof : VectorsCanary := by
   unfold VectorsCanary
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

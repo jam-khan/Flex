@@ -3,10 +3,10 @@
  "packages":
  [{"type": "path",
    "scope": "",
-   "name": "LeanFixpoint",
+   "name": "Flex",
    "manifestFile": "lake-manifest.json",
    "inherited": false,
-   "dir": "/Users/petros/Documents/UCSD/Work/lean-fixpoint",
+   "dir": "../../",
    "configFile": "lakefile.lean"},
   {"url": "https://github.com/leanprover-community/aesop",
    "type": "git",

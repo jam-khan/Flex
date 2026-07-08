@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.FibTestBozo
 open Classical
@@ -68,6 +68,6 @@ open FibTestBozoQualifs
 set_option maxHeartbeats 5000000
 #time def FibTestBozo_proof : FibTestBozo := by
   unfold FibTestBozo
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F

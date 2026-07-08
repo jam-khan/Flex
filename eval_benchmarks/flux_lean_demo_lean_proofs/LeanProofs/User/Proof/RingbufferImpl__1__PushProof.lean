@@ -1,4 +1,4 @@
-import LeanFixpoint
+import Flex
 import LeanProofs.Flux.Prelude
 import LeanProofs.Flux.VC.RingbufferImpl__1__Push
 open Classical
@@ -68,6 +68,6 @@ open RingbufferImpl1PushQualifs
 set_option maxHeartbeats 5000000
 #time def RingbufferImpl__1__Push_proof : RingbufferImpl__1__Push := by
   unfold RingbufferImpl__1__Push
-  solve_fixpoint_combo
+  (try zap) ; (try simp [*]) ; (try solve)
 
 end F
