@@ -54,7 +54,7 @@ LEAN_BENCH_LOG    = RQ3_TABLE / "lean_bench_log.txt"
 
 # (suite_name, lean_proofs_dir, log_path)
 SUITES: list[tuple[str, Path, Path]] = [
-    # flux-medium: three sub-suites reported under one name
+    #flux-medium: three sub-suites reported under one name
     ("flux-medium", EVAL_DIR / "flux_demo_lean_proofs",    RQ3_TABLE / "flux_demo_lean_proofs.log"),
     ("flux-medium", EVAL_DIR / "vecdeque_lean_proofs",     RQ3_TABLE / "vecdeque_lean_proofs.log"),
     ("flux-medium", EVAL_DIR / "pldi_lean_proofs",         RQ3_TABLE / "pldi_lean_proofs.log"),

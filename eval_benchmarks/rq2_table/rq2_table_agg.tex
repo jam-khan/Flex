@@ -2,19 +2,25 @@
 \begin{table}[t]
 \centering
 \small
-\begin{tabular}{lrrrrrrrrrr}
+\begin{tabular}{lrrrrrrrrr}
 \toprule
  & & \multicolumn{2}{c}{\zap} & \multicolumn{3}{c}{\fusiong} & \multicolumn{3}{c}{\fusiona} \\
 \cmidrule(lr){3-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}
 Suite & \#CHCs & hb & ms & \#reduced & $\times$hb & $\times$ms & \#reduced & $\times$hb & $\times$ms \\
 \midrule
-\fluxmedium & 78 & 267 & 24 & 48 (62\%) & 33$\times$ & 23$\times$ & 65 (83\%) & 99$\times$ & 62$\times$ \\
-\liquidfixpoint & 11 & 106 & 11 & 7 (64\%) & 14$\times$ & 10$\times$ & 10 (91\%) & 17$\times$ & 12$\times$ \\
-RQ1 case studies & 14 & 585 & 62 & 11 (79\%) & 251$\times$ & 170$\times$ & 11 (79\%) & 87$\times$ & 45$\times$ \\
+\fluxmedium & 78 & 268 & 24 & 48 (62\%) & 33$\times$ & 23$\times$ & 65 (83\%) & 99$\times$ & 62$\times$ \\
+\wavesuite & 35 & 518 & 49 & 20 (57\%) & 22$\times$ & 16$\times$ & 29 (83\%) & 41$\times$ & 25$\times$ \\
+\fluxtests & 231 & 100 & 11 & 161 (70\%) & 12$\times$ & 9$\times$ & 217 (94\%) & 23$\times$ & 16$\times$ \\
+\lfsuite & 11 & 106 & 11 & 7 (64\%) & 14$\times$ & 10$\times$ & 10 (91\%) & 17$\times$ & 12$\times$ \\
+\flexbench & 14 & 585 & 62 & 11 (79\%) & 251$\times$ & 178$\times$ & 11 (79\%) & 87$\times$ & 44$\times$ \\
 \midrule
-\textbf{All} & 103 & 270 & 25 & 66 (64\%) & 42$\times$ & 29$\times$ & 86 (83\%) & 80$\times$ & 49$\times$ \\
+\textbf{All} & 369 & 154 & 16 & 247 (67\%) & 18$\times$ & 13$\times$ & 332 (90\%) & 34$\times$ & 22$\times$ \\
 \bottomrule
 \end{tabular}
-\caption{RQ2 (\flux): reducing acyclic $\kappa$-variables, aggregated per suite. For each suite we report its number of constraints (\#CHCs) and, for each of \zap, \fusiong, and \fusiona, the number of those constraints successfully reduced (\#reduced) together with the cost of doing so. For \zap, hb and ms are the average heartbeats and average wall-clock time (ms) over the reduced constraints, where heartbeats are \sclean's deterministic proxy for proof effort. For \fusiong~ and \fusiona, \#reduced also gives coverage relative to \zap~in parentheses, and the $\times$hb/$\times$ms columns report their average heartbeat and time cost as a factor of \zap~over the constraints both reduce.}
+\caption{RQ2: acyclic $\kappa$-variables reduction.
+\#CHCs is the number of constraints in each suite; \zap~ can reduce all of them.
+For \zap, hb and ms are average heartbeats and wall-clock time (ms).
+For \fusiong~ and \fusiona, \#reduced is the number of constraints reduced,
+and $\times$hb/$\times$ms report average cost relative to \zap.}
 \label{tab:rq2-flux-agg}
 \end{table}

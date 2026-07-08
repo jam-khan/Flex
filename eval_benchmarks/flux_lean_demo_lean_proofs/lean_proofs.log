@@ -1,0 +1,2249 @@
+info: toolchain not updated; already up-to-date
+⚠ [3/374] Replayed LeanProofs.User.Fun.FibSpecSeven
+warning: LeanProofs/User/Fun/FibSpecSeven.lean:8:18: declaration uses `sorry`
+ℹ [216/374] Replayed Flex.Tactic.Tactics.Fusion
+info: Flex/Tactic/Tactics/Fusion.lean:255:0: [fusion] Start κ: [κ]
+[fusion] End κ:   []
+info: Flex/Tactic/Tactics/Fusion.lean:264:0: [fusion] Start κ: [κ1, κ2]
+[fusion] End κ:   []
+info: Flex/Tactic/Tactics/Fusion.lean:277:0: [fusion] Start κ: [κ1, κ2]
+[fusion] End κ:   [κ1]
+ℹ [221/374] Replayed Flex.Tactic.Tactics.Sol1
+info: Flex/Tactic/Tactics/Sol1.lean:174:2: rewriteKs: already in optimal order
+info: Flex/Tactic/Tactics/Sol1.lean:186:2: rewriteKs: already in optimal order
+info: Flex/Tactic/Tactics/Sol1.lean:187:2: rewriteKs: already in optimal order
+info: Flex/Tactic/Tactics/Sol1.lean:196:2: rewriteKs: already in optimal order
+info: Flex/Tactic/Tactics/Sol1.lean:208:2: rewriteKs: already in optimal order
+info: Flex/Tactic/Tactics/Sol1.lean:209:2: rewriteKs: already in optimal order
+ℹ [240/374] Replayed Flex.VCG.STLC.Examples
+info: Flex/VCG/STLC/Examples.lean:67:2: [solve_fixpoint] closed by: native_decide
+info: Flex/VCG/STLC/Examples.lean:67:2: [solve_fixpoint] closed by: grind
+info: Flex/VCG/STLC/Examples.lean:64:0: [solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  []
+info: Flex/VCG/STLC/Examples.lean:107:0: [fusion] Start κ: [k]
+[fusion] End κ:   []
+info: Flex/VCG/STLC/Examples.lean:118:0: [fusion] Start κ: [k]
+[fusion] End κ:   []
+info: Flex/VCG/STLC/Examples.lean:134:2: [solve_fixpoint] closed by: aesop
+info: Flex/VCG/STLC/Examples.lean:134:2: [solve_fixpoint] closed by: grind
+info: Flex/VCG/STLC/Examples.lean:127:0: [solve_fixpoint] Acyclic κ: [k]
+[solve_fixpoint] Cyclic κ:  []
+[solve] --- k ---
+[solve]   sol = ∃ γ, z0 = 99
+[solve]   lam = fun z0 => ∃ γ, z0 = 99
+info: Flex/VCG/STLC/Examples.lean:143:2: [solve_fixpoint] closed by: aesop
+info: Flex/VCG/STLC/Examples.lean:143:2: [solve_fixpoint] closed by: grind
+info: Flex/VCG/STLC/Examples.lean:136:0: [solve_fixpoint] Acyclic κ: [k]
+[solve_fixpoint] Cyclic κ:  []
+[solve] --- k ---
+[solve]   sol = ∃ γ, z0 = 99
+[solve]   lam = fun z0 => ∃ γ, z0 = 99
+info: Flex/VCG/STLC/Examples.lean:197:2: [solve_fixpoint] closed by: grind
+info: Flex/VCG/STLC/Examples.lean:197:2: [solve_fixpoint] closed by: grind
+info: Flex/VCG/STLC/Examples.lean:197:2: [solve_fixpoint] closed by: grind
+info: Flex/VCG/STLC/Examples.lean:197:2: [solve_fixpoint] closed by: grind
+info: Flex/VCG/STLC/Examples.lean:197:2: [solve_fixpoint] closed by: grind
+info: Flex/VCG/STLC/Examples.lean:195:0: [solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  []
+info: Flex/VCG/STLC/Examples.lean:212:0: [fusion] Start κ: [k]
+[fusion] End κ:   []
+ℹ [243/374] Replayed LeanProofs.User.Proof.FibNinetyProof
+info: LeanProofs/User/Proof/FibNinetyProof.lean:69:0: time: 2ms
+ℹ [244/374] Replayed LeanProofs.Flux.Checking.FibNinety
+info: LeanProofs/Flux/Checking/FibNinety.lean:4:0: F.FibNinety_proof : F.FibNinety
+⚠ [245/374] Replayed LeanProofs.User.Fun.FibSpecTwelve
+warning: LeanProofs/User/Fun/FibSpecTwelve.lean:8:18: declaration uses `sorry`
+ℹ [249/374] Replayed LeanProofs.User.Proof.FibTestBozoProof
+info: LeanProofs/User/Proof/FibTestBozoProof.lean:69:0: time: 8ms
+ℹ [250/374] Replayed LeanProofs.Flux.Checking.FibTestBozo
+info: LeanProofs/Flux/Checking/FibTestBozo.lean:4:0: F.FibTestBozo_proof : F.FibTestBozo
+⚠ [251/374] Replayed LeanProofs.User.Fun.FibSpecSum
+warning: LeanProofs/User/Fun/FibSpecSum.lean:8:18: declaration uses `sorry`
+⚠ [253/374] Replayed LeanProofs.User.Fun.FibSpecFib
+warning: LeanProofs/User/Fun/FibSpecFib.lean:8:18: declaration uses `sorry`
+⚠ [261/374] Replayed LeanProofs.User.Fun.RingbufferFsliceLen
+warning: LeanProofs/User/Fun/RingbufferFsliceLen.lean:9:18: declaration uses `sorry`
+ℹ [263/374] Replayed LeanProofs.User.Proof.RingbufferImpl__1__HasElementsProof
+info: LeanProofs/User/Proof/RingbufferImpl__1__HasElementsProof.lean:69:0: time: 2ms
+ℹ [264/374] Replayed LeanProofs.Flux.Checking.RingbufferImpl__1__HasElements
+info: LeanProofs/Flux/Checking/RingbufferImpl__1__HasElements.lean:4:0: F.RingbufferImpl__1__HasElements_proof : F.RingbufferImpl__1__HasElements
+⚠ [265/374] Replayed LeanProofs.User.Fun.RingbufferFsliceSet
+warning: LeanProofs/User/Fun/RingbufferFsliceSet.lean:10:18: declaration uses `sorry`
+⚠ [266/374] Replayed LeanProofs.User.Fun.RingbufferFsliceGet
+warning: LeanProofs/User/Fun/RingbufferFsliceGet.lean:9:18: declaration uses `sorry`
+⚠ [267/374] Replayed LeanProofs.User.Fun.RingbufferFslicePush
+warning: LeanProofs/User/Fun/RingbufferFslicePush.lean:10:18: declaration uses `sorry`
+⚠ [268/374] Replayed LeanProofs.User.Fun.RingbufferFsliceAppend
+warning: LeanProofs/User/Fun/RingbufferFsliceAppend.lean:11:18: declaration uses `sorry`
+⚠ [269/374] Replayed LeanProofs.User.Fun.RingbufferFsliceSubslice
+warning: LeanProofs/User/Fun/RingbufferFsliceSubslice.lean:10:18: declaration uses `sorry`
+⚠ [270/374] Replayed LeanProofs.User.Fun.RingbufferFslicePopFront
+warning: LeanProofs/User/Fun/RingbufferFslicePopFront.lean:10:18: declaration uses `sorry`
+⚠ [273/374] Replayed LeanProofs.User.Fun.VectorsArrSet
+warning: LeanProofs/User/Fun/VectorsArrSet.lean:10:18: declaration uses `sorry`
+⚠ [274/374] Replayed LeanProofs.User.Fun.VectorsArrGet
+warning: LeanProofs/User/Fun/VectorsArrGet.lean:9:18: declaration uses `sorry`
+⚠ [276/374] Replayed LeanProofs.User.Fun.SortIsSortedBetween
+warning: LeanProofs/User/Fun/SortIsSortedBetween.lean:9:18: declaration uses `sorry`
+⚠ [279/374] Replayed LeanProofs.User.Fun.SortIsSortedBetweenExc
+warning: LeanProofs/User/Fun/SortIsSortedBetweenExc.lean:9:18: declaration uses `sorry`
+⚠ [285/374] Replayed LeanProofs.User.Fun.SortIsPartitionedBy
+warning: LeanProofs/User/Fun/SortIsPartitionedBy.lean:9:18: declaration uses `sorry`
+⚠ [286/374] Replayed LeanProofs.User.Fun.SortIsPerm
+warning: LeanProofs/User/Fun/SortIsPerm.lean:10:18: declaration uses `sorry`
+⚠ [287/374] Replayed LeanProofs.User.Fun.VectorsArrEqBetween
+warning: LeanProofs/User/Fun/VectorsArrEqBetween.lean:10:18: declaration uses `sorry`
+✖ [290/374] Building LeanProofs.Flux.Struct.RingbufferRingBuffer (280ms)
+trace: .> LEAN_PATH=/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/batteries/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/aesop/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean /home/ranjit/.elan/toolchains/leanprover--lean4---v4.29.0-rc8/bin/lean /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/LeanProofs/Flux/Struct/RingbufferRingBuffer.lean -o /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/Flux/Struct/RingbufferRingBuffer.olean -i /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/Flux/Struct/RingbufferRingBuffer.ilean -c /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/Flux/Struct/RingbufferRingBuffer.c --setup /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/Flux/Struct/RingbufferRingBuffer.setup.json --json
+error: LeanProofs/Flux/Struct/RingbufferRingBuffer.lean:17:11: failed to generate `Inhabited` instance for `RingbufferRingBuffer`
+error: Lean exited with code 1
+✖ [291/374] Building LeanProofs.User.Proof.FibTwelveProof (1.1s)
+trace: .> LEAN_PATH=/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/batteries/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/aesop/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean /home/ranjit/.elan/toolchains/leanprover--lean4---v4.29.0-rc8/bin/lean /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/LeanProofs/User/Proof/FibTwelveProof.lean -o /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/FibTwelveProof.olean -i /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/FibTwelveProof.ilean -c /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/FibTwelveProof.c --setup /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/FibTwelveProof.setup.json --json
+error: LeanProofs/User/Proof/FibTwelveProof.lean:69:41: unsolved goals
+⊢ 12 = fib_spec_twelve
+info: LeanProofs/User/Proof/FibTwelveProof.lean:69:0: time: 30ms
+info: LeanProofs/User/Proof/FibTwelveProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  []
+error: Lean exited with code 1
+✖ [296/374] Building LeanProofs.User.Proof.FibSevenProof (1.1s)
+trace: .> LEAN_PATH=/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/batteries/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/aesop/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean /home/ranjit/.elan/toolchains/leanprover--lean4---v4.29.0-rc8/bin/lean /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/LeanProofs/User/Proof/FibSevenProof.lean -o /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/FibSevenProof.olean -i /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/FibSevenProof.ilean -c /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/FibSevenProof.c --setup /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/FibSevenProof.setup.json --json
+error: LeanProofs/User/Proof/FibSevenProof.lean:69:39: unsolved goals
+⊢ 7 = fib_spec_seven
+info: LeanProofs/User/Proof/FibSevenProof.lean:69:0: time: 33ms
+info: LeanProofs/User/Proof/FibSevenProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  []
+error: Lean exited with code 1
+ℹ [319/374] Replayed LeanProofs.User.Proof.VectorsCanaryProof
+info: LeanProofs/User/Proof/VectorsCanaryProof.lean:69:0: time: 1ms
+✖ [320/374] Building LeanProofs.User.Proof.FibFibSlowProof (1.2s)
+trace: .> LEAN_PATH=/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/batteries/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/aesop/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean /home/ranjit/.elan/toolchains/leanprover--lean4---v4.29.0-rc8/bin/lean /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/LeanProofs/User/Proof/FibFibSlowProof.lean -o /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/FibFibSlowProof.olean -i /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/FibFibSlowProof.ilean -c /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/FibFibSlowProof.c --setup /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/FibFibSlowProof.setup.json --json
+info: LeanProofs/User/Proof/FibFibSlowProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibSlowProof.lean:71:36: [solve_fixpoint] closed by: grind
+error: LeanProofs/User/Proof/FibFibSlowProof.lean:69:43: unsolved goals
+case refine_1.refine_2.refine_2
+n₀✝ : Int
+a✝³ : 0 ≤ n₀✝
+a✝² : 1 < n₀✝
+a✝¹ : 0 ≤ fib_spec_fib (n₀✝ - 1)
+a✝ : 0 ≤ fib_spec_fib (n₀✝ - 2)
+⊢ fib_spec_fib (n₀✝ - 1) + fib_spec_fib (n₀✝ - 2) = fib_spec_fib n₀✝
+
+case refine_2
+n₀✝ : Int
+a✝¹ : 0 ≤ n₀✝
+a✝ : n₀✝ ≤ 1
+⊢ 1 = fib_spec_fib n₀✝
+info: LeanProofs/User/Proof/FibFibSlowProof.lean:69:0: time: 134ms
+info: LeanProofs/User/Proof/FibFibSlowProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  []
+error: Lean exited with code 1
+✖ [321/374] Building LeanProofs.User.Proof.MemoFibMemoProof (1.2s)
+trace: .> LEAN_PATH=/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/batteries/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/aesop/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean /home/ranjit/.elan/toolchains/leanprover--lean4---v4.29.0-rc8/bin/lean /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/LeanProofs/User/Proof/MemoFibMemoProof.lean -o /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/MemoFibMemoProof.olean -i /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/MemoFibMemoProof.ilean -c /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/MemoFibMemoProof.c --setup /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/MemoFibMemoProof.setup.json --json
+info: LeanProofs/User/Proof/MemoFibMemoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/MemoFibMemoProof.lean:71:36: [solve_fixpoint] closed by: grind
+error: LeanProofs/User/Proof/MemoFibMemoProof.lean:69:45: unsolved goals
+case refine_1.refine_2.refine_2
+n₀✝ : Int
+a✝⁴ : 0 ≤ n₀✝
+a✝³ : 1 < n₀✝
+a'₀✝ : Prop
+a✝² : ¬a'₀✝
+a✝¹ : 0 ≤ fib_spec_fib (n₀✝ - 1)
+a✝ : 0 ≤ fib_spec_fib (n₀✝ - 2)
+⊢ fib_spec_fib (n₀✝ - 1) + fib_spec_fib (n₀✝ - 2) = fib_spec_fib n₀✝
+
+case refine_2
+n₀✝ : Int
+a✝¹ : 0 ≤ n₀✝
+a✝ : n₀✝ ≤ 1
+⊢ 1 = fib_spec_fib n₀✝
+info: LeanProofs/User/Proof/MemoFibMemoProof.lean:69:0: time: 149ms
+info: LeanProofs/User/Proof/MemoFibMemoProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  []
+error: Lean exited with code 1
+✖ [322/374] Building LeanProofs.User.Proof.SortTest2Proof (1.4s)
+trace: .> LEAN_PATH=/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/batteries/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/aesop/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean /home/ranjit/.elan/toolchains/leanprover--lean4---v4.29.0-rc8/bin/lean /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/LeanProofs/User/Proof/SortTest2Proof.lean -o /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortTest2Proof.olean -i /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortTest2Proof.ilean -c /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortTest2Proof.c --setup /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortTest2Proof.setup.json --json
+warning: LeanProofs/User/Proof/SortTest2Proof.lean:71:36: aesop: failed to prove the goal after exhaustive search.
+info: LeanProofs/User/Proof/SortTest2Proof.lean:71:36: [solve_fixpoint] closed by: aesop
+error: LeanProofs/User/Proof/SortTest2Proof.lean:69:41: unsolved goals
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+⊢ sorry (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 3
+info: LeanProofs/User/Proof/SortTest2Proof.lean:69:0: time: 322ms
+info: LeanProofs/User/Proof/SortTest2Proof.lean:69:0: [solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  []
+error: Lean exited with code 1
+✖ [323/374] Building LeanProofs.User.Proof.SortTestSortedProof (1.3s)
+trace: .> LEAN_PATH=/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/batteries/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/aesop/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean /home/ranjit/.elan/toolchains/leanprover--lean4---v4.29.0-rc8/bin/lean /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/LeanProofs/User/Proof/SortTestSortedProof.lean -o /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortTestSortedProof.olean -i /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortTestSortedProof.ilean -c /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortTestSortedProof.c --setup /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortTestSortedProof.setup.json --json
+info: LeanProofs/User/Proof/SortTestSortedProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortTestSortedProof.lean:71:36: [solve_fixpoint] closed by: grind
+error: LeanProofs/User/Proof/SortTestSortedProof.lean:69:51: unsolved goals
+case refine_2.refine_2
+me₀✝ : VectorsAVec Int
+a✝² : 0 ≤ me₀✝.len
+a✝¹ : sort_is_sorted_between me₀✝.elems 0 me₀✝.len
+a✝ : 100 < me₀✝.len
+⊢ vectors_arr_get me₀✝.elems 0 ≤ vectors_arr_get me₀✝.elems 1
+info: LeanProofs/User/Proof/SortTestSortedProof.lean:69:0: time: 118ms
+info: LeanProofs/User/Proof/SortTestSortedProof.lean:69:0: [fusion] Start κ: [k0, k1]
+[fusion] End κ:   []
+[solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  []
+error: Lean exited with code 1
+✖ [324/374] Building LeanProofs.User.Proof.SortInsertRecProof (1.9s)
+trace: .> LEAN_PATH=/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/batteries/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/aesop/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean /home/ranjit/.elan/toolchains/leanprover--lean4---v4.29.0-rc8/bin/lean /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/LeanProofs/User/Proof/SortInsertRecProof.lean -o /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortInsertRecProof.olean -i /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortInsertRecProof.ilean -c /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortInsertRecProof.c --setup /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortInsertRecProof.setup.json --json
+info: LeanProofs/User/Proof/SortInsertRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+warning: LeanProofs/User/Proof/SortInsertRecProof.lean:71:36: aesop: failed to prove the goal after exhaustive search.
+info: LeanProofs/User/Proof/SortInsertRecProof.lean:71:36: [solve_fixpoint] closed by: aesop
+error: LeanProofs/User/Proof/SortInsertRecProof.lean:69:49: unsolved goals
+case refine_1.refine_2.refine_2.refine_2.refine_2.refine_2.refine_2.refine_2.refine_2.refine_2.refine_2.refine_1
+old₀✝ : VectorsAVec Int
+n₀✝ k₀✝ : Int
+a✝⁸ : sort_is_sorted_between_exc old₀✝.elems 0 (n₀✝ + 1) k₀✝
+a✝⁷ : 1 ≤ n₀✝
+a✝⁶ : n₀✝ < old₀✝.len
+a✝⁵ : k₀✝ ≤ n₀✝
+a✝⁴ : 0 ≤ old₀✝.len
+a✝³ : 0 ≤ n₀✝
+a✝² : 0 ≤ k₀✝
+a✝¹ : 0 < k₀✝
+a✝ : vectors_arr_get old₀✝.elems k₀✝ < vectors_arr_get old₀✝.elems (k₀✝ - 1)
+⊢ sort_is_sorted_between_exc
+    (vectors_arr_set (vectors_arr_set old₀✝.elems (k₀✝ - 1) (vectors_arr_get old₀✝.elems k₀✝)) k₀✝
+      (vectors_arr_get old₀✝.elems (k₀✝ - 1)))
+    0 (n₀✝ + 1) (k₀✝ - 1)
+
+case inl
+old₀ : VectorsAVec Int
+n₀ k₀ : Int
+a : sort_is_sorted_between_exc old₀.elems 0 (n₀ + 1) k₀
+a_1 : 1 ≤ n₀
+a_2 : n₀ < old₀.len
+a_3 : k₀ ≤ n₀
+a_4 : 0 ≤ old₀.len
+a_5 : 0 ≤ n₀
+a_6 : 0 ≤ k₀
+h : k₀ ≤ 0
+⊢ sorry old₀.elems 0 (n₀ + 1)
+
+case inr
+old₀ : VectorsAVec Int
+n₀ k₀ : Int
+a : sort_is_sorted_between_exc old₀.elems 0 (n₀ + 1) k₀
+a_1 : 1 ≤ n₀
+a_2 : n₀ < old₀.len
+a_3 : k₀ ≤ n₀
+a_4 : 0 ≤ old₀.len
+a_5 : 0 ≤ n₀
+a_6 : 0 ≤ k₀
+left : 0 < k₀
+right : vectors_arr_get old₀.elems (k₀ - 1) ≤ vectors_arr_get old₀.elems k₀
+⊢ sorry old₀.elems 0 (n₀ + 1)
+info: LeanProofs/User/Proof/SortInsertRecProof.lean:69:0: time: 764ms
+info: LeanProofs/User/Proof/SortInsertRecProof.lean:69:0: [fusion] Start κ: [k0, k1, k2, k3, k4]
+[fusion] End κ:   []
+[solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  []
+error: Lean exited with code 1
+✖ [326/374] Building LeanProofs.User.Proof.FibSqrtProof (2.0s)
+trace: .> LEAN_PATH=/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/batteries/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/aesop/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean /home/ranjit/.elan/toolchains/leanprover--lean4---v4.29.0-rc8/bin/lean /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/LeanProofs/User/Proof/FibSqrtProof.lean -o /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/FibSqrtProof.olean -i /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/FibSqrtProof.ilean -c /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/FibSqrtProof.c --setup /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/FibSqrtProof.setup.json --json
+info: LeanProofs/User/Proof/FibSqrtProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibSqrtProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibSqrtProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibSqrtProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibSqrtProof.lean:71:36: [solve_fixpoint] closed by: grind
+warning: LeanProofs/User/Proof/FibSqrtProof.lean:71:36: aesop: failed to prove the goal after exhaustive search.
+info: LeanProofs/User/Proof/FibSqrtProof.lean:71:36: [solve_fixpoint] closed by: aesop
+info: LeanProofs/User/Proof/FibSqrtProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibSqrtProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibSqrtProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibSqrtProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibSqrtProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibSqrtProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibSqrtProof.lean:71:36: [solve_fixpoint] closed by: grind
+error: LeanProofs/User/Proof/FibSqrtProof.lean:69:37: unsolved goals
+x₀ : Int
+a_1 : ¬x₀ = 0
+i₀ : Int
+a_3 : x₀ < i₀ * i₀
+right : 1 ≤ x₀
+right_1 : 0 ≤ x₀
+left : 0 < x₀
+right_2 : 0 ≤ i₀
+⊢ Int.instLEInt.1 ((i₀ - 1) * (i₀ - 1)) x₀
+info: LeanProofs/User/Proof/FibSqrtProof.lean:69:0: time: 965ms
+info: LeanProofs/User/Proof/FibSqrtProof.lean:69:0: [fusion] Start κ: [k0]
+[fusion] End κ:   [k0]
+[solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  [k0]
+[solve_fixpoint] --- PA on cyclic κ's [k0] ---
+[solve_fixpoint]   PA sol for k0 = ((z1 > 0 ∧ z0 ≥ 0) ∧ z1 ≥ 0) ∧ 1 ≤ z1
+error: Lean exited with code 1
+ℹ [341/374] Replayed LeanProofs.Flux.Checking.VectorsCanary
+info: LeanProofs/Flux/Checking/VectorsCanary.lean:4:0: F.VectorsCanary_proof : F.VectorsCanary
+✖ [342/374] Building LeanProofs.User.Proof.SortInitUpProof (2.1s)
+trace: .> LEAN_PATH=/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/batteries/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/aesop/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean /home/ranjit/.elan/toolchains/leanprover--lean4---v4.29.0-rc8/bin/lean /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/LeanProofs/User/Proof/SortInitUpProof.lean -o /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortInitUpProof.olean -i /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortInitUpProof.ilean -c /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortInitUpProof.c --setup /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortInitUpProof.setup.json --json
+info: LeanProofs/User/Proof/SortInitUpProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInitUpProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInitUpProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInitUpProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInitUpProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/SortInitUpProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInitUpProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInitUpProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInitUpProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInitUpProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInitUpProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInitUpProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInitUpProof.lean:71:36: [solve_fixpoint] closed by: grind
+error: LeanProofs/User/Proof/SortInitUpProof.lean:71:36: Tactic `simp` failed with a nested error:
+maximum recursion depth has been reached
+use `set_option maxRecDepth <num>` to increase limit
+use `set_option diagnostics true` to get diagnostic information
+info: LeanProofs/User/Proof/SortInitUpProof.lean:69:0: time: 975ms
+info: LeanProofs/User/Proof/SortInitUpProof.lean:69:0: [fusion] Start κ: [k0]
+[fusion] End κ:   [k0]
+[solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  [k0]
+[solve_fixpoint] --- PA on cyclic κ's [k0] ---
+[solve_fixpoint]   PA sol for k0 = (((((((((((z2 ≥ z0 ∧ z2 ≥ z4) ∧ z4 ≥ z0) ∧ z4 ≥ z2) ∧ z0 ≥ 0) ∧ z2 ≥ 0) ∧ z4 ≥ 0) ∧ z0 ≤ z2) ∧ z0 ≤ z4) ∧ z2 ≤ z4) ∧
+      z4 ≤ z2) ∧
+    z2 = z4) ∧
+  z4 = z2
+error: Lean exited with code 1
+✖ [344/374] Building LeanProofs.User.Proof.SortInsertionSortRecProof (2.3s)
+trace: .> LEAN_PATH=/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/batteries/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/aesop/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean /home/ranjit/.elan/toolchains/leanprover--lean4---v4.29.0-rc8/bin/lean /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/LeanProofs/User/Proof/SortInsertionSortRecProof.lean -o /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortInsertionSortRecProof.olean -i /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortInsertionSortRecProof.ilean -c /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortInsertionSortRecProof.c --setup /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortInsertionSortRecProof.setup.json --json
+info: LeanProofs/User/Proof/SortInsertionSortRecProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/SortInsertionSortRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortRecProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/SortInsertionSortRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortRecProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/SortInsertionSortRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortRecProof.lean:71:36: [solve_fixpoint] closed by: grind
+error: LeanProofs/User/Proof/SortInsertionSortRecProof.lean:71:36: Tactic `simp` failed with a nested error:
+maximum recursion depth has been reached
+use `set_option maxRecDepth <num>` to increase limit
+use `set_option diagnostics true` to get diagnostic information
+info: LeanProofs/User/Proof/SortInsertionSortRecProof.lean:69:0: time: 1213ms
+info: LeanProofs/User/Proof/SortInsertionSortRecProof.lean:69:0: [fusion] Start κ: [k0]
+[fusion] End κ:   [k0]
+[solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  [k0]
+[solve_fixpoint] --- PA on cyclic κ's [k0] ---
+[solve_fixpoint]   PA sol for k0 = (((((((((((((((((z0 > 0 ∧ z2 > 0) ∧ z4 > 0) ∧ z0 ≤ z2) ∧ z0 ≤ z4) ∧ z2 ≤ z4) ∧ z4 ≤ z2) ∧ z0 ≥ 0) ∧ z2 ≥ 0) ∧ z4 ≥ 0) ∧
+                  1 ≤ z0) ∧
+                1 ≤ z2) ∧
+              1 ≤ z4) ∧
+            z2 ≥ z0) ∧
+          z2 ≥ z4) ∧
+        z4 ≥ z0) ∧
+      z4 ≥ z2) ∧
+    z2 = z4) ∧
+  z4 = z2
+error: Lean exited with code 1
+✖ [346/374] Building LeanProofs.User.Proof.SortInsertionSortProof (2.3s)
+trace: .> LEAN_PATH=/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/batteries/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/aesop/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean /home/ranjit/.elan/toolchains/leanprover--lean4---v4.29.0-rc8/bin/lean /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/LeanProofs/User/Proof/SortInsertionSortProof.lean -o /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortInsertionSortProof.olean -i /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortInsertionSortProof.ilean -c /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortInsertionSortProof.c --setup /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortInsertionSortProof.setup.json --json
+info: LeanProofs/User/Proof/SortInsertionSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/SortInsertionSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/SortInsertionSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/SortInsertionSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertionSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+error: LeanProofs/User/Proof/SortInsertionSortProof.lean:71:36: Tactic `simp` failed with a nested error:
+maximum recursion depth has been reached
+use `set_option maxRecDepth <num>` to increase limit
+use `set_option diagnostics true` to get diagnostic information
+info: LeanProofs/User/Proof/SortInsertionSortProof.lean:69:0: time: 1189ms
+info: LeanProofs/User/Proof/SortInsertionSortProof.lean:69:0: [fusion] Start κ: [k0]
+[fusion] End κ:   [k0]
+[solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  [k0]
+[solve_fixpoint] --- PA on cyclic κ's [k0] ---
+[solve_fixpoint]   PA sol for k0 = (((((((((((((((((z2 ≥ z0 ∧ z2 ≥ z4) ∧ z4 ≥ z0) ∧ z4 ≥ z2) ∧ z0 > 0) ∧ z2 > 0) ∧ z4 > 0) ∧ z2 = z4) ∧ z4 = z2) ∧
+                    z0 ≤ z2) ∧
+                  z0 ≤ z4) ∧
+                z2 ≤ z4) ∧
+              z4 ≤ z2) ∧
+            1 ≤ z0) ∧
+          1 ≤ z2) ∧
+        1 ≤ z4) ∧
+      z0 ≥ 0) ∧
+    z2 ≥ 0) ∧
+  z4 ≥ 0
+error: Lean exited with code 1
+✖ [348/374] Building LeanProofs.User.Proof.FibSumLoopProof (2.4s)
+trace: .> LEAN_PATH=/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/batteries/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/aesop/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean /home/ranjit/.elan/toolchains/leanprover--lean4---v4.29.0-rc8/bin/lean /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/LeanProofs/User/Proof/FibSumLoopProof.lean -o /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/FibSumLoopProof.olean -i /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/FibSumLoopProof.ilean -c /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/FibSumLoopProof.c --setup /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/FibSumLoopProof.setup.json --json
+info: LeanProofs/User/Proof/FibSumLoopProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibSumLoopProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibSumLoopProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibSumLoopProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibSumLoopProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibSumLoopProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibSumLoopProof.lean:71:36: [solve_fixpoint] closed by: grind
+warning: LeanProofs/User/Proof/FibSumLoopProof.lean:71:36: aesop: failed to prove the goal after exhaustive search.
+info: LeanProofs/User/Proof/FibSumLoopProof.lean:71:36: [solve_fixpoint] closed by: aesop
+info: LeanProofs/User/Proof/FibSumLoopProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibSumLoopProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibSumLoopProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibSumLoopProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibSumLoopProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibSumLoopProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibSumLoopProof.lean:71:36: [solve_fixpoint] closed by: grind
+error: LeanProofs/User/Proof/FibSumLoopProof.lean:69:43: unsolved goals
+n₀ total₀ i₀ : Int
+a_2 : n₀ ≤ i₀
+right_2 : i₀ ≤ n₀
+right_3 : i₀ ≤ total₀
+right_4 : 0 ≤ n₀
+left : 0 ≤ total₀
+right_5 : 0 ≤ i₀
+⊢ total₀ = fib_spec_sum n₀
+info: LeanProofs/User/Proof/FibSumLoopProof.lean:69:0: time: 1316ms
+info: LeanProofs/User/Proof/FibSumLoopProof.lean:69:0: [fusion] Start κ: [k0]
+[fusion] End κ:   [k0]
+[solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  [k0]
+[solve_fixpoint] --- PA on cyclic κ's [k0] ---
+[solve_fixpoint]   PA sol for k0 = (((((z0 ≥ 0 ∧ z1 ≥ 0) ∧ z2 ≥ 0) ∧ z1 ≤ z0) ∧ z1 ≤ z2) ∧ z0 ≥ z1) ∧ z2 ≥ z1
+error: Lean exited with code 1
+✖ [350/374] Building LeanProofs.User.Proof.SortQuicksortProof (1.2s)
+trace: .> LEAN_PATH=/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/batteries/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/aesop/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean /home/ranjit/.elan/toolchains/leanprover--lean4---v4.29.0-rc8/bin/lean /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/LeanProofs/User/Proof/SortQuicksortProof.lean -o /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortQuicksortProof.olean -i /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortQuicksortProof.ilean -c /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortQuicksortProof.c --setup /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortQuicksortProof.setup.json --json
+info: LeanProofs/User/Proof/SortQuicksortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortQuicksortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortQuicksortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortQuicksortProof.lean:71:36: [solve_fixpoint] closed by: grind
+error: LeanProofs/User/Proof/SortQuicksortProof.lean:69:49: unsolved goals
+case refine_1
+old₀✝ : VectorsAVec Int
+a✝¹ : 0 ≤ old₀✝.len
+a✝ : old₀✝.len ≤ 1
+⊢ sorry old₀✝.elems 0 old₀✝.len
+info: LeanProofs/User/Proof/SortQuicksortProof.lean:69:0: time: 151ms
+info: LeanProofs/User/Proof/SortQuicksortProof.lean:69:0: [solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  []
+error: Lean exited with code 1
+✖ [352/374] Building LeanProofs.User.Proof.SortTest1Proof (3.9s)
+trace: .> LEAN_PATH=/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/batteries/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/aesop/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean /home/ranjit/.elan/toolchains/leanprover--lean4---v4.29.0-rc8/bin/lean /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/LeanProofs/User/Proof/SortTest1Proof.lean -o /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortTest1Proof.olean -i /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortTest1Proof.ilean -c /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortTest1Proof.c --setup /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortTest1Proof.setup.json --json
+info: LeanProofs/User/Proof/SortTest1Proof.lean:71:36: [solve_fixpoint] closed by: grind
+warning: LeanProofs/User/Proof/SortTest1Proof.lean:71:36: aesop: failed to prove the goal after exhaustive search.
+info: LeanProofs/User/Proof/SortTest1Proof.lean:71:36: [solve_fixpoint] closed by: aesop
+info: LeanProofs/User/Proof/SortTest1Proof.lean:71:36: [solve_fixpoint] closed by: grind
+warning: LeanProofs/User/Proof/SortTest1Proof.lean:71:36: aesop: failed to prove the goal after exhaustive search.
+info: LeanProofs/User/Proof/SortTest1Proof.lean:71:36: [solve_fixpoint] closed by: aesop
+info: LeanProofs/User/Proof/SortTest1Proof.lean:71:36: [solve_fixpoint] closed by: grind
+warning: LeanProofs/User/Proof/SortTest1Proof.lean:71:36: aesop: failed to prove the goal after exhaustive search.
+info: LeanProofs/User/Proof/SortTest1Proof.lean:71:36: [solve_fixpoint] closed by: aesop
+error: LeanProofs/User/Proof/SortTest1Proof.lean:69:41: unsolved goals
+case inl.inr
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+h_2 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 = 2
+⊢ False
+
+case inr
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 = 3
+⊢ False
+
+case inl.inl.inl.inl
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+h_2 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 = 1
+h : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 1 = 1
+⊢ False
+
+case inl.inl.inr.inl
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 = 2
+h : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 1 = 1
+⊢ False
+
+case inl.inr.inl
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+h_2 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 1 = 3
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 = 1
+⊢ False
+
+case inl.inr.inr
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+h_2 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 1 = 3
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 = 2
+⊢ False
+
+case inr.inl.inl
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 = 3
+h_2 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 1 = 1
+⊢ False
+
+case inr.inr
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 = 3
+h_2 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 1 = 3
+⊢ False
+
+case inl.inl.inl.inl.inl.inl
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 = 1
+h : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 1 = 1
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 2 = 1
+⊢ False
+
+case inl.inl.inl.inl.inl.inr
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 = 1
+h : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 1 = 1
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 2 = 2
+⊢ False
+
+case inl.inl.inl.inl.inr.inl
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 = 1
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 1 = 2
+h : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 2 = 1
+⊢ False
+
+case inl.inl.inl.inl.inr.inr
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 = 1
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 1 = 2
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 2 = 2
+⊢ False
+
+case inl.inl.inl.inr.inl.inl
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 = 2
+h : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 1 = 1
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 2 = 1
+⊢ False
+
+case inl.inl.inl.inr.inl.inr
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 = 2
+h : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 1 = 1
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 2 = 2
+⊢ False
+
+case inl.inl.inl.inr.inr.inl
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 = 2
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 1 = 2
+h : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 2 = 1
+⊢ False
+
+case inl.inl.inl.inr.inr.inr
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 = 2
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 1 = 2
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 2 = 2
+⊢ False
+
+case inl.inr.inl.inl.inl
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+h_2 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 1 = 3
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 = 1
+h : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 2 = 1
+⊢ False
+
+case inl.inr.inl.inl.inr
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+h_2 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 1 = 3
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 = 1
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 2 = 2
+⊢ False
+
+case inl.inr.inl.inr.inl
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+h_2 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 1 = 3
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 = 2
+h : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 2 = 1
+⊢ False
+
+case inl.inr.inl.inr.inr
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+h_2 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 1 = 3
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 = 2
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 2 = 2
+⊢ False
+
+case inr.inl.inl.inl.inl
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 = 3
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 1 = 1
+h : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 2 = 1
+⊢ False
+
+case inr.inl.inl.inl.inr
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 = 3
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 1 = 1
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 2 = 2
+⊢ False
+
+case inr.inl.inl.inr.inl
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 = 3
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 1 = 2
+h : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 2 = 1
+⊢ False
+
+case inr.inl.inl.inr.inr
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 = 3
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 1 = 2
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 2 = 2
+⊢ False
+
+case inr.inr.inl.inl
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 = 3
+h_2 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 1 = 3
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 2 = 1
+⊢ False
+
+case inr.inr.inl.inr
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 1
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 0 = 3
+h_2 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 1 = 3
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 1) 1 2) 2 3) 2 = 2
+⊢ False
+info: LeanProofs/User/Proof/SortTest1Proof.lean:69:0: time: 2719ms
+info: LeanProofs/User/Proof/SortTest1Proof.lean:69:0: [fusion] Start κ: [k0, k1, k2, k3, k4, k5]
+[fusion] End κ:   []
+[solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  []
+error: Lean exited with code 1
+✖ [354/374] Building LeanProofs.User.Proof.SortQuicksortRangeProof (3.1s)
+trace: .> LEAN_PATH=/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/batteries/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/aesop/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean /home/ranjit/.elan/toolchains/leanprover--lean4---v4.29.0-rc8/bin/lean /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/LeanProofs/User/Proof/SortQuicksortRangeProof.lean -o /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortQuicksortRangeProof.olean -i /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortQuicksortRangeProof.ilean -c /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortQuicksortRangeProof.c --setup /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortQuicksortRangeProof.setup.json --json
+info: LeanProofs/User/Proof/SortQuicksortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortQuicksortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortQuicksortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortQuicksortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+warning: LeanProofs/User/Proof/SortQuicksortRangeProof.lean:71:36: aesop: failed to prove the goal after exhaustive search.
+info: LeanProofs/User/Proof/SortQuicksortRangeProof.lean:71:36: [solve_fixpoint] closed by: aesop
+info: LeanProofs/User/Proof/SortQuicksortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+warning: LeanProofs/User/Proof/SortQuicksortRangeProof.lean:71:36: aesop: failed to prove the goal after exhaustive search.
+info: LeanProofs/User/Proof/SortQuicksortRangeProof.lean:71:36: [solve_fixpoint] closed by: aesop
+info: LeanProofs/User/Proof/SortQuicksortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortQuicksortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortQuicksortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+warning: LeanProofs/User/Proof/SortQuicksortRangeProof.lean:71:36: aesop: failed to prove the goal after exhaustive search.
+info: LeanProofs/User/Proof/SortQuicksortRangeProof.lean:71:36: [solve_fixpoint] closed by: aesop
+warning: LeanProofs/User/Proof/SortQuicksortRangeProof.lean:71:36: aesop: failed to prove the goal after exhaustive search.
+info: LeanProofs/User/Proof/SortQuicksortRangeProof.lean:71:36: [solve_fixpoint] closed by: aesop
+error: LeanProofs/User/Proof/SortQuicksortRangeProof.lean:69:59: unsolved goals
+case refine_1.refine_1
+old₀✝ : VectorsAVec Int
+lo₀✝ hi₀✝ : Int
+a✝⁵ : lo₀✝ < old₀✝.len
+a✝⁴ : hi₀✝ < old₀✝.len
+a✝³ : 0 ≤ old₀✝.len
+a✝² : 0 ≤ lo₀✝
+a✝¹ : 0 ≤ hi₀✝
+a✝ : hi₀✝ ≤ lo₀✝
+⊢ sort_is_sorted_between old₀✝.elems lo₀✝ (hi₀✝ + 1)
+
+case refine_1.refine_2
+old₀✝ : VectorsAVec Int
+lo₀✝ hi₀✝ : Int
+a✝⁵ : lo₀✝ < old₀✝.len
+a✝⁴ : hi₀✝ < old₀✝.len
+a✝³ : 0 ≤ old₀✝.len
+a✝² : 0 ≤ lo₀✝
+a✝¹ : 0 ≤ hi₀✝
+a✝ : hi₀✝ ≤ lo₀✝
+⊢ sort_is_perm old₀✝.elems old₀✝.elems lo₀✝ hi₀✝
+
+case inr
+old₀ : VectorsAVec Int
+lo₀ hi₀ : Int
+a : lo₀ < old₀.len
+a_1 : hi₀ < old₀.len
+a_2 : 0 ≤ old₀.len
+a_3 : 0 ≤ lo₀
+a_4 : 0 ≤ hi₀
+a_5 : lo₀ < hi₀
+p₀ : Int
+v₀ : VectorsAVec Int
+a_6 : v₀.len = old₀.len
+a_7 : sort_is_partitioned_by v₀.elems lo₀ p₀ (hi₀ + 1) p₀
+a_8 : sort_is_perm old₀.elems v₀.elems lo₀ hi₀
+a_9 : lo₀ ≤ p₀
+a_10 : p₀ ≤ hi₀
+a_12 : 0 ≤ p₀
+a'₃ : VectorsAVec Int
+a_14 : hi₀ ≤ p₀
+left : lo₀ < p₀
+w : VectorsAVec Int
+left_1 : w.len = old₀.len
+left_3 : sort_is_sorted_between w.elems lo₀ p₀
+right_1 : sort_is_perm v₀.elems w.elems lo₀ (p₀ - 1)
+left_4 : a'₃.elems = w.elems
+right : a'₃.len = old₀.len
+⊢ sorry w.elems lo₀ (hi₀ + 1)
+
+case inr
+old₀ : VectorsAVec Int
+lo₀ hi₀ : Int
+a : lo₀ < old₀.len
+a_1 : hi₀ < old₀.len
+a_2 : 0 ≤ old₀.len
+a_3 : 0 ≤ lo₀
+a_4 : 0 ≤ hi₀
+a_5 : lo₀ < hi₀
+p₀ : Int
+v₀ : VectorsAVec Int
+a_6 : v₀.len = old₀.len
+a_7 : sort_is_partitioned_by v₀.elems lo₀ p₀ (hi₀ + 1) p₀
+a_8 : sort_is_perm old₀.elems v₀.elems lo₀ hi₀
+a_9 : lo₀ ≤ p₀
+a_10 : p₀ ≤ hi₀
+a_12 : 0 ≤ p₀
+a'₃ : VectorsAVec Int
+a_14 : hi₀ ≤ p₀
+left : lo₀ < p₀
+w : VectorsAVec Int
+left_1 : w.len = old₀.len
+left_3 : sort_is_sorted_between w.elems lo₀ p₀
+right_1 : sort_is_perm v₀.elems w.elems lo₀ (p₀ - 1)
+left_4 : a'₃.elems = w.elems
+right : a'₃.len = old₀.len
+⊢ sorry old₀.elems w.elems lo₀ hi₀
+
+case inl
+old₀ : VectorsAVec Int
+lo₀ hi₀ : Int
+a : lo₀ < old₀.len
+a_1 : hi₀ < old₀.len
+a_2 : 0 ≤ old₀.len
+a_3 : 0 ≤ lo₀
+a_4 : 0 ≤ hi₀
+a_5 : lo₀ < hi₀
+p₀ : Int
+v₀ : VectorsAVec Int
+a_6 : v₀.len = old₀.len
+a_7 : sort_is_partitioned_by v₀.elems lo₀ p₀ (hi₀ + 1) p₀
+a_8 : sort_is_perm old₀.elems v₀.elems lo₀ hi₀
+a_9 : lo₀ ≤ p₀
+a_10 : p₀ ≤ hi₀
+a_12 : 0 ≤ p₀
+a'₃ v₂ : VectorsAVec Int
+a_14 : p₀ < hi₀
+a_15 : v₂.len = old₀.len
+a_16 : sort_is_sorted_between v₂.elems (p₀ + 1) (hi₀ + 1)
+a_17 : sort_is_perm v₀.elems v₂.elems (p₀ + 1) hi₀
+left : p₀ ≤ lo₀
+left_1 : a'₃.elems = v₀.elems
+right : a'₃.len = old₀.len
+⊢ sorry v₂.elems lo₀ (hi₀ + 1)
+
+case inr
+old₀ : VectorsAVec Int
+lo₀ hi₀ : Int
+a : lo₀ < old₀.len
+a_1 : hi₀ < old₀.len
+a_2 : 0 ≤ old₀.len
+a_3 : 0 ≤ lo₀
+a_4 : 0 ≤ hi₀
+a_5 : lo₀ < hi₀
+p₀ : Int
+v₀ : VectorsAVec Int
+a_6 : v₀.len = old₀.len
+a_7 : sort_is_partitioned_by v₀.elems lo₀ p₀ (hi₀ + 1) p₀
+a_8 : sort_is_perm old₀.elems v₀.elems lo₀ hi₀
+a_9 : lo₀ ≤ p₀
+a_10 : p₀ ≤ hi₀
+a_12 : 0 ≤ p₀
+a'₃ v₂ : VectorsAVec Int
+a_14 : p₀ < hi₀
+w : VectorsAVec Int
+a_15 : v₂.len = old₀.len
+a_16 : sort_is_sorted_between v₂.elems (p₀ + 1) (hi₀ + 1)
+a_17 : sort_is_perm w.elems v₂.elems (p₀ + 1) hi₀
+left : lo₀ < p₀
+left_1 : w.len = old₀.len
+left_3 : sort_is_sorted_between w.elems lo₀ p₀
+right_1 : sort_is_perm v₀.elems w.elems lo₀ (p₀ - 1)
+left_4 : a'₃.elems = w.elems
+right : a'₃.len = old₀.len
+⊢ sorry v₂.elems lo₀ (hi₀ + 1)
+
+case inl
+old₀ : VectorsAVec Int
+lo₀ hi₀ : Int
+a : lo₀ < old₀.len
+a_1 : hi₀ < old₀.len
+a_2 : 0 ≤ old₀.len
+a_3 : 0 ≤ lo₀
+a_4 : 0 ≤ hi₀
+a_5 : lo₀ < hi₀
+p₀ : Int
+v₀ : VectorsAVec Int
+a_6 : v₀.len = old₀.len
+a_7 : sort_is_partitioned_by v₀.elems lo₀ p₀ (hi₀ + 1) p₀
+a_8 : sort_is_perm old₀.elems v₀.elems lo₀ hi₀
+a_9 : lo₀ ≤ p₀
+a_10 : p₀ ≤ hi₀
+a_12 : 0 ≤ p₀
+a'₃ v₂ : VectorsAVec Int
+a_14 : p₀ < hi₀
+a_15 : v₂.len = old₀.len
+a_16 : sort_is_sorted_between v₂.elems (p₀ + 1) (hi₀ + 1)
+a_17 : sort_is_perm v₀.elems v₂.elems (p₀ + 1) hi₀
+left : p₀ ≤ lo₀
+left_1 : a'₃.elems = v₀.elems
+right : a'₃.len = old₀.len
+⊢ sorry old₀.elems v₂.elems lo₀ hi₀
+
+case inr
+old₀ : VectorsAVec Int
+lo₀ hi₀ : Int
+a : lo₀ < old₀.len
+a_1 : hi₀ < old₀.len
+a_2 : 0 ≤ old₀.len
+a_3 : 0 ≤ lo₀
+a_4 : 0 ≤ hi₀
+a_5 : lo₀ < hi₀
+p₀ : Int
+v₀ : VectorsAVec Int
+a_6 : v₀.len = old₀.len
+a_7 : sort_is_partitioned_by v₀.elems lo₀ p₀ (hi₀ + 1) p₀
+a_8 : sort_is_perm old₀.elems v₀.elems lo₀ hi₀
+a_9 : lo₀ ≤ p₀
+a_10 : p₀ ≤ hi₀
+a_12 : 0 ≤ p₀
+a'₃ v₂ : VectorsAVec Int
+a_14 : p₀ < hi₀
+w : VectorsAVec Int
+a_15 : v₂.len = old₀.len
+a_16 : sort_is_sorted_between v₂.elems (p₀ + 1) (hi₀ + 1)
+a_17 : sort_is_perm w.elems v₂.elems (p₀ + 1) hi₀
+left : lo₀ < p₀
+left_1 : w.len = old₀.len
+left_3 : sort_is_sorted_between w.elems lo₀ p₀
+right_1 : sort_is_perm v₀.elems w.elems lo₀ (p₀ - 1)
+left_4 : a'₃.elems = w.elems
+right : a'₃.len = old₀.len
+⊢ sorry old₀.elems v₂.elems lo₀ hi₀
+info: LeanProofs/User/Proof/SortQuicksortRangeProof.lean:69:0: time: 1955ms
+info: LeanProofs/User/Proof/SortQuicksortRangeProof.lean:69:0: [fusion] Start κ: [k0]
+[fusion] End κ:   []
+[solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  []
+error: Lean exited with code 1
+✖ [356/374] Building LeanProofs.User.Proof.SortMergesortRangeProof (2.6s)
+trace: .> LEAN_PATH=/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/batteries/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/aesop/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean /home/ranjit/.elan/toolchains/leanprover--lean4---v4.29.0-rc8/bin/lean /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/LeanProofs/User/Proof/SortMergesortRangeProof.lean -o /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortMergesortRangeProof.olean -i /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortMergesortRangeProof.ilean -c /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortMergesortRangeProof.c --setup /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortMergesortRangeProof.setup.json --json
+info: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+warning: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: aesop: failed to prove the goal after exhaustive search.
+info: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: [solve_fixpoint] closed by: aesop
+info: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+warning: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: aesop: failed to prove the goal after exhaustive search.
+info: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: [solve_fixpoint] closed by: aesop
+info: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: [solve_fixpoint] closed by: grind
+warning: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: aesop: failed to prove the goal after exhaustive search.
+info: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: [solve_fixpoint] closed by: aesop
+warning: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: aesop: failed to prove the goal after exhaustive search.
+info: LeanProofs/User/Proof/SortMergesortRangeProof.lean:71:36: [solve_fixpoint] closed by: aesop
+error: LeanProofs/User/Proof/SortMergesortRangeProof.lean:69:59: unsolved goals
+old₀ : VectorsAVec Int
+lo₀ hi₀ : Int
+a : lo₀ < old₀.len
+a_1 : lo₀ ≤ hi₀
+a_2 : hi₀ < old₀.len
+a_3 : 0 ≤ old₀.len
+a_4 : 0 ≤ lo₀
+a_5 : 0 ≤ hi₀
+a_6 : lo₀ < hi₀
+v₀ : VectorsAVec Int
+a_7 : v₀.len = old₀.len
+a_8 : sort_is_sorted_between v₀.elems lo₀ (lo₀ + (hi₀ - lo₀) / 2 + 1)
+a_9 : sort_is_perm old₀.elems v₀.elems lo₀ (lo₀ + (hi₀ - lo₀) / 2)
+v₃ v₄ : VectorsAVec Int
+a_11 : v₃.len = old₀.len
+a_12 : sort_is_sorted_between v₃.elems (lo₀ + (hi₀ - lo₀) / 2 + 1) (hi₀ + 1)
+a_13 : sort_is_perm v₀.elems v₃.elems (lo₀ + (hi₀ - lo₀) / 2 + 1) hi₀
+a_15 : vectors_arr_get v₃.elems (lo₀ + (hi₀ - lo₀) / 2 + 1) < vectors_arr_get v₃.elems (lo₀ + (hi₀ - lo₀) / 2)
+a_16 : v₄.len = old₀.len
+⊢ sorry v₃.elems lo₀ (lo₀ + (hi₀ - lo₀) / 2 + 1)
+
+old₀ : VectorsAVec Int
+lo₀ hi₀ : Int
+a : lo₀ < old₀.len
+a_1 : lo₀ ≤ hi₀
+a_2 : hi₀ < old₀.len
+a_3 : 0 ≤ old₀.len
+a_4 : 0 ≤ lo₀
+a_5 : 0 ≤ hi₀
+a_6 : lo₀ < hi₀
+v₀ : VectorsAVec Int
+a_7 : v₀.len = old₀.len
+a_8 : sort_is_sorted_between v₀.elems lo₀ (lo₀ + (hi₀ - lo₀) / 2 + 1)
+a_9 : sort_is_perm old₀.elems v₀.elems lo₀ (lo₀ + (hi₀ - lo₀) / 2)
+v₃ v₄ v₅ v₆ : VectorsAVec Int
+a_11 : v₃.len = old₀.len
+a_12 : sort_is_sorted_between v₃.elems (lo₀ + (hi₀ - lo₀) / 2 + 1) (hi₀ + 1)
+a_13 : sort_is_perm v₀.elems v₃.elems (lo₀ + (hi₀ - lo₀) / 2 + 1) hi₀
+a_15 : vectors_arr_get v₃.elems (lo₀ + (hi₀ - lo₀) / 2 + 1) < vectors_arr_get v₃.elems (lo₀ + (hi₀ - lo₀) / 2)
+a_16 : v₄.len = old₀.len
+a_17 : v₅.len = old₀.len
+a_18 : sort_is_sorted_between v₅.elems lo₀ (hi₀ + 1)
+a_19 : sort_is_perm v₃.elems v₅.elems lo₀ hi₀
+a_21 : v₆.len = old₀.len
+a_22 : vectors_arr_eq_between v₃.elems v₆.elems lo₀ (hi₀ + 1)
+⊢ sorry old₀.elems v₅.elems lo₀ hi₀
+
+old₀ : VectorsAVec Int
+lo₀ hi₀ : Int
+a : lo₀ < old₀.len
+a_1 : lo₀ ≤ hi₀
+a_2 : hi₀ < old₀.len
+a_3 : 0 ≤ old₀.len
+a_4 : 0 ≤ lo₀
+a_5 : 0 ≤ hi₀
+a_6 : lo₀ < hi₀
+v₀ : VectorsAVec Int
+a_7 : v₀.len = old₀.len
+a_8 : sort_is_sorted_between v₀.elems lo₀ (lo₀ + (hi₀ - lo₀) / 2 + 1)
+a_9 : sort_is_perm old₀.elems v₀.elems lo₀ (lo₀ + (hi₀ - lo₀) / 2)
+v₃ : VectorsAVec Int
+a_11 : v₃.len = old₀.len
+a_12 : sort_is_sorted_between v₃.elems (lo₀ + (hi₀ - lo₀) / 2 + 1) (hi₀ + 1)
+a_13 : sort_is_perm v₀.elems v₃.elems (lo₀ + (hi₀ - lo₀) / 2 + 1) hi₀
+a_15 : vectors_arr_get v₃.elems (lo₀ + (hi₀ - lo₀) / 2) ≤ vectors_arr_get v₃.elems (lo₀ + (hi₀ - lo₀) / 2 + 1)
+⊢ sorry v₃.elems lo₀ (hi₀ + 1)
+
+old₀ : VectorsAVec Int
+lo₀ hi₀ : Int
+a : lo₀ < old₀.len
+a_1 : lo₀ ≤ hi₀
+a_2 : hi₀ < old₀.len
+a_3 : 0 ≤ old₀.len
+a_4 : 0 ≤ lo₀
+a_5 : 0 ≤ hi₀
+a_6 : lo₀ < hi₀
+v₀ : VectorsAVec Int
+a_7 : v₀.len = old₀.len
+a_8 : sort_is_sorted_between v₀.elems lo₀ (lo₀ + (hi₀ - lo₀) / 2 + 1)
+a_9 : sort_is_perm old₀.elems v₀.elems lo₀ (lo₀ + (hi₀ - lo₀) / 2)
+v₃ : VectorsAVec Int
+a_11 : v₃.len = old₀.len
+a_12 : sort_is_sorted_between v₃.elems (lo₀ + (hi₀ - lo₀) / 2 + 1) (hi₀ + 1)
+a_13 : sort_is_perm v₀.elems v₃.elems (lo₀ + (hi₀ - lo₀) / 2 + 1) hi₀
+a_15 : vectors_arr_get v₃.elems (lo₀ + (hi₀ - lo₀) / 2) ≤ vectors_arr_get v₃.elems (lo₀ + (hi₀ - lo₀) / 2 + 1)
+⊢ sorry old₀.elems v₃.elems lo₀ hi₀
+
+case refine_2.refine_1
+old₀✝ : VectorsAVec Int
+lo₀✝ hi₀✝ : Int
+a✝⁶ : lo₀✝ < old₀✝.len
+a✝⁵ : lo₀✝ ≤ hi₀✝
+a✝⁴ : hi₀✝ < old₀✝.len
+a✝³ : 0 ≤ old₀✝.len
+a✝² : 0 ≤ lo₀✝
+a✝¹ : 0 ≤ hi₀✝
+a✝ : hi₀✝ ≤ lo₀✝
+⊢ sort_is_sorted_between old₀✝.elems lo₀✝ (hi₀✝ + 1)
+
+case refine_2.refine_2
+old₀✝ : VectorsAVec Int
+lo₀✝ hi₀✝ : Int
+a✝⁶ : lo₀✝ < old₀✝.len
+a✝⁵ : lo₀✝ ≤ hi₀✝
+a✝⁴ : hi₀✝ < old₀✝.len
+a✝³ : 0 ≤ old₀✝.len
+a✝² : 0 ≤ lo₀✝
+a✝¹ : 0 ≤ hi₀✝
+a✝ : hi₀✝ ≤ lo₀✝
+⊢ sort_is_perm old₀✝.elems old₀✝.elems lo₀✝ hi₀✝
+info: LeanProofs/User/Proof/SortMergesortRangeProof.lean:69:0: time: 1508ms
+info: LeanProofs/User/Proof/SortMergesortRangeProof.lean:69:0: [fusion] Start κ: [k0, k1]
+[fusion] End κ:   []
+[solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  []
+error: Lean exited with code 1
+✖ [358/374] Building LeanProofs.User.Proof.VectorsTest1Proof (3.6s)
+trace: .> LEAN_PATH=/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/batteries/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/aesop/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean /home/ranjit/.elan/toolchains/leanprover--lean4---v4.29.0-rc8/bin/lean /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/LeanProofs/User/Proof/VectorsTest1Proof.lean -o /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/VectorsTest1Proof.olean -i /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/VectorsTest1Proof.ilean -c /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/VectorsTest1Proof.c --setup /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/VectorsTest1Proof.setup.json --json
+info: LeanProofs/User/Proof/VectorsTest1Proof.lean:71:36: [solve_fixpoint] closed by: grind
+warning: LeanProofs/User/Proof/VectorsTest1Proof.lean:71:36: aesop: failed to prove the goal after exhaustive search.
+info: LeanProofs/User/Proof/VectorsTest1Proof.lean:71:36: [solve_fixpoint] closed by: aesop
+info: LeanProofs/User/Proof/VectorsTest1Proof.lean:71:36: [solve_fixpoint] closed by: grind
+warning: LeanProofs/User/Proof/VectorsTest1Proof.lean:71:36: aesop: failed to prove the goal after exhaustive search.
+info: LeanProofs/User/Proof/VectorsTest1Proof.lean:71:36: [solve_fixpoint] closed by: aesop
+info: LeanProofs/User/Proof/VectorsTest1Proof.lean:71:36: [solve_fixpoint] closed by: grind
+warning: LeanProofs/User/Proof/VectorsTest1Proof.lean:71:36: aesop: failed to prove the goal after exhaustive search.
+info: LeanProofs/User/Proof/VectorsTest1Proof.lean:71:36: [solve_fixpoint] closed by: aesop
+error: LeanProofs/User/Proof/VectorsTest1Proof.lean:69:47: unsolved goals
+case inl.inr
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 10
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30
+h_2 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 0 = 20
+⊢ False
+
+case inr
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 10
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 0 = 30
+⊢ False
+
+case inl.inl.inl.inl
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 10
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30
+h_2 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 0 = 10
+h : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 1 = 10
+⊢ False
+
+case inl.inl.inr.inl
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 10
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 0 = 20
+h : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 1 = 10
+⊢ False
+
+case inl.inr.inl
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 10
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30
+h_2 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 1 = 30
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 0 = 10
+⊢ False
+
+case inl.inr.inr
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 10
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30
+h_2 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 1 = 30
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 0 = 20
+⊢ False
+
+case inr.inl.inl
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 10
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 0 = 30
+h_2 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 1 = 10
+⊢ False
+
+case inr.inr
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 10
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 0 = 30
+h_2 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 1 = 30
+⊢ False
+
+case inl.inl.inl.inl.inl.inl
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 10
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 0 = 10
+h : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 1 = 10
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 2 = 10
+⊢ False
+
+case inl.inl.inl.inl.inl.inr
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 10
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 0 = 10
+h : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 1 = 10
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 2 = 20
+⊢ False
+
+case inl.inl.inl.inl.inr.inl
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 10
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 0 = 10
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 1 = 20
+h : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 2 = 10
+⊢ False
+
+case inl.inl.inl.inl.inr.inr
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 10
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 0 = 10
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 1 = 20
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 2 = 20
+⊢ False
+
+case inl.inl.inl.inr.inl.inl
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 10
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 0 = 20
+h : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 1 = 10
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 2 = 10
+⊢ False
+
+case inl.inl.inl.inr.inl.inr
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 10
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 0 = 20
+h : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 1 = 10
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 2 = 20
+⊢ False
+
+case inl.inl.inl.inr.inr.inl
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 10
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 0 = 20
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 1 = 20
+h : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 2 = 10
+⊢ False
+
+case inl.inl.inl.inr.inr.inr
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 10
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 0 = 20
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 1 = 20
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 2 = 20
+⊢ False
+
+case inl.inr.inl.inl.inl
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 10
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30
+h_2 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 1 = 30
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 0 = 10
+h : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 2 = 10
+⊢ False
+
+case inl.inr.inl.inl.inr
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 10
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30
+h_2 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 1 = 30
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 0 = 10
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 2 = 20
+⊢ False
+
+case inl.inr.inl.inr.inl
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 10
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30
+h_2 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 1 = 30
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 0 = 20
+h : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 2 = 10
+⊢ False
+
+case inl.inr.inl.inr.inr
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 10
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30
+h_2 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 1 = 30
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 0 = 20
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 2 = 20
+⊢ False
+
+case inr.inl.inl.inl.inl
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 10
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 0 = 30
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 1 = 10
+h : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 2 = 10
+⊢ False
+
+case inr.inl.inl.inl.inr
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 10
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 0 = 30
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 1 = 10
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 2 = 20
+⊢ False
+
+case inr.inl.inl.inr.inl
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 10
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 0 = 30
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 1 = 20
+h : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 2 = 10
+⊢ False
+
+case inr.inl.inl.inr.inr
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 10
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 0 = 30
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 1 = 20
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 2 = 20
+⊢ False
+
+case inr.inr.inl.inl
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 10
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 0 = 30
+h_2 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 1 = 30
+h_3 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 2 = 10
+⊢ False
+
+case inr.inr.inl.inr
+v₀ : VectorsAVec Int
+a : v₀.len = 0
+new₀ new₁ new₂ : VectorsAVec Int
+a_2 : new₀.len = 1
+a_3 : new₀.elems = vectors_arr_set v₀.elems 0 10
+a_5 : new₁.len = 2
+a_6 : new₁.elems = vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20
+a_8 : new₂.len = 3
+a_9 : new₂.elems = vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30
+h_1 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 0 = 30
+h_2 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 1 = 30
+h_4 : vectors_arr_get (vectors_arr_set (vectors_arr_set (vectors_arr_set v₀.elems 0 10) 1 20) 2 30) 2 = 20
+⊢ False
+info: LeanProofs/User/Proof/VectorsTest1Proof.lean:69:0: time: 2326ms
+info: LeanProofs/User/Proof/VectorsTest1Proof.lean:69:0: [fusion] Start κ: [k0, k1, k2, k3, k4, k5]
+[fusion] End κ:   []
+[solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  []
+error: Lean exited with code 1
+✖ [360/374] Building LeanProofs.User.Proof.FibFibFastProof (5.3s)
+trace: .> LEAN_PATH=/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/batteries/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/aesop/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean /home/ranjit/.elan/toolchains/leanprover--lean4---v4.29.0-rc8/bin/lean /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/LeanProofs/User/Proof/FibFibFastProof.lean -o /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/FibFibFastProof.olean -i /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/FibFibFastProof.ilean -c /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/FibFibFastProof.c --setup /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/FibFibFastProof.setup.json --json
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+warning: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: aesop: failed to prove the goal after exhaustive search.
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: aesop
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastProof.lean:71:36: [solve_fixpoint] closed by: grind
+error: LeanProofs/User/Proof/FibFibFastProof.lean:69:43: unsolved goals
+n₀ : Int
+a_1 : 1 < n₀
+prev₀ curr₀ i₀ : Int
+a_3 : n₀ ≤ i₀
+right : prev₀ ≤ curr₀ - 1
+right_1 : 0 < n₀
+right_2 : 0 < i₀
+right_3 : 0 < curr₀
+right_4 : 0 < prev₀
+right_5 : 1 ≤ n₀
+right_6 : 1 ≤ i₀
+right_7 : 1 ≤ curr₀
+right_8 : 1 ≤ prev₀
+right_12 : i₀ ≤ n₀
+right_13 : i₀ ≤ curr₀
+right_14 : prev₀ ≤ curr₀
+right_15 : prev₀ < curr₀
+right_16 : 0 ≤ n₀
+right_17 : 0 ≤ i₀
+left : 0 ≤ prev₀
+right_18 : 0 ≤ curr₀
+⊢ curr₀ = fib_spec_fib n₀
+
+case refine_2
+n₀✝ : Int
+a✝¹ : 0 ≤ n₀✝
+a✝ : n₀✝ ≤ 1
+⊢ 1 = fib_spec_fib n₀✝
+info: LeanProofs/User/Proof/FibFibFastProof.lean:69:0: time: 4230ms
+info: LeanProofs/User/Proof/FibFibFastProof.lean:69:0: [fusion] Start κ: [k0]
+[fusion] End κ:   [k0]
+[solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  [k0]
+[solve_fixpoint] --- PA on cyclic κ's [k0] ---
+[solve_fixpoint]   PA sol for k0 = (((((((((((((((((((z0 ≥ 0 ∧ z1 ≥ 0) ∧ z2 ≥ 0) ∧ z3 ≥ 0) ∧ z1 > z0) ∧ z0 < z1) ∧ z0 ≤ z1) ∧ z2 ≤ z1) ∧ z2 ≤ z3) ∧
+                        z1 ≥ z0) ∧
+                      z1 ≥ z2) ∧
+                    z3 ≥ z2) ∧
+                  1 ≤ z0) ∧
+                1 ≤ z1) ∧
+              1 ≤ z2) ∧
+            1 ≤ z3) ∧
+          z0 > 0) ∧
+        z1 > 0) ∧
+      z2 > 0) ∧
+    z3 > 0) ∧
+  z0 ≤ z1 - 1
+error: Lean exited with code 1
+✖ [362/374] Building LeanProofs.User.Proof.FibFibFastoProof (5.8s)
+trace: .> LEAN_PATH=/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/batteries/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/aesop/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean /home/ranjit/.elan/toolchains/leanprover--lean4---v4.29.0-rc8/bin/lean /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/LeanProofs/User/Proof/FibFibFastoProof.lean -o /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/FibFibFastoProof.olean -i /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/FibFibFastoProof.ilean -c /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/FibFibFastoProof.c --setup /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/FibFibFastoProof.setup.json --json
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+warning: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: aesop: failed to prove the goal after exhaustive search.
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: aesop
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+warning: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: aesop: failed to prove the goal after exhaustive search.
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: aesop
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:71:36: [solve_fixpoint] closed by: grind
+error: LeanProofs/User/Proof/FibFibFastoProof.lean:69:45: unsolved goals
+n₀ : Int
+a : fib_spec_fib n₀ < num_impl_11_MAX
+a_2 : n₀ ≤ 18446744073709551615
+a_3 : 1 < n₀
+prev₀ curr₀ i₀ : Int
+a_5 : n₀ ≤ i₀
+right_1 : 0 ≤ n₀
+right_2 : 0 ≤ i₀
+right_3 : 0 ≤ curr₀
+right_4 : 0 ≤ prev₀
+right_5 : prev₀ ≤ curr₀ - 1
+right_9 : 1 ≤ n₀
+right_10 : 1 ≤ i₀
+right_11 : 1 ≤ curr₀
+right_12 : 1 ≤ prev₀
+right_13 : i₀ ≤ n₀
+right_14 : i₀ ≤ curr₀
+right_15 : prev₀ ≤ curr₀
+right_16 : 0 < n₀
+right_17 : 0 < i₀
+right_18 : 0 < curr₀
+left : prev₀ < curr₀
+right_19 : 0 < prev₀
+⊢ curr₀ = fib_spec_fib n₀
+
+n₀ : Int
+a : fib_spec_fib n₀ < num_impl_11_MAX
+a_2 : n₀ ≤ 18446744073709551615
+a_3 : 1 < n₀
+prev₀ curr₀ i₀ : Int
+a_5 : i₀ < n₀
+right_1 : 0 ≤ n₀
+right_2 : 0 ≤ i₀
+right_3 : 0 ≤ curr₀
+right_4 : 0 ≤ prev₀
+right_5 : prev₀ ≤ curr₀ - 1
+right_9 : 1 ≤ n₀
+right_10 : 1 ≤ i₀
+right_11 : 1 ≤ curr₀
+right_12 : 1 ≤ prev₀
+right_13 : i₀ ≤ n₀
+right_14 : i₀ ≤ curr₀
+right_15 : prev₀ ≤ curr₀
+right_16 : 0 < n₀
+right_17 : 0 < i₀
+right_18 : 0 < curr₀
+left : prev₀ < curr₀
+right_19 : 0 < prev₀
+⊢ Int.instLEInt.1 (prev₀ + curr₀) 18446744073709551615
+
+case refine_2
+n₀✝ : Int
+a✝³ : fib_spec_fib n₀✝ < num_impl_11_MAX
+a✝² : 0 ≤ n₀✝
+a✝¹ : n₀✝ ≤ 18446744073709551615
+a✝ : n₀✝ ≤ 1
+⊢ 1 = fib_spec_fib n₀✝
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:69:0: time: 4679ms
+info: LeanProofs/User/Proof/FibFibFastoProof.lean:69:0: [fusion] Start κ: [k0]
+[fusion] End κ:   [k0]
+[solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  [k0]
+[solve_fixpoint] --- PA on cyclic κ's [k0] ---
+[solve_fixpoint]   PA sol for k0 = (((((((((((((((((((z0 < z1 ∧ z0 > 0) ∧ z1 > 0) ∧ z2 > 0) ∧ z3 > 0) ∧ z1 ≥ z0) ∧ z1 ≥ z2) ∧ z3 ≥ z2) ∧ 1 ≤ z0) ∧
+                        1 ≤ z1) ∧
+                      1 ≤ z2) ∧
+                    1 ≤ z3) ∧
+                  z0 ≤ z1) ∧
+                z2 ≤ z1) ∧
+              z2 ≤ z3) ∧
+            z0 ≤ z1 - 1) ∧
+          z0 ≥ 0) ∧
+        z1 ≥ 0) ∧
+      z2 ≥ 0) ∧
+    z3 ≥ 0) ∧
+  z1 > z0
+error: Lean exited with code 1
+✖ [364/374] Building LeanProofs.User.Proof.SortMergeSortProof (5.0s)
+trace: .> LEAN_PATH=/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/batteries/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/aesop/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean /home/ranjit/.elan/toolchains/leanprover--lean4---v4.29.0-rc8/bin/lean /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/LeanProofs/User/Proof/SortMergeSortProof.lean -o /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortMergeSortProof.olean -i /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortMergeSortProof.ilean -c /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortMergeSortProof.c --setup /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortMergeSortProof.setup.json --json
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: native_decide
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:71:36: [solve_fixpoint] closed by: grind
+error: LeanProofs/User/Proof/SortMergeSortProof.lean:69:49: unsolved goals
+case refine_2
+old₀✝ : VectorsAVec Int
+a✝¹ : 0 ≤ old₀✝.len
+a✝ : old₀✝.len ≤ 1
+⊢ sorry old₀✝.elems 0 old₀✝.len
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:69:0: time: 4809ms
+info: LeanProofs/User/Proof/SortMergeSortProof.lean:69:0: [fusion] Start κ: [k0, k1]
+[fusion] End κ:   [k0]
+[solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  [k0]
+[solve_fixpoint] --- PA on cyclic κ's [k0] ---
+[solve_fixpoint]   PA sol for k0 = (((((((((((((((((((((((((z6 ≤ 0 ∧ z4 > 0) ∧ z1 = z2) ∧ z2 = z1) ∧ z1 ≥ z2) ∧ z1 ≥ z6) ∧ z2 ≥ z1) ∧ z2 ≥ z6) ∧ z4 ≥ z1) ∧
+                                    z4 ≥ z2) ∧
+                                  z4 ≥ z6) ∧
+                                z4 > z6) ∧
+                              1 ≤ z4) ∧
+                            z6 ≤ z4 - 1) ∧
+                          z6 < z4) ∧
+                        z1 ≤ z2) ∧
+                      z1 ≤ z4) ∧
+                    z2 ≤ z1) ∧
+                  z2 ≤ z4) ∧
+                z6 ≤ z1) ∧
+              z6 ≤ z2) ∧
+            z6 ≤ z4) ∧
+          z1 ≥ 0) ∧
+        z2 ≥ 0) ∧
+      z4 ≥ 0) ∧
+    z6 ≥ 0) ∧
+  z6 = 0
+error: Lean exited with code 1
+✖ [366/374] Building LeanProofs.User.Proof.SortInsertProof (7.9s)
+trace: .> LEAN_PATH=/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/batteries/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/aesop/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean /home/ranjit/.elan/toolchains/leanprover--lean4---v4.29.0-rc8/bin/lean /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/LeanProofs/User/Proof/SortInsertProof.lean -o /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortInsertProof.olean -i /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortInsertProof.ilean -c /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortInsertProof.c --setup /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortInsertProof.setup.json --json
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortInsertProof.lean:71:36: [solve_fixpoint] closed by: grind
+error: LeanProofs/User/Proof/SortInsertProof.lean:71:36: Tactic `simp` failed with a nested error:
+maximum recursion depth has been reached
+use `set_option maxRecDepth <num>` to increase limit
+use `set_option diagnostics true` to get diagnostic information
+info: LeanProofs/User/Proof/SortInsertProof.lean:69:0: time: 6822ms
+info: LeanProofs/User/Proof/SortInsertProof.lean:69:0: [fusion] Start κ: [k0, k1, k2, k3]
+[fusion] End κ:   [k0]
+[solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  [k0]
+[solve_fixpoint] --- PA on cyclic κ's [k0] ---
+[solve_fixpoint]   PA sol for k0 = ((((((((((((((((((((((((((((((((((((z2 = z4 ∧ z4 = z2) ∧ z2 ≥ z0) ∧ z2 ≥ z4) ∧ z2 ≥ z5) ∧ z4 ≥ z0) ∧ z4 ≥ z2) ∧
+                                                              z4 ≥ z5) ∧
+                                                            z5 ≥ z0) ∧
+                                                          z0 < z2) ∧
+                                                        z0 < z4) ∧
+                                                      z5 < z2) ∧
+                                                    z5 < z4) ∧
+                                                  z2 > z0) ∧
+                                                z2 > z5) ∧
+                                              z4 > z0) ∧
+                                            z4 > z5) ∧
+                                          z0 ≥ 0) ∧
+                                        z2 ≥ 0) ∧
+                                      z4 ≥ 0) ∧
+                                    z5 ≥ 0) ∧
+                                  1 ≤ z2) ∧
+                                1 ≤ z4) ∧
+                              1 ≤ z5) ∧
+                            z0 ≤ z2 - 1) ∧
+                          z0 ≤ z4 - 1) ∧
+                        z5 ≤ z2 - 1) ∧
+                      z5 ≤ z4 - 1) ∧
+                    z2 > 0) ∧
+                  z4 > 0) ∧
+                z5 > 0) ∧
+              z0 ≤ z2) ∧
+            z0 ≤ z4) ∧
+          z0 ≤ z5) ∧
+        z2 ≤ z4) ∧
+      z4 ≤ z2) ∧
+    z5 ≤ z2) ∧
+  z5 ≤ z4
+error: Lean exited with code 1
+✖ [368/374] Building LeanProofs.User.Proof.SortPartitionProof (12s)
+trace: .> LEAN_PATH=/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/batteries/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/aesop/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean /home/ranjit/.elan/toolchains/leanprover--lean4---v4.29.0-rc8/bin/lean /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/LeanProofs/User/Proof/SortPartitionProof.lean -o /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortPartitionProof.olean -i /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortPartitionProof.ilean -c /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortPartitionProof.c --setup /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortPartitionProof.setup.json --json
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+info: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: [solve_fixpoint] closed by: grind
+error: LeanProofs/User/Proof/SortPartitionProof.lean:71:36: Tactic `simp` failed with a nested error:
+maximum recursion depth has been reached
+use `set_option maxRecDepth <num>` to increase limit
+use `set_option diagnostics true` to get diagnostic information
+info: LeanProofs/User/Proof/SortPartitionProof.lean:69:0: time: 11458ms
+info: LeanProofs/User/Proof/SortPartitionProof.lean:69:0: [fusion] Start κ: [k0, k1, k2, k3]
+[fusion] End κ:   [k1]
+[solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  [k1]
+[solve_fixpoint] --- PA on cyclic κ's [k1] ---
+[solve_fixpoint]   PA sol for k1 = ((((((((((((((((((((((((((((((((((((((((((((((((((⋯ ∧ z6 ≤ z3) ∧ z6 ≤ z5) ∧ z6 ≤ z7) ∧ z7 ≤ z3) ∧ z7 ≤ z5) ∧ 1 ≤ z3) ∧
+                                                                                          1 ≤ z5) ∧
+                                                                                        1 ≤ z7) ∧
+                                                                                      z3 > z0) ∧
+                                                                                    z3 > z1) ∧
+                                                                                  z3 > z6) ∧
+                                                                                z3 > z7) ∧
+                                                                              z5 > z0) ∧
+                                                                            z5 > z1) ∧
+                                                                          z5 > z6) ∧
+                                                                        z5 > z7) ∧
+                                                                      z7 > z6) ∧
+                                                                    z0 < z3) ∧
+                                                                  z0 < z5) ∧
+                                                                z1 < z3) ∧
+                                                              z1 < z5) ∧
+                                                            z6 < z3) ∧
+                                                          z6 < z5) ∧
+                                                        z6 < z7) ∧
+                                                      z7 < z3) ∧
+                                                    z7 < z5) ∧
+                                                  z0 ≥ 0) ∧
+                                                z1 ≥ 0) ∧
+                                              z3 ≥ 0) ∧
+                                            z5 ≥ 0) ∧
+                                          z6 ≥ 0) ∧
+                                        z7 ≥ 0) ∧
+                                      z0 ≥ z6) ∧
+                                    z1 ≥ z0) ∧
+                                  z1 ≥ z6) ∧
+                                z3 ≥ z0) ∧
+                              z3 ≥ z1) ∧
+                            z3 ≥ z5) ∧
+                          z3 ≥ z6) ∧
+                        z3 ≥ z7) ∧
+                      z5 ≥ z0) ∧
+                    z5 ≥ z1) ∧
+                  z5 ≥ z3) ∧
+                z5 ≥ z6) ∧
+              z5 ≥ z7) ∧
+            z7 ≥ z0) ∧
+          z7 ≥ z1) ∧
+        z7 ≥ z6) ∧
+      z3 > 0) ∧
+    z5 > 0) ∧
+  z7 > 0
+error: Lean exited with code 1
+✖ [370/374] Building LeanProofs.User.Proof.SortMergeProof (189s)
+trace: .> LEAN_PATH=/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/batteries/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/packages/aesop/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/.lake/build/lib/lean:/home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean /home/ranjit/.elan/toolchains/leanprover--lean4---v4.29.0-rc8/bin/lean /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/LeanProofs/User/Proof/SortMergeProof.lean -o /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortMergeProof.olean -i /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/lib/lean/LeanProofs/User/Proof/SortMergeProof.ilean -c /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortMergeProof.c --setup /home/ranjit/Desktop/lean-fixpoint/eval_benchmarks/flux_lean_demo_lean_proofs/.lake/build/ir/LeanProofs/User/Proof/SortMergeProof.setup.json --json
+error: LeanProofs/User/Proof/SortMergeProof.lean:69:41: (deterministic) timeout at `whnf`, maximum number of heartbeats (5000000) has been reached
+
+Note: Use `set_option maxHeartbeats <num>` to set the limit.
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+info: LeanProofs/User/Proof/SortMergeProof.lean:69:0: time: 187340ms
+info: LeanProofs/User/Proof/SortMergeProof.lean:69:0: [fusion] Start κ: [k0, k1, k2, k3, k4, k5, k6, k7, k8, k9, k10, k11]
+[fusion] End κ:   [k0, k1, k2, k3]
+[solve_fixpoint] Acyclic κ: []
+[solve_fixpoint] Cyclic κ:  [k0, k1, k3, k2]
+[solve_fixpoint] --- PA on cyclic κ's [k0, k1, k3, k2] ---
+error: Lean exited with code 1
+Some required targets logged failures:
+- LeanProofs.Flux.Struct.RingbufferRingBuffer
+- LeanProofs.User.Proof.FibTwelveProof
+- LeanProofs.User.Proof.FibSevenProof
+- LeanProofs.User.Proof.FibFibSlowProof
+- LeanProofs.User.Proof.MemoFibMemoProof
+- LeanProofs.User.Proof.SortTest2Proof
+- LeanProofs.User.Proof.SortTestSortedProof
+- LeanProofs.User.Proof.SortInsertRecProof
+- LeanProofs.User.Proof.FibSqrtProof
+- LeanProofs.User.Proof.SortInitUpProof
+- LeanProofs.User.Proof.SortInsertionSortRecProof
+- LeanProofs.User.Proof.SortInsertionSortProof
+- LeanProofs.User.Proof.FibSumLoopProof
+- LeanProofs.User.Proof.SortQuicksortProof
+- LeanProofs.User.Proof.SortTest1Proof
+- LeanProofs.User.Proof.SortQuicksortRangeProof
+- LeanProofs.User.Proof.SortMergesortRangeProof
+- LeanProofs.User.Proof.VectorsTest1Proof
+- LeanProofs.User.Proof.FibFibFastProof
+- LeanProofs.User.Proof.FibFibFastoProof
+- LeanProofs.User.Proof.SortMergeSortProof
+- LeanProofs.User.Proof.SortInsertProof
+- LeanProofs.User.Proof.SortPartitionProof
+- LeanProofs.User.Proof.SortMergeProof
+error: build failed
+lake build failed (exit 1)
