@@ -99,6 +99,19 @@ inductive Refinement where
   | fmla : Formula → Refinement
   | kapp : EVar → List (Σ b : Base, Term b) → Refinement
 
+/-! ## Syntactic constraints (CHC tree)
+
+  A verification condition, produced by VC generation (`VCGen.lean`), as a
+  Constrained Horn Clause tree. -/
+inductive Cstr where
+  | head : Refinement → Cstr             -- goal refinement `r`
+  | imp  : Refinement → Cstr → Cstr      -- hypothesis `r ⇒ c`
+  | all  : EVar → Base → Cstr → Cstr     -- `∀ x:b. c`
+  | conj : Cstr → Cstr → Cstr            -- `c₁ ∧ c₂`
+
+/-- The trivially-true constraint (used for synthesis leaves). -/
+@[simp] def Cstr.triv : Cstr := .head (.fmla .tt)
+
 /-! ## κ-assignments
 
   A `KVar` is a name for an *uninterpreted* predicate symbol (a "κ" in the
