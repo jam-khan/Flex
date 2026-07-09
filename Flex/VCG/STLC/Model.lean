@@ -6,8 +6,7 @@ namespace STLC
 /-- Interpret a term under the single environment `γ`. `fvar` resolves through
     the name map (`REnv.get`); `bvar` resolves through the de Bruijn stack
     (`REnv.getBV`) — the values of ν and the enclosing quantifier/arrow binders
-    live there. Both kinds of variable go *through `γ`*; nothing is substituted
-    into the syntax. -/
+    live there.. -/
 def Term.interp (γ : REnv) : {b : Base} → Term b → b.interp
   | _, .const _ c   => c
   | _, .bvar b k    => REnv.getBV b γ k
@@ -18,9 +17,7 @@ def Term.interp (γ : REnv) : {b : Base} → Term b → b.interp
 
 /-- Interpret a (now κ-free) formula under `γ`. Each quantifier binds `BVar 0`,
     so it `push`es its witness value as the new innermost de Bruijn slot of `γ`
-    and recurses — the value goes *through the environment*, never substituted
-    into the syntax. No κ-assignment is needed: κ-applications live one level
-    up, in `Refinement`. -/
+    and recurses. -/
 def Formula.interp (γ : REnv) : Formula → Prop
   | .tt           => True
   | .ff           => False
@@ -41,12 +38,7 @@ def Refinement.interp (κ : KEnv) (r : Refinement) (γ : REnv) : Prop :=
   | .kapp kn args =>
       κ kn (args.map (fun a => ⟨a.1, Term.interp γ a.2⟩))
 
-/-- Interpret a syntactic constraint (`Cstr`, declared in `Syntax.lean`) as a
-    `κ`-indexed `REnv` predicate. Binders are *named*: `.all x b c` quantifies
-    `x` and writes it into the name map; the de Bruijn stack is never used. Not a
-    global `@[simp]` lemma (that would make `simp` in the soundness proofs unfold
-    constraints under the bridge lemmas); unfold it explicitly (see
-    `Examples.lean` / `vc_generate`). -/
+/-- Interpret a syntactic constraint as a `κ`-indexed `REnv` predicate. -/
 def Cstr.interp : Cstr → KEnv → REnv → Prop
   | .head r,     κ, γ => Refinement.interp κ r γ
   | .imp r c,    κ, γ => Refinement.interp κ r γ → c.interp κ γ

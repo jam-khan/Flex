@@ -102,9 +102,7 @@ inductive Refinement where
 /-! ## Syntactic constraints (CHC tree)
 
   A verification condition, produced by VC generation (`VCGen.lean`), as a
-  Constrained Horn Clause tree. Every constraint the generator emits has shape
-  `⋀ (∀x. hyp ⇒ … ⇒ head)`. Its interpretation (`Cstr.interp`) lives in
-  `Model.lean`, since it consults the κ-assignment via `Refinement.interp`. -/
+  Constrained Horn Clause tree. -/
 inductive Cstr where
   | head : Refinement → Cstr             -- goal refinement `r`
   | imp  : Refinement → Cstr → Cstr      -- hypothesis `r ⇒ c`
