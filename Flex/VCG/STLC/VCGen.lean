@@ -9,72 +9,14 @@ open STLC
 
   Algorithmic bidirectional refinement type-checker that produces a *syntactic*
   constraint `Cstr` — a Constrained Horn Clause tree with constructors
-
-  * `.head r`   — a goal refinement to prove,
-  * `.imp r c`  — a hypothesis refinement guarding `c`,
-  * `.all x b c`— a universally-quantified binder naming `x : b`,
-  * `.conj c₁ c₂`— conjunction.
-
-  `Cstr` is declared in `Syntax.lean`; its interpretation `Cstr.interp` (in
-  `Model.lean`) reads a `Cstr` back as a `KEnv → REnv → Prop` (the `Constraint`
-  abbrev). The user existentially quantifies the `KEnv` parameter to invoke the
-  solver (`solve_fixpoint`); `topVC` is stated over `Cstr.interp`.
-
-  Binders are *named* (textbook Horn / liquid-fixpoint form): `.all x b c`
-  interprets as `∀ v:b, c[x ↦ v]`, updating the `REnv` name map at `x` (the de
-  Bruijn stack stays empty). A refinement placed into a `.imp`/`.head` therefore
-  has its ν (`bvar 0`) *opened* to the enclosing binder name `x` via
-  `Refinement.openBVar 0` (defined in `Substitution.lean`) at generation time —
-  the same opening `Subtyp.refine` uses declaratively.
 -/
-
-/-- The interpreted form of a constraint: a `κ`-indexed predicate over runtime
-    environments. -/
-@[simp]
-abbrev Constraint := KEnv → REnv → Prop
 
 namespace STLC
 
-/-- Implication-constraint helper: bind `x` to a value satisfying refinement
-    `r` (under `κ`), then assert `c`. For function-typed bindings, no
-    quantification. The refinement's ν is instantiated to the fresh name `x`. -/
 def implyBindCstr (x : EVar) (t : Ty) (c : Cstr) : Cstr :=
   match t with
   | .refine b r => .all x b (.imp (r.openBVar 0 x) c)
   | .arrow _ _  => c
-
-/-- Bridge: `implyBindCstr` over a refined binding interprets exactly as the old
-    `push`-based `implyBind` (provided `x` is fresh for `r`). -/
-theorem implyBindCstr_interp (κ : KEnv) (x : EVar) (b : Base) (r : Refinement)
-    (c : Cstr) (γ : REnv) (hx : x ∉ r.fv) :
-    (implyBindCstr x (.refine b r) c).interp κ γ ↔
-    ∀ v : b.interp, Refinement.interp κ r (γ.push (Val.inj b v)) →
-      c.interp κ (REnv.update b γ x v) := by
-  simp only [implyBindCstr, Cstr.interp]
-  constructor <;> intro h v
-  · intro hr
-    exact h v ((Refinement.interp_openBVar κ r γ x (Val.inj b v) 0 (Nat.zero_le _) hx).mpr hr)
-  · intro hr
-    exact h v ((Refinement.interp_openBVar κ r γ x (Val.inj b v) 0 (Nat.zero_le _) hx).mp hr)
-
-/-- Semantic (`push`-form) reading of a bind, matching the pre-refactor
-    `implyBind`. Used to keep the soundness proofs' `cases s` structure. -/
-def implyBindSem (κ : KEnv) (x : EVar) (t : Ty) (c : Cstr) (γ : REnv) : Prop :=
-  match t with
-  | .refine b r => ∀ v : b.interp,
-                     Refinement.interp κ r (γ.push (Val.inj b v)) →
-                       c.interp κ (REnv.update b γ x v)
-  | .arrow _ _  => c.interp κ γ
-
-/-- `implyBindCstr` interprets as `implyBindSem`, for *any* binding type
-    (provided `x` is fresh for the binding's refinement). -/
-theorem implyBindCstr_interp_gen (κ : KEnv) (x : EVar) (t : Ty) (c : Cstr)
-    (γ : REnv) (hx : x ∉ t.fv) :
-    (implyBindCstr x t c).interp κ γ ↔ implyBindSem κ x t c γ := by
-  cases t with
-  | refine b r =>
-      exact implyBindCstr_interp κ x b r c γ (by simpa [Ty.fv] using hx)
-  | arrow s t => simp only [implyBindCstr, implyBindSem]
 
 end STLC
 

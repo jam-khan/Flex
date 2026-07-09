@@ -141,16 +141,6 @@ theorem EnvCloses.mem_closed :
 
 /-! ## extendBy commutativity and extendBy_fresh -/
 
-/-- `extendBy` at two different variables commutes. -/
-private theorem REnv.write_comm (γ : REnv) (x z : EVar) (va va' : Val)
-    (hxz : x ≠ z) :
-    (γ.write z va').write x va =
-    (γ.write x va).write z va' := by
-  apply REnv.ext
-  · funext w
-    by_cases hxw : x = w <;> by_cases hzw : z = w <;> simp_all
-  · rfl
-
 /-- Writing a fresh `x` (`x ∉ r.fv`) does not change `Refinement.interp` under
     *any* `γ`. The refinement never reads `x`, so this is orthogonal to ν / the
     de Bruijn stack entirely — it only touches the name map. It reduces directly
@@ -358,8 +348,7 @@ theorem EnvCloses.extendBy_fresh {κ Γ γ} (hE : EnvCloses κ Γ γ)
     exact TyDenote.extendBy_fresh x va hx_fv.1 htd
 
 /-- Extend `EnvCloses` by prepending a fresh `(x, s)` binding whose value `va`
-    is the value written at `x`. The single-env analogue of `EnvAgrees.extend`;
-    the reflection clauses are gone since the slot value is `va` by `write_self`. -/
+    is the value written at `x` (recovered by `write_self`). -/
 theorem EnvCloses.extend {κ Γ γ} (hE : EnvCloses κ Γ γ)
     (x : EVar) (s : Ty) (va : Val) (hx_dom : x ∉ TEnv.dom Γ)
     (hx_fv : x ∉ TEnv.tyFv Γ)

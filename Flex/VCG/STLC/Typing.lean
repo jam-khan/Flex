@@ -22,13 +22,6 @@ open STLC
 /-! ## Subtyping  κ; Γ ⊢ s <: t -/
 
 inductive Subtyp : KEnv → TEnv → Ty → Ty → Prop where
-  /-- SUB-BASE (opened): `κ; Γ, x:{ν:b|r₁} ⊢ r₂[ν↦x]  ⟹  κ; Γ ⊢ {ν:b|r₁} <: {ν:b|r₂}`.
-      ν is *opened* to a fresh name `x` via `Refinement.openBVar 0` — the exact
-      refinement-level analogue of how `arrow` opens its argument binder with
-      `Ty.openVar` (both are now the same base-agnostic, shifting open). The
-      hypothesis `r₁` enters `Γ` as the binding `x:{ν:b|r₁}`; the goal is the
-      opened `r₂` under that extended context. Works uniformly whether
-      `r₁`/`r₂` are formulas or κ-applications. -/
   | refine {κ Γ b r₁ r₂ x} :
       x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ r₁.fv ++ r₂.fv →
       Entail κ ((x, .refine b r₁) :: Γ) (fun γ => Refinement.interp κ (r₂.openBVar 0 x) γ) →
@@ -86,7 +79,6 @@ mutual
         Γ.lookup y = some (.refine .bool ry) →
         Synth κ Γ (.and (.fvar x) (.fvar y)) <ty|Bool{ν : ν = x ∧ y} |>
 
-  -- κ; Γ ⊢ e ⇐ t : "e checks against type t under κ"
   inductive Check : KEnv → TEnv → Exp → Ty → Prop where
     | sub {κ Γ e s t} :
         Synth κ Γ e s  →

@@ -14,11 +14,9 @@ def Term.fv : {b : Base} → Term b → List EVar
   | _, .not t       => Term.fv t
   | _, .and t₁ t₂   => Term.fv t₁ ++ Term.fv t₂
 
-/-- Open the `BVar` at level `k` with a free var `x`, base-agnostically, and
+/-- Open the `BVar` at level `k` with a free var `x`, and
     *shift every deeper de Bruijn index down by one* (proper LN binder
-    instantiation). This is the standard locally-nameless open: the `BVar` sitting
-    at level `k` (whatever its base) becomes `fvar`; indices `> k` shift down.
-    On locally-closed data (no `BVar > k`) the shift is a no-op. -/
+    instantiation). -/
 def Term.openBVar (k : Nat) (x : EVar) : {b : Base} → Term b → Term b
   | _, .const b c    => .const b c
   | _, .bvar b j     =>
@@ -31,8 +29,7 @@ def Term.openBVar (k : Nat) (x : EVar) : {b : Base} → Term b → Term b
 /-! ## 2. Formula operations -/
 
 /-- Free variables of a formula. The quantifiers are locally nameless, so they
-    bind no name and just pass their body's fv through (the bound `BVar` is not
-    an `fvar`). ν is likewise a `BVar`, never an `fvar`, so it never appears. -/
+    bind no name and just pass their body's fv through. -/
 def Formula.fv : Formula → List EVar
   | .tt           => []
   | .ff           => []
@@ -100,21 +97,19 @@ def Refinement.openBVar (k : Nat) (x : EVar)
 
 /-! ## 4. Ty operations (locally nameless)
 
-  `Ty.openVar k b x t` substitutes the `b`-typed `BVar` at level `k` with
-  `fvar b x` throughout refinements in `t`. Crossing a `Ty.arrow` binder
-  bumps the level. `arrow`'s domain is at the same level as the parent
-  (it's not under the arrow's binder); the codomain is at `k+1`.
+  `Ty.openVar k x t` opens the `BVar` at level `k` to `fvar x` throughout
+  refinements in `t`. Crossing a `Ty.arrow` binder bumps the level: `arrow`'s
+  domain stays at the parent level, its codomain is at `k+1`.
 -/
 
 def Ty.fv : Ty → List EVar
   | .refine _ r => r.fv
   | .arrow s t  => Ty.fv s ++ Ty.fv t
 
-/-- Open a `Ty`'s outermost binder at level `k` with free name `x`. Replaces
-    `Term.bvar (k+1)` (base-agnostically) in every refinement formula — the `+1`
-    because ν occupies formula-level 0, so arrow binders live one level out.
-    Since `Refinement.openBVar` is base-agnostic and shifting, a *single* open
-    handles both bases at once. -/
+/-- Open a `Ty`'s outermost binder at level `k` with free name `x`. Opens the
+    refinement `BVar` at level `k+1` — the `+1` because ν occupies formula-level
+    0, so arrow binders live one level out. One base-agnostic, shifting
+    `openBVar` handles both bases at once. -/
 def Ty.openVar (k : Nat) (x : EVar) : Ty → Ty
   | .refine b r => .refine b (r.openBVar (k+1) x)
   | .arrow s t  => .arrow (s.openVar k x) (t.openVar (k+1) x)
@@ -129,12 +124,11 @@ theorem Ty.skel_openVar (k : Nat) (x : EVar) (t : Ty) :
 /-! ### Well-formedness: BVar base consistency (WFBVarCtx)
 
   In coq-SystemRF, `WFtype` ensures that bound variables in predicate formulas
-  match the base of the enclosing binder's domain type.  In our system, this is
+  match the base of the enclosing binder's domain type. In our system, this is
   `Ty.WFBVarCtx ctx t`: for each level `k`, all `BVar b k` in `t`'s refinement
-  formulas have `ctx[k]? = some (some b)` (the k-th outer arrow binder's domain base).
-
-  This predicate is required by `TyDenote.push_iff` to make `openBVar` of
-  the "other" base a provable no-op when the formula is well-formed. -/
+  formulas have `ctx[k]? = some (some b)` (the k-th outer arrow binder's domain
+  base). It drives `Ty.WFBVarCtx_openVar_last` (WFBVars is preserved by opening),
+  which `subtyp_sound` threads through its arrow rule. -/
 
 /-- `Term.hasBVar b k t`: t contains at least one `Term.bvar b k`. -/
 def Term.hasBVar (b : Base) (k : Nat) : {b' : Base} → Term b' → Prop
@@ -235,11 +229,9 @@ theorem TEnv.WFBVars.lookup {Γ : TEnv} (hΓ : TEnv.WFBVars Γ) {x : EVar} {t : 
 
 /-! ### `hasBVar` under the shifting open
 
-  With `openBVar k` base-agnostic and shifting, a `BVar b i` occurs in
-  `t.openBVar k x` iff it came from level `i` (below the opened level `k`) or
-  from level `i+1` (at/above `k`, shifted down). This single characterization
-  replaces the old base-specific `openBVar_noop` / `hasBVar_openBVar_other` /
-  `not_hasBVar_openBVar_same` family, and drives `Ty.WFBVarCtx_openVar_last`. -/
+  A `BVar b i` occurs in `t.openBVar k x` iff it came from level `i` (below the
+  opened level `k`) or from level `i+1` (at/above `k`, shifted down). This
+  characterization drives `Ty.WFBVarCtx_openVar_last`. -/
 
 theorem Term.hasBVar_openBVar {b'' : Base} (t : Term b'') (b : Base) (i k : Nat) (x : EVar) :
     Term.hasBVar b i (Term.openBVar k x t) ↔
@@ -791,8 +783,7 @@ theorem Exp.substEnv_congr (e : Exp) (γ₁ γ₂ : REnv)
       ih₁ fun z hz => h z (by simp [Exp.fv, hz]),
       ih₂ fun z hz => h z (by simp [Exp.fv, hz])]
 
-/-- Extending `γ` at a name `y` not free in `e` does not change `substEnv`. The
-    single-env analogue of the old `substEnv_cons_fresh`. -/
+/-- Extending `γ` at a name `y` not free in `e` does not change `substEnv`. -/
 theorem Exp.substEnv_write_fresh (e : Exp) (γ : REnv) (y : EVar) (v : Val)
     (h : y ∉ e.fv) :
     Exp.substEnv (γ.write y v) e = Exp.substEnv γ e := by
@@ -802,8 +793,7 @@ theorem Exp.substEnv_write_fresh (e : Exp) (γ : REnv) (y : EVar) (v : Val)
 
 /-- Key lemma for the lam/letin cases: opening the binder with a fresh `z` and
     then closing under `γ.write z va` equals closing the body under `γ` and then
-    plugging `va` into the bound position. The merged single-env analogue of the
-    old `substEnv_cons_openVar`. -/
+    plugging `va` into the bound position. -/
 theorem Exp.substEnv_write_openVar (e : Exp) (γ : REnv) (va : Val) (z : EVar) (k : Nat)
     (hz_fv : z ∉ e.fv) (hγ : ∀ w ∈ e.fv, Val.lc (γ.map w)) :
     Exp.substEnv (γ.write z va) (Exp.openVar k z e) =
@@ -857,18 +847,11 @@ theorem REnv.push_write_comm (γ : REnv) (w : Val) (x : EVar) (v : Val) :
     (γ.write x v).push w = (γ.push w).write x v := by
   apply REnv.ext <;> rfl
 
-/-- `update` (a `write` of an injected value) likewise commutes with `push`. -/
-theorem REnv.push_update_comm (γ : REnv) (w : Val) (b : Base) (x : EVar) (v : b.interp) :
-    (γ.update b x v).push w = (γ.push w).update b x v :=
-  REnv.push_write_comm γ w x (Val.inj b v)
-
 
 /-! ## Rename keystone: interpretation
 
-  Under the single-map `REnv`, renaming `x → y` corresponds to copying `y`'s
-  (single) cell into `x` with the Val-level `write`. (The old two-field version
-  set `x`'s int- and bool-slots independently to `y`'s; that has no single-map
-  analogue, since one cell cannot hold both an `Int` and a `Bool` at once.) -/
+  Renaming `x → y` corresponds to copying `y`'s cell into `x` with the Val-level
+  `write`. -/
 
 theorem REnv.get_write_other (b : Base) (γ : REnv) (x : EVar) (v : Val) {y : EVar}
     (h : x ≠ y) : REnv.get b (γ.write x v) y = REnv.get b γ y := by
@@ -1060,9 +1043,8 @@ theorem Formula.interp_openBVar (x : EVar) (w : Val) :
     refinement against a `write`-updated name-map slot equals interpreting the
     original against a value `insertBV`-ed into the de Bruijn stack at level `k`.
     Premise-free beyond `k ≤ len` and freshness. The `k = 0` case
-    (`insertBV 0 = push`) is what lets the *opened* `Subtyp.refine` (and the
-    *named* `.all` binder the generator emits) discharge the same VC the
-    `push`-based form did. -/
+    (`insertBV 0 = push`) bridges the generator's named `.all` binder and the
+    opened `Subtyp.refine` with the `push`-based denotation. -/
 theorem Refinement.interp_openBVar (κ : KEnv) (r : Refinement) (γ : REnv)
     (x : EVar) (w : Val) (k : Nat) (hk : k ≤ γ.bv.length) (hx : x ∉ r.fv) :
     Refinement.interp κ (r.openBVar k x) (γ.write x w) ↔

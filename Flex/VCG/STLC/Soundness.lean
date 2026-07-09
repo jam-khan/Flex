@@ -10,6 +10,43 @@ open STLC
 
 -/
 
+namespace STLC
+
+/-- `implyBindCstr` over a refined binding interprets as a `push`-form
+    quantified bind, provided `x` is fresh for `r`. -/
+theorem implyBindCstr_interp (κ : KEnv) (x : EVar) (b : Base) (r : Refinement)
+    (c : Cstr) (γ : REnv) (hx : x ∉ r.fv) :
+    (implyBindCstr x (.refine b r) c).interp κ γ ↔
+    ∀ v : b.interp, Refinement.interp κ r (γ.push (Val.inj b v)) →
+      c.interp κ (REnv.update b γ x v) := by
+  simp only [implyBindCstr, Cstr.interp]
+  constructor <;> intro h v
+  · intro hr
+    exact h v ((Refinement.interp_openBVar κ r γ x (Val.inj b v) 0 (Nat.zero_le _) hx).mpr hr)
+  · intro hr
+    exact h v ((Refinement.interp_openBVar κ r γ x (Val.inj b v) 0 (Nat.zero_le _) hx).mp hr)
+
+/-- Semantic (`push`-form) reading of a bind; keeps the soundness proofs'
+    `cases s` structure. -/
+def implyBindSem (κ : KEnv) (x : EVar) (t : Ty) (c : Cstr) (γ : REnv) : Prop :=
+  match t with
+  | .refine b r => ∀ v : b.interp,
+                     Refinement.interp κ r (γ.push (Val.inj b v)) →
+                       c.interp κ (REnv.update b γ x v)
+  | .arrow _ _  => c.interp κ γ
+
+/-- `implyBindCstr` interprets as `implyBindSem`, for *any* binding type
+    (provided `x` is fresh for the binding's refinement). -/
+theorem implyBindCstr_interp_gen (κ : KEnv) (x : EVar) (t : Ty) (c : Cstr)
+    (γ : REnv) (hx : x ∉ t.fv) :
+    (implyBindCstr x t c).interp κ γ ↔ implyBindSem κ x t c γ := by
+  cases t with
+  | refine b r =>
+      exact implyBindCstr_interp κ x b r c γ (by simpa [Ty.fv] using hx)
+  | arrow s t => simp only [implyBindCstr, implyBindSem]
+
+end STLC
+
 /-! ## Sub soundness -/
 
 /-- `Exp.WFBVars` is preserved under `Exp.openVar`. (openVar replaces a `bvar k`
@@ -359,12 +396,6 @@ mutual
         simp only [L₀, List.mem_append, not_or] at h ⊢
         grind
       exact Check.letin hsy hfresh₀ hbody₀
-      -- have hx₀_fresh : x₀ ∉ Γ.dom ++ s.fv ++ e2.fv ++ Ty.fv t
-      --         ++ Ty.named s ++ Ty.named t
-      --         ++ TEnv.tyFv Γ ++ TEnv.tyNamed Γ ++ [nuName] := by
-      --   have hx₀_fresh_L₀ : x₀ ∉ L₀ := EVar.fresh_not_mem _
-      --   grind
-      -- exact Check.rename_letin_body x₀ x hx₀_fresh hx_fresh hbody₀
     | .leq (.fvar x) (.fvar y) =>
       simp_all [check]
       obtain ⟨c₁, s, hc₁⟩ : ∃ c₁ s, synth Γ ((Exp.fvar x).leq (Exp.fvar y)) = some (c₁, s) := by grind

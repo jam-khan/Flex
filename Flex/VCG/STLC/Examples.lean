@@ -25,17 +25,12 @@ abbrev TT  : Ty := <ty| Int{ν : ⊤}|>
 
 abbrev Pos : Ty :=  <ty| Int{ν : 1 ≤ ν}|>
 
-def NatR : Ty := <ty| Int{ν : 0 ≤ ν }|>
-
 /-- `IntN n = {ν : Int | ν = n}`. -/
 abbrev IntN (n : Int) : Ty := <ty| Int{ν : ν = ⌜n⌝}|>
 
 /-- κ-refinement on int: `{ν : Int | k(ν)}` for κ-symbol `k`. -/
 abbrev IntK (k : STLC.KVar) : Ty :=
   .refine .int (.kapp k [⟨.int, .bvar .int 0⟩])
-
-abbrev IntK2 (k : STLC.KVar) : Ty :=
-  .refine .int (.kapp k [⟨.int, .bvar .int 1⟩, ⟨.int, .bvar .int 0⟩])
 
 /-- κ-refinement on int: `{ν | k(x, y, ν)}` for the two enclosing arrow binders.
     `bvar 2` = x (outer arg), `bvar 1` = y (inner arg), `bvar 0` = ν. -/
