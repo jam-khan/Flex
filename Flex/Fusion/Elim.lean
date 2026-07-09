@@ -28,16 +28,6 @@ partial def exprElimStar (κ : KVar) (sol : Expr) (e : Expr) : KM Expr := do
     else
       return substKVarInExpr κ sol e
 
-/-- `elim1(κ, c)` per Cosman & Jhala 2017 §5.3 (Fig. 11).
-    Returns `(σ̂_body, elim*(σ̂, c))`:
-      - `σ̂_body` = `sol1(κ, scope(κ, c))`, the body of the scoped solution.
-        This is what you wrap as `λx̄. σ̂_body` to assign to κ-mvar.
-      - `elim*(σ̂, c)` is the constraint with κ-uses substituted away.
-
-    Caller is responsible for assigning κ-mvar AFTER consuming the new
-    constraint — never before, or `whnf` will eagerly expand `?κ` and the
-    next iteration's elim1 will see no raw `?κ` to substitute. -/
-
 def exprElim1 (κ : KVar) (e : Expr) : KM (Expr × Expr) := do
   let scoped' ← exprScope κ e
   let sol     ← exprSolScoped κ scoped'

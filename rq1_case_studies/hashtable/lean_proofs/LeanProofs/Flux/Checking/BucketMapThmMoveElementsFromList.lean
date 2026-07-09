@@ -1,0 +1,4 @@
+import LeanProofs.Flux.VC.BucketMapThmMoveElementsFromList
+import LeanProofs.User.Proof.BucketMapThmMoveElementsFromListProof
+
+#check (F.BucketMapThmMoveElementsFromList_proof : F.BucketMapThmMoveElementsFromList)

@@ -1,0 +1,14 @@
+import LeanProofs.Flux.Prelude
+import LeanProofs.Flux.VC.VectorsTest1
+-- import LeanProofs.Lib.Tactics
+import Flex
+import LeanProofs.Lib.Lemmas
+
+namespace F
+
+def VectorsTest1_proof : VectorsTest1 := by
+  unfold VectorsTest1
+  fusion
+  solve_fixpoint
+
+end F

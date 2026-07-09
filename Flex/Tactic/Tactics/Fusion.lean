@@ -12,24 +12,6 @@ open Lean Meta Elab Tactic
     summary). Off by default — enable with `set_option trace.Fusion.debug true`. -/
 initialize registerTraceClass `Fusion.debug
 
-/-! ## `fusion` tactic
-
-  Cosman–Jhala fusion for the *acyclic* κ's of a refinement constraint — the
-  first half of the solver, complementing `fixpoint` (predicate abstraction for
-  the cyclic κ's).
-
-  On a goal `∃ κ₁ … κₙ, P`, `fusion`:
-
-  1. peels the ∃-chain into fresh κ-mvars and classifies them into acyclic /
-     cyclic (`exprPartitionKVars`);
-  2. for each acyclic κ in topological order, computes its strongest solution
-     `σ̂` (`sol`) and eliminates it (`elim*`): head-position κ-apps collapse to
-     `True`, hypothesis-position κ-apps are replaced by `σ̂`;
-  3. rebuilds the proof (the `destructAndBuild`/`nav` bridge) and leaves
-     the residual `∃ κ_cyclic, P'` — body with every acyclic κ gone, cyclic κ's
-     still bound — plus any leaf obligations fusion could not discharge.
-
-  Hand the residual to `fix`, or use `solve` (= `zap` then `fix`). -/
 syntax "zap" : tactic
 
 /-- Build the bridge proof `(∃ κ_cyclic, P') → (∃ κ₁ … κₙ, P)`: ∃-eliminate the

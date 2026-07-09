@@ -1,0 +1,4 @@
+import LeanProofs.Flux.VC.BucketMapImpl__0__InsertNoResize
+import LeanProofs.User.Proof.BucketMapImpl__0__InsertNoResizeProof
+
+#check (F.BucketMapImpl__0__InsertNoResize_proof : F.BucketMapImpl__0__InsertNoResize)

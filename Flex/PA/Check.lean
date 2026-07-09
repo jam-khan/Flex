@@ -19,12 +19,6 @@ private def withSilencedMessages {α} (k : TermElabM α) : TermElabM α := do
     Core.setMessageLog saved
     throw e
 
--- Attempt to prove `prop` via the standard tactic ladder.
--- Returns `true` iff all goals are closed AND the resulting proof term
--- contains no `sorry`. Lean's `(constructor <;> grind)` silently uses
--- `sorry` for unsolved sub-goals, so `goals.isEmpty` alone is unsound:
--- `Tactic.run` reports goals=0, mvar.isAssigned=true, but the proof has
--- `sorry` inside.
 def checkExprVC (prop : Expr) : TermElabM Bool := withSilencedMessages do
   let mvar   ← mkFreshExprMVar (some prop) (kind := .syntheticOpaque)
   let mvarId := mvar.mvarId!
@@ -48,17 +42,6 @@ def checkExprVC (prop : Expr) : TermElabM Bool := withSilencedMessages do
   catch _ =>
     return false
 
--- Proof-RETURNING oracle (§5 `prove`/`Provable`). Same contract as
--- `checkExprVC` — silence messages, run the tactic ladder, reject `sorry` —
--- but on success returns the proof *term* (Some) instead of a Bool. The
--- certifying PA glue (`walkPAProof`) calls this at each κ-head leaf to
--- discharge every survivor conjunct `q[ρ](x̄)`, then `And.intro`s the proofs.
---
--- The goal here is the bare atom `q[ρ](x̄)`; its hypotheses Γ (the ∀-binders
--- and guards) are already ambient fvars threaded in by the walk, so NO
--- `intros` is needed. The tactic ladder MUST match `checkExprVC`'s so that
--- any candidate that survived weakening re-proves at glue time (a superset
--- ladder is sound; a weaker one could drop a survivor and break the bridge).
 def proveLeaf (goal : Expr) : TermElabM (Option Expr) := withSilencedMessages do
   let mvar   ← mkFreshExprMVar (some goal) (kind := .syntheticOpaque)
   let mvarId := mvar.mvarId!
@@ -71,8 +54,6 @@ def proveLeaf (goal : Expr) : TermElabM (Option Expr) := withSilencedMessages do
           | (constructor <;> grind))))
     if !goals.isEmpty then return none
     let proof ← instantiateMVars mvar
-    -- Reject `sorry` (silently inserted by `constructor <;> grind` for
-    -- unsolved subgoals) and any still-unassigned mvar.
     if proof.hasSorry || proof.hasExprMVar then return none
     return some proof
   catch _ =>

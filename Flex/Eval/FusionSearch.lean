@@ -45,7 +45,6 @@ def SearchCloser.label : SearchCloser → String
 
 /-- Try to prove `prop` by running `closer` on a fresh goal in the *current*
     local context (so the in-scope binders/guards are available as hypotheses).
-    Returns the instantiated, `sorry`-free proof on success, else `none`.
 
     `grind`/`aesop` report failures through the *message log* rather than the
     exception path, so we snapshot/restore the log around the attempt (the
