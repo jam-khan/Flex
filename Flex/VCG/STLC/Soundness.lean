@@ -47,7 +47,7 @@ theorem sub_sound (κ : KEnv) (Γ : TEnv) (s t : Ty) (c : Cstr) :
     refine Subtyp.refine hfr (Entail.ext ?_)
     intro γ hm v h1
     have hc := hent γ hm; simp only [Cstr.interp] at hc
-    exact hc v ((Refinement.interp_instNu κ r1 γ x (Val.inj .int v) hx1).mpr h1)
+    exact hc v ((Refinement.interp_openBVar κ r1 γ x (Val.inj .int v) 0 (Nat.zero_le _) hx1).mpr h1)
   | .refine .bool r1, .refine .bool r2 =>
     simp only [sub, Option.some.injEq] at hsub
     subst hsub
@@ -57,7 +57,7 @@ theorem sub_sound (κ : KEnv) (Γ : TEnv) (s t : Ty) (c : Cstr) :
     refine Subtyp.refine hfr (Entail.ext ?_)
     intro γ hm v h1
     have hc := hent γ hm; simp only [Cstr.interp] at hc
-    exact hc v ((Refinement.interp_instNu κ r1 γ x (Val.inj .bool v) hx1).mpr h1)
+    exact hc v ((Refinement.interp_openBVar κ r1 γ x (Val.inj .bool v) 0 (Nat.zero_le _) hx1).mpr h1)
   | .arrow s1 t1, .arrow s2 t2 =>
     simp_all [sub]
     let w := (EVar.fresh (Γ.dom ++ (Γ.tyFv ++ (s1.fv ++ (s2.fv ++ (t1.fv ++ t2.fv))))))

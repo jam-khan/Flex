@@ -23,14 +23,15 @@ open STLC
 
 inductive Subtyp : KEnv → TEnv → Ty → Ty → Prop where
   /-- SUB-BASE (opened): `κ; Γ, x:{ν:b|r₁} ⊢ r₂[ν↦x]  ⟹  κ; Γ ⊢ {ν:b|r₁} <: {ν:b|r₂}`.
-      ν is *opened* to a fresh name `x` via `Refinement.instNu` — the exact
+      ν is *opened* to a fresh name `x` via `Refinement.openBVar 0` — the exact
       refinement-level analogue of how `arrow` opens its argument binder with
-      `Ty.openVar`. The hypothesis `r₁` enters `Γ` as the binding `x:{ν:b|r₁}`;
-      the goal is the opened `r₂` under that extended context. Works uniformly
-      whether `r₁`/`r₂` are formulas or κ-applications. -/
+      `Ty.openVar` (both are now the same base-agnostic, shifting open). The
+      hypothesis `r₁` enters `Γ` as the binding `x:{ν:b|r₁}`; the goal is the
+      opened `r₂` under that extended context. Works uniformly whether
+      `r₁`/`r₂` are formulas or κ-applications. -/
   | refine {κ Γ b r₁ r₂ x} :
       x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ r₁.fv ++ r₂.fv →
-      Entail κ ((x, .refine b r₁) :: Γ) (fun γ => Refinement.interp κ (r₂.instNu x) γ) →
+      Entail κ ((x, .refine b r₁) :: Γ) (fun γ => Refinement.interp κ (r₂.openBVar 0 x) γ) →
       Subtyp κ Γ (.refine b r₁) (.refine b r₂)
 
   /-- SUB-FUN (explicit witness): contravariant input, covariant output. -/

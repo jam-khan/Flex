@@ -24,8 +24,8 @@ open STLC
   interprets as `∀ v:b, c[x ↦ v]`, updating the `REnv` name map at `x` (the de
   Bruijn stack stays empty). A refinement placed into a `.imp`/`.head` therefore
   has its ν (`bvar 0`) *opened* to the enclosing binder name `x` via
-  `Refinement.instNu` (defined in `Substitution.lean`) at generation time — the
-  same opening `Subtyp.refine` uses declaratively.
+  `Refinement.openBVar 0` (defined in `Substitution.lean`) at generation time —
+  the same opening `Subtyp.refine` uses declaratively.
 -/
 
 /-- The interpreted form of a constraint: a `κ`-indexed predicate over runtime
@@ -40,7 +40,7 @@ namespace STLC
     quantification. The refinement's ν is instantiated to the fresh name `x`. -/
 def implyBindCstr (x : EVar) (t : Ty) (c : Cstr) : Cstr :=
   match t with
-  | .refine b r => .all x b (.imp (r.instNu x) c)
+  | .refine b r => .all x b (.imp (r.openBVar 0 x) c)
   | .arrow _ _  => c
 
 /-- Bridge: `implyBindCstr` over a refined binding interprets exactly as the old
@@ -53,9 +53,9 @@ theorem implyBindCstr_interp (κ : KEnv) (x : EVar) (b : Base) (r : Refinement)
   simp only [implyBindCstr, Cstr.interp]
   constructor <;> intro h v
   · intro hr
-    exact h v ((Refinement.interp_instNu κ r γ x (Val.inj b v) hx).mpr hr)
+    exact h v ((Refinement.interp_openBVar κ r γ x (Val.inj b v) 0 (Nat.zero_le _) hx).mpr hr)
   · intro hr
-    exact h v ((Refinement.interp_instNu κ r γ x (Val.inj b v) hx).mp hr)
+    exact h v ((Refinement.interp_openBVar κ r γ x (Val.inj b v) 0 (Nat.zero_le _) hx).mp hr)
 
 /-- Semantic (`push`-form) reading of a bind, matching the pre-refactor
     `implyBind`. Used to keep the soundness proofs' `cases s` structure. -/
@@ -86,10 +86,10 @@ end STLC
 def sub (Γ : TEnv) : Ty → Ty → Option Cstr
   | .refine .int  r₁, .refine .int  r₂ =>
       let x := EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ ++ r₁.fv ++ r₂.fv)
-      some (.all x .int (.imp (r₁.instNu x) (.head (r₂.instNu x))))
+      some (.all x .int (.imp (r₁.openBVar 0 x) (.head (r₂.openBVar 0 x))))
   | .refine .bool r₁, .refine .bool r₂ =>
       let x := EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ ++ r₁.fv ++ r₂.fv)
-      some (.all x .bool (.imp (r₁.instNu x) (.head (r₂.instNu x))))
+      some (.all x .bool (.imp (r₁.openBVar 0 x) (.head (r₂.openBVar 0 x))))
   | .arrow s₁ t₁, .arrow s₂ t₂ =>
       let x := EVar.fresh (TEnv.dom Γ ++ TEnv.tyFv Γ
                             ++ s₁.fv ++ s₂.fv ++ t₁.fv ++ t₂.fv)
