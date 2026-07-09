@@ -13,22 +13,24 @@ open STLC
   Binding sites use locally-nameless: `Exp.lam`/`letin` carry no binder name;
   the body has `BVar 0` for the parameter.
 
-  Refinements are deeply-embedded `Formula`s; `Subtyp.refine`'s constraint is
-  expressed via `Refinement.subImp` (a `Formula.allI`/`allB` over `ν`).
+  Refinements are deeply-embedded `Formula`s. Both binder rules — `Subtyp.arrow`
+  and `Subtyp.refine` — are stated in *opened* form: they introduce a fresh name
+  and check the codomain / opened refinement under the extended context.
 
 -/
 
 /-! ## Subtyping  κ; Γ ⊢ s <: t -/
 
 inductive Subtyp : KEnv → TEnv → Ty → Ty → Prop where
-  /-- SUB-BASE: `κ; Γ ⊢ ∀ν. r₁(ν) → r₂(ν)`  ⟹  `κ; Γ ⊢ {ν:b|r₁} <: {ν:b|r₂}`.
-      Stated *semantically* over `Refinement.interp` (matching what the
-      algorithmic `sub` produces), so it works uniformly whether `r₁`/`r₂` are
-      formulas or κ-applications. -/
-  | refine {κ Γ b r₁ r₂} :
-      Entail κ Γ (fun γ => ∀ ν : b.interp,
-        Refinement.interp κ r₁ (γ.push (Val.inj b ν)) →
-        Refinement.interp κ r₂ (γ.push (Val.inj b ν))) →
+  /-- SUB-BASE (opened): `κ; Γ, x:{ν:b|r₁} ⊢ r₂[ν↦x]  ⟹  κ; Γ ⊢ {ν:b|r₁} <: {ν:b|r₂}`.
+      ν is *opened* to a fresh name `x` via `Refinement.instNu` — the exact
+      refinement-level analogue of how `arrow` opens its argument binder with
+      `Ty.openVar`. The hypothesis `r₁` enters `Γ` as the binding `x:{ν:b|r₁}`;
+      the goal is the opened `r₂` under that extended context. Works uniformly
+      whether `r₁`/`r₂` are formulas or κ-applications. -/
+  | refine {κ Γ b r₁ r₂ x} :
+      x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ r₁.fv ++ r₂.fv →
+      Entail κ ((x, .refine b r₁) :: Γ) (fun γ => Refinement.interp κ (r₂.instNu x) γ) →
       Subtyp κ Γ (.refine b r₁) (.refine b r₂)
 
   /-- SUB-FUN (explicit witness): contravariant input, covariant output. -/

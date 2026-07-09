@@ -655,7 +655,7 @@ theorem EnvCloses.extend {κ Γ γ} (hE : EnvCloses κ Γ γ)
 
 private theorem Subtyp.optBase_eq {κ Γ s t} (h : Subtyp κ Γ s t) : s.optBase = t.optBase := by
   cases h with
-  | refine => rfl
+  | refine _ _ => rfl
   | arrow => simp [Ty.optBase]
 
 /-- ModelsEnv is preserved when extending γ at z fresh from Γ. -/
@@ -722,18 +722,27 @@ theorem subtyp_sound {κ Γ s t} (hsub : Subtyp κ Γ s t)
     (hWF_s : Ty.WFBVars s) (hWF_t : Ty.WFBVars t) :
     ∀ {γ}, ModelsEnv κ γ Γ → ∀ {v}, TyDenote κ s γ v → TyDenote κ t γ v := by
   induction hsub with
-  | refine hent =>
-      rename_i b r₁ r₂
+  | refine hfresh hent =>
+      rename_i b r₁ r₂ x
       intro γ hΓ v hs
+      simp only [List.mem_append, not_or] at hfresh
+      obtain ⟨⟨⟨hx_dom, hx_tyfv⟩, hx_r₁⟩, hx_r₂⟩ := hfresh
+      have hx_r₁' : x ∉ (Ty.refine b r₁).fv := by simpa [Ty.fv] using hx_r₁
+      -- Feed the witness through the opened rule: extend the model at the fresh
+      -- `x`, read off the opened `r₂`, then close ν back to push form.
       cases b with
       | int =>
         simp only [TyDenote] at hs ⊢
         obtain ⟨n, hvn, hp₁⟩ := hs
-        exact ⟨n, hvn, hent γ hΓ n hp₁⟩
+        have h := hent _ (ModelsEnv.extendBy_cons hΓ _ x _ hx_dom hx_tyfv hx_r₁'
+          (by simp only [TyDenote]; exact ⟨n, rfl, hp₁⟩))
+        exact ⟨n, hvn, (Refinement.interp_instNu κ r₂ γ x (Val.inj .int n) hx_r₂).mp h⟩
       | bool =>
         simp only [TyDenote] at hs ⊢
         obtain ⟨bv, hvb, hp₁⟩ := hs
-        exact ⟨bv, hvb, hent γ hΓ bv hp₁⟩
+        have h := hent _ (ModelsEnv.extendBy_cons hΓ _ x _ hx_dom hx_tyfv hx_r₁'
+          (by simp only [TyDenote]; exact ⟨bv, rfl, hp₁⟩))
+        exact ⟨bv, hvb, (Refinement.interp_instNu κ r₂ γ x (Val.inj .bool bv) hx_r₂).mp h⟩
   | arrow hdom hfresh hcodom ih_hdom ih_hcodom =>
     rename_i Γ' s₁ t₁ s₂ t₂ x
     obtain ⟨hWF_s1, hWF_st1⟩ := hWF_s
