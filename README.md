@@ -2,8 +2,6 @@
 
 A Lean 4 library for a constraint-solving framework for Constrained Horn Clauses (CHCs).
 
-> ⚠️ This is a private repository. You must be a collaborator to use it as a dependency.
-
 ---
 
 ## Using as a Dependency
@@ -11,7 +9,6 @@ A Lean 4 library for a constraint-solving framework for Constrained Horn Clauses
 ### Prerequisites
 
 - [Lean 4](https://leanprover.github.io/lean4/doc/quickstart.html) installed via `elan`
-- Access to this private GitHub repository
 
 ### Step 1 — Add to your `lakefile.toml`
 
