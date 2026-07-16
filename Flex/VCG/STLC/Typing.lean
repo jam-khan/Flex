@@ -90,6 +90,13 @@ mutual
         Subtyp κ Γ s t →
         Check κ Γ e t
 
+    /-- UNREACH: `unreachable` typechecks at any type, provided the ambient
+        context is provably contradictory (no model of `Γ` exists). It is not
+        a value and has no `BigStep` rule — it can only appear in dead code. -/
+    | unreach {κ Γ t} :
+        Entail κ Γ (fun _ => False) →
+        Check κ Γ .unreach t
+
     | lam {κ Γ e s₁ s₂ x} :
         x ∉ TEnv.dom Γ ++ TEnv.tyFv Γ ++ e.fv ++ s₁.fv ++ s₂.fv →
         Check κ ((x, s₁) :: Γ) (e.openVar 0 x) (s₂.openVar 0 x) →

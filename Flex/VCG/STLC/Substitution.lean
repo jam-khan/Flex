@@ -187,7 +187,7 @@ def TEnv.WFBVars (Γ : TEnv) : Prop :=
     Used as a precondition on soundness theorems so the `.ann` case has the
     WFBVars evidence to construct the corresponding `Hastype` node. -/
 def Exp.WFBVars : Exp → Prop
-  | .bvar _ | .fvar _ | .iconst _ | .bconst _ => True
+  | .bvar _ | .fvar _ | .iconst _ | .bconst _ | .unreach => True
   | .lam e        => Exp.WFBVars e
   | .letin e₁ e₂  => Exp.WFBVars e₁ ∧ Exp.WFBVars e₂
   | .app e₁ e₂    => Exp.WFBVars e₁ ∧ Exp.WFBVars e₂
@@ -479,6 +479,7 @@ def Exp.openVar (k : Nat) (x : EVar) : Exp → Exp
   | .leq e₁ e₂     => .leq (e₁.openVar k x) (e₂.openVar k x)
   | .ite e₀ e₁ e₂  => .ite (e₀.openVar k x) (e₁.openVar k x) (e₂.openVar k x)
   | .add e₁ e₂     => .add (e₁.openVar k x) (e₂.openVar k x)
+  | .unreach       => .unreach
 
 /-- Structural skeleton size: counts constructor depth, ignoring leaf details
     (so `Exp.skel` is preserved under `openVar` / `subst`). Used as a
@@ -498,6 +499,7 @@ def Exp.skel : Exp → Nat
   | .leq e₁ e₂     => 1 + e₁.skel + e₂.skel
   | .ite e₀ e₁ e₂  => 1 + e₀.skel + e₁.skel + e₂.skel
   | .add e₁ e₂     => 1 + e₁.skel + e₂.skel
+  | .unreach       => 0
 
 @[simp]
 theorem Exp.skel_openVar (k : Nat) (x : EVar) (e : Exp) :
@@ -516,6 +518,7 @@ theorem Exp.skel_openVar (k : Nat) (x : EVar) (e : Exp) :
   | leq _ _ ih₁ ih₂    => simp [Exp.openVar, Exp.skel, ih₁, ih₂]
   | ite _ _ _ ih₀ ih₁ ih₂ => simp [Exp.openVar, Exp.skel, ih₀, ih₁, ih₂]
   | add _ _ ih₁ ih₂    => simp [Exp.openVar, Exp.skel, ih₁, ih₂]
+  | unreach            => rfl
 
 /-! ## 7. TEnv free variables -/
 
@@ -547,6 +550,7 @@ def Exp.substEnv (γ : REnv) : Exp → Exp
   | .not e        => .not (Exp.substEnv γ e)
   | .and e₁ e₂    => .and (Exp.substEnv γ e₁) (Exp.substEnv γ e₂)
   | .ite e₀ e₁ e₂ => .ite (Exp.substEnv γ e₀) (Exp.substEnv γ e₁) (Exp.substEnv γ e₂)
+  | .unreach      => .unreach
 
 /-! ## 9. Freshness helper
 
@@ -645,11 +649,15 @@ theorem Exp.substEnv_and (γ : REnv) (e₁ e₂ : Exp) :
 theorem Exp.substEnv_ite (γ : REnv) (e₀ e₁ e₂ : Exp) :
     Exp.substEnv γ (.ite e₀ e₁ e₂) = .ite (Exp.substEnv γ e₀) (Exp.substEnv γ e₁) (Exp.substEnv γ e₂) := rfl
 
+@[simp]
+theorem Exp.substEnv_unreach (γ : REnv) :
+    Exp.substEnv γ .unreach = .unreach := rfl
+
 /-- A closed expression is fixed under the closing substitution. -/
 theorem Exp.substEnv_closed (γ : REnv) (e : Exp) (he : e.fv = []) :
     Exp.substEnv γ e = e := by
   induction e with
-  | bvar _ | iconst _ | bconst _ => rfl
+  | bvar _ | iconst _ | bconst _ | unreach => rfl
   | fvar y => simp [Exp.fv] at he
   | lam body ih => simp only [Exp.fv] at he; simp only [Exp.substEnv, ih he]
   | ann e t ih => simp only [Exp.fv] at he; simp only [Exp.substEnv, ih he]
@@ -685,7 +693,7 @@ theorem Exp.substEnv_fv_nil (γ : REnv) (e : Exp)
     (hcl : ∀ z ∈ e.fv, Val.closed (γ.map z)) :
     (Exp.substEnv γ e).fv = [] := by
   induction e with
-  | bvar _ | iconst _ | bconst _ => rfl
+  | bvar _ | iconst _ | bconst _ | unreach => rfl
   | fvar x => exact Val.toExp_closed_of_closed (hcl x (by simp [Exp.fv]))
   | lam body ih => exact ih fun z hz => hcl z (by simpa [Exp.fv] using hz)
   | ann e t ih => exact ih fun z hz => hcl z (by simpa [Exp.fv] using hz)
@@ -717,6 +725,7 @@ theorem Exp.lc_at_of_openVar (e : Exp) (k : Nat) (x : EVar)
   | fvar _ => trivial
   | iconst _ => trivial
   | bconst _ => trivial
+  | unreach => trivial
   | lam body ih =>
     simp only [Exp.openVar, Exp.lc_at] at h ⊢
     exact ih (k + 1) h
@@ -755,6 +764,7 @@ theorem Exp.openExp_of_lc_at (e : Exp) (k : Nat) (u : Exp) (h : Exp.lc_at k e) :
   | fvar _ => rfl
   | iconst _ => rfl
   | bconst _ => rfl
+  | unreach => rfl
   | lam body ih =>
     simp only [Exp.lc_at] at h; simp only [Exp.openExp]; congr 1; exact ih (k+1) h
   | letin e₁ e₂ ih₁ ih₂ =>
@@ -788,6 +798,7 @@ theorem Exp.lc_at_mono (e : Exp) {j k : Nat} (hjk : j ≤ k) (h : Exp.lc_at j e)
   | fvar _ => trivial
   | iconst _ => trivial
   | bconst _ => trivial
+  | unreach => trivial
   | lam body ih =>
     simp only [Exp.lc_at] at *
     exact ih (Nat.succ_le_succ hjk) h
@@ -823,7 +834,7 @@ theorem Exp.substEnv_lc_at (γ : REnv) (e : Exp) (k : Nat)
     (e.substEnv γ).lc_at k := by
   induction e generalizing k with
   | bvar j => simpa [Exp.substEnv] using hlc_e
-  | iconst _ | bconst _ => trivial
+  | iconst _ | bconst _ | unreach => trivial
   | fvar x =>
     exact Exp.lc_at_mono _ (Nat.zero_le k) (Val.toExp_lc_at_zero (hγ x (by simp [Exp.fv])))
   | lam body ih =>
@@ -873,7 +884,7 @@ theorem Exp.substEnv_congr (e : Exp) (γ₁ γ₂ : REnv)
     (h : ∀ z ∈ e.fv, γ₁.map z = γ₂.map z) :
     Exp.substEnv γ₁ e = Exp.substEnv γ₂ e := by
   induction e with
-  | bvar _ | iconst _ | bconst _ => rfl
+  | bvar _ | iconst _ | bconst _ | unreach => rfl
   | fvar x => simp only [Exp.substEnv, h x (by simp [Exp.fv])]
   | lam e ih | ann e _ ih | not e ih =>
     simp only [Exp.substEnv, ih fun z hz => h z (by simpa [Exp.fv] using hz)]
@@ -910,7 +921,7 @@ theorem Exp.substEnv_write_openVar (e : Exp) (γ : REnv) (va : Val) (z : EVar) (
     by_cases hjk : j = k
     · subst hjk; simp [Exp.openVar, Exp.substEnv, Exp.openExp]
     · simp [Exp.openVar, Exp.substEnv, Exp.openExp, hjk]
-  | iconst _ | bconst _ => rfl
+  | iconst _ | bconst _ | unreach => rfl
   | fvar y =>
     have hyz : z ≠ y := fun he => hz_fv (by simp [Exp.fv, he])
     show Exp.substEnv (γ.write z va) (.fvar y) = Exp.openExp k va.toExp ((γ.map y).toExp)
