@@ -31,7 +31,7 @@ import Flex.VCG.STLC.Syntax
   refine ::= fmla | ident term*          -- κ-application
   ty    ::= Int { ident : refine } | Bool { ident : refine }
            | ty -> ty | (ident : ty) -> ty | (ty)
-  exp   ::= ident | numeral | (exp)
+  exp   ::= ident | numeral | (exp) | unreachable
            | λ ident, exp | let ident = exp in exp
            | exp exp | (exp : ty)
            | exp + exp | exp ≤ exp | exp ∧ exp | ¬exp
@@ -90,6 +90,7 @@ syntax:25  stlcTy:26 " -> " stlcTy:25                  : stlcTy
 syntax:max "(" stlcExp ")"                            : stlcExp
 syntax:max ident                                      : stlcExp
 syntax:max num                                        : stlcExp
+syntax:max "unreachable"                              : stlcExp
 syntax:max "(" stlcExp " : " stlcTy ")"               : stlcExp
 syntax:max "¬" stlcExp:max                            : stlcExp
 syntax:70 stlcExp:70 stlcExp:71                       : stlcExp  -- application
@@ -222,6 +223,7 @@ partial def eExp (ctx : List String) (e : TSyntax `stlcExp) : MacroM (TSyntax `t
   match e with
   | `(stlcExp| ($inner:stlcExp))               => eExp ctx inner
   | `(stlcExp| $n:num)                         => `(Exp.iconst $n)
+  | `(stlcExp| unreachable)                    => `(Exp.unreach)
   | `(stlcExp| $x:ident)                       =>
       let name := x.getId.toString
       match ctx.findIdx? (· == name) with

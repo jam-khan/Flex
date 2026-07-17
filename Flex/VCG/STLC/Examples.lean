@@ -230,12 +230,7 @@ example (κ : KEnv) : topVC κ [] exAddExp exAddTy := by
   `unreach` typechecks there at *any* result type, including `Pos`. -/
 
 abbrev exUnreachable : Exp :=
-  .lam                                    -- λ x.
-    (.letin (.iconst 0)                   -- let z = 0
-      (.letin (.leq (.bvar 1) (.bvar 0))  -- let c = x ≤ z
-        (.ite (.bvar 0)                   -- if c
-              (.iconst 1)                 -- then 1
-              .unreach)))                 -- else unreachable
+  <| λ x, let z = 0 in let c = x ≤ z in if c then 1 else unreachable |>
 
 abbrev tyUnreachable : Ty :=
   .arrow (<ty| Int{ν : ν ≤ 0}|>) Pos
