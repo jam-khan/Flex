@@ -493,6 +493,9 @@ theorem hastype_fundamental {κ Γ e t} (h : Hastype κ Γ e t) :
     ∀ {γ}, EnvCloses κ Γ γ →
     ∃ v, BigStep (Exp.substEnv γ e) v ∧ TyDenote κ t γ v := by
   induction h with
+  | unreach hent _ =>
+      intro γ hE
+      exact (hent γ hE.toModelsEnv).elim
   | var hlk _ =>
       rename_i Γ x t hwf
       intro γ hE

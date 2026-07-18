@@ -92,6 +92,7 @@ mutual
 
 
   def check (Γ : TEnv) : Exp → Ty → Option Cstr
+    | .unreach, _ => some .ff
     | .lam e, .arrow s₁ s₂ =>
         let x := EVar.fresh (TEnv.dom Γ ++ e.fv ++ s₁.fv ++ s₂.fv ++ TEnv.tyFv Γ)
         match check ((x, s₁) :: Γ) (e.openVar 0 x) (s₂.openVar 0 x) with

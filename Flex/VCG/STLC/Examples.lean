@@ -220,6 +220,36 @@ def exAddTy : Ty := IntN 7
 example (κ : KEnv) : topVC κ [] exAddExp exAddTy := by
   simp [topVC, exAddExp, exAddTy]
 
+/-! ## `unreachable`: a dead `else`-branch typechecks via ex falso
+
+  `λ x. let z = 0 in let c = x ≤ z in if c then 1 else unreachable`
+  at `{ν:Int | ν ≤ 0} → Pos`.
+
+  The `else` branch's context binds `x ≤ 0` (the param refinement), `z = 0`,
+  `c ↔ (x ≤ z)`, and the path condition `c = false`. Since `x ≤ 0 ∧ z = 0`
+  forces `x ≤ z`, the `c ↔ (x ≤ z)` hypothesis then forces `c = true`,
+  contradicting `c = false` — so the branch context is unsatisfiable and
+  `unreach` typechecks there at *any* result type, including `Pos`. -/
+
+abbrev exUnreachable : Exp :=
+  <| λ x, let z = 0 in let c = x ≤ z in if c then 1 else unreachable |>
+
+abbrev tyUnreachable : Ty :=
+  .arrow (<ty| Int{ν : ν ≤ 0}|>) Pos
+
+example (κ : KEnv) : topVC κ [] exUnreachable tyUnreachable := by
+  simp [topVC]
+
+-- Declarative-side: `unreach` is directly derivable from a contradictory `Entail`.
+example (κ : KEnv) (Γ : TEnv) (t : Ty)
+    (h : Entail κ Γ (fun _ => False)) (hwf : Ty.WFBVars t) :
+    Hastype κ Γ .unreach t := .unreach h hwf
+
+-- Sanity check: `unreach` genuinely gets stuck — it has no `BigStep` rule.
+example : ¬ ∃ v, BigStep .unreach v := by
+  rintro ⟨v, hv⟩
+  cases hv
+
 /-! ## Declarative-side examples (via `topVC_decl_sound`) -/
 
 -- Identity (λx. x) is declaratively typeable at Pos → Pos.

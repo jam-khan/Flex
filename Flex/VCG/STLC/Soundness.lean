@@ -67,6 +67,7 @@ theorem Exp.WFBVars_openVar (e : Exp) (k : Nat) (x : EVar) :
   | leq e₁ e₂ ih₁ ih₂ => simp [Exp.openVar, Exp.WFBVars, ih₁, ih₂]
   | ite e₀ e₁ e₂ ih₀ ih₁ ih₂ => simp [Exp.openVar, Exp.WFBVars, ih₀, ih₁, ih₂]
   | add e₁ e₂ ih₁ ih₂ => simp [Exp.openVar, Exp.WFBVars, ih₁, ih₂]
+  | unreach => simp [Exp.openVar, Exp.WFBVars]
 
 
 theorem sub_sound (κ : KEnv) (Γ : TEnv) (s t : Ty) (c : Cstr) :
@@ -222,6 +223,9 @@ mutual
     | (.leq (.fvar _) (.bvar _)) | (.leq (.bvar _) _) | (.app _ (.add _ _)) | (.app _ (.ite _ _ _)) | (.app _ (.leq _ _)) | (.app _ (.not _))
     | (.app _ (.and _ _)) | (.app _ (.ann _ _)) | (.app _ (.app _ _)) | (.app _ (.letin _ _)) | (.app _ (.lam _)) | (.app _ (.bconst _))
     | (.app _ (.iconst _)) | (.app _ (.bvar _))
+    | .unreach | (.add .unreach _) | (.add (.fvar _) .unreach)
+    | (.leq .unreach _) | (.leq (.fvar _) .unreach) | (.not .unreach)
+    | (.and .unreach _) | (.and (.fvar _) .unreach) | (.app _ .unreach)
       => simp_all [synth]
   termination_by 2*e.skel
 
@@ -229,6 +233,11 @@ mutual
       check Γ e t = some c → Entail κ Γ (c.interp κ) → Check κ Γ e t := by
     intro hcheck hent
     match e with
+    | .unreach =>
+      simp only [check] at hcheck
+      injection hcheck with hc
+      subst hc
+      exact Check.unreach hent
     | .bvar i =>
       simp_all [check]
       obtain ⟨c₁, s', hc₁⟩ : ∃ c₁ s, synth Γ (.bvar i) = some (c₁, s) := by grind
@@ -434,26 +443,27 @@ mutual
     | (.ite (.add _ _) _ _) | (.ite (.ite _ _ _) _ _) | (.ite (.leq _ _) _ _) | (.ite (.not _) _ _)
     | (.ite (.and _ _) _ _) | (.ite (.ann _ _) _ _) | (.ite (.app _ _) _ _) | (.ite (.letin _ _) _ _)
     | (.ite (.lam _) _ _) | (.ite (.bconst true) _ _) | (.ite (.bconst false) _ _)
-    | (.ite (.iconst _) _ _) | (.ite (.bvar _) _ _)
+    | (.ite (.iconst _) _ _) | (.ite (.bvar _) _ _) | (.ite .unreach _ _)
     | (.not (.bvar _)) | (.not (.iconst _)) | (.not (.bconst _)) | (.not (.lam _))
     | (.not (.letin _ _)) | (.not (.app _ _)) | (.not (.ann _ _)) | (.not (.and _ _))
-    | (.not (.add _ _)) | (.not (.leq _ _)) | (.not (.ite _ _ _)) | (.not (.not _))
+    | (.not (.add _ _)) | (.not (.leq _ _)) | (.not (.ite _ _ _)) | (.not (.not _)) | (.not .unreach)
     | (.and (.fvar _) (.bvar _)) | (.and (.fvar _) (.iconst _)) | (.and (.fvar _) (.bconst _))
     | (.and (.fvar _) (.lam _)) | (.and (.fvar _) (.letin _ _)) | (.and (.fvar _) (.app _ _))
     | (.and (.fvar _) (.ann _ _)) | (.and (.fvar _) (.and _ _)) | (.and (.fvar _) (.add _ _))
-    | (.and (.fvar _) (.leq _ _)) | (.and (.fvar _) (.ite _ _ _)) | (.and (.fvar _) (.not _))
+    | (.and (.fvar _) (.leq _ _)) | (.and (.fvar _) (.ite _ _ _)) | (.and (.fvar _) (.not _)) | (.and (.fvar _) .unreach)
     | (.and (.bvar _) _) | (.and (.iconst _) _) | (.and (.bconst _) _) | (.and (.lam _) _)
     | (.and (.letin _ _) _) | (.and (.app _ _) _) | (.and (.ann _ _) _)
-    | (.and (.add _ _) _) | (.and (.leq _ _) _) | (.and (.ite _ _ _) _) | (.and (.not _) _) | (.and (.and _ _) _)
+    | (.and (.add _ _) _) | (.and (.leq _ _) _) | (.and (.ite _ _ _) _) | (.and (.not _) _) | (.and (.and _ _) _) | (.and .unreach _)
     | (.leq (.add _ _) _) | (.leq (.ite _ _ _) _) | (.leq (.leq _ _) _) | (.leq (.not _) _)
     | (.leq (.and _ _) _) | (.leq (.ann _ _) _) | (.leq (.app _ _) _) | (.leq (.letin _ _) _)
     | (.leq (.lam _) _) | (.leq (.bconst _) _) | (.leq (.iconst _) _) | (.leq (.fvar _) (.add _ _))
     | (.leq (.fvar _) (.ite _ _ _)) | (.leq (.fvar _) (.leq _ _)) | (.leq (.fvar _) (.not _)) | (.leq (.fvar _) (.and _ _))
     | (.leq (.fvar _) (.ann _ _)) | (.leq (.fvar _) (.app _ _)) | (.leq (.fvar _) (.letin _ _)) | (.leq (.fvar _) (.lam _))
     | (.leq (.fvar _) (.bconst _)) | (.leq (.fvar _) (.iconst _)) | (.leq (.fvar _) (.bvar _)) | (.leq (.bvar _) _)
+    | (.leq (.fvar _) .unreach) | (.leq .unreach _)
     | (.app _ (.add _ _)) | (.app _ (.ite _ _ _)) | (.app _ (.leq _ _)) | (.app _ (.not _))
     | (.app _ (.and _ _)) | (.app _ (.ann _ _)) | (.app _ (.app _ _)) | (.app _ (.letin _ _)) | (.app _ (.lam _)) | (.app _ (.bconst _))
-    | (.app _ (.iconst _)) | (.app _ (.bvar _))=>
+    | (.app _ (.iconst _)) | (.app _ (.bvar _)) | (.app _ .unreach)=>
       simp_all [check, synth]
   termination_by 2 * e.skel + 1
 end
@@ -497,6 +507,8 @@ mutual
       (h : Check κ Γ e t) :
       Hastype κ Γ e t := by
     match h with
+    | .unreach hent =>
+      exact .unreach hent ht
     | .sub hsy hsub =>
       have ⟨hht, _⟩ := synth_to_hastype hΓ hE hsy
       exact .sub hht hsub ht
