@@ -58,7 +58,9 @@ syntax "flex_spec_solve" ident : tactic
 macro_rules
   | `(tactic| flex_spec_solve $f:ident) =>
     `(tactic| first
-        | (intros; unfold $f:ident; leafClosers; done)
+        -- `at *`: a binder like `∀ b ∈ f xs, …` intros its membership into a
+        -- hypothesis, leaving the only `f`-occurrence outside the goal.
+        | (intros; unfold $f:ident at *; leafClosers; done)
         | (intros; fun_induction $f:ident <;> leafClosers; done)
         | (intros; unfold $f:ident;
            apply foldl_inv_spec; instantiate_goal; fix; done))

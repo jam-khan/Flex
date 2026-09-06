@@ -61,10 +61,21 @@ syntax (name := specCmd)
   "#spec " ident specBinder* " => " specBinder (" by " tacticSeq)? : command
 
 /-- Substitute every occurrence of the result variable `r` in the result
-refinement `q` by `repl` (the application `f x̄`). -/
+refinement `q` by `repl` (the application `f x̄`). Dot-notation on the result
+variable (`r.length`) parses as a single dotted ident rooted at `r`, so it is
+rewritten to a projection chain on `repl` (`(f x̄).length`). -/
 private def substResult (r : Name) (repl : Term) (q : Term) : Term :=
-  ⟨Id.run <| q.raw.replaceM fun s =>
-    if s.isIdent && s.getId == r then pure (some repl.raw) else pure none⟩
+  ⟨Id.run <| q.raw.replaceM fun s => do
+    unless s.isIdent do return none
+    let n := s.getId
+    if n == r then return some repl.raw
+    match n.components with
+    | root :: rest =>
+      if root == r && !rest.isEmpty then
+        return some <| rest.foldl (init := repl.raw) fun acc c =>
+          mkNode ``Lean.Parser.Term.proj #[acc, mkAtom ".", mkIdent c]
+      else return none
+    | _ => return none⟩
 
 /-- Parse a binder into `(name, type, hypothesis?)`. For arrow binders the
 type and hypothesis are synthesized: `(f : (i : T | p) => (r : U | q))`
@@ -108,9 +119,14 @@ elab_rules : command
       | some t => pure t
       | none   => `(tacticSeq| flex_spec_solve $f:ident)
     -- Error-count snapshot rather than `hasErrors`: an unrelated earlier error
-    -- in the file must not mask or fake this command's outcome.
+    -- in the file must not mask or fake this command's outcome. The theorem is
+    -- elaborated synchronously — under `Elab.async` its proof errors would
+    -- land after the snapshot (the `hasSorry` guard below would still catch
+    -- them, but the failure would surface as the wrong error).
     let errsBefore := ((← get).messages.toList.filter (·.severity == .error)).length
-    elabCommand (← `(command| theorem $declId:ident : $stmt := by $tacSeq))
+    elabCommand
+      (← `(command| set_option Elab.async false in
+                    theorem $declId:ident : $stmt := by $tacSeq))
     let errsAfter := ((← get).messages.toList.filter (·.severity == .error)).length
     if errsAfter > errsBefore then return
     -- `constructor <;> grind` inside `leafClosers` can silently insert
@@ -118,5 +134,15 @@ elab_rules : command
     if let some (.thmInfo v) := (← getEnv).find? thmName then
       if v.value.hasSorry then
         throwError "#spec: proof of {thmName} contains sorry"
+    -- Registration is best-effort: `grind_pattern` requires the pattern to
+    -- cover every top-level binder, which a result refinement of the shape
+    -- `∀ b ∈ r, …` violates (its `b` outlives the pattern `f x̄`). The
+    -- theorem stands either way; only search-composition is affected.
+    let saved := (← get).messages
     elabCommand (← `(command| grind_pattern $(mkIdent thmName):ident => $app:term))
-    logInfo m!"#spec: {thmName} proved and registered"
+    if ((← get).messages.toList.filter (·.severity == .error)).length > errsBefore then
+      modify fun s => { s with messages := saved }
+      logInfo m!"#spec: {thmName} proved (not registered for composition: \
+        grind_pattern rejected the pattern {app} — register one manually)"
+    else
+      logInfo m!"#spec: {thmName} proved and registered"
