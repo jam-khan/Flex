@@ -26,8 +26,12 @@ import Flex.Front.Solve
 
   An optional `by <tacticSeq>` trailer overrides the default ladder.
 
+  Function-typed binders take the refined-arrow form
+  `(f : (i : T | p) => (r : U | q))`, denoting `∀ i, p → q[r := f i]`.
+
   Known prototype limitations, by design:
-  * a binder *type* containing `|` (e.g. a pattern-match lambda) mis-parses;
+  * a binder *type* containing a bare `|` (e.g. a pattern-match lambda)
+    mis-parses — refined arrows are the one supported nesting;
   * a binder inside the result refinement that shadows the result variable
     (e.g. `∃ result, …`) is captured by the substitution;
   * a second `#spec` on the same function is a standard "already declared"
@@ -45,6 +49,10 @@ declare_syntax_cat specBinder
 syntax "(" ident " : " term " | " term ")" : specBinder
 /-- Plain binder: `(x : T)` — no refinement, contributes no hypothesis. -/
 syntax "(" ident " : " term ")" : specBinder
+/-- Function-typed refined binder: `(f : (i : T | p) => (r : U | q))` — `f`
+gets type `T → U` and contributes the arrow denotation as its hypothesis:
+`∀ i, p → q[r := f i]`. Nests, so higher-order arguments of any depth parse. -/
+syntax "(" ident " : " specBinder " => " specBinder ")" : specBinder
 
 /-- `#spec f (x : T | p)* => (r : U | q) (by tacs)?` — generate and prove
 `theorem f.spec : ∀ x̄, p̄ → q[r := f x̄]`, then register it for modular
@@ -52,18 +60,31 @@ composition. See the module docstring. -/
 syntax (name := specCmd)
   "#spec " ident specBinder* " => " specBinder (" by " tacticSeq)? : command
 
-private def parseSpecBinder (b : TSyntax `specBinder) :
-    CommandElabM (Ident × Term × Option Term) := do
-  match b with
-  | `(specBinder| ($x:ident : $T:term | $p:term)) => return (x, T, some p)
-  | `(specBinder| ($x:ident : $T:term))           => return (x, T, none)
-  | _ => throwUnsupportedSyntax
-
 /-- Substitute every occurrence of the result variable `r` in the result
 refinement `q` by `repl` (the application `f x̄`). -/
 private def substResult (r : Name) (repl : Term) (q : Term) : Term :=
   ⟨Id.run <| q.raw.replaceM fun s =>
     if s.isIdent && s.getId == r then pure (some repl.raw) else pure none⟩
+
+/-- Parse a binder into `(name, type, hypothesis?)`. For arrow binders the
+type and hypothesis are synthesized: `(f : (i : T | p) => (r : U | q))`
+becomes `(f, T → U, ∀ i, p → q[r := f i])`. -/
+private partial def parseSpecBinder (b : TSyntax `specBinder) :
+    CommandElabM (Ident × Term × Option Term) := do
+  match b with
+  | `(specBinder| ($x:ident : $T:term | $p:term)) => return (x, T, some p)
+  | `(specBinder| ($x:ident : $T:term))           => return (x, T, none)
+  | `(specBinder| ($f:ident : $arg:specBinder => $res:specBinder)) => do
+    let (i, T, pOpt) ← parseSpecBinder arg
+    let (r, U, qOpt) ← parseSpecBinder res
+    let some q := qOpt
+      | throwError "#spec: a function binder's result needs a refinement"
+    let q' := substResult r.getId (Syntax.mkApp f #[i]) q
+    let hyp ← match pOpt with
+      | some p => `(∀ ($i : $T), $p → $q')
+      | none   => `(∀ ($i : $T), $q')
+    return (f, ← `($T → $U), some hyp)
+  | _ => throwUnsupportedSyntax
 
 elab_rules : command
   | `(#spec $f:ident $bs:specBinder* => $res:specBinder $[by $tac?:tacticSeq]?) => do

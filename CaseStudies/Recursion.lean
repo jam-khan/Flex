@@ -23,8 +23,10 @@ def sumTo (n : Int) : Int :=
   termination_by n.toNat
   decreasing_by omega
 
--- Rung 2: fun_induction sumTo <;> leafClosers. The conjunction is the
--- invariant; neither conjunct is provable by induction alone.
+-- Rung 2: fun_induction sumTo <;> leafClosers; the conjunction rides the
+-- motive. (Verified: each conjunct here also closes alone — the 0 < n guard
+-- makes the IH n - 1 ≤ sumTo (n - 1) imply 0 ≤ sumTo (n - 1). For where the
+-- ladder genuinely stops, see Closures.lean.)
 #spec sumTo (n : Int) => (r : Int | 0 ≤ r ∧ n ≤ r)
 
 -- Composition against a recursive callee: sumTo never unfolds.
