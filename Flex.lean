@@ -17,6 +17,9 @@ import Flex.Tactic
 -- Predicate Abstraction
 import Flex.PA
 
+-- Certifying `#spec` frontend over ordinary Lean definitions
+import Flex.Front
+
 -- Sound Verification Condition Generation for Imp
 import Flex.VCG.While.Types
 import Flex.VCG.While.Semantics
