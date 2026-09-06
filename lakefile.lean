@@ -17,5 +17,7 @@ lean_lib «Demo» where
 
 lean_lib «Benchmarks» where
 
+lean_lib «CaseStudies» where
+
 lean_exe «flex» where
   root := `Main

@@ -35,6 +35,7 @@ GROUPS = {
     "Liquid-fixpoint": REPO_ROOT / "Benchmarks" / "Liquid-fixpoint",
     "FluxRS": REPO_ROOT / "Benchmarks" / "FluxRS",
     "Demo": REPO_ROOT / "Demo",
+    "CaseStudies": REPO_ROOT / "CaseStudies",
 }
 
 # ANSI colors; disabled when stdout is not a TTY.
